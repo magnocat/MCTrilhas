@@ -1,0 +1,6 @@
+name: GodMode
+version: '${project.version}' # Pega a versão do pom.xml
+main: com.magnocat.godmode.GodModePlugin # Sua classe principal
+api-version: 1.20 # Use a API mais recente ou a que seu servidor suporta. Para 1.21.5, pode ser 1.20 ou 1.21
+authors: [MagnoCat]
+description: Plugin de GodMode para o servidor MC Trilhas

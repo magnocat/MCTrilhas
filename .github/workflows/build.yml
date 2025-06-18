@@ -1,0 +1,28 @@
+name: Build Plugin
+
+on:
+  push:
+    branches:
+      - main # Ou o nome da sua branch principal (master)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # O sistema operacional para rodar a build
+
+    steps:
+      - uses: actions/checkout@v4 # Clona o repositório
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin' # Usa Temurin 21 como você especificou
+          cache: 'maven' # Cache de dependências Maven
+
+      - name: Build with Maven
+        run: mvn clean package # Executa o comando Maven para compilar o plugin
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GodMode-Plugin-${{ github.sha }} # Nome do arquivo (GodMode-Plugin-hashdocommit)
+          path: target/*.jar # Onde o JAR compilado estará
