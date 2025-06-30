@@ -22,3 +22,15 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Ignorar arquivos de build e dependências
+target/ *.jar
+
+# Ignorar arquivos de configuração do IDE
+.idea/ *.iml .vscode/
+
+# Ignorar cache do Maven
+.m2/
+
+# Ignorar arquivos temporários
+*.tmp *.bak
