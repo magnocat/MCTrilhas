@@ -1,6 +1,14 @@
-name: GodMode
-version: '1.0-SNAPSHOT' # Pega a versão do pom.xml
+name: GodMode-MCtrilhas
+version: '${project.version}' # Pega a versão do pom.xml
 main: com.magnocat.godmode.GodModePlugin # Sua classe principal
-api-version: 1.20 # Use a API mais recente ou a que seu servidor suporta. Para 1.21.5, pode ser 1.20 ou 1.21
+api-version: 1.21 # Use a API mais recente ou a que seu servidor suporta. Para 1.21.5, pode ser 1.20 ou 1.21
 authors: [MagnoCat]
-description: Plugin de GodMode para o servidor MC Trilhas
+description: Plugin para o servidor MC Trilhas com temática escoteira
+commands:
+  scout:
+    description: Comandos do sistema escoteiro
+    usage: /<command> [subcomando]
+permissions:
+  godmode.scout.use:
+    description: Permite usar comandos do sistema escoteiro
+    default: true
