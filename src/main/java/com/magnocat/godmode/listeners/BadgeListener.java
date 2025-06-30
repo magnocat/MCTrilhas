@@ -4,6 +4,9 @@ import com.magnocat.godmode.GodModePlugin;
 import com.magnocat.godmode.badges.Badge;
 import com.magnocat.godmode.badges.BadgeManager;
 import com.magnocat.godmode.data.PlayerData;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -99,7 +102,13 @@ public class BadgeListener implements Listener {
             player.getInventory().addItem(item);
         }
         if (badge.getRewardRegion() != null) {
-            player.sendMessage("§aVocê ganhou acesso à área: " + badge.getRewardRegion());
+            WorldGuardPlugin wg = WorldGuardPlugin.inst();
+            RegionManager rm = wg.getRegionManager(player.getWorld());
+            ProtectedRegion region = rm.getRegion(badge.getRewardRegion());
+            if (region != null) {
+                region.getMembers().addPlayer(player.getUniqueId());
+                player.sendMessage("§aVocê ganhou acesso à área: " + badge.getRewardRegion());
+            }
         }
     }
 }
