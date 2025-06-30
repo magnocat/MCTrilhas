@@ -42,4 +42,24 @@ public class PlayerData {
             }
         }
     }
+
+    public boolean removePlayerBadge(UUID playerId, String badgeId) {
+        File file = new File(plugin.getDataFolder(), "players/" + playerId.toString() + ".yml");
+        if (!file.exists()) {
+            return false;
+        }
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        List<String> badges = config.getStringList("badges");
+        if (badges.remove(badgeId)) {
+            config.set("badges", badges);
+            try {
+                config.save(file);
+                return true;
+            } catch (IOException e) {
+                plugin.getLogger().severe("Erro ao salvar dados do jogador: " + e.getMessage());
+                return false;
+            }
+        }
+        return false;
+    }
 }
