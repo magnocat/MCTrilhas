@@ -8,8 +8,9 @@ public class Badge {
     private final String rewardItem;
     private final int rewardAmount;
     private final String rewardRegion;
+    private final int requiredProgress;
 
-    public Badge(String id, String name, String description, int rewardTotems, String rewardItem, int rewardAmount, String rewardRegion) {
+    public Badge(String id, String name, String description, int rewardTotems, String rewardItem, int rewardAmount, String rewardRegion, int requiredProgress) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -17,6 +18,7 @@ public class Badge {
         this.rewardItem = rewardItem;
         this.rewardAmount = rewardAmount;
         this.rewardRegion = rewardRegion;
+        this.requiredProgress = requiredProgress;
     }
 
     public String getId() { return id; }
@@ -26,4 +28,5 @@ public class Badge {
     public String getRewardItem() { return rewardItem; }
     public int getRewardAmount() { return rewardAmount; }
     public String getRewardRegion() { return rewardRegion; }
+    public int getRequiredProgress() { return requiredProgress; }
 }
