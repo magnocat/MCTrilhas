@@ -1,5 +1,5 @@
 name: GodMode-MCtrilhas
-version: 1.0
+version: '${project.version}'
 main: com.magnocat.godmode.GodModePlugin
 api-version: 1.21
 description: Plugin para o servidor MC Trilhas com temática escoteira
