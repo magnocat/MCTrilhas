@@ -10,10 +10,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class BadgeListener implements Listener {
     private final GodModePlugin plugin;
@@ -32,31 +31,54 @@ public class BadgeListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         String badgeId = null;
+        int increment = 1;
         if (event.getBlock().getType().name().contains("_LOG")) {
             badgeId = "lumberjack";
         } else if (event.getBlock().getType() == Material.STONE || event.getBlock().getType().name().contains("_ORE")) {
             badgeId = "miner";
         }
         if (badgeId != null && !playerData.getPlayerBadges(player.getUniqueId()).contains(badgeId)) {
-            // Simples por agora, vamos adicionar contadores depois
-            grantBadge(player, badgeId);
+            playerData.updatePlayerProgress(player.getUniqueId(), badgeId, increment);
+            checkProgress(player, badgeId);
         }
     }
 
     @EventHandler
     public void onFurnaceSmelt(FurnaceSmeltEvent event) {
-        // Detectar cozimento de alimentos (simples por agora)
         if (event.getResult().getType().isEdible()) {
-            // Encontrar o jogador mais próximo (simplificado)
             for (Player player : event.getBlock().getWorld().getPlayers()) {
                 if (player.getLocation().distance(event.getBlock().getLocation()) < 5) {
                     String badgeId = "cook";
                     if (!playerData.getPlayerBadges(player.getUniqueId()).contains(badgeId)) {
-                        grantBadge(player, badgeId);
+                        playerData.updatePlayerProgress(player.getUniqueId(), badgeId, 1);
+                        checkProgress(player, badgeId);
                     }
                     break;
                 }
             }
+        }
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        String badgeId = "builder";
+        if (!playerData.getPlayerBadges(player.getUniqueId()).contains(badgeId)) {
+            Material type = event.getBlock().getType();
+            if (type.name().contains("_PLANKS") || type == Material.STONE || type == Material.BRICK) {
+                playerData.updatePlayerProgress(player.getUniqueId(), badgeId, 1);
+                checkProgress(player, badgeId);
+            }
+        }
+    }
+
+    private void checkProgress(Player player, String badgeId) {
+        Badge badge = badgeManager.getBadges().get(badgeId);
+        int progress = playerData.getPlayerProgress(player.getUniqueId()).getOrDefault(badgeId, 0);
+        if (progress >= badge.getRequiredProgress()) {
+            grantBadge(player, badgeId);
+        } else {
+            player.sendMessage("§eProgresso para " + badge.getName() + ": " + progress + "/" + badge.getRequiredProgress());
         }
     }
 
@@ -71,14 +93,12 @@ public class BadgeListener implements Listener {
         if (badge.getRewardItem() != null) {
             ItemStack item = new ItemStack(Material.valueOf(badge.getRewardItem().split("\\{")[0].replace("minecraft:", "").toUpperCase()));
             if (badge.getRewardItem().contains("{")) {
-                // Adicionar encantamentos (simplificado, usar um parser adequado depois)
-                item.addEnchantment(org.bukkit.enchantments.Enchantment.EFFICIENCY, 2); // Exemplo
+                item.addEnchantment(org.bukkit.enchantments.Enchantment.EFFICIENCY, 2); // Simplificado
             }
             item.setAmount(badge.getRewardAmount());
             player.getInventory().addItem(item);
         }
         if (badge.getRewardRegion() != null) {
-            // Configurar permissões do WorldGuard depois
             player.sendMessage("§aVocê ganhou acesso à área: " + badge.getRewardRegion());
         }
     }
