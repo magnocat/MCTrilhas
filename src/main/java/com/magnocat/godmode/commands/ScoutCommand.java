@@ -44,6 +44,22 @@ public class ScoutCommand implements CommandExecutor {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("progress")) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage("§cEste comando requer um jogador!");
+                return true;
+            }
+            Player player = (Player) sender;
+            player.sendMessage("§6Seu Progresso:");
+            for (Badge badge : badgeManager.getBadges().values()) {
+                if (!playerData.getPlayerBadges(player.getUniqueId()).contains(badge.getId())) {
+                    int progress = playerData.getPlayerProgress(player.getUniqueId()).getOrDefault(badge.getId(), 0);
+                    player.sendMessage("§e- " + badge.getName() + ": " + progress + "/" + badge.getRequiredProgress());
+                }
+            }
+            return true;
+        }
+
         if (args[0].equalsIgnoreCase("removebadge") && sender.hasPermission("godmode.scout.admin")) {
             if (args.length != 3) {
                 sender.sendMessage("§cUso: /scout removebadge <jogador> <badgeId>");
