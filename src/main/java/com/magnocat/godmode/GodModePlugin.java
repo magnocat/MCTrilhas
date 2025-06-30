@@ -5,13 +5,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class GodModePlugin extends JavaPlugin {
     @Override
     public void onEnable() {
-        getLogger().info("MC Trilhas plugin iniciado!");
+        getLogger().info("GodMode-MCtrilhas iniciado!");
         saveDefaultConfig(); // Cria o config.yml se não existir
-        // Registrar comandos e eventos aqui
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("MC Trilhas plugin desativado!");
+        getLogger().info("GodMode-MCtrilhas desativado!");
     }
 }
