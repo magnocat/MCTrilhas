@@ -3,6 +3,9 @@ package com.magnocat.godmode.commands;
 import com.magnocat.godmode.badges.Badge;
 import com.magnocat.godmode.badges.BadgeManager;
 import com.magnocat.godmode.data.PlayerData;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -76,9 +79,19 @@ public class ScoutCommand implements CommandExecutor {
                 return true;
             }
             if (playerData.removePlayerBadge(target.getUniqueId(), badgeId)) {
+                Badge badge = badgeManager.getBadges().get(badgeId);
                 sender.sendMessage("§aInsígnia " + badgeId + " removida de " + target.getName() + "!");
                 if (target.isOnline()) {
-                    target.sendMessage("§cSua insígnia " + badgeManager.getBadges().get(badgeId).getName() + " foi removida!");
+                    target.sendMessage("§cSua insígnia " + badge.getName() + " foi removida!");
+                    if (badge.getRewardRegion() != null) {
+                        WorldGuardPlugin wg = WorldGuardPlugin.inst();
+                        RegionManager rm = wg.getRegionManager(target.getWorld());
+                        ProtectedRegion region = rm.getRegion(badge.getRewardRegion());
+                        if (region != null) {
+                            region.getMembers().removePlayer(target.getUniqueId());
+                            target.sendMessage("§cVocê perdeu acesso à área: " + badge.getRewardRegion());
+                        }
+                    }
                 }
             } else {
                 sender.sendMessage("§cO jogador não possui essa insígnia!");
