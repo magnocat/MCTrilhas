@@ -18,7 +18,8 @@ public class BadgeManager {
                 String rewardItem = badgeSection.getString(key + ".reward-item");
                 int rewardAmount = badgeSection.getInt(key + ".reward-amount");
                 String rewardRegion = badgeSection.getString(key + ".reward-region");
-                badges.put(key, new Badge(key, name, description, rewardTotems, rewardItem, rewardAmount, rewardRegion));
+                int requiredProgress = badgeSection.getInt(key + ".required-progress");
+                badges.put(key, new Badge(key, name, description, rewardTotems, rewardItem, rewardAmount, rewardRegion, requiredProgress));
             }
         }
     }
