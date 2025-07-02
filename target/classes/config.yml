@@ -1,0 +1,28 @@
+badges:
+  lumberjack:
+    name: "Insígnia de Lenhador"
+    description: "Corte 100 árvores."
+    reward-totems: 50
+    reward-item: "minecraft:diamond_axe{Enchantments:[{id:'minecraft:efficiency',lvl:2}]}"
+    reward-amount: 1
+    required-progress: 100
+  miner:
+    name: "Insígnia de Minerador"
+    description: "Minere 500 blocos de pedra ou minérios."
+    reward-totems: 100
+    reward-item: "minecraft:diamond_pickaxe{Enchantments:[{id:'minecraft:fortune',lvl:1}]}"
+    reward-amount: 1
+    required-progress: 500
+  cook:
+    name: "Insígnia de Cozinheiro"
+    description: "Cozinhe 50 alimentos."
+    reward-totems: 50
+    reward-item: "minecraft:bread"
+    reward-amount: 10
+    required-progress: 50
+  builder:
+    name: "Insígnia de Construtor"
+    description: "Coloque 1000 blocos de construção."
+    reward-totems: 150
+    reward-region: "builder_area"
+    required-progress: 1000
