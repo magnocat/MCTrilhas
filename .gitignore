@@ -10,7 +10,7 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files #
+# Package Files
 *.jar
 *.war
 *.nar
@@ -24,13 +24,16 @@ hs_err_pid*
 replay_pid*
 
 # Ignorar arquivos de build e dependências
-target/ *.jar
+target/
 
 # Ignorar arquivos de configuração do IDE
-.idea/ *.iml .vscode/
+.idea/
+*.iml
+.vscode/
 
 # Ignorar cache do Maven
 .m2/
 
 # Ignorar arquivos temporários
-*.tmp *.bak
+*.tmp
+*.bak
