@@ -11,7 +11,6 @@ Como instalar o plugin **GodMode-MCTrilhas** no seu servidor Paper 1.21.5.
 ## Dependências
 - **Paper 1.21.5**: Servidor compatível.
 - **Vault**: Para economia (moeda Totem).
-- **WorldGuard**: Para áreas restritas.
 - **LuckyPerms** (opcional): Para permissões.
 
 ## Notas

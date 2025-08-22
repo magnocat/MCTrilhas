@@ -4,10 +4,6 @@ import com.magnocat.godmode.GodModePlugin;
 import com.magnocat.godmode.badges.Badge;
 import com.magnocat.godmode.badges.BadgeManager;
 import com.magnocat.godmode.data.PlayerData;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -97,7 +93,7 @@ public class BadgeListener implements Listener {
         if (badge == null) return;
 
         int progress = playerData.getPlayerProgress(player.getUniqueId()).getOrDefault(badgeId, 0);
-        int required = badge.getRequiredProgress();
+        int required = badge.requiredProgress();
 
         if (progress >= required) {
             grantBadge(player, badgeId);
@@ -105,7 +101,7 @@ public class BadgeListener implements Listener {
             // Otimização de UX: Para evitar spam, notifica o jogador apenas em marcos de progresso.
             // Ex: a cada 25 itens/blocos.
             if (progress > 0 && progress % 25 == 0) {
-                player.sendMessage("§eProgresso para " + badge.getName() + ": " + progress + "/" + required);
+                player.sendMessage("§eProgresso para " + badge.name() + ": " + progress + "/" + required);
             }
         }
     }
@@ -115,31 +111,17 @@ public class BadgeListener implements Listener {
         Badge badge = badgeManager.getBadges().get(badgeId);
         if (badge == null) return;
 
-        player.sendMessage("§aVocê conquistou a " + badge.getName() + "!");
+        player.sendMessage("§aVocê conquistou a " + badge.name() + "!");
 
-        if (badge.getRewardTotems() > 0 && economy != null) {
-            economy.depositPlayer(player, badge.getRewardTotems());
-            player.sendMessage("§aVocê recebeu " + badge.getRewardTotems() + " Totens!");
+        if (badge.rewardTotems() > 0 && economy != null) {
+            economy.depositPlayer(player, badge.rewardTotems());
+            player.sendMessage("§aVocê recebeu " + badge.rewardTotems() + " Totens!");
         }
 
         // Correção: Usa o console para dar o item, garantindo que o NBT (encantamentos, etc.) seja aplicado corretamente.
         if (badge.getRewardItem() != null && !badge.getRewardItem().isEmpty()) {
-            String giveCommand = String.format("give %s %s %d", player.getName(), badge.getRewardItem(), badge.getRewardAmount());
+            String giveCommand = String.format("give %s %s %d", player.getName(), badge.rewardItem(), badge.rewardAmount());
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), giveCommand);
-        }
-
-        // Correção: Usa a API moderna do WorldGuard.
-        if (badge.getRewardRegion() != null) {
-            RegionManager rm = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld()));
-            if (rm != null) {
-                ProtectedRegion region = rm.getRegion(badge.getRewardRegion());
-                if (region != null) {
-                    region.getMembers().addPlayer(player.getUniqueId());
-                    player.sendMessage("§aVocê ganhou acesso à área: " + badge.getRewardRegion());
-                } else {
-                    plugin.getLogger().warning("A região '" + badge.getRewardRegion() + "' não foi encontrada no mundo '" + player.getWorld().getName() + "'.");
-                }
-            }
         }
     }
 }

@@ -3,7 +3,7 @@ package com.magnocat.godmode.commands;
 import com.magnocat.godmode.badges.Badge;
 import com.magnocat.godmode.badges.BadgeManager;
 import com.magnocat.godmode.data.PlayerData;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
@@ -58,7 +58,7 @@ public class ScoutCommand implements CommandExecutor {
             for (String badgeId : playerBadges) {
                 Badge badge = badgeManager.getBadges().get(badgeId);
                 if (badge != null) {
-                    player.sendMessage("§a- " + badge.getName() + ": §f" + badge.getDescription());
+                    player.sendMessage("§a- " + badge.name() + ": §f" + badge.description());
                 }
             }
         }
@@ -74,9 +74,9 @@ public class ScoutCommand implements CommandExecutor {
         player.sendMessage(PREFIX + "§eSeu Progresso para as próximas insígnias:");
         boolean hasPendingBadges = false;
         for (Badge badge : badgeManager.getBadges().values()) {
-            if (!playerData.getPlayerBadges(player.getUniqueId()).contains(badge.getId())) {
-                int progress = playerData.getPlayerProgress(player.getUniqueId()).getOrDefault(badge.getId(), 0);
-                player.sendMessage("§e- " + badge.getName() + ": §f" + progress + "/" + badge.getRequiredProgress());
+            if (!playerData.getPlayerBadges(player.getUniqueId()).contains(badge.id())) {
+                int progress = playerData.getPlayerProgress(player.getUniqueId()).getOrDefault(badge.id(), 0);
+                player.sendMessage("§e- " + badge.name() + ": §f" + progress + "/" + badge.requiredProgress());
                 hasPendingBadges = true;
             }
         }
@@ -110,23 +110,23 @@ public class ScoutCommand implements CommandExecutor {
         }
 
         if (playerData.removePlayerBadge(target.getUniqueId(), badgeId)) {
-            sender.sendMessage(PREFIX + "§aInsígnia '" + badge.getName() + "' removida de " + target.getName() + " com sucesso!");
+            sender.sendMessage(PREFIX + "§aInsígnia '" + badge.name() + "' removida de " + target.getName() + " com sucesso!");
             if (target.isOnline()) {
-                target.sendMessage(PREFIX + "§cSua insígnia '" + badge.getName() + "' foi removida por um administrador.");
+                target.sendMessage(PREFIX + "§cSua insígnia '" + badge.name() + "' foi removida por um administrador.");
                 // Remove o acesso à região do WorldGuard, se houver
-                if (badge.getRewardRegion() != null && !badge.getRewardRegion().isEmpty()) {
-                    RegionManager rm = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(target.getWorld()));
-                    if (rm != null) {
-                        ProtectedRegion region = rm.getRegion(badge.getRewardRegion());
-                        if (region != null) {
-                            region.getMembers().removePlayer(target.getUniqueId());
-                            target.sendMessage(PREFIX + "§cVocê perdeu o acesso à área: " + badge.getRewardRegion());
-                        }
-                    }
+                if (badge.rewardRegion() != null && !badge.rewardRegion().isEmpty()) {
+                    /*
+                     * A funcionalidade de remoção de região foi desativada
+                     * porque a dependência do WorldEdit foi removida. Para reativar,
+                     * adicione o WorldEdit de volta ao projeto e descomente o código abaixo.
+                     *
+                     * RegionManager rm = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(target.getWorld()));
+                     * // ... (resto da lógica)
+                     */
                 }
             }
         } else {
-            sender.sendMessage(PREFIX + "§cO jogador " + target.getName() + " não possui a insígnia '" + badge.getName() + "'.");
+            sender.sendMessage(PREFIX + "§cO jogador " + target.getName() + " não possui a insígnia '" + badge.name() + "'.");
         }
         return true;
     }

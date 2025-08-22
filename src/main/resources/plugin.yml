@@ -6,7 +6,7 @@ authors: [MagnoCat]
 website: https://github.com/magnocat/GodMode-MCTrilhas
 description: Plugin para o servidor MC Trilhas com temática escoteira
 prefix: GodMode
-depend: [Vault, WorldGuard]
+depend: [Vault]
 commands:
   scout:
     description: Comandos do sistema escoteiro

@@ -27,7 +27,6 @@ badges:
 - `reward-totems`: Quantidade de Totens (via Vault).
 - `reward-item`: Item do Minecraft (opcional, com encantamentos).
 - `reward-amount`: Quantidade do item.
-- `reward-region`: Região do WorldGuard (opcional).
 - `required-progress`: Quantidade necessária para conquistar a insígnia.
 
 ## Edição
