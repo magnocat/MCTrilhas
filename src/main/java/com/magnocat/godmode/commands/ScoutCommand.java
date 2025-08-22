@@ -12,9 +12,12 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class ScoutCommand implements CommandExecutor {
     private final BadgeManager badgeManager;
     private final PlayerData playerData;
+    private static final String PREFIX = "§6[Escoteiro] ";
 
     public ScoutCommand(BadgeManager badgeManager, PlayerData playerData) {
         this.badgeManager = badgeManager;
@@ -23,83 +26,108 @@ public class ScoutCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player) && args.length > 0 && !args[0].equalsIgnoreCase("removebadge")) {
-            sender.sendMessage("§cApenas jogadores podem usar este comando!");
-            return true;
+        if (args.length == 0) {
+            // Por padrão, mostra as insígnias do jogador ou uma mensagem de ajuda.
+            return handleBadges(sender);
         }
 
-        if (args.length == 0 || args[0].equalsIgnoreCase("badges")) {
-            if (!(sender instanceof Player)) {
-                sender.sendMessage("§cEste comando requer um jogador!");
+        switch (args[0].toLowerCase()) {
+            case "badges":
+                return handleBadges(sender);
+            case "progress":
+                return handleProgress(sender);
+            case "removebadge":
+                return handleRemoveBadge(sender, args);
+            default:
+                sender.sendMessage(PREFIX + "§cComando desconhecido. Use /scout <badges|progress|removebadge>.");
                 return true;
-            }
-            Player player = (Player) sender;
-            List<String> playerBadges = playerData.getPlayerBadges(player.getUniqueId());
-            player.sendMessage("§6Suas Insígnias:");
-            if (playerBadges.isEmpty()) {
-                player.sendMessage("§7Você ainda não conquistou nenhuma insígnia.");
-            } else {
-                for (String badgeId : playerBadges) {
-                    Badge badge = badgeManager.getBadges().get(badgeId);
-                    player.sendMessage("§a- " + badge.getName() + ": " + badge.getDescription());
-                }
-            }
+        }
+    }
+
+    private boolean handleBadges(CommandSender sender) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(PREFIX + "§cEste comando só pode ser usado por jogadores.");
             return true;
         }
-
-        if (args[0].equalsIgnoreCase("progress")) {
-            if (!(sender instanceof Player)) {
-                sender.sendMessage("§cEste comando requer um jogador!");
-                return true;
-            }
-            Player player = (Player) sender;
-            player.sendMessage("§6Seu Progresso:");
-            for (Badge badge : badgeManager.getBadges().values()) {
-                if (!playerData.getPlayerBadges(player.getUniqueId()).contains(badge.getId())) {
-                    int progress = playerData.getPlayerProgress(player.getUniqueId()).getOrDefault(badge.getId(), 0);
-                    player.sendMessage("§e- " + badge.getName() + ": " + progress + "/" + badge.getRequiredProgress());
-                }
-            }
-            return true;
-        }
-
-        if (args[0].equalsIgnoreCase("removebadge") && sender.hasPermission("godmode.scout.admin")) {
-            if (args.length != 3) {
-                sender.sendMessage("§cUso: /scout removebadge <jogador> <badgeId>");
-                return true;
-            }
-            Player target = Bukkit.getPlayer(args[1]);
-            if (target == null) {
-                sender.sendMessage("§cJogador não encontrado!");
-                return true;
-            }
-            String badgeId = args[2];
-            if (!badgeManager.getBadges().containsKey(badgeId)) {
-                sender.sendMessage("§cInsígnia inválida!");
-                return true;
-            }
-            if (playerData.removePlayerBadge(target.getUniqueId(), badgeId)) {
+        Player player = (Player) sender;
+        List<String> playerBadges = playerData.getPlayerBadges(player.getUniqueId());
+        player.sendMessage(PREFIX + "§eSuas Insígnias:");
+        if (playerBadges.isEmpty()) {
+            player.sendMessage("§7Você ainda não conquistou nenhuma insígnia. Continue explorando!");
+        } else {
+            for (String badgeId : playerBadges) {
                 Badge badge = badgeManager.getBadges().get(badgeId);
-                sender.sendMessage("§aInsígnia " + badgeId + " removida de " + target.getName() + "!");
-                if (target.isOnline()) {
-                    target.sendMessage("§cSua insígnia " + badge.getName() + " foi removida!");
-                    if (badge.getRewardRegion() != null) {
-                        WorldGuardPlugin wg = WorldGuardPlugin.inst();
-                        RegionManager rm = wg.getRegionManager(target.getWorld());
+                if (badge != null) {
+                    player.sendMessage("§a- " + badge.getName() + ": §f" + badge.getDescription());
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean handleProgress(CommandSender sender) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(PREFIX + "§cEste comando só pode ser usado por jogadores.");
+            return true;
+        }
+        Player player = (Player) sender;
+        player.sendMessage(PREFIX + "§eSeu Progresso para as próximas insígnias:");
+        boolean hasPendingBadges = false;
+        for (Badge badge : badgeManager.getBadges().values()) {
+            if (!playerData.getPlayerBadges(player.getUniqueId()).contains(badge.getId())) {
+                int progress = playerData.getPlayerProgress(player.getUniqueId()).getOrDefault(badge.getId(), 0);
+                player.sendMessage("§e- " + badge.getName() + ": §f" + progress + "/" + badge.getRequiredProgress());
+                hasPendingBadges = true;
+            }
+        }
+        if (!hasPendingBadges) {
+            player.sendMessage("§aVocê já conquistou todas as insígnias disponíveis! Parabéns!");
+        }
+        return true;
+    }
+
+    private boolean handleRemoveBadge(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("godmode.scout.admin")) {
+            sender.sendMessage(PREFIX + "§cVocê não tem permissão para usar este comando.");
+            return true;
+        }
+        if (args.length != 3) {
+            sender.sendMessage(PREFIX + "§cUso correto: /scout removebadge <jogador> <id_da_insignia>");
+            return true;
+        }
+
+        Player target = Bukkit.getPlayer(args[1]);
+        if (target == null) {
+            sender.sendMessage(PREFIX + "§cJogador '" + args[1] + "' não encontrado ou está offline.");
+            return true;
+        }
+
+        String badgeId = args[2].toLowerCase();
+        Badge badge = badgeManager.getBadges().get(badgeId);
+        if (badge == null) {
+            sender.sendMessage(PREFIX + "§cInsígnia com ID '" + badgeId + "' não existe.");
+            return true;
+        }
+
+        if (playerData.removePlayerBadge(target.getUniqueId(), badgeId)) {
+            sender.sendMessage(PREFIX + "§aInsígnia '" + badge.getName() + "' removida de " + target.getName() + " com sucesso!");
+            if (target.isOnline()) {
+                target.sendMessage(PREFIX + "§cSua insígnia '" + badge.getName() + "' foi removida por um administrador.");
+                // Remove o acesso à região do WorldGuard, se houver
+                if (badge.getRewardRegion() != null && !badge.getRewardRegion().isEmpty()) {
+                    RegionManager rm = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(target.getWorld()));
+                    if (rm != null) {
                         ProtectedRegion region = rm.getRegion(badge.getRewardRegion());
                         if (region != null) {
                             region.getMembers().removePlayer(target.getUniqueId());
-                            target.sendMessage("§cVocê perdeu acesso à área: " + badge.getRewardRegion());
+                            target.sendMessage(PREFIX + "§cVocê perdeu o acesso à área: " + badge.getRewardRegion());
                         }
                     }
                 }
-            } else {
-                sender.sendMessage("§cO jogador não possui essa insígnia!");
             }
-            return true;
+        } else {
+            sender.sendMessage(PREFIX + "§cO jogador " + target.getName() + " não possui a insígnia '" + badge.getName() + "'.");
         }
-
-        sender.sendMessage("§cComando inválido ou permissão insuficiente!");
         return true;
     }
 }

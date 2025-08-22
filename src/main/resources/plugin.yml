@@ -1,15 +1,24 @@
 name: GodMode-MCtrilhas
 version: '${project.version}'
-authors: [MagnoCat]
 main: com.magnocat.godmode.GodModePlugin
 api-version: 1.21
+authors: [MagnoCat]
+website: https://github.com/magnocat/GodMode-MCTrilhas
 description: Plugin para o servidor MC Trilhas com temática escoteira
-softdepend: [Vault, WorldGuard]
+prefix: GodMode
+depend: [Vault, WorldGuard]
 commands:
   scout:
     description: Comandos do sistema escoteiro
     usage: /<command> [subcomando]
+    permission: godmode.scout.use
+    permission-message: Você não tem permissão para usar este comando.
 permissions:
+  godmode.scout.*:
+    description: Concede todas as permissões do plugin GodMode.
+    children:
+      - godmode.scout.use
+      - godmode.scout.admin
   godmode.scout.use:
     description: Permite usar comandos do sistema escoteiro
     default: true
