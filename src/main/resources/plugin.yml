@@ -1,8 +1,32 @@
 name: GodMode-MCtrilhas
-version: '${project.version}' # Pega a versão do pom.xml
+version: '${project.version}'
 main: com.magnocat.godmode.GodModePlugin
-api-version: '1.21'
-author: MagnoCat
+api-version: '1.20'
+authors: [MagnoCat]
 description: Plugin para o servidor MC Trilhas com temática escoteira.
 website: https://github.com/magnocat/GodMode-MCTrilhas
-softdepend: [Vault] # Dependência opcional, o plugin carregará mesmo sem o Vault
+softdepend: [Vault, WorldGuard]
+
+commands:
+  scout:
+    description: Comando principal para gerenciar insígnias de escoteiro.
+    usage: "/<command> [badges|progress|removebadge]"
+    permission: godmode.scout.use
+    aliases: [insignia, escoteiro]
+
+permissions:
+  godmode.scout.*:
+    description: Dá acesso a todos os comandos do GodMode-MCtrilhas.
+    children:
+      godmode.scout.use: true
+      godmode.scout.admin: true
+      godmode.scout.progress.other: true
+  godmode.scout.use:
+    description: Permite ao jogador ver suas próprias insígnias e progresso.
+    default: true
+  godmode.scout.admin:
+    description: Permite acesso aos comandos administrativos, como remover insígnias.
+    default: op
+  godmode.scout.progress.other:
+    description: Permite ver o progresso de outros jogadores.
+    default: op
