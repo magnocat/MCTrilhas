@@ -3,9 +3,6 @@ package com.magnocat.godmode.commands;
 import com.magnocat.godmode.badges.Badge;
 import com.magnocat.godmode.badges.BadgeManager;
 import com.magnocat.godmode.data.PlayerData;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -113,17 +110,6 @@ public class ScoutCommand implements CommandExecutor {
             sender.sendMessage(PREFIX + "§aInsígnia '" + badge.name() + "' removida de " + target.getName() + " com sucesso!");
             if (target.isOnline()) {
                 target.sendMessage(PREFIX + "§cSua insígnia '" + badge.name() + "' foi removida por um administrador.");
-                // Remove o acesso à região do WorldGuard, se houver
-                if (badge.rewardRegion() != null && !badge.rewardRegion().isEmpty()) {
-                    /*
-                     * A funcionalidade de remoção de região foi desativada
-                     * porque a dependência do WorldEdit foi removida. Para reativar,
-                     * adicione o WorldEdit de volta ao projeto e descomente o código abaixo.
-                     *
-                     * RegionManager rm = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(target.getWorld()));
-                     * // ... (resto da lógica)
-                     */
-                }
             }
         } else {
             sender.sendMessage(PREFIX + "§cO jogador " + target.getName() + " não possui a insígnia '" + badge.name() + "'.");

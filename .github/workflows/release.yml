@@ -1,0 +1,39 @@
+# This GitHub Actions workflow automates the build and release process.
+# It triggers whenever a new tag starting with 'v' (e.g., v1.0, v1.2.1) is pushed.
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    # Use the latest version of Ubuntu to run the job
+    runs-on: ubuntu-latest
+    # Grant permissions for the action to create a release
+    permissions:
+      contents: write
+
+    steps:
+      # Step 1: Check out the repository's code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up JDK 17 (Temurin), as specified in your docs
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven' # Cache Maven dependencies for faster builds
+
+      # Step 3: Build the project with Maven, creating the .jar file
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      # Step 4: Create a new GitHub Release and upload the compiled .jar
+      - name: Create Release and Upload Artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/GodMode-MCtrilhas-*.jar

@@ -119,7 +119,7 @@ public class BadgeListener implements Listener {
         }
 
         // Correção: Usa o console para dar o item, garantindo que o NBT (encantamentos, etc.) seja aplicado corretamente.
-        if (badge.getRewardItem() != null && !badge.getRewardItem().isEmpty()) {
+        if (badge.rewardItem() != null && !badge.rewardItem().isEmpty()) {
             String giveCommand = String.format("give %s %s %d", player.getName(), badge.rewardItem(), badge.rewardAmount());
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), giveCommand);
         }
