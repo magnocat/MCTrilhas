@@ -1,6 +1,6 @@
 # 🏠 Instalação
 
-Como instalar o plugin **GodMode-MCTrilhas** no seu servidor Paper 1.21.5.
+Como instalar o plugin **GodMode-MCTrilhas** no seu servidor Paper 1.20.4.
 
 ## Passos
 1. Baixe o arquivo `.jar` mais recente da aba Releases.
@@ -9,7 +9,7 @@ Como instalar o plugin **GodMode-MCTrilhas** no seu servidor Paper 1.21.5.
 4. Verifique se o `config.yml` foi gerado em `plugins/GodMode-MCTrilhas/`.
 
 ## Dependências
-- **Paper 1.21.5**: Servidor compatível.
+- **Paper 1.20.4**: Servidor compatível.
 - **Vault**: Para economia (moeda Totem).
 
 ## Notas

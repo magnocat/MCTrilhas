@@ -1,6 +1,6 @@
 # 📖 Wiki do GodMode-MCTrilhas
 
-Bem-vindo à documentação do **GodMode-MCTrilhas**, um plugin para o servidor **MC Trilhas** (Paper 1.21.5) com temática escoteira. Este plugin implementa um sistema de insígnias que recompensa jogadores por completar tarefas como cortar árvores, minerar, cozinhar e construir, integrado com o Vault para a economia de Totens.
+Bem-vindo à documentação do **GodMode-MCTrilhas**, um plugin para o servidor **MC Trilhas** (Paper 1.20.4) com temática escoteira. Este plugin implementa um sistema de insígnias que recompensa jogadores por completar tarefas como cortar árvores, minerar, cozinhar e construir, integrado com o Vault para a economia de Totens.
 
 ## 🌲 Menu de Navegação
 - [🏠 Instalação](instalacao.md): Como instalar o plugin no servidor.

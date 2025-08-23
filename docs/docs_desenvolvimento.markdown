@@ -6,7 +6,7 @@ Como configurar o ambiente para desenvolver o plugin **GodMode-MCTrilhas**.
 - **JDK**: Temurin 17
 - **Maven**: 3.9.6 ou superior
 - **IDE**: VSCode com Java Extension Pack
-- **Paper**: 1.21.5
+- **Paper**: 1.20.4
 
 ## Configuração
 1. Clone o repositório: `git clone https://github.com/magnocat/GodMode-MCTrilhas.git`
@@ -17,7 +17,7 @@ Como configurar o ambiente para desenvolver o plugin **GodMode-MCTrilhas**.
      "java.configuration.runtimes": [
        {
          "name": "JavaSE-17",
-         "path": "C:\\Program Files\\Eclipse Adoptium\\jdk-17"
+         "path": "C:\\Program Files\\Eclipse Adoptium\\temurin-17.0.16+8"
        }
      ]
    }
