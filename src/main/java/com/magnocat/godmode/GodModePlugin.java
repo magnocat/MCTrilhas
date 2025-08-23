@@ -1,6 +1,6 @@
 package com.magnocat.godmode;
 
-import com.magnocat.godmode.badge.BadgeManager;
+import com.magnocat.godmode.badges.BadgeManager;
 import com.magnocat.godmode.commands.ScoutCommand;
 import com.magnocat.godmode.data.PlayerDataManager;
 import com.magnocat.godmode.listeners.MiningListener;

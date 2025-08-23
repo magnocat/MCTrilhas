@@ -2,12 +2,13 @@ package com.magnocat.godmode.commands;
 
 import com.magnocat.godmode.GodModePlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.OfflinePlayer;
+
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
@@ -70,7 +71,7 @@ public class ScoutCommand implements CommandExecutor {
         }
 
         Player player = (Player) sender;
-        List<String> earnedBadges = plugin.getPlayerDataManager().getEarnedBadges(player);
+        List<String> earnedBadges = plugin.getPlayerDataManager().getEarnedBadges(player.getUniqueId());
 
         if (earnedBadges.isEmpty()) {
             player.sendMessage(ChatColor.YELLOW + "Você ainda não conquistou nenhuma insígnia. Continue se esforçando!");
@@ -157,9 +158,9 @@ public class ScoutCommand implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
-        boolean currentStatus = plugin.getPlayerDataManager().areProgressMessagesEnabled(player);
+        boolean currentStatus = plugin.getPlayerDataManager().areProgressMessagesEnabled(player.getUniqueId());
         boolean newStatus = !currentStatus;
-        plugin.getPlayerDataManager().setProgressMessagesEnabled(player, newStatus);
+        plugin.getPlayerDataManager().setProgressMessagesEnabled(player.getUniqueId(), newStatus);
 
         if (newStatus) {
             player.sendMessage(ChatColor.GREEN + "Mensagens de progresso de insígnia ativadas.");
@@ -285,7 +286,7 @@ public class ScoutCommand implements CommandExecutor {
             return true;
         }
 
-        plugin.getPlayerDataManager().removeBadge(targetPlayer, badgeId);
+        plugin.getPlayerDataManager().removeBadge(targetPlayer.getUniqueId(), badgeId);
         sender.sendMessage(ChatColor.GREEN + "A insígnia '" + badgeId + "' foi removida de " + targetPlayer.getName() + ".");
         targetPlayer.sendMessage(ChatColor.YELLOW + "Sua insígnia '" + plugin.getConfig().getString("badges." + badgeId + ".name", badgeId) + "' foi removida por um administrador.");
         return true;

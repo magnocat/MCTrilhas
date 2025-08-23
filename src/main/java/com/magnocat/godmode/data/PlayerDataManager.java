@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 public class PlayerDataManager {
 
@@ -22,54 +23,66 @@ public class PlayerDataManager {
         }
     }
 
-    private File getPlayerFile(Player player) {
-        return new File(dataFolder, player.getUniqueId().toString() + ".yml");
+    private File getPlayerFile(UUID uuid) {
+        return new File(dataFolder, uuid.toString() + ".yml");
     }
 
-    public FileConfiguration getPlayerConfig(Player player) {
-        return YamlConfiguration.loadConfiguration(getPlayerFile(player));
+    public FileConfiguration getPlayerConfig(UUID uuid) {
+        File playerFile = getPlayerFile(uuid);
+        if (!playerFile.exists()) {
+            return new YamlConfiguration(); // Return empty config for offline players
+        }
+        return YamlConfiguration.loadConfiguration(playerFile);
     }
 
-    public void savePlayerConfig(Player player, FileConfiguration config) {
+    public void savePlayerConfig(UUID uuid, FileConfiguration config) {
         try {
-            config.save(getPlayerFile(player));
+            config.save(getPlayerFile(uuid));
         } catch (IOException e) {
-            plugin.getLogger().severe("Could not save player data file for " + player.getName());
+            plugin.getLogger().severe("Could not save player data file for " + uuid);
         }
     }
 
-    public List<String> getEarnedBadges(Player player) {
-        return getPlayerConfig(player).getStringList("badges");
+    public List<String> getEarnedBadges(UUID uuid) {
+        return getPlayerConfig(uuid).getStringList("badges");
     }
 
-    public void addBadge(Player player, String badgeId) {
-        FileConfiguration config = getPlayerConfig(player);
+    public void addBadge(UUID uuid, String badgeId) {
+        FileConfiguration config = getPlayerConfig(uuid);
         List<String> badges = config.getStringList("badges");
         if (!badges.contains(badgeId)) {
             badges.add(badgeId);
             config.set("badges", badges);
-            savePlayerConfig(player, config);
+            savePlayerConfig(uuid, config);
         }
     }
 
-    public int getProgress(Player player, String badgeId) {
-        return getPlayerConfig(player).getInt("progress." + badgeId, 0);
+    public void removeBadge(UUID uuid, String badgeId) {
+        FileConfiguration config = getPlayerConfig(uuid);
+        List<String> badges = config.getStringList("badges");
+        if (badges.remove(badgeId)) {
+            config.set("badges", badges);
+            savePlayerConfig(uuid, config);
+        }
     }
 
-    public void setProgress(Player player, String badgeId, int newProgress) {
-        FileConfiguration config = getPlayerConfig(player);
+    public int getProgress(UUID uuid, String badgeId) {
+        return getPlayerConfig(uuid).getInt("progress." + badgeId, 0);
+    }
+
+    public void setProgress(UUID uuid, int newProgress, String badgeId) {
+        FileConfiguration config = getPlayerConfig(uuid);
         config.set("progress." + badgeId, newProgress);
-        savePlayerConfig(player, config);
+        savePlayerConfig(uuid, config);
+    }
+
+    public boolean areProgressMessagesEnabled(UUID uuid) {
+        return getPlayerConfig(uuid).getBoolean("settings.progress-messages-enabled", true);
+    }
+
+    public void setProgressMessagesEnabled(UUID uuid, boolean enabled) {
+        FileConfiguration config = getPlayerConfig(uuid);
+        config.set("settings.progress-messages-enabled", enabled);
+        savePlayerConfig(uuid, config);
     }
 }
-
-    public boolean areProgressMessagesEnabled(Player player) {
-        // Default to true so players see messages unless they opt-out.
-        return getPlayerConfig(player).getBoolean("settings.progress-messages-enabled", true);
-    }
-
-    public void setProgressMessagesEnabled(Player player, boolean enabled) {
-        FileConfiguration config = getPlayerConfig(player);
-        config.set("settings.progress-messages-enabled", enabled);
-        savePlayerConfig(player, config);
-    }

@@ -50,10 +50,53 @@ public class BadgeManager {
 
         // 4. Reward with Item (Note: This is a simplified parser for material names)
         String itemString = badgeSection.getString("reward-item", "");
+        int amount = badgeSection.getInt("reward-amount", 1);
         if (!itemString.isEmpty()) {
             // This command can be used to give complex items with NBT data.
-            String command = "give " + player.getName() + " " + itemString;
+            String command = "give " + player.getName() + " " + itemString + " " + amount;
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+        }
+    }
+
+    public void incrementProgress(Player player, String badgeId, int amount) {
+        if (plugin.getPlayerDataManager().getEarnedBadges(player).contains(badgeId)) {
+            return; // Player has already earned this badge.
+        }
+
+        ConfigurationSection badgeSection = plugin.getConfig().getConfigurationSection("badges." + badgeId);
+        if (badgeSection == null) {
+            return; // Badge is not configured.
+        }
+
+        int oldProgress = plugin.getPlayerDataManager().getProgress(player, badgeId);
+        int newProgress = oldProgress + amount;
+        int requiredProgress = badgeSection.getInt("required-progress", Integer.MAX_VALUE);
+
+        // If progress meets or exceeds the requirement, award the badge and stop.
+        if (newProgress >= requiredProgress) {
+            plugin.getPlayerDataManager().setProgress(player, badgeId, requiredProgress);
+            awardBadge(player, badgeId);
+            return;
+        }
+
+        // Save the new progress value.
+        plugin.getPlayerDataManager().setProgress(player, badgeId, newProgress);
+
+        // Check if the player wants to see progress messages.
+        if (plugin.getPlayerDataManager().areProgressMessagesEnabled(player) && requiredProgress > 0) {
+            // Calculate milestones as increments of 10%
+            int oldMilestone = (oldProgress * 10) / requiredProgress;
+            int newMilestone = (newProgress * 10) / requiredProgress;
+
+            if (newMilestone > oldMilestone) {
+                String messageFormat = plugin.getConfig().getString("progress-message-format", "&e{badgeName}: &a{progress}&8/&7{required}");
+                String badgeName = badgeSection.getString("name", badgeId);
+                int percentage = (newProgress * 100) / requiredProgress;
+
+                String message = messageFormat.replace("{badgeName}", badgeName).replace("{progress}", String.valueOf(newProgress)).replace("{required}", String.valueOf(requiredProgress)).replace("{percentage}", String.valueOf(percentage));
+
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+            }
         }
     }
 }
