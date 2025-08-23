@@ -1,5 +1,8 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
     "maven.view": "hierarchical",
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "github-actions.workflows.pinned.workflows": [
+        ".github/workflows/release.yml"
+    ]
 }
