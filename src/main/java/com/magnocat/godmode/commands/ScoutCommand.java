@@ -7,11 +7,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class ScoutCommand implements CommandExecutor {
+public class ScoutCommand implements CommandExecutor, TabCompleter {
     private final BadgeManager badgeManager;
     private final PlayerData playerData;
     private static final String PREFIX = "§6[Escoteiro] ";
@@ -115,5 +121,39 @@ public class ScoutCommand implements CommandExecutor {
             sender.sendMessage(PREFIX + "§cO jogador " + target.getName() + " não possui a insígnia '" + badge.name() + "'.");
         }
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        final List<String> completions = new ArrayList<>();
+
+        if (args.length == 1) {
+            // Sugere os subcomandos base
+            List<String> subcommands = new ArrayList<>(Arrays.asList("badges", "progress"));
+            // Adiciona o subcomando de admin apenas se o jogador tiver permissão
+            if (sender.hasPermission("godmode.scout.admin")) {
+                subcommands.add("removebadge");
+            }
+            StringUtil.copyPartialMatches(args[0], subcommands, completions);
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("removebadge")) {
+            // Sugere nomes de jogadores online para o subcomando removebadge
+            if (sender.hasPermission("godmode.scout.admin")) {
+                List<String> playerNames = Bukkit.getOnlinePlayers().stream()
+                        .map(Player::getName)
+                        .collect(Collectors.toList());
+                StringUtil.copyPartialMatches(args[1], playerNames, completions);
+            }
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("removebadge")) {
+            // Sugere as insígnias que o jogador alvo possui
+            if (sender.hasPermission("godmode.scout.admin")) {
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target != null) {
+                    StringUtil.copyPartialMatches(args[2], playerData.getPlayerBadges(target.getUniqueId()), completions);
+                }
+            }
+        }
+
+        Collections.sort(completions);
+        return completions;
     }
 }

@@ -11,6 +11,5 @@ public record Badge(
         int rewardTotems,
         String rewardItem,
         int rewardAmount,
-        String rewardRegion,
         int requiredProgress
 ) {}

@@ -1,16 +1,9 @@
-# Compiled class file
-*.class
+# Arquivos de Build e Saída do Maven
+# A pasta 'target' contém todos os arquivos compilados (.class) e o .jar final.
+target/
 
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files
+# Arquivos de Pacotes e Binários
+# Ignora arquivos de pacote se forem colocados acidentalmente fora da pasta 'target'.
 *.jar
 *.war
 *.nar
@@ -19,25 +12,23 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Arquivos de Log e Crash Dumps do Java
+*.log
 hs_err_pid*
 replay_pid*
 
-# Ignorar arquivos de build e dependências
-target/
-
-# Ignorar arquivos de configuração do IDE
+# Arquivos de Configuração de IDEs
+# Ignora configurações específicas de editores de código para manter o projeto agnóstico.
 .idea/
 *.iml
 .vscode/
 
-# Ignorar cache do Maven
-.m2/
-
-# Ignorar arquivos temporários
+# Arquivos Temporários e de Backup
 *.tmp
 *.bak
+*.swp
+*~
 
-# OS-generated files
+# Arquivos gerados pelo Sistema Operacional
 .DS_Store
 Thumbs.db

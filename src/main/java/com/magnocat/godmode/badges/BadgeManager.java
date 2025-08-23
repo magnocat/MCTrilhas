@@ -41,10 +41,9 @@ public class BadgeManager {
             int rewardTotems = currentBadgeConfig.getInt("reward-totems", 0);
             String rewardItem = currentBadgeConfig.getString("reward-item", "");
             int rewardAmount = currentBadgeConfig.getInt("reward-amount", 1);
-            String rewardRegion = currentBadgeConfig.getString("reward-region", "");
             int requiredProgress = currentBadgeConfig.getInt("required-progress");
 
-            Badge badge = new Badge(badgeId, name, description, rewardTotems, rewardItem, rewardAmount, rewardRegion, requiredProgress);
+            Badge badge = new Badge(badgeId, name, description, rewardTotems, rewardItem, rewardAmount, requiredProgress);
             badges.put(badgeId, badge);
             loadedCount++;
         }

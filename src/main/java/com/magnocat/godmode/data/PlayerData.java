@@ -34,28 +34,20 @@ public class PlayerData {
     }
 
     /**
-     * Carrega os dados de um jogador do arquivo YAML para o cache na memória.
+     * Carrega os dados de um jogador do arquivo para o cache.
      * Deve ser chamado quando o jogador entra no servidor.
      */
     public void loadPlayerData(UUID playerId) {
-        File playerFile = new File(playersFolder, playerId.toString() + ".yml");
-        PlayerDataObject data = new PlayerDataObject();
-
-        if (playerFile.exists()) {
-            FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-            data.badges.addAll(config.getStringList("badges"));
-            if (config.isConfigurationSection("progress")) {
-                config.getConfigurationSection("progress").getKeys(false).forEach(key ->
-                        data.progress.put(key, config.getInt("progress." + key))
-                );
-            }
+        // Evita recarregar dados se já estiverem no cache (ex: carregado sob demanda anteriormente).
+        if (playerDataCache.containsKey(playerId)) {
+            return;
         }
-        playerDataCache.put(playerId, data);
+        playerDataCache.put(playerId, loadFromFile(playerId));
         plugin.getLogger().info("Dados do jogador " + playerId + " carregados para o cache.");
     }
 
     /**
-     * Salva os dados de um jogador do cache para o arquivo YAML e o remove do cache.
+     * Salva os dados de um jogador do cache para o arquivo e o remove do cache.
      * Deve ser chamado quando o jogador sai do servidor.
      */
     public void savePlayerData(UUID playerId) {
@@ -65,6 +57,17 @@ public class PlayerData {
         }
 
         File playerFile = new File(playersFolder, playerId.toString() + ".yml");
+
+        // Otimização: Se o jogador não tiver dados, remove o arquivo para manter a pasta limpa.
+        if (data.badges.isEmpty() && data.progress.isEmpty()) {
+            if (playerFile.exists()) {
+                playerFile.delete();
+                plugin.getLogger().info("Dados do jogador " + playerId + " estavam vazios. Arquivo de dados removido.");
+            }
+            playerDataCache.remove(playerId); // Limpa do cache para liberar memória.
+            return;
+        }
+
         FileConfiguration config = new YamlConfiguration();
 
         config.set("badges", data.badges);
@@ -78,6 +81,29 @@ public class PlayerData {
         }
 
         playerDataCache.remove(playerId); // Limpa do cache para liberar memória.
+    }
+
+    /**
+     * Carrega os dados de um jogador do arquivo YAML para o cache na memória.
+     * @return Um objeto PlayerDataObject com os dados carregados.
+     */
+    private PlayerDataObject loadFromFile(UUID playerId) {
+        File playerFile = new File(playersFolder, playerId.toString() + ".yml");
+        PlayerDataObject data = new PlayerDataObject();
+
+        if (playerFile.exists()) {
+            FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+            data.badges.addAll(config.getStringList("badges"));
+            // Usar getValues é um pouco mais limpo que iterar sobre as chaves.
+            if (config.isConfigurationSection("progress")) {
+                config.getConfigurationSection("progress").getValues(false).forEach((key, value) -> {
+                    if (value instanceof Integer) {
+                        data.progress.put(key, (Integer) value);
+                    }
+                });
+            }
+        }
+        return data;
     }
 
     /**
@@ -95,11 +121,11 @@ public class PlayerData {
     // --- MÉTODOS DE MANIPULAÇÃO DE DADOS (AGORA OPERAM NO CACHE RÁPIDO) ---
 
     private PlayerDataObject getPlayerDataObject(UUID playerId) {
-        // Garante que o jogador tenha um objeto de dados no cache, mesmo que seja novo.
+        // computeIfAbsent é a ferramenta perfeita para carregamento sob demanda (lazy-loading) em um cache.
+        // Ele verifica atomicamente a chave e calcula o valor se estiver ausente.
         return playerDataCache.computeIfAbsent(playerId, k -> {
-            // Se o jogador não estava no cache (ex: /reload), carrega seus dados.
-            loadPlayerData(k);
-            return playerDataCache.get(k);
+            plugin.getLogger().info("Dados do jogador " + k + " não encontrados no cache. Carregando do arquivo...");
+            return loadFromFile(k);
         });
     }
 

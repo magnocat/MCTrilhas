@@ -7,6 +7,7 @@ import com.magnocat.godmode.badges.BadgeManager;
 import com.magnocat.godmode.commands.ScoutCommand;
 import com.magnocat.godmode.data.PlayerData;
 import com.magnocat.godmode.listeners.BadgeListener;
+import com.magnocat.godmode.listeners.PlayerConnectionListener;
 
 import net.milkbowl.vault.economy.Economy;
 
@@ -31,18 +32,28 @@ public class GodModePlugin extends JavaPlugin {
         this.badgeManager = new BadgeManager();
         this.badgeManager.loadBadges(this);
         this.playerData = new PlayerData(this);
-        // TODO: Adicionar lógica para carregar dados dos jogadores de um arquivo (ex: playerData.loadPlayerData())
 
         // Registrar eventos e comandos
         getServer().getPluginManager().registerEvents(new BadgeListener(this, badgeManager, playerData, economy), this);
-        getCommand("scout").setExecutor(new ScoutCommand(badgeManager, playerData));
+        getServer().getPluginManager().registerEvents(new PlayerConnectionListener(playerData), this);
+
+        // Otimização: Cria uma única instância do comando para o executor e o tab-completer.
+        ScoutCommand scoutCommand = new ScoutCommand(badgeManager, playerData);
+        getCommand("scout").setExecutor(scoutCommand);
+        getCommand("scout").setTabCompleter(scoutCommand);
+
+        // Garante que jogadores online durante um /reload tenham seus dados carregados
+        getServer().getOnlinePlayers().forEach(player -> this.playerData.loadPlayerData(player.getUniqueId()));
 
         getLogger().info("GodMode-MCtrilhas iniciado com sucesso!");
     }
 
     @Override
     public void onDisable() {
-        // TODO: Adicionar lógica para salvar dados dos jogadores (ex: playerData.savePlayerData())
+        // Salva os dados de todos os jogadores em cache antes de desligar para evitar perda de dados.
+        if (this.playerData != null) {
+            this.playerData.saveAllPlayerData();
+        }
         getLogger().info("GodMode-MCtrilhas desativado!");
     }
 
