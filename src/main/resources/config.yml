@@ -10,8 +10,8 @@ badges:
   lumberjack:
     name: "Insígnia de Lenhador"
     description: "Corte 1000 árvores."
-    reward-totems: 50
-    required-progress: 1000
+    reward-totems: 500
+    required-progress: 10000
     reward-item:
       material: "DIAMOND_AXE"
       amount: 1
@@ -24,8 +24,8 @@ badges:
   miner:
     name: "Insígnia de Minerador"
     description: "Minere 5000 blocos de pedra ou minérios."
-    reward-totems: 100
-    required-progress: 5000
+    reward-totems: 1000
+    required-progress: 50000
     reward-item:
       material: "DIAMOND_PICKAXE"
       amount: 1
@@ -38,8 +38,8 @@ badges:
   cook:
     name: "Insígnia de Cozinheiro"
     description: "Cozinhe 500 itens."
-    reward-totems: 50
-    required-progress: 500
+    reward-totems: 500
+    required-progress: 5000
     reward-item:
       material: "SMOKER"
       amount: 1
@@ -50,8 +50,8 @@ badges:
   builder:
     name: "Insígnia de Construtor"
     description: "Coloque 10000 blocos."
-    reward-totems: 150
-    required-progress: 10000
+    reward-totems: 1500
+    required-progress: 100000
     reward-item:
       material: "SHULKER_BOX"
       amount: 1
