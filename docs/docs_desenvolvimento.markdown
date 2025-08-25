@@ -31,7 +31,9 @@ Como configurar o ambiente para desenvolver o plugin **GodMode-MCTrilhas**.
 - `pom.xml`: Dependências Maven.
 
 ## GitHub Actions
-- O repositório usa Actions para build automático. O `.jar` é gerado em Releases.
+- O repositório usa Actions para build automático.
+- **Releases (estáveis)**: Ao criar uma tag `v*`, um novo Release é gerado com o `.jar` oficial.
+- **Builds de desenvolvimento**: A cada push na branch `main`, um `.jar` é gerado e pode ser baixado na aba "Actions" do GitHub, dentro do workflow correspondente.
 
 ## AutoPlug
 - Configure o AutoPlug para atualizações automáticas:

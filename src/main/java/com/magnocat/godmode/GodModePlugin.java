@@ -10,6 +10,7 @@ import com.magnocat.godmode.listeners.CookingListener;
 import com.magnocat.godmode.listeners.LumberjackListener;
 import com.magnocat.godmode.listeners.FishingListener;
 import com.magnocat.godmode.listeners.PlayerJoinListener;
+import com.magnocat.godmode.storage.BlockPersistenceManager;
 import com.magnocat.godmode.updater.UpdateChecker;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -19,6 +20,7 @@ public final class GodModePlugin extends JavaPlugin {
 
     private PlayerDataManager playerDataManager;
     private BadgeManager badgeManager;
+    private BlockPersistenceManager blockPersistenceManager;
     private Economy econ = null;
 
     @Override
@@ -60,7 +62,8 @@ public final class GodModePlugin extends JavaPlugin {
     private void loadManagers() {
         this.playerDataManager = new PlayerDataManager(this);
         this.badgeManager = new BadgeManager(this);
-        getLogger().info("Gerenciadores de dados e insígnias inicializados.");
+        this.blockPersistenceManager = new BlockPersistenceManager(this);
+        getLogger().info("Gerenciadores de dados, insígnias e persistência de blocos inicializados.");
     }
 
     private void registerCommands() {
@@ -85,6 +88,10 @@ public final class GodModePlugin extends JavaPlugin {
 
     public BadgeManager getBadgeManager() {
         return badgeManager;
+    }
+
+    public BlockPersistenceManager getBlockPersistenceManager() {
+        return blockPersistenceManager;
     }
 
     public Economy getEconomy() {

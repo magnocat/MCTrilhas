@@ -1,9 +1,12 @@
-# Este workflow automatiza o processo de build e criação de um Release no GitHub.
-# Ele é acionado sempre que uma nova tag começando com 'v' (ex: v1.0, v1.2.1) é enviada.
-name: Create Release
+# Este workflow automatiza o processo de build do plugin.
+# - Em cada push para a branch 'main', ele compila um .jar de desenvolvimento.
+# - Ao criar uma tag (ex: v1.0.4), ele compila e cria um Release oficial no GitHub.
+name: Java CI with Maven
 
 on:
   push:
+    branches:
+      - 'main'
     tags:
       - 'v*'
 
@@ -29,12 +32,32 @@ jobs:
           cache: 'maven' # Adiciona cache para as dependências do Maven, acelerando os builds
 
       # Passo 3: Compila o projeto com o Maven, criando o arquivo .jar
+      # A versão é passada dinamicamente usando o número da execução do workflow (ex: 1.0.4, 1.0.5, etc)
+      # Para tags, a versão é extraída da tag (ex: v1.1.0 -> 1.1.0)
       - name: Build with Maven
-        run: mvn clean package --file pom.xml
+        run: |
+          VERSION_STRING=""
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION_STRING="${{ github.ref_name }}"
+            VERSION_STRING="${VERSION_STRING:1}" # Remove the 'v' prefix from tag name (e.g., v1.1.0 -> 1.1.0)
+          else
+            VERSION_STRING="1.0.${{ github.run_number }}" # For development builds, use 1.0.X where X is the run number
+          fi
+          echo "Building with version: $VERSION_STRING"
+          mvn clean package -Dproject.version.full="$VERSION_STRING" --file pom.xml
 
-      # Passo 4: Cria um novo Release no GitHub e anexa o .jar compilado
+      # Passo 4: Se o gatilho foi uma tag, cria um Release no GitHub
       - name: Create Release and Upload Artifact
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           # Usa um wildcard para encontrar o .jar, evitando erros quando a versão muda
           files: target/*.jar
+
+      # Passo 5: Se o gatilho foi um push na 'main', anexa o .jar como um artefato do build
+      - name: Upload Development Artifact
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        uses: actions/upload-artifact@v4
+        with:
+          name: GodMode-MCtrilhas-dev
+          path: target/GodMode-MCtrilhas.jar

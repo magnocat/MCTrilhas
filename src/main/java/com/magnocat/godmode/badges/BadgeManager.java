@@ -33,6 +33,9 @@ public class BadgeManager {
     private static final String KEY_REWARD_TOTEMS = "reward-totems";
     private static final String KEY_REWARD_ITEM_DATA = "reward-item-data";
     private static final String KEY_REQUIRED_PROGRESS = "required-progress";
+    private static final String KEY_AWARD_MESSAGE = "badge-award-format";
+    private static final String KEY_PROGRESS_MESSAGE_FORMAT = "progress-message-format";
+    private static final String KEY_TOTEM_REWARD_MESSAGE = "totem-reward-format";
 
     /**
      * Constructs a new BadgeManager.
@@ -58,17 +61,29 @@ public class BadgeManager {
         plugin.getPlayerDataManager().addBadge(player.getUniqueId(), badgeId);
 
         // 2. Announce and give rewards
+        // Announce the achievement using a configurable message format
         String badgeName = badgeSection.getString(KEY_NAME, badgeId);
-        player.sendMessage(ChatColor.GOLD + "---------------------------------");
-        player.sendMessage(ChatColor.GREEN + "Insígnia Conquistada: " + ChatColor.BOLD + badgeName);
-        player.sendMessage(ChatColor.GOLD + "---------------------------------");
+        List<String> awardMessages = plugin.getConfig().getStringList(KEY_AWARD_MESSAGE);
+
+        // Provide a default message if the configuration is missing, making it robust
+        if (awardMessages.isEmpty()) {
+            awardMessages = List.of(
+                "&6---------------------------------",
+                "&aInsígnia Conquistada: &l{badgeName}",
+                "&6---------------------------------"
+            );
+        }
+        awardMessages.forEach(line -> player.sendMessage(ChatColor.translateAlternateColorCodes('&', line.replace("{badgeName}", badgeName))));
 
         // 3. Reward with Totems (Vault)
         int totems = badgeSection.getInt(KEY_REWARD_TOTEMS, 0);
         if (totems > 0 && plugin.getEconomy() != null) {
             Economy economy = plugin.getEconomy();
             economy.depositPlayer(player, totems);
-            player.sendMessage(ChatColor.YELLOW + "+ " + totems + " Totens!");
+            // Send a configurable message for the totem reward
+            String totemMessageFormat = plugin.getConfig().getString(KEY_TOTEM_REWARD_MESSAGE, "&e+ {amount} Totens!");
+            String totemMessage = totemMessageFormat.replace("{amount}", String.valueOf(totems));
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', totemMessage));
         }
 
         // 4. Reward with Item (Robust API-based method)
@@ -110,14 +125,8 @@ public class BadgeManager {
         plugin.getPlayerDataManager().setProgress(player.getUniqueId(), badgeId, newProgress);
 
         // Check if the player wants to see progress messages.
-        if (plugin.getPlayerDataManager().areProgressMessagesEnabled(player.getUniqueId()) && requiredProgress > 0) {
-            // Calculate milestones as increments of 10%
-            int oldMilestone = (oldProgress * 10) / requiredProgress;
-            int newMilestone = (newProgress * 10) / requiredProgress;
-
-            if (newMilestone > oldMilestone) {
-                sendProgressMessage(player, badgeId, badgeSection, newProgress, requiredProgress);
-            }
+        if (plugin.getPlayerDataManager().areProgressMessagesEnabled(player.getUniqueId())) {
+            sendProgressMessage(player, badgeId, badgeSection, newProgress, requiredProgress);
         }
     }
 
@@ -131,7 +140,7 @@ public class BadgeManager {
      * @param requiredProgress The total progress required for the badge.
      */
     private void sendProgressMessage(Player player, String badgeId, ConfigurationSection badgeSection, int currentProgress, int requiredProgress) {
-        String messageFormat = plugin.getConfig().getString("progress-message-format", "&e{badgeName}: &a{progress}&8/&7{required} &b({percentage}%)");
+        String messageFormat = plugin.getConfig().getString(KEY_PROGRESS_MESSAGE_FORMAT, "&e{badgeName}: &a{progress}&8/&7{required} &b({percentage}%)");
         String badgeName = badgeSection.getString(KEY_NAME, badgeId);
         int percentage = (currentProgress * 100) / requiredProgress;
 
@@ -191,8 +200,10 @@ public class BadgeManager {
                             int level = Integer.parseInt(parts[1]);
                             meta.addEnchant(enchantment, level, true);
                         } catch (NumberFormatException e) {
-                            plugin.getLogger().warning("Invalid enchantment level for " + parts[0] + " in badge " + badgeId);
+                            plugin.getLogger().warning("Invalid enchantment level in '" + enchString + "' for badge '" + badgeId + "'.");
                         }
+                    } else {
+                        plugin.getLogger().warning("Unknown enchantment '" + parts[0] + "' in '" + enchString + "' for badge '" + badgeId + "'.");
                     }
                 }
             }

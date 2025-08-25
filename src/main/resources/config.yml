@@ -5,42 +5,51 @@
 # Placeholders disponíveis: {badgeName}, {progress}, {required}, {percentage}
 progress-message-format: "&e{badgeName}: &a{progress}&8/&7{required} &b({percentage}%)"
 
+# Formato da mensagem de conquista de insígnia.
+# Placeholders disponíveis: {badgeName}
+badge-award-format:
+  - "&6---------------------------------"
+  - "&aInsígnia Conquistada: &l{badgeName}"
+  - "&6---------------------------------"
+
 # Seção onde todas as insígnias são definidas.
 badges:
   lumberjack:
     name: "Insígnia de Lenhador"
     description: "Corte 1000 árvores."
     reward-totems: 500
-    required-progress: 10000
-    reward-item:
+    required-progress: 1000
+    reward-item-data:
       material: "DIAMOND_AXE"
       amount: 1
       name: "&bMachado do Lenhador"
       lore:
         - "&7Eficiência aprimorada para o trabalho."
       enchantments:
-        - "EFFICIENCY:2"
+        - "efficiency:2"
+        - "unbreaking:1"
 
   miner:
     name: "Insígnia de Minerador"
     description: "Minere 5000 blocos de pedra ou minérios."
     reward-totems: 1000
-    required-progress: 50000
-    reward-item:
+    required-progress: 5000
+    reward-item-data:
       material: "DIAMOND_PICKAXE"
       amount: 1
       name: "&9Picareta do Minerador"
       lore:
         - "&7Que a sorte esteja com você."
       enchantments:
-        - "FORTUNE:1"
+        - "fortune:1"
+        - "unbreaking:1"
 
   cook:
     name: "Insígnia de Cozinheiro"
     description: "Cozinhe 500 itens."
     reward-totems: 500
-    required-progress: 5000
-    reward-item:
+    required-progress: 500
+    reward-item-data:
       material: "SMOKER"
       amount: 1
       name: "&6Defumador do Chef"
@@ -51,10 +60,26 @@ badges:
     name: "Insígnia de Construtor"
     description: "Coloque 10000 blocos."
     reward-totems: 1500
-    required-progress: 100000
-    reward-item:
+    required-progress: 10000
+    reward-item-data:
       material: "SHULKER_BOX"
       amount: 1
       name: "&dCaixa do Construtor"
       lore:
         - "&7Para guardar todos os seus materiais."
+
+  fishing:
+    name: "Insígnia de Pescador"
+    description: "Pesque 250 peixes."
+    required-progress: 250
+    reward-totems: 75
+    reward-item-data:
+      material: "FISHING_ROD"
+      amount: 1
+      name: "&bVara de Pescar do Mestre Pescador"
+      lore:
+        - "&7Uma vara especial para um"
+        - "&7pescador exemplar."
+      enchantments:
+        - "lure:2"
+        - "unbreaking:1"

@@ -25,6 +25,9 @@ public class BuilderListener implements Listener {
             return;
         }
 
+        // Mark the block as player-placed using the persistent storage manager.
+        plugin.getBlockPersistenceManager().markBlockAsPlayerPlaced(event.getBlock());
+
         // Any block placed in survival mode counts towards the builder badge.
         plugin.getBadgeManager().incrementProgress(player, BUILDER_BADGE_ID, 1);
     }

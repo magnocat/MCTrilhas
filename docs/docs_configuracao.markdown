@@ -4,8 +4,10 @@ O plugin **GodMode-MCTrilhas** usa o arquivo `config.yml` em `plugins/GodMode-MC
 
 ## Estrutura do `config.yml`
 
+```yaml
 # Formato da mensagem de progresso. Placeholders: {badgeName}, {progress}, {required}, {percentage}
 progress-message-format: "&e{badgeName}: &a{progress}&8/&7{required} &b({percentage}%)"
+```
 
 ```yaml
 badges:
@@ -31,6 +33,21 @@ badges:
     description: "Minere 5000 blocos de pedra ou minérios."
     required-progress: 5000
     reward-totems: 100
+  fishing:
+    name: "Insígnia de Pescador"
+    description: "Pesque 250 peixes."
+    required-progress: 250
+    reward-totems: 75
+    reward-item-data:
+      material: "FISHING_ROD"
+      amount: 1
+      name: "&bVara de Pescar do Mestre Pescador"
+      lore:
+        - "&7Uma vara especial para um"
+        - "&7pescador exemplar."
+      enchantments:
+        - "lure:2"
+        - "unbreaking:1"
 ```
 
 ## Campos
