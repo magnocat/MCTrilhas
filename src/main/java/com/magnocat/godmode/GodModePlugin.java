@@ -10,6 +10,7 @@ import com.magnocat.godmode.listeners.CookingListener;
 import com.magnocat.godmode.listeners.LumberjackListener;
 import com.magnocat.godmode.listeners.FishingListener;
 import com.magnocat.godmode.listeners.PlayerJoinListener;
+import com.magnocat.godmode.updater.UpdateChecker;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,6 +31,9 @@ public final class GodModePlugin extends JavaPlugin {
         registerListeners();
 
         getLogger().info("GodMode-MCTrilhas foi ativado com sucesso!");
+
+        // Inicia a verificação por atualizações.
+        new UpdateChecker(this, "magnocat/GodMode-MCTrilhas").checkForUpdates();
     }
 
     @Override
