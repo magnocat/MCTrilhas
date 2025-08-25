@@ -3,7 +3,6 @@ package com.magnocat.godmode.data;
 import com.magnocat.godmode.GodModePlugin;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +26,7 @@ public class PlayerDataManager {
         return new File(dataFolder, uuid.toString() + ".yml");
     }
 
-    public FileConfiguration getPlayerConfig(UUID uuid) {
+    private FileConfiguration getPlayerConfig(UUID uuid) {
         File playerFile = getPlayerFile(uuid);
         if (!playerFile.exists()) {
             return new YamlConfiguration(); // Return empty config for offline players
@@ -35,7 +34,7 @@ public class PlayerDataManager {
         return YamlConfiguration.loadConfiguration(playerFile);
     }
 
-    public void savePlayerConfig(UUID uuid, FileConfiguration config) {
+    private void savePlayerConfig(UUID uuid, FileConfiguration config) {
         try {
             config.save(getPlayerFile(uuid));
         } catch (IOException e) {
@@ -67,11 +66,13 @@ public class PlayerDataManager {
     }
 
     public int getProgress(UUID uuid, String badgeId) {
+        // Always return an integer. If progress is not set, default to 0.
         return getPlayerConfig(uuid).getInt("progress." + badgeId, 0);
     }
 
-    public void setProgress(UUID uuid, int newProgress, String badgeId) {
+    public void setProgress(UUID uuid, String badgeId, int newProgress) {
         FileConfiguration config = getPlayerConfig(uuid);
+        // Always save progress as an integer.
         config.set("progress." + badgeId, newProgress);
         savePlayerConfig(uuid, config);
     }

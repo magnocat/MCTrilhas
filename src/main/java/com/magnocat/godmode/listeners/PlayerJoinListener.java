@@ -1,5 +1,6 @@
 package com.magnocat.godmode.listeners;
 
+import com.magnocat.godmode.data.PlayerDataManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,6 +11,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class PlayerJoinListener implements Listener {
+
+    private final PlayerDataManager playerDataManager;
+
+    public PlayerJoinListener(PlayerDataManager playerDataManager) {
+        this.playerDataManager = playerDataManager;
+    }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {

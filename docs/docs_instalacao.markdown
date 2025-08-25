@@ -13,8 +13,4 @@ Como instalar o plugin **GodMode-MCTrilhas** no seu servidor Paper 1.20.4.
 - **Vault**: Para economia (moeda Totem).
 - **WorldGuard**: Para proteção de regiões.
 
-## Notas
-- Use `/plugman reload GodMode-MCTrilhas` para recarregar sem reiniciar (requer PlugMan).
-- Configure o AutoPlug para atualizações automáticas (veja [Desenvolvimento](desenvolvimento.md)).
-
 [🔙 Voltar ao Menu](index.md)

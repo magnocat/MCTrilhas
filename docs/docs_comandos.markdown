@@ -17,6 +17,8 @@ Lista de comandos do plugin **GodMode-MCTrilhas**.
 - `/scout removebadge <jogador> <badgeId>`: Remove uma insígnia de um jogador.
   - Permissão: `godmode.scout.admin`
   - Exemplo: `/scout removebadge MagnoCat lumberjack`
+- `/scout reload`: Recarrega o arquivo de configuração `config.yml`.
+  - Permissão: `godmode.scout.admin`
 
 ## IDs de Insígnias
 - `lumberjack`: Insígnia de Lenhador

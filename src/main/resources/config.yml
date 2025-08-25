@@ -1,2 +1,60 @@
 # Arquivo de configuração para o GodMode-MCTrilhas.
-# As insígnias e outras opções serão adicionadas aqui.
+# Use este arquivo para definir as insígnias, suas recompensas e requisitos.
+
+# Formato da mensagem de progresso.
+# Placeholders disponíveis: {badgeName}, {progress}, {required}, {percentage}
+progress-message-format: "&e{badgeName}: &a{progress}&8/&7{required} &b({percentage}%)"
+
+# Seção onde todas as insígnias são definidas.
+badges:
+  lumberjack:
+    name: "Insígnia de Lenhador"
+    description: "Corte 1000 árvores."
+    reward-totems: 50
+    required-progress: 1000
+    reward-item:
+      material: "DIAMOND_AXE"
+      amount: 1
+      name: "&bMachado do Lenhador"
+      lore:
+        - "&7Eficiência aprimorada para o trabalho."
+      enchantments:
+        - "EFFICIENCY:2"
+
+  miner:
+    name: "Insígnia de Minerador"
+    description: "Minere 5000 blocos de pedra ou minérios."
+    reward-totems: 100
+    required-progress: 5000
+    reward-item:
+      material: "DIAMOND_PICKAXE"
+      amount: 1
+      name: "&9Picareta do Minerador"
+      lore:
+        - "&7Que a sorte esteja com você."
+      enchantments:
+        - "FORTUNE:1"
+
+  cook:
+    name: "Insígnia de Cozinheiro"
+    description: "Cozinhe 500 itens."
+    reward-totems: 50
+    required-progress: 500
+    reward-item:
+      material: "SMOKER"
+      amount: 1
+      name: "&6Defumador do Chef"
+      lore:
+        - "&7Cozinhe seus alimentos duas vezes mais rápido."
+
+  builder:
+    name: "Insígnia de Construtor"
+    description: "Coloque 10000 blocos."
+    reward-totems: 150
+    required-progress: 10000
+    reward-item:
+      material: "SHULKER_BOX"
+      amount: 1
+      name: "&dCaixa do Construtor"
+      lore:
+        - "&7Para guardar todos os seus materiais."

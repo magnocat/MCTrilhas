@@ -2,6 +2,7 @@ package com.magnocat.godmode;
 
 import com.magnocat.godmode.badges.BadgeManager;
 import com.magnocat.godmode.commands.ScoutCommand;
+import com.magnocat.godmode.commands.ScoutCommandExecutor;
 import com.magnocat.godmode.data.PlayerDataManager;
 import com.magnocat.godmode.listeners.MiningListener;
 import com.magnocat.godmode.listeners.BuilderListener;
@@ -59,12 +60,13 @@ public final class GodModePlugin extends JavaPlugin {
     }
 
     private void registerCommands() {
-        getCommand("scout").setExecutor(new ScoutCommand(this));
+        getCommand("scout").setExecutor(new ScoutCommandExecutor(this));
+        getCommand("scout").setTabCompleter(new ScoutCommand(this));
         getLogger().info("Comandos registrados.");
     }
 
     private void registerListeners() {
-        getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(playerDataManager), this);
         getServer().getPluginManager().registerEvents(new MiningListener(this), this);
         getServer().getPluginManager().registerEvents(new LumberjackListener(this), this);
         getServer().getPluginManager().registerEvents(new CookingListener(this), this);
@@ -83,5 +85,13 @@ public final class GodModePlugin extends JavaPlugin {
 
     public Economy getEconomy() {
         return econ;
+    }
+
+    /**
+     * Recarrega a configuração do plugin a partir do arquivo config.yml.
+     */
+    public void reloadPluginConfig() {
+        this.reloadConfig();
+        getLogger().info("A configuração do GodMode-MCTrilhas foi recarregada.");
     }
 }

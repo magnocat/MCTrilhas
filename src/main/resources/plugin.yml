@@ -10,7 +10,7 @@ softdepend: [Vault, WorldGuard]
 commands:
   scout:
     description: Comando principal para gerenciar insígnias de escoteiro.
-    usage: "/<command> [badges|progress|removebadge]"
+    usage: "/<command> [subcommand]"
     permission: godmode.scout.use
     aliases: [insignia, escoteiro]
 
