@@ -2,6 +2,7 @@ package com.magnocat.godmode.listeners;
 
 import com.magnocat.godmode.GodModePlugin;
 import org.bukkit.GameMode;
+import org.bukkit.Tag;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,8 +28,13 @@ public class FishingListener implements Listener {
         }
 
         // We only care about the event when a fish is actually caught.
-        if (event.getState() == PlayerFishEvent.State.CAUGHT_FISH && event.getCaught() instanceof Item) {
-            plugin.getBadgeManager().incrementProgress(player, FISHING_BADGE_ID, 1);
+        if (event.getState() == PlayerFishEvent.State.CAUGHT_FISH && event.getCaught() instanceof Item) {            
+            Item caughtEntity = (Item) event.getCaught();
+
+            // Check if the caught item is specifically a fish, matching the badge's intent.
+            if (Tag.ITEMS_FISHES.isTagged(caughtEntity.getItemStack().getType())) {
+                plugin.getBadgeManager().incrementProgress(player, FISHING_BADGE_ID, 1);
+            }
         }
     }
 }

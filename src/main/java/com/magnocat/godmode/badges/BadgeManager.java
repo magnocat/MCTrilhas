@@ -1,19 +1,12 @@
 package com.magnocat.godmode.badges;
 
 import com.magnocat.godmode.GodModePlugin;
+import com.magnocat.godmode.utils.ItemFactory;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.NamespacedKey;
-
-import java.util.stream.Collectors;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,11 +18,6 @@ public class BadgeManager {
 
     // Constants for configuration keys to avoid "magic strings"
     private static final String BADGES_SECTION = "badges.";
-    private static final String KEY_NAME = "name";
-    private static final String KEY_LORE = "lore";
-    private static final String KEY_MATERIAL = "material";
-    private static final String KEY_AMOUNT = "amount";
-    private static final String KEY_ENCHANTS = "enchantments";
     private static final String KEY_REWARD_TOTEMS = "reward-totems";
     private static final String KEY_REWARD_ITEM_DATA = "reward-item-data";
     private static final String KEY_REQUIRED_PROGRESS = "required-progress";
@@ -62,7 +50,7 @@ public class BadgeManager {
 
         // 2. Announce and give rewards
         // Announce the achievement using a configurable message format
-        String badgeName = badgeSection.getString(KEY_NAME, badgeId);
+        String badgeName = badgeSection.getString("name", badgeId);
         List<String> awardMessages = plugin.getConfig().getStringList(KEY_AWARD_MESSAGE);
 
         // Provide a default message if the configuration is missing, making it robust
@@ -89,7 +77,7 @@ public class BadgeManager {
         // 4. Reward with Item (Robust API-based method)
         ConfigurationSection itemSection = badgeSection.getConfigurationSection(KEY_REWARD_ITEM_DATA);
         if (itemSection != null) {
-            ItemStack rewardItem = createRewardItem(itemSection, badgeId);
+            ItemStack rewardItem = ItemFactory.createRewardItem(itemSection, badgeId, plugin.getLogger());
             if (rewardItem != null) {
                 // Give the item to the player, dropping it if the inventory is full.
                 player.getInventory().addItem(rewardItem).forEach((index, item) ->
@@ -141,7 +129,7 @@ public class BadgeManager {
      */
     private void sendProgressMessage(Player player, String badgeId, ConfigurationSection badgeSection, int currentProgress, int requiredProgress) {
         String messageFormat = plugin.getConfig().getString(KEY_PROGRESS_MESSAGE_FORMAT, "&e{badgeName}: &a{progress}&8/&7{required} &b({percentage}%)");
-        String badgeName = badgeSection.getString(KEY_NAME, badgeId);
+        String badgeName = badgeSection.getString("name", badgeId);
         int percentage = (currentProgress * 100) / requiredProgress;
 
         String message = messageFormat.replace("{badgeName}", badgeName)
@@ -150,65 +138,5 @@ public class BadgeManager {
                 .replace("{percentage}", String.valueOf(percentage));
 
         player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
-    }
-
-    /**
-     * Creates an ItemStack from a configuration section.
-     *
-     * @param itemSection The ConfigurationSection containing the item data.
-     * @param badgeId The ID of the badge for logging purposes.
-     * @return The created ItemStack, or null if the material is invalid.
-     */
-    private ItemStack createRewardItem(ConfigurationSection itemSection, String badgeId) {
-        String materialName = itemSection.getString(KEY_MATERIAL);
-        if (materialName == null) {
-            plugin.getLogger().warning("Reward item for badge '" + badgeId + "' is missing a 'material' key.");
-            return null;
-        }
-
-        Material material = Material.matchMaterial(materialName.toUpperCase());
-        if (material == null) {
-            plugin.getLogger().warning("Invalid material '" + materialName + "' for badge '" + badgeId + "'.");
-            return null;
-        }
-
-        int amount = itemSection.getInt(KEY_AMOUNT, 1);
-        ItemStack rewardItem = new ItemStack(material, amount);
-        ItemMeta meta = rewardItem.getItemMeta();
-
-        if (meta != null) {
-            String name = itemSection.getString(KEY_NAME);
-            if (name != null && !name.isEmpty()) {
-                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-            }
-
-            List<String> lore = itemSection.getStringList(KEY_LORE);
-            if (!lore.isEmpty()) {
-                List<String> coloredLore = lore.stream()
-                        .map(line -> ChatColor.translateAlternateColorCodes('&', line))
-                        .collect(Collectors.toList());
-                meta.setLore(coloredLore);
-            }
-
-            List<String> enchantStrings = itemSection.getStringList(KEY_ENCHANTS);
-            for (String enchString : enchantStrings) {
-                String[] parts = enchString.split(":");
-                if (parts.length == 2) {
-                    Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(parts[0].toLowerCase()));
-                    if (enchantment != null) {
-                        try {
-                            int level = Integer.parseInt(parts[1]);
-                            meta.addEnchant(enchantment, level, true);
-                        } catch (NumberFormatException e) {
-                            plugin.getLogger().warning("Invalid enchantment level in '" + enchString + "' for badge '" + badgeId + "'.");
-                        }
-                    } else {
-                        plugin.getLogger().warning("Unknown enchantment '" + parts[0] + "' in '" + enchString + "' for badge '" + badgeId + "'.");
-                    }
-                }
-            }
-            rewardItem.setItemMeta(meta);
-        }
-        return rewardItem;
     }
 }

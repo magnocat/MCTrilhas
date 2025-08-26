@@ -4,17 +4,21 @@ import com.magnocat.godmode.badges.BadgeManager;
 import com.magnocat.godmode.commands.ScoutCommand;
 import com.magnocat.godmode.commands.ScoutCommandExecutor;
 import com.magnocat.godmode.data.PlayerDataManager;
-import com.magnocat.godmode.listeners.MiningListener;
 import com.magnocat.godmode.listeners.BuilderListener;
 import com.magnocat.godmode.listeners.CookingListener;
-import com.magnocat.godmode.listeners.LumberjackListener;
 import com.magnocat.godmode.listeners.FishingListener;
+import com.magnocat.godmode.listeners.LumberjackListener;
+import com.magnocat.godmode.listeners.MiningListener;
 import com.magnocat.godmode.listeners.PlayerJoinListener;
 import com.magnocat.godmode.storage.BlockPersistenceManager;
 import com.magnocat.godmode.updater.UpdateChecker;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Arrays;
+import java.util.List;
 
 public final class GodModePlugin extends JavaPlugin {
 
@@ -73,12 +77,16 @@ public final class GodModePlugin extends JavaPlugin {
     }
 
     private void registerListeners() {
-        getServer().getPluginManager().registerEvents(new PlayerJoinListener(playerDataManager), this);
-        getServer().getPluginManager().registerEvents(new MiningListener(this), this);
-        getServer().getPluginManager().registerEvents(new LumberjackListener(this), this);
-        getServer().getPluginManager().registerEvents(new CookingListener(this), this);
-        getServer().getPluginManager().registerEvents(new BuilderListener(this), this);
-        getServer().getPluginManager().registerEvents(new FishingListener(this), this);
+        List<Listener> listenersToRegister = Arrays.asList(
+                new PlayerJoinListener(playerDataManager),
+                new MiningListener(this),
+                new LumberjackListener(this),
+                new CookingListener(this),
+                new BuilderListener(this),
+                new FishingListener(this)
+        );
+
+        listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
         getLogger().info("Ouvintes de eventos registrados.");
     }
 

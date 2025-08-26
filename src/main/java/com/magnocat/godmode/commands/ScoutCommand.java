@@ -23,7 +23,7 @@ public class ScoutCommand implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         final List<String> completions = new ArrayList<>();
-        final List<String> subCommands = new ArrayList<>(Arrays.asList("badges", "progress", "top", "toggleprogress"));
+        final List<String> subCommands = new ArrayList<>(Arrays.asList("badges", "progress", "top", "toggleprogress", "version"));
 
         if (sender.hasPermission("godmode.scout.admin")) {
             subCommands.addAll(Arrays.asList("addbadge", "removebadge", "reload"));

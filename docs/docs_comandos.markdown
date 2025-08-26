@@ -12,6 +12,8 @@ Lista de comandos do plugin **GodMode-MCTrilhas**.
   - Permissão: `godmode.scout.use`
 - `/scout top`: Mostra os jogadores com mais insígnias.
   - Permissão: `godmode.scout.use`
+- `/scout version`: Exibe a versão atual do plugin.
+  - Permissão: `godmode.scout.use`
 
 ## Comandos Administrativos
 - `/scout addbadge <jogador> <badgeId>`: Concede uma insígnia a um jogador.
