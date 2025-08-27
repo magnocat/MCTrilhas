@@ -18,7 +18,7 @@ badges:
     name: "Insígnia de Lenhador"
     description: "Corte 1000 árvores."
     reward-totems: 500
-    required-progress: 1000
+    required-progress: 10000
     reward-item-data:
       material: "DIAMOND_AXE"
       amount: 1
@@ -33,7 +33,7 @@ badges:
     name: "Insígnia de Minerador"
     description: "Minere 5000 blocos de pedra ou minérios."
     reward-totems: 1000
-    required-progress: 5000
+    required-progress: 50000
     reward-item-data:
       material: "DIAMOND_PICKAXE"
       amount: 1
@@ -48,25 +48,27 @@ badges:
     name: "Insígnia de Cozinheiro"
     description: "Cozinhe 500 itens."
     reward-totems: 500
-    required-progress: 500
+    required-progress: 5000
     reward-item-data:
       material: "SMOKER"
       amount: 1
       name: "&6Defumador do Chef"
       lore:
         - "&7Cozinhe seus alimentos duas vezes mais rápido."
+      enchantments: [] # Adicionado para consistência
 
   builder:
     name: "Insígnia de Construtor"
     description: "Coloque 10000 blocos."
     reward-totems: 1500
-    required-progress: 10000
+    required-progress: 80000
     reward-item-data:
       material: "SHULKER_BOX"
       amount: 1
       name: "&dCaixa do Construtor"
       lore:
         - "&7Para guardar todos os seus materiais."
+      enchantments: [] # Adicionado para consistência
 
   fishing:
     name: "Insígnia de Pescador"
