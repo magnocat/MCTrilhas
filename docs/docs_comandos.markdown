@@ -15,6 +15,10 @@ Lista de comandos do plugin **GodMode-MCTrilhas**.
 - `/scout version`: Exibe a versão atual do plugin.
   - Permissão: `godmode.scout.use`
 
+- `/daily`: Coleta a recompensa diária.
+  - Permissão: `godmode.scout.daily`
+  - Aliases: `/recompensa`, `/reward`
+
 ## Comandos Administrativos
 - `/scout addbadge <jogador> <badgeId>`: Concede uma insígnia a um jogador.
   - Permissão: `godmode.scout.admin`

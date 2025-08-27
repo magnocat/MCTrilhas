@@ -11,18 +11,26 @@ commands:
   scout:
     description: Comando principal para gerenciar insígnias de escoteiro.
     usage: "/<command> [subcommand]"
-    permission: godmode.scout.use
     aliases: [insignia, escoteiro]
+  daily:
+    description: Coleta a recompensa diária.
+    usage: /daily
+    permission: godmode.scout.daily
+    aliases: [recompensa, reward]
 
 permissions:
   godmode.scout.*:
     description: Dá acesso a todos os comandos do GodMode-MCtrilhas.
     children:
       godmode.scout.use: true
+      godmode.scout.daily: true
       godmode.scout.admin: true
       godmode.scout.progress.other: true
   godmode.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
+    default: true
+  godmode.scout.daily:
+    description: Permite ao jogador coletar a recompensa diária.
     default: true
   godmode.scout.admin:
     description: Permite acesso aos comandos administrativos, como remover insígnias.

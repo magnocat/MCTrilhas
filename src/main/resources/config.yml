@@ -85,3 +85,19 @@ badges:
       enchantments:
         - "lure:2"
         - "unbreaking:1"
+
+# Recompensa diária para os jogadores
+daily-reward:
+  enabled: true
+  reward-totems: 25
+  reward-item-data:
+    material: "GOLDEN_APPLE"
+    amount: 1
+    name: "&6Maçã Dourada Diária"
+    lore:
+      - "&7Um presente por sua dedicação!"
+    enchantments: [] # Sem encantamentos para a maçã
+  messages:
+    success: "&aVocê coletou sua recompensa diária! Volte em 24 horas."
+    cooldown: "&cVocê já coletou sua recompensa. Tempo restante: &e{time}"
+    login-notification: "&a[!] Sua recompensa diária está disponível! Use &e/daily&a para coletar."

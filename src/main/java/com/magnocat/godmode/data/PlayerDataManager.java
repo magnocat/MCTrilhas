@@ -86,4 +86,14 @@ public class PlayerDataManager {
         config.set("settings.progress-messages-enabled", enabled);
         savePlayerConfig(uuid, config);
     }
+
+    public long getLastDailyRewardTime(UUID uuid) {
+        return getPlayerConfig(uuid).getLong("last-daily-reward", 0);
+    }
+
+    public void setLastDailyRewardTime(UUID uuid, long time) {
+        FileConfiguration config = getPlayerConfig(uuid);
+        config.set("last-daily-reward", time);
+        savePlayerConfig(uuid, config);
+    }
 }

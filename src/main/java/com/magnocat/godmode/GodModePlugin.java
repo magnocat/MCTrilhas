@@ -2,6 +2,7 @@ package com.magnocat.godmode;
 
 import com.magnocat.godmode.badges.BadgeManager;
 import com.magnocat.godmode.commands.ScoutCommand;
+import com.magnocat.godmode.commands.DailyRewardCommandExecutor;
 import com.magnocat.godmode.commands.ScoutCommandExecutor;
 import com.magnocat.godmode.data.PlayerDataManager;
 import com.magnocat.godmode.listeners.BuilderListener;
@@ -73,12 +74,13 @@ public final class GodModePlugin extends JavaPlugin {
     private void registerCommands() {
         getCommand("scout").setExecutor(new ScoutCommandExecutor(this));
         getCommand("scout").setTabCompleter(new ScoutCommand(this));
+        getCommand("daily").setExecutor(new DailyRewardCommandExecutor(this));
         getLogger().info("Comandos registrados.");
     }
 
     private void registerListeners() {
         List<Listener> listenersToRegister = Arrays.asList(
-                new PlayerJoinListener(playerDataManager),
+                new PlayerJoinListener(this),
                 new MiningListener(this),
                 new LumberjackListener(this),
                 new CookingListener(this),
