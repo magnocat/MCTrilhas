@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 /**
  * A utility class for creating text-based progress bars.
  */
+@SuppressWarnings("deprecation") // Suppress warnings for deprecated ChatColor
 public final class ProgressBarUtil {
 
     private ProgressBarUtil() {

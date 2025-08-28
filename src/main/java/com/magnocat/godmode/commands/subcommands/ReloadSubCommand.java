@@ -4,6 +4,7 @@ import com.magnocat.godmode.GodModePlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+@SuppressWarnings("deprecation") // Suppress warnings for deprecated ChatColor
 public class ReloadSubCommand extends SubCommand {
 
     public ReloadSubCommand(GodModePlugin plugin) {
@@ -17,7 +18,7 @@ public class ReloadSubCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "Recarrega o arquivo de configuração config.yml.";
+        return "Recarrega os arquivos de configuração (config.yml e badges.yml).";
     }
 
     @Override

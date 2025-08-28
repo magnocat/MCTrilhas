@@ -31,7 +31,17 @@ jobs:
           distribution: 'temurin'
           cache: 'maven' # Adiciona cache para as dependências do Maven, acelerando os builds
 
-      # Passo 3: Compila o projeto com o Maven, criando o arquivo .jar
+      # Passo de Validação: Verifica a sintaxe do plugin.yml antes de compilar
+      - name: Validate plugin.yml
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: src/main/resources/plugin.yml
+
+      # Passo 3: Roda os testes unitários. O 'clean' garante um ambiente limpo antes de compilar e testar.
+      - name: Run Unit Tests
+        run: mvn clean test
+
+      # Passo 4: Compila o projeto com o Maven, criando o arquivo .jar
       # A versão é passada dinamicamente usando o número da execução do workflow (ex: 1.0.4, 1.0.5, etc)
       # Para tags, a versão é extraída da tag (ex: v1.1.0 -> 1.1.0)
       - name: Build with Maven
@@ -39,14 +49,15 @@ jobs:
           VERSION_STRING=""
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION_STRING="${{ github.ref_name }}"
-            VERSION_STRING="${VERSION_STRING:1}" # Remove the 'v' prefix from tag name (e.g., v1.1.0 -> 1.1.0)
+            VERSION_STRING="${VERSION_STRING:1}" # Remove o prefixo 'v' da tag (ex: v1.1.0 -> 1.1.0)
           else
-            VERSION_STRING="1.0.${{ github.run_number }}" # For development builds, use 1.0.X where X is the run number
+            VERSION_STRING="1.0.${{ github.run_number }}" # Para builds de desenvolvimento, usa 1.0.X onde X é o número da execução
           fi
           echo "Building with version: $VERSION_STRING"
-          mvn clean package -Dproject.version.full="$VERSION_STRING" --file pom.xml
+          # Usamos -DskipTests para não rodar os testes novamente, pois já foram executados no passo anterior
+          mvn package -Dproject.version.full="$VERSION_STRING" -Dmaven.compiler.showWarnings=false -DskipTests --file pom.xml
 
-      # Passo 4: Se o gatilho foi uma tag, cria um Release no GitHub
+      # Passo 5: Se o gatilho foi uma tag, cria um Release no GitHub
       - name: Create Release and Upload Artifact
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
@@ -54,7 +65,7 @@ jobs:
           # Usa um wildcard para encontrar o .jar, evitando erros quando a versão muda
           files: target/*.jar
 
-      # Passo 5: Se o gatilho foi um push na 'main', anexa o .jar como um artefato do build
+      # Passo 6: Se o gatilho foi um push na 'main', anexa o .jar como um artefato do build
       - name: Upload Development Artifact
         if: "!startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v4

@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender;
 
 import java.util.*;
 
+@SuppressWarnings("deprecation") // Suprime avisos de API depreciada (ex: ChatColor)
 public class ScoutCommandExecutor implements CommandExecutor {
 
     private final GodModePlugin plugin;

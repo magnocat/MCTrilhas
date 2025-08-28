@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 /**
  * A utility class for creating ItemStacks from configuration files.
  */
+@SuppressWarnings("deprecation") // Suppress warnings for deprecated methods like setDisplayName, setLore, and ChatColor
 public final class ItemFactory {
 
     // Constants for configuration keys to avoid "magic strings"

@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
+@SuppressWarnings("deprecation") // Suppress warnings for deprecated ChatColor
 public class BadgesSubCommand extends SubCommand {
 
     public BadgesSubCommand(GodModePlugin plugin) {
@@ -53,8 +54,9 @@ public class BadgesSubCommand extends SubCommand {
 
         player.sendMessage(ChatColor.GOLD + "--- Suas Insígnias Conquistadas ---");
         for (String badgeId : earnedBadges) {
-            String badgeName = plugin.getConfig().getString("badges." + badgeId + ".name", badgeId);
-            player.sendMessage(ChatColor.AQUA + "- " + badgeName);
+            String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString(badgeId + ".name", badgeId);
+            String description = plugin.getBadgeConfigManager().getBadgeConfig().getString(badgeId + ".description", "Sem descrição.");
+            player.sendMessage(ChatColor.AQUA + "- " + badgeName + ": " + ChatColor.GRAY + description);
         }
     }
 }

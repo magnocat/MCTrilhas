@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("deprecation") // Suppress warnings for deprecated ChatColor
 public class DailyRewardCommandExecutor implements CommandExecutor {
 
     private final GodModePlugin plugin;
@@ -42,19 +43,21 @@ public class DailyRewardCommandExecutor implements CommandExecutor {
         }
 
         long lastClaim = playerDataManager.getLastDailyRewardTime(player.getUniqueId());
-        long cooldown = TimeUnit.HOURS.toMillis(24);
+        int cooldownHours = dailyRewardSection.getInt("cooldown-hours", 24);
+        long cooldownMillis = TimeUnit.HOURS.toMillis(cooldownHours);
         long currentTime = System.currentTimeMillis();
 
-        if (currentTime - lastClaim >= cooldown) {
+        if (currentTime - lastClaim >= cooldownMillis) {
             // Dar a recompensa
             giveReward(player, dailyRewardSection);
             playerDataManager.setLastDailyRewardTime(player.getUniqueId(), currentTime);
 
-            String successMessage = dailyRewardSection.getString("messages.success", "&aVocê coletou sua recompensa diária! Volte em 24 horas.");
+            String successMessage = dailyRewardSection.getString("messages.success", "&aVocê coletou sua recompensa diária! Volte em {hours} horas.");
+            successMessage = successMessage.replace("{hours}", String.valueOf(cooldownHours));
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', successMessage));
         } else {
             // Informar o tempo restante
-            long remainingTime = (lastClaim + cooldown) - currentTime;
+            long remainingTime = (lastClaim + cooldownMillis) - currentTime;
             String formattedTime = formatTime(remainingTime);
             String cooldownMessage = dailyRewardSection.getString("messages.cooldown", "&cVocê já coletou sua recompensa. Tempo restante: &e{time}");
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', cooldownMessage.replace("{time}", formattedTime)));

@@ -27,7 +27,8 @@ Como configurar o ambiente para desenvolver o plugin **GodMode-MCTrilhas**.
 ## Estrutura
 - `src/main/java/com/magnocat/godmode/`: Código Java.
 - `src/main/resources/plugin.yml`: Metadados do plugin.
-- `src/main/resources/config.yml`: Configuração das insígnias.
+- `src/main/resources/config.yml`: Configuração padrão geral.
+- `src/main/resources/badges.yml`: Configuração padrão das insígnias.
 - `pom.xml`: Dependências Maven.
 
 ## GitHub Actions

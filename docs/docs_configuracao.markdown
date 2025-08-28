@@ -1,12 +1,22 @@
 # ⚙️ Configuração
 
-O plugin **GodMode-MCTrilhas** usa o arquivo `config.yml` em `plugins/GodMode-MCTrilhas/` para definir insígnias e recompensas.
+O plugin **GodMode-MCTrilhas** usa dois arquivos de configuração principais:
+- `config.yml`: Para configurações gerais do plugin.
+- `badges.yml`: Para definir todas as insígnias e suas recompensas.
 
-## Estrutura do `config.yml`
+## Estrutura do `config.yml` (Configurações Gerais)
 
 ```yaml
 # Formato da mensagem de progresso. Placeholders: {badgeName}, {progress}, {required}, {percentage}
 progress-message-format: "&e{badgeName}: &a{progress}&8/&7{required} &b({percentage}%)"
+
+# Mensagens ao conquistar uma insígnia. Placeholder: {badgeName}
+award-message:
+  - "&6&l[INSÍGNIA DESBLOQUEADA]"
+  - "&eParabéns! Você conquistou a insígnia {badgeName}!"
+
+# Mensagem ao receber Totens como recompensa. Placeholder: {amount}
+totem-reward-message: "&e+ {amount} Totens!"
 ```
 
 ```yaml

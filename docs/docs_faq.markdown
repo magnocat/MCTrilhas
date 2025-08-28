@@ -3,14 +3,13 @@
 Perguntas frequentes sobre o plugin **GodMode-MCTrilhas**.
 
 ## Como adiciono uma nova insígnia?
-Edite o `config.yml` em `plugins/GodMode-MCTrilhas/` e adicione uma nova entrada em `badges`. Exemplo:
+Edite o arquivo `badges.yml` em `plugins/GodMode-MCTrilhas/` e adicione uma nova entrada. Exemplo:
 ```yaml
-badges:
-  newbadge:
-    name: "Nova Insígnia"
-    description: "Faça algo legal."
-    reward-totems: 50
-    required-progress: 10
+newbadge:
+  name: "Nova Insígnia"
+  description: "Faça algo legal."
+  reward-totems: 50
+  required-progress: 10
 ```
 
 ## Como configuro uma região no WorldGuard?

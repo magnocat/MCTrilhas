@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@SuppressWarnings("deprecation") // Suppress warnings for deprecated ChatColor
 public class ProgressSubCommand extends SubCommand {
 
     public ProgressSubCommand(GodModePlugin plugin) {
@@ -68,22 +69,24 @@ public class ProgressSubCommand extends SubCommand {
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> earnedBadges = plugin.getPlayerDataManager().getEarnedBadges(target.getUniqueId());
-            var badgeSection = plugin.getConfig().getConfigurationSection("badges");
-            if (badgeSection == null) {
+            var badgeConfig = plugin.getBadgeConfigManager().getBadgeConfig();
+
+            if (badgeConfig == null || badgeConfig.getKeys(false).isEmpty()) {
                 Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(ChatColor.RED + "Nenhuma insígnia configurada."));
                 return;
             }
-            Set<String> allBadgeIds = badgeSection.getKeys(false);
+            Set<String> allBadgeIds = badgeConfig.getKeys(false);
 
             List<String> progressMessages = new ArrayList<>();
             for (String badgeId : allBadgeIds) {
                 if (earnedBadges.contains(badgeId)) continue;
 
-                String badgeName = plugin.getConfig().getString("badges." + badgeId + ".name", badgeId);
-                int currentProgress = plugin.getPlayerDataManager().getProgress(target.getUniqueId(), badgeId);
-                int requiredProgress = plugin.getConfig().getInt("badges." + badgeId + ".required-progress", 1);
+                String badgeName = badgeConfig.getString(badgeId + ".name", badgeId);
+                long currentProgress = plugin.getPlayerDataManager().getProgress(target.getUniqueId(), badgeId);
+                long requiredProgress = badgeConfig.getLong(badgeId + ".required-progress", 1);
 
-                String progressBar = ProgressBarUtil.buildProgressBar(currentProgress, requiredProgress);
+                // Cast para int é necessário para a utilidade da barra de progresso, que espera inteiros.
+                String progressBar = ProgressBarUtil.buildProgressBar((int) currentProgress, (int) requiredProgress);
                 String message = ChatColor.YELLOW + badgeName + ": " + ChatColor.AQUA + currentProgress + "/" + requiredProgress + " " + progressBar;
                 progressMessages.add(message);
             }

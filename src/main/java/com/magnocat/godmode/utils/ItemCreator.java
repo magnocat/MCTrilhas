@@ -10,6 +10,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("deprecation") // Suppress warnings for deprecated methods like setDisplayName, setLore, and ChatColor
 public class ItemCreator {
 
     public static ItemStack createItemFromConfig(ConfigurationSection section) {

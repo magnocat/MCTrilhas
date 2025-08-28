@@ -12,18 +12,18 @@ import java.util.List;
 /**
  * Manages the logic for awarding badges, tracking progress, and giving rewards.
  */
+@SuppressWarnings("deprecation") // Suprime avisos de API depreciada (ex: ChatColor)
 public class BadgeManager {
 
     private final GodModePlugin plugin;
 
     // Constants for configuration keys to avoid "magic strings"
-    private static final String BADGES_SECTION = "badges.";
     private static final String KEY_REWARD_TOTEMS = "reward-totems";
     private static final String KEY_REWARD_ITEM_DATA = "reward-item-data";
     private static final String KEY_REQUIRED_PROGRESS = "required-progress";
-    private static final String KEY_AWARD_MESSAGE = "badge-award-format";
+    private static final String KEY_AWARD_MESSAGE = "award-message";
     private static final String KEY_PROGRESS_MESSAGE_FORMAT = "progress-message-format";
-    private static final String KEY_TOTEM_REWARD_MESSAGE = "totem-reward-format";
+    private static final String KEY_TOTEM_REWARD_MESSAGE = "totem-reward-message";
 
     /**
      * Constructs a new BadgeManager.
@@ -33,13 +33,24 @@ public class BadgeManager {
         this.plugin = plugin;
     }
 
+    /**
+     * Recarrega as definições de insígnias.
+     * Atualmente, este método é um placeholder para garantir a compatibilidade com o comando de reload.
+     * Pode ser expandido no futuro para limpar caches internos do BadgeManager.
+     */
+    public void loadBadges() {
+        // No momento, não há cache interno para limpar, mas o método é necessário para a compilação.
+        plugin.getLogger().info("Definições de insígnias recarregadas (cache do BadgeManager).");
+    }
+
     public void awardBadge(Player player, String badgeId) {
         List<String> earnedBadges = plugin.getPlayerDataManager().getEarnedBadges(player.getUniqueId());
         if (earnedBadges.contains(badgeId)) {
             return; // Player already has this badge, do nothing.
         }
 
-        ConfigurationSection badgeSection = plugin.getConfig().getConfigurationSection(BADGES_SECTION + badgeId);
+        // Fetch badge configuration from the dedicated badges.yml file
+        ConfigurationSection badgeSection = plugin.getBadgeConfigManager().getBadgeConfig().getConfigurationSection(badgeId);
         if (badgeSection == null) {
             plugin.getLogger().warning("Attempted to award a non-existent badge: " + badgeId);
             return;
@@ -49,8 +60,8 @@ public class BadgeManager {
         plugin.getPlayerDataManager().addBadge(player.getUniqueId(), badgeId);
 
         // 2. Announce and give rewards
-        // Announce the achievement using a configurable message format
-        String badgeName = badgeSection.getString("name", badgeId);
+        // Announce the achievement using a configurable message format from config.yml
+        String badgeName = badgeSection.getString("name", badgeId); // 'name' comes from badges.yml
         List<String> awardMessages = plugin.getConfig().getStringList(KEY_AWARD_MESSAGE);
 
         // Provide a default message if the configuration is missing, making it robust
@@ -64,11 +75,11 @@ public class BadgeManager {
         awardMessages.forEach(line -> player.sendMessage(ChatColor.translateAlternateColorCodes('&', line.replace("{badgeName}", badgeName))));
 
         // 3. Reward with Totems (Vault)
-        int totems = badgeSection.getInt(KEY_REWARD_TOTEMS, 0);
+        int totems = badgeSection.getInt(KEY_REWARD_TOTEMS, 0); // 'reward-totems' from badges.yml
         if (totems > 0 && plugin.getEconomy() != null) {
             Economy economy = plugin.getEconomy();
             economy.depositPlayer(player, totems);
-            // Send a configurable message for the totem reward
+            // Send a configurable message for the totem reward from config.yml
             String totemMessageFormat = plugin.getConfig().getString(KEY_TOTEM_REWARD_MESSAGE, "&e+ {amount} Totens!");
             String totemMessage = totemMessageFormat.replace("{amount}", String.valueOf(totems));
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', totemMessage));
@@ -87,20 +98,21 @@ public class BadgeManager {
         }
     }
 
-    public void incrementProgress(Player player, String badgeId, int amount) {
+    public void incrementProgress(Player player, String badgeId, long amount) {
         if (plugin.getPlayerDataManager().getEarnedBadges(player.getUniqueId()).contains(badgeId)) {
             return; // Player has already earned this badge.
         }
 
-        ConfigurationSection badgeSection = plugin.getConfig().getConfigurationSection(BADGES_SECTION + badgeId);
+        // Fetch badge configuration from the dedicated badges.yml file
+        ConfigurationSection badgeSection = plugin.getBadgeConfigManager().getBadgeConfig().getConfigurationSection(badgeId);
         if (badgeSection == null) {
             return; // Badge is not configured.
         }
 
         // The PlayerDataManager should handle returning 0 if no progress exists.
-        int oldProgress = plugin.getPlayerDataManager().getProgress(player.getUniqueId(), badgeId);
-        int newProgress = oldProgress + amount;
-        int requiredProgress = badgeSection.getInt(KEY_REQUIRED_PROGRESS, Integer.MAX_VALUE);
+        long oldProgress = plugin.getPlayerDataManager().getProgress(player.getUniqueId(), badgeId);
+        long newProgress = oldProgress + amount;
+        long requiredProgress = badgeSection.getLong(KEY_REQUIRED_PROGRESS, Long.MAX_VALUE);
 
         // If progress meets or exceeds the requirement, award the badge and stop.
         if (newProgress >= requiredProgress) {
@@ -112,8 +124,8 @@ public class BadgeManager {
         // Save the new progress value.
         plugin.getPlayerDataManager().setProgress(player.getUniqueId(), badgeId, newProgress);
 
-        // Check if the player wants to see progress messages.
-        if (plugin.getPlayerDataManager().areProgressMessagesEnabled(player.getUniqueId())) {
+        // Check if the player has NOT disabled progress messages.
+        if (!plugin.getPlayerDataManager().areProgressMessagesDisabled(player.getUniqueId())) {
             sendProgressMessage(player, badgeId, badgeSection, newProgress, requiredProgress);
         }
     }
@@ -127,10 +139,10 @@ public class BadgeManager {
      * @param currentProgress The player's current progress.
      * @param requiredProgress The total progress required for the badge.
      */
-    private void sendProgressMessage(Player player, String badgeId, ConfigurationSection badgeSection, int currentProgress, int requiredProgress) {
+    private void sendProgressMessage(Player player, String badgeId, ConfigurationSection badgeSection, long currentProgress, long requiredProgress) {
         String messageFormat = plugin.getConfig().getString(KEY_PROGRESS_MESSAGE_FORMAT, "&e{badgeName}: &a{progress}&8/&7{required} &b({percentage}%)");
         String badgeName = badgeSection.getString("name", badgeId);
-        int percentage = (currentProgress * 100) / requiredProgress;
+        long percentage = (requiredProgress > 0) ? (currentProgress * 100) / requiredProgress : 0;
 
         String message = messageFormat.replace("{badgeName}", badgeName)
                 .replace("{progress}", String.valueOf(currentProgress))

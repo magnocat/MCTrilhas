@@ -6,13 +6,18 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerDataManager {
 
     private final GodModePlugin plugin;
     private final File dataFolder;
+    // Cache para os dados dos jogadores online para evitar leituras constantes do disco.
+    private final Map<UUID, FileConfiguration> playerCache = new ConcurrentHashMap<>();
 
     public PlayerDataManager(GodModePlugin plugin) {
         this.plugin = plugin;
@@ -22,16 +27,37 @@ public class PlayerDataManager {
         }
     }
 
+    /**
+     * Carrega os dados de um jogador do arquivo para o cache.
+     * Ideal para ser chamado no evento PlayerJoinEvent.
+     * @param uuid O UUID do jogador.
+     */
+    public void loadPlayerData(UUID uuid) {
+        File playerFile = getPlayerFile(uuid);
+        FileConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
+        playerCache.put(uuid, playerConfig);
+    }
+
+    /**
+     * Salva os dados de um jogador do cache para o arquivo e o remove do cache.
+     * Ideal para ser chamado no evento PlayerQuitEvent.
+     * @param uuid O UUID do jogador.
+     */
+    public void unloadPlayerData(UUID uuid) {
+        if (playerCache.containsKey(uuid)) {
+            savePlayerConfig(uuid, playerCache.get(uuid));
+            playerCache.remove(uuid);
+        }
+    }
+
     private File getPlayerFile(UUID uuid) {
         return new File(dataFolder, uuid.toString() + ".yml");
     }
 
     private FileConfiguration getPlayerConfig(UUID uuid) {
-        File playerFile = getPlayerFile(uuid);
-        if (!playerFile.exists()) {
-            return new YamlConfiguration(); // Return empty config for offline players
-        }
-        return YamlConfiguration.loadConfiguration(playerFile);
+        // Prioriza o cache para jogadores online, melhorando a performance.
+        // Para jogadores offline, carrega diretamente do arquivo.
+        return playerCache.getOrDefault(uuid, YamlConfiguration.loadConfiguration(getPlayerFile(uuid)));
     }
 
     private void savePlayerConfig(UUID uuid, FileConfiguration config) {
@@ -40,6 +66,10 @@ public class PlayerDataManager {
         } catch (IOException e) {
             plugin.getLogger().severe("Could not save player data file for " + uuid);
         }
+    }
+
+    public boolean hasBadge(UUID uuid, String badgeId) {
+        return getEarnedBadges(uuid).contains(badgeId);
     }
 
     public List<String> getEarnedBadges(UUID uuid) {
@@ -65,26 +95,38 @@ public class PlayerDataManager {
         }
     }
 
-    public int getProgress(UUID uuid, String badgeId) {
-        // Always return an integer. If progress is not set, default to 0.
+    public long getProgress(UUID uuid, String badgeId) {
         return getPlayerConfig(uuid).getInt("progress." + badgeId, 0);
     }
 
-    public void setProgress(UUID uuid, String badgeId, int newProgress) {
+    public void setProgress(UUID uuid, String badgeId, long newProgress) {
         FileConfiguration config = getPlayerConfig(uuid);
-        // Always save progress as an integer.
         config.set("progress." + badgeId, newProgress);
         savePlayerConfig(uuid, config);
     }
 
-    public boolean areProgressMessagesEnabled(UUID uuid) {
-        return getPlayerConfig(uuid).getBoolean("settings.progress-messages-enabled", true);
+    /**
+     * Verifica se as mensagens de progresso estão desativadas para um jogador.
+     * @param uuid O UUID do jogador.
+     * @return true se as mensagens estiverem desativadas, false caso contrário.
+     */
+    public boolean areProgressMessagesDisabled(UUID uuid) {
+        // O padrão é 'false' (mensagens ativadas).
+        return getPlayerConfig(uuid).getBoolean("settings.progress-messages-disabled", false);
     }
 
-    public void setProgressMessagesEnabled(UUID uuid, boolean enabled) {
+    /**
+     * Alterna a configuração de exibição de mensagens de progresso para um jogador.
+     * @param uuid O UUID do jogador.
+     * @return true se as mensagens foram desativadas, false se foram ativadas.
+     */
+    public boolean toggleProgressMessages(UUID uuid) {
+        boolean isDisabled = areProgressMessagesDisabled(uuid);
+        boolean newSetting = !isDisabled;
         FileConfiguration config = getPlayerConfig(uuid);
-        config.set("settings.progress-messages-enabled", enabled);
+        config.set("settings.progress-messages-disabled", newSetting);
         savePlayerConfig(uuid, config);
+        return newSetting;
     }
 
     public long getLastDailyRewardTime(UUID uuid) {
@@ -95,5 +137,29 @@ public class PlayerDataManager {
         FileConfiguration config = getPlayerConfig(uuid);
         config.set("last-daily-reward", time);
         savePlayerConfig(uuid, config);
+    }
+
+    /**
+     * Obtém a contagem de insígnias de todos os jogadores que possuem dados salvos.
+     * Usa o cache para jogadores online para garantir dados atualizados.
+     * @return Um mapa com UUID do jogador e sua contagem de insígnias.
+     */
+    public Map<UUID, Integer> getAllBadgeCounts() {
+        Map<UUID, Integer> allCounts = new HashMap<>();
+        File[] playerFiles = dataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+        if (playerFiles != null) {
+            for (File playerFile : playerFiles) {
+                try {
+                    UUID uuid = UUID.fromString(playerFile.getName().replace(".yml", ""));
+                    FileConfiguration playerData = YamlConfiguration.loadConfiguration(playerFile);
+                    allCounts.put(uuid, playerData.getStringList("badges").size());
+                } catch (IllegalArgumentException e) {
+                    plugin.getLogger().warning("Arquivo de jogador com nome inválido ignorado: " + playerFile.getName());
+                }
+            }
+        }
+        // Sobrescreve com dados do cache para garantir que os dados de jogadores online estejam atualizados.
+        playerCache.forEach((uuid, config) -> allCounts.put(uuid, config.getStringList("badges").size()));
+        return allCounts;
     }
 }

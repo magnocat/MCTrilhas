@@ -3,7 +3,7 @@ package com.magnocat.godmode;
 import com.magnocat.godmode.badges.BadgeManager;
 import com.magnocat.godmode.commands.ScoutCommand;
 import com.magnocat.godmode.commands.DailyRewardCommandExecutor;
-import com.magnocat.godmode.commands.ScoutCommandExecutor;
+import com.magnocat.godmode.managers.BadgeConfigManager;
 import com.magnocat.godmode.data.PlayerDataManager;
 import com.magnocat.godmode.listeners.BuilderListener;
 import com.magnocat.godmode.listeners.CookingListener;
@@ -11,9 +11,11 @@ import com.magnocat.godmode.listeners.FishingListener;
 import com.magnocat.godmode.listeners.LumberjackListener;
 import com.magnocat.godmode.listeners.MiningListener;
 import com.magnocat.godmode.listeners.PlayerJoinListener;
+import com.magnocat.godmode.listeners.PlayerQuitListener;
 import com.magnocat.godmode.storage.BlockPersistenceManager;
 import com.magnocat.godmode.updater.UpdateChecker;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,6 +27,7 @@ public final class GodModePlugin extends JavaPlugin {
 
     private PlayerDataManager playerDataManager;
     private BadgeManager badgeManager;
+    private BadgeConfigManager badgeConfigManager;
     private BlockPersistenceManager blockPersistenceManager;
     private Economy econ = null;
 
@@ -45,6 +48,16 @@ public final class GodModePlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // Salva os dados de todos os jogadores online para evitar perda de dados durante um reload ou desligamento.
+        if (playerDataManager != null) {
+            getLogger().info("Salvando dados dos jogadores online...");
+            // Itera sobre os jogadores online e salva seus dados do cache para o arquivo.
+            for (Player player : getServer().getOnlinePlayers()) {
+                playerDataManager.unloadPlayerData(player.getUniqueId());
+            }
+            getLogger().info("Dados dos jogadores salvos com sucesso.");
+        }
+
         getLogger().info("GodMode-MCTrilhas foi desativado.");
     }
 
@@ -65,15 +78,19 @@ public final class GodModePlugin extends JavaPlugin {
     }
 
     private void loadManagers() {
+        this.badgeConfigManager = new BadgeConfigManager(this);
         this.playerDataManager = new PlayerDataManager(this);
         this.badgeManager = new BadgeManager(this);
         this.blockPersistenceManager = new BlockPersistenceManager(this);
-        getLogger().info("Gerenciadores de dados, insígnias e persistência de blocos inicializados.");
+        getLogger().info("Gerenciadores de configuração, dados, insígnias e persistência de blocos inicializados.");
     }
 
     private void registerCommands() {
-        getCommand("scout").setExecutor(new ScoutCommandExecutor(this));
-        getCommand("scout").setTabCompleter(new ScoutCommand(this));
+        // ScoutCommand agora implementa CommandExecutor e TabCompleter
+        ScoutCommand scoutCommandHandler = new ScoutCommand(this);
+        getCommand("scout").setExecutor(scoutCommandHandler);
+        getCommand("scout").setTabCompleter(scoutCommandHandler);
+
         getCommand("daily").setExecutor(new DailyRewardCommandExecutor(this));
         getLogger().info("Comandos registrados.");
     }
@@ -85,7 +102,8 @@ public final class GodModePlugin extends JavaPlugin {
                 new LumberjackListener(this),
                 new CookingListener(this),
                 new BuilderListener(this),
-                new FishingListener(this)
+                new FishingListener(this),
+                new PlayerQuitListener(this) // Essencial para salvar os dados do jogador ao sair.
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
@@ -98,6 +116,10 @@ public final class GodModePlugin extends JavaPlugin {
 
     public BadgeManager getBadgeManager() {
         return badgeManager;
+    }
+
+    public BadgeConfigManager getBadgeConfigManager() {
+        return badgeConfigManager;
     }
 
     public BlockPersistenceManager getBlockPersistenceManager() {
@@ -113,6 +135,11 @@ public final class GodModePlugin extends JavaPlugin {
      */
     public void reloadPluginConfig() {
         this.reloadConfig();
-        getLogger().info("A configuração do GodMode-MCTrilhas foi recarregada.");
+        this.badgeConfigManager.reloadBadgeConfig();
+
+        // Notifica o BadgeManager para recarregar sua lista interna de insígnias
+        this.badgeManager.loadBadges();
+
+        getLogger().info("As configurações (config.yml e badges.yml) do GodMode-MCTrilhas foram recarregadas.");
     }
 }

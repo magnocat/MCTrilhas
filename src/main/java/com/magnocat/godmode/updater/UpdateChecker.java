@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Scanner;
 
+@SuppressWarnings("deprecation") // Suprime avisos de API depreciada (ex: getDescription)
 public class UpdateChecker {
 
     private final GodModePlugin plugin;
