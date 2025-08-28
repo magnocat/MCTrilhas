@@ -1,12 +1,15 @@
 # ⚙️ Configuração
 
-O plugin **GodMode-MCTrilhas** usa dois arquivos de configuração principais:
+O plugin **GodMode-MCTrilhas** usa dois arquivos de configuração principais que são gerados na pasta `plugins/GodMode-MCTrilhas/`:
 - `config.yml`: Para configurações gerais do plugin.
-- `badges.yml`: Para definir todas as insígnias e suas recompensas.
+- `badges.yml`: Para definir todas as insígnias, seus requisitos e recompensas.
 
-## Estrutura do `config.yml` (Configurações Gerais)
+## `config.yml` (Configurações Gerais)
+
+Este arquivo controla as mensagens e formatos globais do plugin.
 
 ```yaml
+# config.yml
 # Formato da mensagem de progresso. Placeholders: {badgeName}, {progress}, {required}, {percentage}
 progress-message-format: "&e{badgeName}: &a{progress}&8/&7{required} &b({percentage}%)"
 

@@ -1,0 +1,67 @@
+# Definição das insígnias do plugin GodMode-MCTrilhas.
+# Cada chave de nível superior é o ID único de uma insígnia.
+#
+# Campos disponíveis:
+#   name: "Nome exibido da insígnia" (Obrigatório)
+#   description: "Descrição da insígnia" (Obrigatório)
+#   required-progress: <número> (Obrigatório) - Quantidade de ações para conquistar.
+#   reward-totems: <número> (Opcional) - Quantidade de Totens (moeda) como recompensa.
+#   reward-item-data: (Opcional) - Define um item como recompensa.
+#     material: "NOME_DO_MATERIAL" (Obrigatório) - Ex: "DIAMOND_AXE"
+#     amount: <número> (Opcional, padrão 1)
+#     name: "Nome customizado do item" (Opcional)
+#     lore: (Opcional)
+#       - "Linha 1 da lore"
+#       - "Linha 2 da lore"
+#     enchantments: (Opcional)
+#       - "encantamento:nível" - Ex: "efficiency:5"
+
+lumberjack:
+  name: "Insígnia de Lenhador"
+  description: "Corte 1000 árvores."
+  required-progress: 1000
+  reward-totems: 50
+  reward-item-data:
+    material: "DIAMOND_AXE"
+    amount: 1
+    name: "&bMachado do Lenhador Mestre"
+    lore:
+      - "&7Um machado especial para um"
+      - "&7escoteiro exemplar."
+    enchantments:
+      - "efficiency:2"
+      - "unbreaking:1"
+
+miner:
+  name: "Insígnia de Minerador"
+  description: "Minere 5000 blocos de pedra ou minérios."
+  required-progress: 5000
+  reward-totems: 100
+
+cook:
+  name: "Insígnia de Cozinheiro"
+  description: "Cozinhe 500 alimentos."
+  required-progress: 500
+  reward-totems: 60
+
+builder:
+  name: "Insígnia de Construtor"
+  description: "Posicione 10000 blocos."
+  required-progress: 10000
+  reward-totems: 150
+
+fishing:
+  name: "Insígnia de Pescador"
+  description: "Pesque 250 peixes."
+  required-progress: 250
+  reward-totems: 75
+  reward-item-data:
+    material: "FISHING_ROD"
+    amount: 1
+    name: "&bVara de Pescar do Mestre Pescador"
+    lore:
+      - "&7Uma vara especial para um"
+      - "&7pescador exemplar."
+    enchantments:
+      - "lure:2"
+      - "unbreaking:1"
