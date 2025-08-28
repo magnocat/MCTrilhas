@@ -43,6 +43,7 @@ public class PlayerJoinListener implements Listener {
      * Envia uma mensagem de boas-vindas personalizada para o jogador.
      * @param player O jogador que entrou no servidor.
      */
+    @SuppressWarnings("deprecation")
     private void sendWelcomeMessage(Player player) {
         // Atraso de 1 segundo (20 ticks) para a mensagem não se perder no meio de outras mensagens de login.
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -62,6 +63,7 @@ public class PlayerJoinListener implements Listener {
      * Agenda uma tarefa para notificar o jogador sobre a recompensa diária, se disponível.
      * @param player O jogador para notificar.
      */
+    @SuppressWarnings("deprecation")
     private void scheduleDailyRewardNotification(Player player) {
         // Usamos runTaskLater para garantir que o jogador já esteja totalmente carregado e possa receber mensagens.
         // O atraso maior (5 segundos) é para que esta notificação apareça depois da mensagem de boas-vindas.

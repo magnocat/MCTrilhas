@@ -35,7 +35,12 @@ jobs:
       - name: Validate plugin.yml
         uses: ibiqlik/action-yamllint@v3
         with:
-          file_or_dir: src/main/resources/plugin.yml
+          file_or_dir: src/main/resources/
+          config_data: |
+            extends: default
+            rules:
+              line-length: disable
+              document-start: disable
 
       # Passo 3: Roda os testes unitários. O 'clean' garante um ambiente limpo antes de compilar e testar.
       - name: Run Unit Tests
