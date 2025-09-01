@@ -1,6 +1,7 @@
 package com.magnocat.godmode.listeners;
 
 import com.magnocat.godmode.GodModePlugin;
+import com.magnocat.godmode.badges.BadgeType;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,7 +12,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 public class BuilderListener implements Listener {
 
     private final GodModePlugin plugin;
-    private static final String BUILDER_BADGE_ID = "builder";
 
     public BuilderListener(GodModePlugin plugin) {
         this.plugin = plugin;
@@ -29,6 +29,6 @@ public class BuilderListener implements Listener {
         plugin.getBlockPersistenceManager().markBlockAsPlayerPlaced(event.getBlock());
 
         // Any block placed in survival mode counts towards the builder badge.
-        plugin.getBadgeManager().incrementProgress(player, BUILDER_BADGE_ID, 1);
+        plugin.getPlayerDataManager().addProgress(player, BadgeType.BUILDER, 1);
     }
 }

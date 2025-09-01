@@ -1,6 +1,7 @@
 package com.magnocat.godmode.listeners;
 
 import com.magnocat.godmode.GodModePlugin;
+import com.magnocat.godmode.badges.BadgeType;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 public class CookingListener implements Listener {
 
     private final GodModePlugin plugin;
-    private static final String COOK_BADGE_ID = "cook";
     private static final int RESULT_SLOT = 2;
 
     public CookingListener(GodModePlugin plugin) {
@@ -45,7 +45,7 @@ public class CookingListener implements Listener {
         if (resultItem != null && resultItem.getAmount() > 0) {
             // The amount of items taken is the amount in the result stack.
             // This works for both regular clicks and shift-clicks.
-            plugin.getBadgeManager().incrementProgress(player, COOK_BADGE_ID, resultItem.getAmount());
+            plugin.getPlayerDataManager().addProgress(player, BadgeType.COOKING, resultItem.getAmount());
         }
     }
 }

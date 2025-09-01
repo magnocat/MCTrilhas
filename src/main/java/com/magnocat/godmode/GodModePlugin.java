@@ -1,8 +1,8 @@
 package com.magnocat.godmode;
 
 import com.magnocat.godmode.badges.BadgeManager;
+import com.magnocat.godmode.commands.DailyCommand;
 import com.magnocat.godmode.commands.ScoutCommand;
-import com.magnocat.godmode.commands.DailyRewardCommandExecutor;
 import com.magnocat.godmode.managers.BadgeConfigManager;
 import com.magnocat.godmode.data.PlayerDataManager;
 import com.magnocat.godmode.listeners.BuilderListener;
@@ -12,6 +12,8 @@ import com.magnocat.godmode.listeners.LumberjackListener;
 import com.magnocat.godmode.listeners.MiningListener;
 import com.magnocat.godmode.listeners.PlayerJoinListener;
 import com.magnocat.godmode.listeners.PlayerQuitListener;
+import com.magnocat.godmode.listeners.MenuListener;
+import com.magnocat.godmode.menus.BadgeMenu;
 import com.magnocat.godmode.storage.BlockPersistenceManager;
 import com.magnocat.godmode.updater.UpdateChecker;
 import net.milkbowl.vault.economy.Economy;
@@ -29,6 +31,7 @@ public final class GodModePlugin extends JavaPlugin {
     private BadgeManager badgeManager;
     private BadgeConfigManager badgeConfigManager;
     private BlockPersistenceManager blockPersistenceManager;
+    private BadgeMenu badgeMenu;
     private Economy econ = null;
 
     @Override
@@ -82,7 +85,8 @@ public final class GodModePlugin extends JavaPlugin {
         this.playerDataManager = new PlayerDataManager(this);
         this.badgeManager = new BadgeManager(this);
         this.blockPersistenceManager = new BlockPersistenceManager(this);
-        getLogger().info("Gerenciadores de configuração, dados, insígnias e persistência de blocos inicializados.");
+        this.badgeMenu = new BadgeMenu(this);
+        getLogger().info("Gerenciadores e menus inicializados.");
     }
 
     private void registerCommands() {
@@ -91,7 +95,7 @@ public final class GodModePlugin extends JavaPlugin {
         getCommand("scout").setExecutor(scoutCommandHandler);
         getCommand("scout").setTabCompleter(scoutCommandHandler);
 
-        getCommand("daily").setExecutor(new DailyRewardCommandExecutor(this));
+        getCommand("daily").setExecutor(new DailyCommand(this));
         getLogger().info("Comandos registrados.");
     }
 
@@ -103,7 +107,8 @@ public final class GodModePlugin extends JavaPlugin {
                 new CookingListener(this),
                 new BuilderListener(this),
                 new FishingListener(this),
-                new PlayerQuitListener(this) // Essencial para salvar os dados do jogador ao sair.
+                new PlayerQuitListener(this), // Essencial para salvar os dados do jogador ao sair.
+                new MenuListener()
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
@@ -126,6 +131,10 @@ public final class GodModePlugin extends JavaPlugin {
         return blockPersistenceManager;
     }
 
+    public BadgeMenu getBadgeMenu() {
+        return badgeMenu;
+    }
+
     public Economy getEconomy() {
         return econ;
     }
@@ -134,11 +143,11 @@ public final class GodModePlugin extends JavaPlugin {
      * Recarrega a configuração do plugin a partir do arquivo config.yml.
      */
     public void reloadPluginConfig() {
-        this.reloadConfig();
-        this.badgeConfigManager.reloadBadgeConfig();
+        reloadConfig();
+        badgeConfigManager.reloadBadgeConfig();
 
         // Notifica o BadgeManager para recarregar sua lista interna de insígnias
-        this.badgeManager.loadBadges();
+        badgeManager.loadBadgesFromConfig();
 
         getLogger().info("As configurações (config.yml e badges.yml) do GodMode-MCTrilhas foram recarregadas.");
     }

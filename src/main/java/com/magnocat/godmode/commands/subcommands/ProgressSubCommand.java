@@ -2,6 +2,8 @@ package com.magnocat.godmode.commands.subcommands;
 
 import com.magnocat.godmode.GodModePlugin;
 import com.magnocat.godmode.utils.ProgressBarUtil;
+import com.magnocat.godmode.badges.Badge;
+import com.magnocat.godmode.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -10,7 +12,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation") // Suppress warnings for deprecated ChatColor
 public class ProgressSubCommand extends SubCommand {
@@ -68,31 +70,36 @@ public class ProgressSubCommand extends SubCommand {
         sender.sendMessage(ChatColor.YELLOW + "Calculando progresso para " + targetName + "...");
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            List<String> earnedBadges = plugin.getPlayerDataManager().getEarnedBadges(target.getUniqueId());
-            var badgeConfig = plugin.getBadgeConfigManager().getBadgeConfig();
-
-            if (badgeConfig == null || badgeConfig.getKeys(false).isEmpty()) {
-                Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(ChatColor.RED + "Nenhuma insígnia configurada."));
-                return;
+            // Carrega os dados do jogador se não estiverem no cache.
+            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(target.getUniqueId());
+            if (playerData == null) {
+                plugin.getPlayerDataManager().loadPlayerData(target.getUniqueId());
+                playerData = plugin.getPlayerDataManager().getPlayerData(target.getUniqueId());
+                if (playerData == null) {
+                    Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(ChatColor.RED + "Não foi possível carregar os dados de progresso para " + targetName + "."));
+                    return;
+                }
             }
-            Set<String> allBadgeIds = badgeConfig.getKeys(false);
+
+            final PlayerData finalPlayerData = playerData;
+            List<Badge> unearnedBadges = plugin.getBadgeManager().getAllBadges().stream()
+                    .filter(badge -> !finalPlayerData.hasBadge(badge.getId()))
+                    .collect(Collectors.toList());
 
             List<String> progressMessages = new ArrayList<>();
-            for (String badgeId : allBadgeIds) {
-                if (earnedBadges.contains(badgeId)) continue;
+            for (Badge badge : unearnedBadges) {
+                double currentProgress = finalPlayerData.getProgress(badge.getType());
+                double requiredProgress = badge.getRequirement();
 
-                String badgeName = badgeConfig.getString(badgeId + ".name", badgeId);
-                long currentProgress = plugin.getPlayerDataManager().getProgress(target.getUniqueId(), badgeId);
-                long requiredProgress = badgeConfig.getLong(badgeId + ".required-progress", 1);
+                if (requiredProgress <= 0) continue; // Evita divisão por zero e barras de progresso sem sentido.
 
-                // Cast para int é necessário para a utilidade da barra de progresso, que espera inteiros.
                 String progressBar = ProgressBarUtil.buildProgressBar((int) currentProgress, (int) requiredProgress);
-                String message = ChatColor.YELLOW + badgeName + ": " + ChatColor.AQUA + currentProgress + "/" + requiredProgress + " " + progressBar;
+                String message = ChatColor.YELLOW + badge.getName() + ": " + ChatColor.AQUA + (long) currentProgress + "/" + (long) requiredProgress + " " + progressBar;
                 progressMessages.add(message);
             }
 
             Bukkit.getScheduler().runTask(plugin, () -> {
-                if (progressMessages.isEmpty()) {
+                if (unearnedBadges.isEmpty() && !plugin.getBadgeManager().getAllBadges().isEmpty()) {
                     sender.sendMessage(ChatColor.GREEN + "Parabéns! " + targetName + " já conquistou todas as insígnias disponíveis!");
                 } else {
                     sender.sendMessage(ChatColor.GOLD + "--- Progresso de " + targetName + " ---");

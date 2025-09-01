@@ -1,4 +1,4 @@
-name: GodMode-MCtrilhas
+name: GodModeMCTrilhas
 version: '${project.version}'
 main: com.magnocat.godmode.GodModePlugin
 api-version: '1.20'
@@ -9,14 +9,15 @@ softdepend: [Vault, WorldGuard]
 
 commands:
   scout:
-    description: Comando principal para gerenciar insígnias de escoteiro.
+    description: Comando principal do plugin de escoteiros.
     usage: "/<command> [subcommand]"
-    aliases: [insignia, escoteiro]
+    aliases: [trilhas, insignia, escoteiro]
   daily:
-    description: Coleta a recompensa diária.
-    usage: /daily
+    description: Coleta a recompensa diária de Totens.
+    usage: /<command>
     permission: godmode.scout.daily
     aliases: [recompensa, reward]
+    permission-message: "§cVocê não tem permissão para usar este comando."
 
 permissions:
   godmode.scout.*:

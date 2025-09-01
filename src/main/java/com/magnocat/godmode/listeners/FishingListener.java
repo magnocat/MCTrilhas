@@ -1,6 +1,7 @@
 package com.magnocat.godmode.listeners;
 
 import com.magnocat.godmode.GodModePlugin;
+import com.magnocat.godmode.badges.BadgeType;
 import org.bukkit.GameMode;
 import org.bukkit.Tag;
 import org.bukkit.entity.Item;
@@ -13,7 +14,6 @@ import org.bukkit.event.player.PlayerFishEvent;
 public class FishingListener implements Listener {
 
     private final GodModePlugin plugin;
-    private static final String FISHING_BADGE_ID = "fishing";
 
     public FishingListener(GodModePlugin plugin) {
         this.plugin = plugin;
@@ -33,7 +33,7 @@ public class FishingListener implements Listener {
 
             // Check if the caught item is specifically a fish, matching the badge's intent.
             if (Tag.ITEMS_FISHES.isTagged(caughtEntity.getItemStack().getType())) {
-                plugin.getBadgeManager().incrementProgress(player, FISHING_BADGE_ID, 1);
+                plugin.getPlayerDataManager().addProgress(player, BadgeType.FISHING, 1);
             }
         }
     }

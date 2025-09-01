@@ -31,23 +31,27 @@ public final class ItemFactory {
     private ItemFactory() {}
 
     /**
-     * Creates an ItemStack from a configuration section.
+     * Creates an ItemStack from a configuration section with context for logging.
      *
      * @param itemSection The ConfigurationSection containing the item data.
-     * @param badgeId The ID of the badge for logging purposes.
+     * @param contextId The ID of the badge or other context for logging purposes.
      * @param logger The logger instance to report warnings.
      * @return The created ItemStack, or null if the material is invalid.
      */
-    public static ItemStack createRewardItem(ConfigurationSection itemSection, String badgeId, Logger logger) {
+    public static ItemStack createFromConfig(ConfigurationSection itemSection, String contextId, Logger logger) {
+        if (itemSection == null) {
+            return null;
+        }
+
         String materialName = itemSection.getString(KEY_MATERIAL);
         if (materialName == null) {
-            logger.warning("Reward item for badge '" + badgeId + "' is missing a 'material' key.");
+            logger.warning("Item configuration for context '" + contextId + "' is missing a 'material' key.");
             return null;
         }
 
         Material material = Material.matchMaterial(materialName.toUpperCase());
         if (material == null) {
-            logger.warning("Invalid material '" + materialName + "' for badge '" + badgeId + "'.");
+            logger.warning("Invalid material '" + materialName + "' for context '" + contextId + "'.");
             return null;
         }
 
@@ -81,5 +85,17 @@ public final class ItemFactory {
             rewardItem.setItemMeta(meta);
         }
         return rewardItem;
+    }
+
+    /**
+     * Creates an ItemStack from a generic configuration section.
+     * This is a convenience overload that uses a default context and the global logger.
+     *
+     * @param itemSection The ConfigurationSection containing the item data.
+     * @return The created ItemStack, or null if the configuration is invalid.
+     */
+    public static ItemStack createFromConfig(ConfigurationSection itemSection) {
+        // Calls the main creator with a generic context and the global Minecraft logger.
+        return createFromConfig(itemSection, "generic-item", Logger.getLogger("Minecraft"));
     }
 }

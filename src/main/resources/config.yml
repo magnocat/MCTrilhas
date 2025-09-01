@@ -6,19 +6,23 @@
 progress-message-format: "&e{badgeName}: &a{progress}&8/&7{required} &b({percentage}%)"
 
 # Formato da mensagem de conquista de insígnia.
-# Placeholders disponíveis: {badgeName}
-badge-award-format:
-  - "&6---------------------------------"
-  - "&aInsígnia Conquistada: &l{badgeName}"
-  - "&6---------------------------------"
+# Placeholders: {badgeName}
+award-message:
+  - "&6&l[INSÍGNIA DESBLOQUEADA]"
+  - "&eParabéns! Você conquistou a insígnia {badgeName}!"
 
 # Seção onde todas as insígnias são definidas.
 badges:
   lumberjack:
     name: "Insígnia de Lenhador"
-    description: "Corte 1000 árvores."
+    description: "Corte 10000 árvores."
     reward-totems: 500
     required-progress: 10000
+    # Lista de materiais ou tags que contam para o progresso.
+    # Use "TAG:<nome_da_tag>" para tags (ex: "TAG:LOGS")
+    # Use o nome do material para blocos específicos (ex: "OAK_PLANKS")
+    tracked-items:
+      - "TAG:LOGS"
     reward-item-data:
       material: "DIAMOND_AXE"
       amount: 1
@@ -31,9 +35,20 @@ badges:
 
   miner:
     name: "Insígnia de Minerador"
-    description: "Minere 5000 blocos de pedra ou minérios."
+    description: "Minere 50000 blocos de pedra ou minérios."
     reward-totems: 1000
     required-progress: 50000
+    # Lista de materiais ou tags que contam para o progresso.
+    tracked-items:
+      - "TAG:STONE_ORE_REPLACEABLES" # Cobre Stone, Deepslate, Andesite, etc.
+      - "TAG:COAL_ORES"
+      - "TAG:IRON_ORES"
+      - "TAG:COPPER_ORES"
+      - "TAG:GOLD_ORES"
+      - "TAG:REDSTONE_ORES"
+      - "TAG:LAPIS_ORES"
+      - "TAG:DIAMOND_ORES"
+      - "TAG:EMERALD_ORES"
     reward-item-data:
       material: "DIAMOND_PICKAXE"
       amount: 1
@@ -46,7 +61,7 @@ badges:
 
   cook:
     name: "Insígnia de Cozinheiro"
-    description: "Cozinhe 500 itens."
+    description: "Cozinhe 5000 itens."
     reward-totems: 500
     required-progress: 5000
     reward-item-data:
@@ -59,7 +74,7 @@ badges:
 
   builder:
     name: "Insígnia de Construtor"
-    description: "Coloque 10000 blocos."
+    description: "Coloque 80000 blocos."
     reward-totems: 1500
     required-progress: 80000
     reward-item-data:
@@ -89,6 +104,7 @@ badges:
 # Recompensa diária para os jogadores
 daily-reward:
   enabled: true
+  cooldown-hours: 24
   reward-totems: 25
   reward-item-data:
     material: "GOLDEN_APPLE"
@@ -98,6 +114,6 @@ daily-reward:
       - "&7Um presente por sua dedicação!"
     enchantments: [] # Sem encantamentos para a maçã
   messages:
-    success: "&aVocê coletou sua recompensa diária! Volte em 24 horas."
-    cooldown: "&cVocê já coletou sua recompensa. Tempo restante: &e{time}"
+    claim-success: "&aVocê coletou sua recompensa diária! Volte amanhã para mais."
+    cooldown: "&cVocê já coletou sua recompensa. Tente novamente em &e{time}&c."
     login-notification: "&a[!] Sua recompensa diária está disponível! Use &e/daily&a para coletar."

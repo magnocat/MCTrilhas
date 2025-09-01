@@ -1,6 +1,7 @@
 package com.magnocat.godmode.listeners;
 
 import com.magnocat.godmode.GodModePlugin;
+import com.magnocat.godmode.badges.BadgeType;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -17,7 +18,6 @@ import java.util.Set;
 public class MiningListener implements Listener {
 
     private final GodModePlugin plugin;
-    private static final String MINER_BADGE_ID = "miner";
 
     // Using a Set is highly efficient for checking if a material is in the list.
     // This list includes stone, deepslate, and common ores to match the badge description.
@@ -63,7 +63,7 @@ public class MiningListener implements Listener {
         // Check if the broken block is one of the designated mining materials.
         if (MINING_MATERIALS.contains(event.getBlock().getType())) {
             // All logic for checking progress, milestones, and awarding is now in the manager.
-            plugin.getBadgeManager().incrementProgress(player, MINER_BADGE_ID, 1);
+            plugin.getPlayerDataManager().addProgress(player, BadgeType.MINING, 1);
         }
     }
 }
