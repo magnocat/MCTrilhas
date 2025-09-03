@@ -4,6 +4,7 @@ import com.magnocat.mctrilhas.badges.BadgeType;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -14,13 +15,15 @@ public class PlayerData {
     private final UUID playerUUID;
     private final List<String> earnedBadges;
     private final Map<BadgeType, Double> progressMap;
+    private final Set<String> visitedBiomes; // Armazena os biomas únicos visitados.
     private boolean progressMessagesDisabled;
     private long lastDailyRewardTime;
 
-    public PlayerData(UUID playerUUID, List<String> earnedBadges, Map<BadgeType, Double> progressMap, boolean progressMessagesDisabled, long lastDailyRewardTime) {
+    public PlayerData(UUID playerUUID, List<String> earnedBadges, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime) {
         this.playerUUID = playerUUID;
         this.earnedBadges = earnedBadges;
         this.progressMap = progressMap;
+        this.visitedBiomes = visitedBiomes;
         this.progressMessagesDisabled = progressMessagesDisabled;
         this.lastDailyRewardTime = lastDailyRewardTime;
     }
@@ -47,6 +50,10 @@ public class PlayerData {
 
     public Map<BadgeType, Double> getProgressMap() {
         return progressMap;
+    }
+
+    public Set<String> getVisitedBiomes() {
+        return visitedBiomes;
     }
 
     public boolean areProgressMessagesDisabled() {

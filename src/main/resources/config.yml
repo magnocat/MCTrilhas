@@ -13,6 +13,10 @@ award-message:
 
 # Seção onde todas as insígnias são definidas.
 badges:
+  # Ativa a interface gráfica (GUI) para o comando /scout badges.
+  # Se for 'false' ou não existir, as insígnias serão mostradas no chat.
+  use-gui: true
+
   lumberjack:
     name: "Insígnia de Lenhador"
     description: "Corte 10000 árvores."
@@ -100,6 +104,57 @@ badges:
       enchantments:
         - "lure:2"
         - "unbreaking:1"
+
+  farming:
+    name: "Insígnia de Agricultor"
+    description: "Colha 5000 itens de plantações."
+    required-progress: 5000
+    reward-totems: 500
+    # Itens que contam para o progresso. O listener irá verificar se o bloco quebrado é um desses.
+    # O listener também deve verificar se a cultura está totalmente crescida.
+    tracked-items:
+      - "WHEAT"
+      - "CARROTS"
+      - "POTATOES"
+      - "BEETROOTS"
+      - "NETHER_WART"
+      - "MELON"
+      - "PUMPKIN"
+    reward-item-data:
+      material: "DIAMOND_HOE"
+      amount: 1
+      name: "&aEnxada do Agricultor"
+      lore:
+        - "&7Para colheitas abundantes."
+      enchantments:
+        - "fortune:2"
+        - "unbreaking:1"
+
+  crafting:
+    name: "Insígnia de Artesão"
+    description: "Crie 1000 itens na bancada de trabalho."
+    required-progress: 1000
+    reward-totems: 750
+    reward-item-data:
+      material: "CRAFTING_TABLE"
+      amount: 1
+      name: "&6Bancada de Trabalho do Mestre"
+      lore:
+        - "&7Criações mais rápidas e eficientes."
+
+  explorer:
+    name: "Insígnia de Explorador"
+    description: "Visite 25 biomas diferentes."
+    required-progress: 25
+    reward-totems: 1000
+    reward-item-data:
+      material: "COMPASS"
+      amount: 1
+      name: "&aBússola do Explorador"
+      lore:
+        - "&7Nunca se perca em suas aventuras."
+      enchantments:
+        - "unbreaking:3"
 
 # Recompensa diária para os jogadores
 daily-reward:

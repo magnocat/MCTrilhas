@@ -9,7 +9,10 @@ public enum BadgeType {
     MINING("Mineração"),
     COOKING("Culinária"),
     BUILDER("Construção"),
-    FISHING("Pesca");
+    FISHING("Pesca"),
+    FARMING("Agricultura"),
+    CRAFTING("Artesão"),
+    EXPLORER("Explorador");
 
     private final String name;
 

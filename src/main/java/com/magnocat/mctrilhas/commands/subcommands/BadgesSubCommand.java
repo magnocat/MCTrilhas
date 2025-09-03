@@ -45,18 +45,29 @@ public class BadgesSubCommand extends SubCommand {
         }
 
         Player player = (Player) sender;
-        List<String> earnedBadges = plugin.getPlayerDataManager().getEarnedBadges(player.getUniqueId());
 
-        if (earnedBadges.isEmpty()) {
-            player.sendMessage(ChatColor.YELLOW + "Você ainda não conquistou nenhuma insígnia. Continue se esforçando!");
-            return;
-        }
+        // Verifica na config.yml se o modo GUI deve ser usado.
+        // O valor 'false' é o padrão para manter o comportamento antigo caso a opção não exista.
+        boolean useGUI = plugin.getConfig().getBoolean("badges.use-gui", false);
 
-        player.sendMessage(ChatColor.GOLD + "--- Suas Insígnias Conquistadas ---");
-        for (String badgeId : earnedBadges) {
-            String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString(badgeId + ".name", badgeId);
-            String description = plugin.getBadgeConfigManager().getBadgeConfig().getString(badgeId + ".description", "Sem descrição.");
-            player.sendMessage(ChatColor.AQUA + "- " + badgeName + ": " + ChatColor.GRAY + description);
+        if (useGUI) {
+            // Abre a GUI de insígnias para o próprio jogador.
+            plugin.getBadgeMenu().open(player, player.getUniqueId(), player.getName());
+        } else {
+            // Comportamento antigo: mostrar insígnias no chat.
+            List<String> earnedBadges = plugin.getPlayerDataManager().getEarnedBadges(player.getUniqueId());
+
+            if (earnedBadges.isEmpty()) {
+                player.sendMessage(ChatColor.YELLOW + "Você ainda não conquistou nenhuma insígnia. Continue se esforçando!");
+                return;
+            }
+
+            player.sendMessage(ChatColor.GOLD + "--- Suas Insígnias Conquistadas ---");
+            for (String badgeId : earnedBadges) {
+                String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString(badgeId + ".name", badgeId);
+                String description = plugin.getBadgeConfigManager().getBadgeConfig().getString(badgeId + ".description", "Sem descrição.");
+                player.sendMessage(ChatColor.AQUA + "- " + badgeName + ": " + ChatColor.GRAY + description);
+            }
         }
     }
 }

@@ -79,6 +79,12 @@ public class LumberjackListener implements Listener {
             return;
         }
 
+        // Check if the block was placed by a player. If so, do not count progress.
+        // This is the primary anti-farming mechanism.
+        if (plugin.getBlockPersistenceManager().isPlayerPlaced(block)) {
+            return;
+        }
+
         boolean shouldIncrement = false;
         if (trackedMaterials.contains(block.getType())) {
             shouldIncrement = true;

@@ -17,6 +17,12 @@ public class MenuListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
+        // Garante que quem clicou foi um jogador.
+        if (!(event.getWhoClicked() instanceof Player)) {
+            return;
+        }
+        Player player = (Player) event.getWhoClicked();
+
         // Verifica se o inventário clicado é um dos nossos menus de insígnias.
         if (!event.getView().getTitle().startsWith(BadgeMenu.MENU_TITLE_PREFIX)) {
             return;
@@ -36,10 +42,7 @@ public class MenuListener implements Listener {
         // Para ter certeza, verifica se o nome do item é "Fechar".
         if (clickedItem.hasItemMeta() && clickedItem.getItemMeta().getDisplayName().equals(ChatColor.RED + "" + ChatColor.BOLD + "Fechar")) {
             // Se for, fecha o inventário do jogador.
-            if (event.getWhoClicked() instanceof Player) {
-                Player player = (Player) event.getWhoClicked();
-                player.closeInventory();
-            }
+            player.closeInventory();
         }
     }
 }

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -39,7 +40,8 @@ public class PlayerDataManager {
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
         if (!playerFile.exists()) {
             // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez
-            playerDataCache.put(uuid, new PlayerData(uuid, new ArrayList<>(), new EnumMap<>(BadgeType.class), false, 0));
+            // NOTA: O construtor de PlayerData precisa ser atualizado para aceitar um Set<String> para os biomas.
+            playerDataCache.put(uuid, new PlayerData(uuid, new ArrayList<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0));
             return;
         }
 
@@ -47,6 +49,8 @@ public class PlayerDataManager {
         List<String> earnedBadges = config.getStringList("earned-badges");
         boolean progressMessagesDisabled = config.getBoolean("settings.progress-messages-disabled", false);
         long lastDailyReward = config.getLong("last-daily-reward", 0);
+        // Carrega a lista de biomas visitados
+        List<String> visitedBiomesList = config.getStringList("visited-biomes");
 
         Map<BadgeType, Double> progressMap = new EnumMap<>(BadgeType.class);
         if (config.isConfigurationSection("progress")) {
@@ -61,7 +65,8 @@ public class PlayerDataManager {
             }
         }
 
-        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, progressMessagesDisabled, lastDailyReward);
+        // NOTA: O construtor de PlayerData precisa ser atualizado para aceitar um Set<String> para os biomas.
+        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward);
         playerDataCache.put(uuid, playerData);
     }
 
@@ -88,6 +93,9 @@ public class PlayerDataManager {
         config.set("earned-badges", playerData.getEarnedBadges());
         config.set("settings.progress-messages-disabled", playerData.areProgressMessagesDisabled());
         config.set("last-daily-reward", playerData.getLastDailyRewardTime());
+        // Salva a lista de biomas visitados
+        // NOTA: PlayerData precisa ter um método getVisitedBiomes() que retorna um Set<String>.
+        config.set("visited-biomes", new ArrayList<>(playerData.getVisitedBiomes()));
 
         // Salva o mapa de progresso
         playerData.getProgressMap().forEach((type, progress) -> {
@@ -113,6 +121,25 @@ public class PlayerDataManager {
         if (data != null) {
             data.addProgress(type, amount);
         }
+    }
+
+    /**
+     * Adiciona um bioma à lista de visitados de um jogador e incrementa o progresso se for um novo bioma.
+     * @param player O jogador.
+     * @param biomeName O nome do bioma (ex: "PLAINS").
+     * @return true se o bioma era novo e foi adicionado, false caso contrário.
+     */
+    public boolean addVisitedBiome(Player player, String biomeName) {
+        PlayerData data = getPlayerData(player.getUniqueId());
+        if (data == null) return false;
+
+        // NOTA: PlayerData precisa ter um método getVisitedBiomes() que retorna um Set<String>.
+        boolean isNewBiome = data.getVisitedBiomes().add(biomeName);
+
+        if (isNewBiome) {
+            addProgress(player, BadgeType.EXPLORER, 1);
+        }
+        return isNewBiome;
     }
 
     public void addBadge(Player player, String badgeId) {

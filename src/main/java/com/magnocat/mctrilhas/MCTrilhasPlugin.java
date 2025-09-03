@@ -7,7 +7,10 @@ import com.magnocat.mctrilhas.managers.BadgeConfigManager;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
 import com.magnocat.mctrilhas.listeners.BuilderListener;
 import com.magnocat.mctrilhas.listeners.CookingListener;
+import com.magnocat.mctrilhas.listeners.CraftingListener;
+import com.magnocat.mctrilhas.listeners.ExplorerListener;
 import com.magnocat.mctrilhas.listeners.FishingListener;
+import com.magnocat.mctrilhas.listeners.FarmingListener;
 import com.magnocat.mctrilhas.listeners.LumberjackListener;
 import com.magnocat.mctrilhas.listeners.MiningListener;
 import com.magnocat.mctrilhas.listeners.PlayerJoinListener;
@@ -106,6 +109,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new CookingListener(this),
                 new BuilderListener(this),
                 new FishingListener(this),
+                new FarmingListener(this),
+                new CraftingListener(this),
+                new ExplorerListener(this),
                 new PlayerQuitListener(this), // Essencial para salvar os dados do jogador ao sair.
                 new MenuListener()
         );
