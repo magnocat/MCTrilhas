@@ -75,5 +75,5 @@ jobs:
         if: "!startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v4
         with:
-          name: GodMode-MCtrilhas-dev
-          path: target/GodMode-MCtrilhas.jar
+          name: MCtrilhas-dev
+          path: target/MCtrilhas.jar

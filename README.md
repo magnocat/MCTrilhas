@@ -1,10 +1,10 @@
 # ⚜️ GodMode-MCTrilhas ⚜️
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/magnocat/GodMode-MCTrilhas/build.yml?branch=main&label=Build&style=for-the-badge)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/magnocat/GodMode-MCTrilhas?style=for-the-badge&label=Versão)
-![Linguagem Principal](https://img.shields.io/github/languages/top/magnocat/GodMode-MCTrilhas?style=for-the-badge&label=Linguagem)
+![Build Status](https://img.shields.io/github/actions/workflow/status/magnocat/MCTrilhas/build.yml?branch=main&label=Build&style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/magnocat/MCTrilhas?style=for-the-badge&label=Versão)
+![Linguagem Principal](https://img.shields.io/github/languages/top/magnocat/MCTrilhas?style=for-the-badge&label=Linguagem)
 
-**GodMode-MCTrilhas** é um plugin para o servidor **MC Trilhas** com temática escoteira, que implementa um sistema de insígnias para recompensar jogadores por suas conquistas no Minecraft.
+**MCTrilhas** é um plugin para o servidor **MC Trilhas** com temática escoteira, que implementa um sistema de insígnias para recompensar jogadores por suas conquistas no Minecraft.
 
 ---
 
@@ -44,7 +44,7 @@
 | **WorldGuard**| Obrigatório | Para recompensas de acesso a áreas.  |
 
 ## ⚙️ Configuração
-Todas as insígnias e suas recompensas são definidas no arquivo `config.yml`, gerado na pasta `plugins/GodMode-MCTrilhas/`. Para mais detalhes, consulte a Wiki de Configuração.
+Todas as insígnias e suas recompensas são definidas no arquivo `config.yml`, gerado na pasta `plugins/MCTrilhas/`. Para mais detalhes, consulte a Wiki de Configuração.
 
 ## 🧑‍💻 Desenvolvimento
 Este projeto é construído com **Maven** e **Java 17 (Temurin)**.

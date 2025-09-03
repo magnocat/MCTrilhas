@@ -1,10 +1,10 @@
-name: GodModeMCTrilhas
+name: MCTrilhas
 version: '${project.version}'
-main: com.magnocat.godmode.GodModePlugin
+main: com.magnocat.mctrilhas.MCTrilhasPlugin
 api-version: '1.20'
 authors: [MagnoCat]
-description: Plugin para o servidor MC Trilhas com temática escoteira.
-website: https://github.com/magnocat/GodMode-MCTrilhas
+description: Plugin de trilhas e insígnias com temática escoteira para o servidor MC Trilhas.
+website: https://github.com/magnocat/MCTrilhas
 softdepend: [Vault, WorldGuard]
 
 commands:
@@ -15,27 +15,27 @@ commands:
   daily:
     description: Coleta a recompensa diária de Totens.
     usage: /<command>
-    permission: godmode.scout.daily
+    permission: mctrilhas.daily
     aliases: [recompensa, reward]
     permission-message: "§cVocê não tem permissão para usar este comando."
 
 permissions:
-  godmode.scout.*:
-    description: Dá acesso a todos os comandos do GodMode-MCtrilhas.
+  mctrilhas.*:
+    description: Dá acesso a todos os comandos do MCTrilhas.
     children:
-      godmode.scout.use: true
-      godmode.scout.daily: true
-      godmode.scout.admin: true
-      godmode.scout.progress.other: true
-  godmode.scout.use:
+      mctrilhas.use: true
+      mctrilhas.daily: true
+      mctrilhas.admin: true
+      mctrilhas.progress.other: true
+  mctrilhas.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
-  godmode.scout.daily:
+  mctrilhas.daily:
     description: Permite ao jogador coletar a recompensa diária.
     default: true
-  godmode.scout.admin:
+  mctrilhas.admin:
     description: Permite acesso aos comandos administrativos, como remover insígnias.
     default: op
-  godmode.scout.progress.other:
+  mctrilhas.progress.other:
     description: Permite ver o progresso de outros jogadores.
     default: op
