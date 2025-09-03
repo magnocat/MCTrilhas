@@ -33,7 +33,8 @@ public class PlayerData {
     }
 
     public boolean hasBadge(String badgeId) {
-        return earnedBadges.contains(badgeId.toLowerCase());
+        // Faz a verificação ignorando maiúsculas/minúsculas para ser mais robusto.
+        return earnedBadges.stream().anyMatch(badgeId::equalsIgnoreCase);
     }
 
     public double getProgress(BadgeType type) {

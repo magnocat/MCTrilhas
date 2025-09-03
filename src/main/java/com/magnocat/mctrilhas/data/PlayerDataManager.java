@@ -2,9 +2,15 @@ package com.magnocat.mctrilhas.data;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.badges.BadgeType;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -40,7 +47,6 @@ public class PlayerDataManager {
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
         if (!playerFile.exists()) {
             // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez
-            // NOTA: O construtor de PlayerData precisa ser atualizado para aceitar um Set<String> para os biomas.
             playerDataCache.put(uuid, new PlayerData(uuid, new ArrayList<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0));
             return;
         }
@@ -65,7 +71,6 @@ public class PlayerDataManager {
             }
         }
 
-        // NOTA: O construtor de PlayerData precisa ser atualizado para aceitar um Set<String> para os biomas.
         PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward);
         playerDataCache.put(uuid, playerData);
     }
@@ -94,7 +99,6 @@ public class PlayerDataManager {
         config.set("settings.progress-messages-disabled", playerData.areProgressMessagesDisabled());
         config.set("last-daily-reward", playerData.getLastDailyRewardTime());
         // Salva a lista de biomas visitados
-        // NOTA: PlayerData precisa ter um método getVisitedBiomes() que retorna um Set<String>.
         config.set("visited-biomes", new ArrayList<>(playerData.getVisitedBiomes()));
 
         // Salva o mapa de progresso
@@ -120,6 +124,69 @@ public class PlayerDataManager {
         PlayerData data = getPlayerData(player.getUniqueId());
         if (data != null) {
             data.addProgress(type, amount);
+
+            // --- LÓGICA DE CONCLUSÃO DE INSÍGNIA ---
+            // Verifica se o jogador atingiu o progresso necessário para uma nova insígnia.
+
+            String badgeId = type.name();
+
+            // Se o jogador já tem a insígnia, não faz mais nada.
+            if (data.hasBadge(badgeId)) {
+                return;
+            }
+
+            // Usa o método que ignora maiúsculas/minúsculas para encontrar a chave no config.yml
+            String configKey = plugin.getBadgeConfigManager().getBadgeConfigKey(badgeId);
+            if (configKey == null) {
+                return; // A insígnia não está configurada.
+            }
+
+            String requiredProgressPath = "badges." + configKey + ".required-progress";
+            if (!plugin.getBadgeConfigManager().getBadgeConfig().contains(requiredProgressPath)) {
+                return; // Não há progresso requerido para esta insígnia.
+            }
+
+            double requiredProgress = plugin.getBadgeConfigManager().getBadgeConfig().getDouble(requiredProgressPath);
+            double currentProgress = data.getProgress(type);
+
+            if (currentProgress >= requiredProgress) {
+                // O jogador completou a insígnia!
+                addBadge(player, configKey); // Adiciona a insígnia usando a chave do config
+
+                String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString("badges." + configKey + ".name", "uma nova insígnia");
+                player.sendMessage(ChatColor.GOLD + "Parabéns! Você conquistou a " + ChatColor.AQUA + badgeName + ChatColor.GOLD + "!");
+
+                // Lógica para dar a recompensa em item
+                String rewardItemPath = "badges." + configKey + ".reward-item-data";
+                if (plugin.getBadgeConfigManager().getBadgeConfig().isConfigurationSection(rewardItemPath)) {
+                    ConfigurationSection itemSection = plugin.getBadgeConfigManager().getBadgeConfig().getConfigurationSection(rewardItemPath);
+                    try {
+                        Material material = Material.valueOf(Objects.requireNonNull(itemSection.getString("material")).toUpperCase());
+                        int itemAmount = itemSection.getInt("amount", 1);
+                        ItemStack rewardItem = new ItemStack(material, itemAmount);
+                        ItemMeta meta = rewardItem.getItemMeta();
+
+                        if (meta != null) {
+                            if (itemSection.contains("name")) {
+                                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemSection.getString("name")));
+                            }
+                            if (itemSection.contains("lore")) {
+                                List<String> lore = new ArrayList<>();
+                                for (String line : itemSection.getStringList("lore")) {
+                                    lore.add(ChatColor.translateAlternateColorCodes('&', line));
+                                }
+                                meta.setLore(lore);
+                            }
+                            rewardItem.setItemMeta(meta);
+                        }
+                        player.getInventory().addItem(rewardItem);
+                    } catch (Exception e) {
+                        plugin.getLogger().severe("Erro ao criar item de recompensa para a insígnia '" + configKey + "': " + e.getMessage());
+                    }
+                }
+
+                // TODO: Adicionar lógica para dar "reward-totems" aqui, conectando ao seu sistema de economia.
+            }
         }
     }
 
@@ -133,7 +200,6 @@ public class PlayerDataManager {
         PlayerData data = getPlayerData(player.getUniqueId());
         if (data == null) return false;
 
-        // NOTA: PlayerData precisa ter um método getVisitedBiomes() que retorna um Set<String>.
         boolean isNewBiome = data.getVisitedBiomes().add(biomeName);
 
         if (isNewBiome) {
