@@ -11,6 +11,15 @@ award-message:
   - "&6&l[INSÍGNIA DESBLOQUEADA]"
   - "&eParabéns! Você conquistou a insígnia {badgeName}!"
 
+# Anúncio global em formato de título quando um jogador conquista uma insígnia.
+badge-announcement:
+  enabled: true
+  # Placeholders: {player}, {badgeName}
+  # O título principal que aparece na tela.
+  title: "&6&lINSÍGNIA!"
+  # O subtítulo que aparece abaixo do título principal.
+  subtitle: "&e{player} &7conquistou a insígnia &b{badgeName}&7!"
+
 # Seção onde todas as insígnias são definidas.
 badges:
   # Ativa a interface gráfica (GUI) para o comando /scout badges.
@@ -62,6 +71,11 @@ badges:
       enchantments:
         - "fortune:1"
         - "unbreaking:1"
+    reward-map:
+      # Caminho da imagem (128x128) dentro da pasta 'resources' do plugin.
+      image: "maps/mining_badge.png"
+      # Nome do item do mapa. {badgeName} será substituído pelo nome da insígnia.
+      name: "&6Troféu: {badgeName}"
 
   COOKING:
     name: "Insígnia de Cozinheiro"

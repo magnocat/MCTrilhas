@@ -2,6 +2,7 @@ package com.magnocat.mctrilhas.data;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.badges.BadgeType;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -267,6 +268,29 @@ public class PlayerDataManager {
         if (totems > 0 && plugin.getEconomy() != null) {
             plugin.getEconomy().depositPlayer(player, totems);
             player.sendMessage(ChatColor.GREEN + "Você recebeu " + ChatColor.YELLOW + totems + " Totens" + ChatColor.GREEN + " como recompensa!");
+        }
+
+        // --- LÓGICA DE RECOMPENSA EM MAPA ---
+        ItemStack mapReward = plugin.getMapRewardManager().createMapReward(player, configKey);
+        if (mapReward != null) {
+            player.getInventory().addItem(mapReward);
+            player.sendMessage(ChatColor.GREEN + "Você também recebeu um troféu especial!");
+        }
+
+        // --- LÓGICA DE ANÚNCIO GLOBAL ---
+        if (plugin.getConfig().getBoolean("badge-announcement.enabled", false)) {
+            String title = plugin.getConfig().getString("badge-announcement.title", "&6&lINSÍGNIA!");
+            String subtitle = plugin.getConfig().getString("badge-announcement.subtitle", "&e{player} &7conquistou a insígnia &b{badgeName}&7!");
+
+            // Substitui os placeholders
+            title = ChatColor.translateAlternateColorCodes('&', title.replace("{player}", player.getName()).replace("{badgeName}", badgeName));
+            subtitle = ChatColor.translateAlternateColorCodes('&', subtitle.replace("{player}", player.getName()).replace("{badgeName}", badgeName));
+
+            // Envia o título para todos os jogadores online
+            // Os números são: fadeIn (em ticks), stay (em ticks), fadeOut (em ticks)
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                onlinePlayer.sendTitle(title, subtitle, 10, 70, 20);
+            }
         }
     }
 

@@ -26,9 +26,13 @@ permissions:
       mctrilhas.scout.use: true
       mctrilhas.daily: true
       mctrilhas.admin: true
+      mctrilhas.scout.getmap: true
       mctrilhas.progress.other: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
+    default: true
+  mctrilhas.scout.getmap:
+    description: Permite ao jogador recuperar um mapa-troféu perdido.
     default: true
   mctrilhas.daily:
     description: Permite ao jogador coletar a recompensa diária.

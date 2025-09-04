@@ -3,6 +3,7 @@ package com.magnocat.mctrilhas.commands;
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.commands.subcommands.BadgesSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.AdminSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.GetMapSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.ProgressSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.ReloadSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
@@ -30,6 +31,7 @@ public class ScoutCommandExecutor implements CommandExecutor {
         registerSubCommand(new BadgesSubCommand(plugin));
         registerSubCommand(new ProgressSubCommand(plugin));
         registerSubCommand(new VersionSubCommand(plugin));
+        registerSubCommand(new GetMapSubCommand(plugin));
         // Comandos de administração
         registerSubCommand(new ReloadSubCommand(plugin));
         registerSubCommand(new AdminSubCommand(plugin));

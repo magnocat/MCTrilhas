@@ -2,6 +2,7 @@ package com.magnocat.mctrilhas;
 
 import com.magnocat.mctrilhas.badges.BadgeManager;
 import com.magnocat.mctrilhas.commands.DailyCommand;
+import com.magnocat.mctrilhas.maps.MapRewardManager;
 import com.magnocat.mctrilhas.managers.BadgeConfigManager;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
 import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;
@@ -35,6 +36,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private BadgeConfigManager badgeConfigManager;
     private BlockPersistenceManager blockPersistenceManager;
     private BadgeMenu badgeMenu;
+    private MapRewardManager mapRewardManager;
     private Economy econ = null;
 
     @Override
@@ -89,6 +91,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.badgeManager = new BadgeManager(this);
         this.blockPersistenceManager = new BlockPersistenceManager(this);
         this.badgeMenu = new BadgeMenu(this);
+        this.mapRewardManager = new MapRewardManager(this);
         getLogger().info("Gerenciadores e menus inicializados.");
     }
 
@@ -136,6 +139,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
     public BadgeMenu getBadgeMenu() {
         return badgeMenu;
+    }
+
+    public MapRewardManager getMapRewardManager() {
+        return mapRewardManager;
     }
 
     public Economy getEconomy() {
