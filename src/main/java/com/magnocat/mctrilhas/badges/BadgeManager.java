@@ -34,15 +34,27 @@ public class BadgeManager {
     public void loadBadgesFromConfig() {
         badges.clear();
         FileConfiguration config = plugin.getBadgeConfigManager().getBadgeConfig();
-        Set<String> badgeIds = config.getKeys(false);
+
+        // Garante que a seção 'badges' exista antes de tentar lê-la.
+        if (!config.isConfigurationSection("badges")) {
+            plugin.getLogger().warning("A seção 'badges' não foi encontrada no config.yml. Nenhuma insígnia será carregada.");
+            return;
+        }
+
+        // Pega as chaves apenas de dentro da seção 'badges'.
+        Set<String> badgeIds = config.getConfigurationSection("badges").getKeys(false);
 
         for (String id : badgeIds) {
+            String path = "badges." + id;
             try {
-                String name = config.getString(id + ".name");
-                String description = config.getString(id + ".description");
-                BadgeType type = BadgeType.valueOf(config.getString(id + ".type", "").toUpperCase());
-                double requirement = config.getDouble(id + ".requirement");
-                String icon = config.getString(id + ".icon", "BARRIER");
+                // O tipo da insígnia agora é o próprio ID da chave.
+                // Isso também serve para filtrar chaves que não são insígnias (como 'use-gui').
+                BadgeType type = BadgeType.valueOf(id.toUpperCase());
+
+                String name = config.getString(path + ".name");
+                String description = config.getString(path + ".description");
+                double requirement = config.getDouble(path + ".required-progress");
+                String icon = config.getString(path + ".reward-item-data.material", "BARRIER");
 
                 if (name == null || description == null) {
                     plugin.getLogger().warning("A insígnia '" + id + "' está faltando o nome ou a descrição e não será carregada.");
@@ -52,7 +64,7 @@ public class BadgeManager {
                 Badge badge = new Badge(id, name, description, type, requirement, icon);
                 badges.put(id.toLowerCase(), badge);
             } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("Tipo de insígnia inválido para '" + id + "'. Verifique o campo 'type' no badges.yml. Erro: " + e.getMessage());
+                // Ignora chaves que não são tipos de insígnia válidos (ex: 'use-gui').
             } catch (Exception e) {
                 plugin.getLogger().severe("Ocorreu um erro inesperado ao carregar a insígnia '" + id + "': " + e.getMessage());
             }

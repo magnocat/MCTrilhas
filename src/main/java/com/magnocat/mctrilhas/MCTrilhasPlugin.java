@@ -2,9 +2,9 @@ package com.magnocat.mctrilhas;
 
 import com.magnocat.mctrilhas.badges.BadgeManager;
 import com.magnocat.mctrilhas.commands.DailyCommand;
-import com.magnocat.mctrilhas.commands.ScoutCommand;
 import com.magnocat.mctrilhas.managers.BadgeConfigManager;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
+import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;
 import com.magnocat.mctrilhas.listeners.BuilderListener;
 import com.magnocat.mctrilhas.listeners.CookingListener;
 import com.magnocat.mctrilhas.listeners.CraftingListener;
@@ -93,10 +93,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     }
 
     private void registerCommands() {
-        // ScoutCommand agora implementa CommandExecutor e TabCompleter
-        ScoutCommand scoutCommandHandler = new ScoutCommand(this);
-        getCommand("scout").setExecutor(scoutCommandHandler);
-        getCommand("scout").setTabCompleter(scoutCommandHandler);
+        // O ScoutCommandExecutor gerencia todos os subcomandos do /scout
+        getCommand("scout").setExecutor(new ScoutCommandExecutor(this));
         getCommand("daily").setExecutor(new DailyCommand(this));
         getLogger().info("Comandos registrados.");
     }
@@ -149,11 +147,17 @@ public final class MCTrilhasPlugin extends JavaPlugin {
      */
     public void reloadPluginConfig() {
         reloadConfig();
+        // Tenta reestabelecer a conexão com a economia, caso tenha sido adicionada após o boot.
+        setupEconomy();
+
         badgeConfigManager.reloadBadgeConfig();
 
         // Notifica o BadgeManager para recarregar sua lista interna de insígnias
         badgeManager.loadBadgesFromConfig();
 
-        getLogger().info("As configurações (config.yml e badges.yml) do MCTrilhas foram recarregadas.");
+        // Recria e registra novamente o DailyCommand para garantir que ele pegue a instância de economia atualizada.
+        getCommand("daily").setExecutor(new DailyCommand(this));
+
+        getLogger().info("As configurações (config.yml) do MCTrilhas foram recarregadas.");
     }
 }

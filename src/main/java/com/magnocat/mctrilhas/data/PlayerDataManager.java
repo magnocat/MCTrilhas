@@ -151,41 +151,8 @@ public class PlayerDataManager {
 
             if (currentProgress >= requiredProgress) {
                 // O jogador completou a insígnia!
-                addBadge(player, configKey); // Adiciona a insígnia usando a chave do config
-
-                String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString("badges." + configKey + ".name", "uma nova insígnia");
-                player.sendMessage(ChatColor.GOLD + "Parabéns! Você conquistou a " + ChatColor.AQUA + badgeName + ChatColor.GOLD + "!");
-
-                // Lógica para dar a recompensa em item
-                String rewardItemPath = "badges." + configKey + ".reward-item-data";
-                if (plugin.getBadgeConfigManager().getBadgeConfig().isConfigurationSection(rewardItemPath)) {
-                    ConfigurationSection itemSection = plugin.getBadgeConfigManager().getBadgeConfig().getConfigurationSection(rewardItemPath);
-                    try {
-                        Material material = Material.valueOf(Objects.requireNonNull(itemSection.getString("material")).toUpperCase());
-                        int itemAmount = itemSection.getInt("amount", 1);
-                        ItemStack rewardItem = new ItemStack(material, itemAmount);
-                        ItemMeta meta = rewardItem.getItemMeta();
-
-                        if (meta != null) {
-                            if (itemSection.contains("name")) {
-                                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemSection.getString("name")));
-                            }
-                            if (itemSection.contains("lore")) {
-                                List<String> lore = new ArrayList<>();
-                                for (String line : itemSection.getStringList("lore")) {
-                                    lore.add(ChatColor.translateAlternateColorCodes('&', line));
-                                }
-                                meta.setLore(lore);
-                            }
-                            rewardItem.setItemMeta(meta);
-                        }
-                        player.getInventory().addItem(rewardItem);
-                    } catch (Exception e) {
-                        plugin.getLogger().severe("Erro ao criar item de recompensa para a insígnia '" + configKey + "': " + e.getMessage());
-                    }
-                }
-
-                // TODO: Adicionar lógica para dar "reward-totems" aqui, conectando ao seu sistema de economia.
+                addBadge(player, configKey);
+                grantReward(player, configKey, "Parabéns! Você conquistou a ");
             }
         }
     }
@@ -212,6 +179,94 @@ public class PlayerDataManager {
         PlayerData data = getPlayerData(player.getUniqueId());
         if (data != null && !data.hasBadge(badgeId)) {
             data.getEarnedBadges().add(badgeId.toLowerCase());
+        }
+    }
+
+    /**
+     * Remove uma insígnia de um jogador e zera o progresso associado a ela.
+     * Este é o método correto para ser usado por comandos de administração.
+     * @param player O jogador.
+     * @param badgeId O ID da insígnia a ser removida (ex: "MINING").
+     */
+    public void removeBadgeAndResetProgress(Player player, String badgeId) {
+        PlayerData data = getPlayerData(player.getUniqueId());
+        if (data == null) return;
+
+        // Remove a insígnia da lista de conquistadas, ignorando maiúsculas/minúsculas.
+        data.getEarnedBadges().removeIf(earned -> earned.equalsIgnoreCase(badgeId));
+
+        // Zera o progresso para o tipo de insígnia correspondente.
+        try {
+            BadgeType type = BadgeType.valueOf(badgeId.toUpperCase());
+            data.getProgressMap().put(type, 0.0);
+        } catch (IllegalArgumentException e) {
+            // Loga um aviso se o tipo de insígnia for inválido, mas não para a execução.
+            plugin.getLogger().warning("Tentativa de zerar progresso para uma insígnia inválida '" + badgeId + "' para o jogador " + player.getName());
+        }
+    }
+
+    /**
+     * Concede uma insígnia a um jogador, define seu progresso como completo e entrega a recompensa.
+     * Ideal para ser usado por comandos de administração.
+     * @param player O jogador que receberá a insígnia.
+     * @param badgeId O ID da insígnia (ex: "MINING").
+     * @return true se a insígnia foi concedida, false se o jogador já a possuía ou se a insígnia não existe.
+     */
+    public boolean grantBadgeAndReward(Player player, String badgeId) {
+        PlayerData data = getPlayerData(player.getUniqueId());
+        if (data == null || data.hasBadge(badgeId)) {
+            return false; // Jogador não está online ou já possui a insígnia.
+        }
+
+        String configKey = plugin.getBadgeConfigManager().getBadgeConfigKey(badgeId);
+        if (configKey == null) {
+            return false; // Insígnia não encontrada na configuração.
+        }
+
+        addBadge(player, configKey);
+
+        try {
+            BadgeType type = BadgeType.valueOf(badgeId.toUpperCase());
+            double requiredProgress = plugin.getBadgeConfigManager().getBadgeConfig().getDouble("badges." + configKey + ".required-progress", 1.0);
+            data.getProgressMap().put(type, requiredProgress);
+        } catch (IllegalArgumentException e) {
+            // Não deve acontecer se configKey foi encontrado.
+        }
+
+        grantReward(player, configKey, "Você recebeu a ");
+        return true;
+    }
+
+    private void grantReward(Player player, String configKey, String messagePrefix) {
+        String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString("badges." + configKey + ".name", "uma nova insígnia");
+        player.sendMessage(ChatColor.GOLD + messagePrefix + ChatColor.AQUA + badgeName + ChatColor.GOLD + "!");
+
+        String rewardItemPath = "badges." + configKey + ".reward-item-data";
+        if (plugin.getBadgeConfigManager().getBadgeConfig().isConfigurationSection(rewardItemPath)) {
+            ConfigurationSection itemSection = plugin.getBadgeConfigManager().getBadgeConfig().getConfigurationSection(rewardItemPath);
+            try {
+                Material material = Material.valueOf(Objects.requireNonNull(itemSection.getString("material")).toUpperCase());
+                ItemStack rewardItem = new ItemStack(material, itemSection.getInt("amount", 1));
+                ItemMeta meta = rewardItem.getItemMeta();
+                if (meta != null) {
+                    if (itemSection.contains("name")) meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemSection.getString("name")));
+                    if (itemSection.contains("lore")) {
+                        List<String> lore = new ArrayList<>();
+                        itemSection.getStringList("lore").forEach(line -> lore.add(ChatColor.translateAlternateColorCodes('&', line)));
+                        meta.setLore(lore);
+                    }
+                    rewardItem.setItemMeta(meta);
+                }
+                player.getInventory().addItem(rewardItem);
+            } catch (Exception e) {
+                plugin.getLogger().severe("Erro ao criar item de recompensa para a insígnia '" + configKey + "': " + e.getMessage());
+            }
+        }
+
+        double totems = plugin.getBadgeConfigManager().getBadgeConfig().getDouble("badges." + configKey + ".reward-totems", 0);
+        if (totems > 0 && plugin.getEconomy() != null) {
+            plugin.getEconomy().depositPlayer(player, totems);
+            player.sendMessage(ChatColor.GREEN + "Você recebeu " + ChatColor.YELLOW + totems + " Totens" + ChatColor.GREEN + " como recompensa!");
         }
     }
 

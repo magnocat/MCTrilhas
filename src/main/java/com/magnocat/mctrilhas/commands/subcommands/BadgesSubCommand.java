@@ -64,8 +64,14 @@ public class BadgesSubCommand extends SubCommand {
 
             player.sendMessage(ChatColor.GOLD + "--- Suas Insígnias Conquistadas ---");
             for (String badgeId : earnedBadges) {
-                String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString(badgeId + ".name", badgeId);
-                String description = plugin.getBadgeConfigManager().getBadgeConfig().getString(badgeId + ".description", "Sem descrição.");
+                // Usa o método que ignora maiúsculas/minúsculas para encontrar a chave correta no config.
+                String configKey = plugin.getBadgeConfigManager().getBadgeConfigKey(badgeId);
+                if (configKey == null) continue; // Pula se a insígnia não for encontrada na config.
+
+                String basePath = "badges." + configKey;
+                String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString(basePath + ".name", configKey);
+                String description = plugin.getBadgeConfigManager().getBadgeConfig().getString(basePath + ".description", "Sem descrição.");
+
                 player.sendMessage(ChatColor.AQUA + "- " + badgeName + ": " + ChatColor.GRAY + description);
             }
         }

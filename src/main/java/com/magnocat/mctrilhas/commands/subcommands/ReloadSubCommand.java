@@ -18,7 +18,7 @@ public class ReloadSubCommand extends SubCommand {
 
     @Override
     public String getDescription() {
-        return "Recarrega os arquivos de configuração (config.yml e badges.yml).";
+        return "Recarrega o arquivo de configuração (config.yml).";
     }
 
     @Override

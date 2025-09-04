@@ -23,11 +23,11 @@ permissions:
   mctrilhas.*:
     description: Dá acesso a todos os comandos do MCTrilhas.
     children:
-      mctrilhas.use: true
+      mctrilhas.scout.use: true
       mctrilhas.daily: true
       mctrilhas.admin: true
       mctrilhas.progress.other: true
-  mctrilhas.use:
+  mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
   mctrilhas.daily:

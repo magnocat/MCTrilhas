@@ -2,6 +2,7 @@ package com.magnocat.mctrilhas.commands;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.commands.subcommands.BadgesSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.AdminSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.ProgressSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.ReloadSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
@@ -25,14 +26,13 @@ public class ScoutCommandExecutor implements CommandExecutor {
     }
 
     private void registerSubCommands() {
-        // TODO: Converta os outros comandos para este novo padrão, seguindo o exemplo.
-        // Ex: registerSubCommand(new AddBadgeSubCommand(plugin));
-
-        // Comandos já convertidos:
+        // Comandos de jogador
         registerSubCommand(new BadgesSubCommand(plugin));
         registerSubCommand(new ProgressSubCommand(plugin));
         registerSubCommand(new VersionSubCommand(plugin));
+        // Comandos de administração
         registerSubCommand(new ReloadSubCommand(plugin));
+        registerSubCommand(new AdminSubCommand(plugin));
     }
 
     private void registerSubCommand(SubCommand subCommand) {
