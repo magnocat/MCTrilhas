@@ -7,10 +7,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class GetMapSubCommand extends SubCommand {
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class GetMapSubCommand implements SubCommand {
+
+    private final MCTrilhasPlugin plugin;
 
     public GetMapSubCommand(MCTrilhasPlugin plugin) {
-        super(plugin);
+        this.plugin = plugin;
     }
 
     @Override
@@ -85,5 +92,24 @@ public class GetMapSubCommand extends SubCommand {
         } else {
             player.sendMessage(ChatColor.RED + "Esta insígnia não possui um mapa-troféu como recompensa.");
         }
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+        // Lógica para autocompletar o comando /scout getmap <insignia>
+        if (args.length == 1) {
+            String partialBadge = args[0].toLowerCase();
+
+            // Obtém todos os IDs de insígnias da configuração (ex: MINING, LUMBERJACK)
+            Set<String> badgeIds = plugin.getBadgeConfigManager().getBadgeConfig().getConfigurationSection("badges").getKeys(false);
+
+            // Filtra e retorna as insígnias que começam com o que o jogador digitou
+            return badgeIds.stream()
+                    .filter(id -> !id.equalsIgnoreCase("use-gui")) // Ignora a chave de configuração da GUI
+                    .filter(id -> id.toLowerCase().startsWith(partialBadge))
+                    .sorted() // Ordena alfabeticamente para uma melhor experiência
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }

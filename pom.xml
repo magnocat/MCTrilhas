@@ -18,6 +18,7 @@
         <paper.api.version>1.20.4-R0.1-SNAPSHOT</paper.api.version>
         <vault.api.version>1.7.1</vault.api.version>
         <worldguard.version>7.0.9</worldguard.version>
+        <!-- <bluemap.api.version>2.7.5</bluemap.api.version> -->
     </properties>
 
     <build>
@@ -58,6 +59,10 @@
             <id>enginehub-repo</id>
             <url>https://maven.enginehub.org/repo/</url>
         </repository>
+        <repository>
+            <id>bluecolored-repo</id>
+            <url>https://repo.bluecolored.de/repository/maven-public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -79,5 +84,13 @@
             <version>${worldguard.version}</version>
             <scope>provided</scope>
         </dependency>
+        <!--
+        <dependency>
+            <groupId>de.bluecolored.bluemap</groupId>
+            <artifactId>BlueMapAPI</artifactId>
+            <version>${bluemap.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        -->
     </dependencies>
     </project>

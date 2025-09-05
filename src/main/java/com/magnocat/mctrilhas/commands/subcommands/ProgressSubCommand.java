@@ -11,14 +11,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation") // Suppress warnings for deprecated ChatColor
-public class ProgressSubCommand extends SubCommand {
+public class ProgressSubCommand implements SubCommand {
+
+    private final MCTrilhasPlugin plugin;
 
     public ProgressSubCommand(MCTrilhasPlugin plugin) {
-        super(plugin);
+        this.plugin = plugin;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class ProgressSubCommand extends SubCommand {
 
         OfflinePlayer target;
         if (args.length == 1) {
-            if (!sender.hasPermission("mctrilhas.scout.progress.other")) {
+            if (!sender.hasPermission("mctrilhas.progress.other")) {
                 sender.sendMessage(ChatColor.RED + "Você não tem permissão para ver o progresso de outros jogadores.");
                 return;
             }
@@ -107,5 +110,13 @@ public class ProgressSubCommand extends SubCommand {
                 }
             });
         });
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+        if (args.length == 1 && sender.hasPermission("mctrilhas.progress.other")) {
+            return null; // Usa o completador padrão do Bukkit para nomes de jogadores
+        }
+        return Collections.emptyList();
     }
 }

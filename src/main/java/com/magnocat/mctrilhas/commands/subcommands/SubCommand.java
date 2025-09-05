@@ -2,28 +2,27 @@ package com.magnocat.mctrilhas.commands.subcommands;
 
 import org.bukkit.command.CommandSender;
 
-import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import java.util.Collections;
+import java.util.List;
 
-public abstract class SubCommand {
+/**
+ * Interface que define a estrutura de um subcomando.
+ */
+public interface SubCommand {
 
-    protected final MCTrilhasPlugin plugin;
+    String getName();
 
-    public SubCommand(MCTrilhasPlugin plugin) {
-        this.plugin = plugin;
+    String getDescription();
+
+    String getSyntax();
+
+    String getPermission();
+
+    boolean isAdminCommand();
+
+    void execute(CommandSender sender, String[] args);
+
+    default List<String> onTabComplete(CommandSender sender, String[] args) {
+        return Collections.emptyList();
     }
-
-    // Informações do comando para a mensagem de ajuda
-    public abstract String getName();
-    public abstract String getDescription();
-    public abstract String getSyntax();
-    public abstract String getPermission();
-    public abstract boolean isAdminCommand();
-
-    /**
-     * Executa a lógica do subcomando.
-     *
-     * @param sender Quem enviou o comando.
-     * @param args   Argumentos do comando, sem o nome do subcomando.
-     */
-    public abstract void execute(CommandSender sender, String[] args);
 }

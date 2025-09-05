@@ -2,6 +2,7 @@ package com.magnocat.mctrilhas;
 
 import com.magnocat.mctrilhas.badges.BadgeManager;
 import com.magnocat.mctrilhas.commands.DailyCommand;
+// import com.magnocat.mctrilhas.integrations.BlueMapManager; // Comentado temporariamente
 import com.magnocat.mctrilhas.maps.MapRewardManager;
 import com.magnocat.mctrilhas.managers.BadgeConfigManager;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
@@ -37,6 +38,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private BlockPersistenceManager blockPersistenceManager;
     private BadgeMenu badgeMenu;
     private MapRewardManager mapRewardManager;
+    // private BlueMapManager blueMapManager; // Comentado temporariamente
     private Economy econ = null;
 
     @Override
@@ -92,12 +94,21 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.blockPersistenceManager = new BlockPersistenceManager(this);
         this.badgeMenu = new BadgeMenu(this);
         this.mapRewardManager = new MapRewardManager(this);
+        
+        /* Comentado temporariamente para desativar a integração com BlueMap
+        // Inicializa integrações opcionais
+        if (getServer().getPluginManager().isPluginEnabled("BlueMap")) {
+            this.blueMapManager = new BlueMapManager(this);
+            getLogger().info("Integração com BlueMap ativada.");
+        }*/
         getLogger().info("Gerenciadores e menus inicializados.");
     }
 
     private void registerCommands() {
         // O ScoutCommandExecutor gerencia todos os subcomandos do /scout
-        getCommand("scout").setExecutor(new ScoutCommandExecutor(this));
+        ScoutCommandExecutor scoutExecutor = new ScoutCommandExecutor(this);
+        getCommand("scout").setExecutor(scoutExecutor);
+        getCommand("scout").setTabCompleter(scoutExecutor);
         getCommand("daily").setExecutor(new DailyCommand(this));
         getLogger().info("Comandos registrados.");
     }
@@ -145,6 +156,11 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         return mapRewardManager;
     }
 
+    /* Comentado temporariamente
+    public BlueMapManager getBlueMapManager() {
+        return blueMapManager;
+    }
+    */
     public Economy getEconomy() {
         return econ;
     }

@@ -4,21 +4,24 @@ import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public class AdminSubCommand extends SubCommand {
+public class AdminSubCommand implements SubCommand {
 
+    private final MCTrilhasPlugin plugin;
     private final Map<String, SubCommand> subCommands = new HashMap<>();
 
     public AdminSubCommand(MCTrilhasPlugin plugin) {
-        super(plugin);
+        this.plugin = plugin;
         // Registra os subcomandos de administração aqui
         registerSubCommand(new AddBadgeSubCommand(plugin));
         registerSubCommand(new RemoveBadgeSubCommand(plugin));
+        registerSubCommand(new StatsSubCommand(plugin));
     }
 
     private void registerSubCommand(SubCommand subCommand) {
@@ -76,5 +79,31 @@ public class AdminSubCommand extends SubCommand {
             sender.sendMessage(ChatColor.AQUA + subCommand.getSyntax() + ChatColor.GRAY + " - " + subCommand.getDescription());
         }
         sender.sendMessage(ChatColor.GOLD + "-----------------------------------------");
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+        // /scout admin <sub-comando> [argumentos...]
+        // args[0] é o nome do sub-comando (ex: "addbadge")
+
+        // Se estiver completando o primeiro argumento (o nome do sub-comando de admin)
+        if (args.length == 1) {
+            String partialCommand = args[0].toLowerCase();
+            return subCommands.keySet().stream()
+                    .filter(name -> name.toLowerCase().startsWith(partialCommand))
+                    .sorted()
+                    .collect(Collectors.toList());
+        }
+
+        // Se estiver completando argumentos para um sub-comando de admin específico
+        if (args.length > 1) {
+            SubCommand subCommand = subCommands.get(args[0].toLowerCase());
+            if (subCommand != null) {
+                // Delega para o sub-comando específico (ex: AddBadgeSubCommand)
+                return subCommand.onTabComplete(sender, Arrays.copyOfRange(args, 1, args.length));
+            }
+        }
+
+        return Collections.emptyList();
     }
 }

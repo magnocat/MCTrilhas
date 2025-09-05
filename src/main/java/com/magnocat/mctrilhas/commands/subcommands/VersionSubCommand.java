@@ -5,10 +5,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 @SuppressWarnings("deprecation") // Suppress warnings for deprecated ChatColor and getDescription
-public class VersionSubCommand extends SubCommand {
+public class VersionSubCommand implements SubCommand {
+
+    private final MCTrilhasPlugin plugin;
 
     public VersionSubCommand(MCTrilhasPlugin plugin) {
-        super(plugin);
+        this.plugin = plugin;
     }
 
     @Override

@@ -6,10 +6,17 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class RemoveBadgeSubCommand extends SubCommand {
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class RemoveBadgeSubCommand implements SubCommand {
+
+    private final MCTrilhasPlugin plugin;
 
     public RemoveBadgeSubCommand(MCTrilhasPlugin plugin) {
-        super(plugin);
+        this.plugin = plugin;
     }
 
     @Override
@@ -53,5 +60,31 @@ public class RemoveBadgeSubCommand extends SubCommand {
         String badgeId = args[1];
         plugin.getPlayerDataManager().removeBadgeAndResetProgress(target, badgeId);
         sender.sendMessage(ChatColor.GREEN + "A insígnia '" + badgeId + "' e seu progresso foram removidos de " + target.getName() + ".");
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+        // /scout admin removebadge <jogador> <insignia>
+        // args[0] -> <jogador>
+        // args[1] -> <insignia>
+
+        // Completa o nome do jogador para o primeiro argumento
+        if (args.length == 1) {
+            return null; // Usa o completador padrão do Bukkit para nomes de jogadores
+        }
+
+        // Completa o nome da insígnia para o segundo argumento
+        if (args.length == 2) {
+            String partialBadge = args[1].toLowerCase();
+            Set<String> badgeIds = plugin.getBadgeConfigManager().getBadgeConfig().getConfigurationSection("badges").getKeys(false);
+
+            return badgeIds.stream()
+                    .filter(id -> !id.equalsIgnoreCase("use-gui"))
+                    .filter(id -> id.toLowerCase().startsWith(partialBadge))
+                    .sorted()
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
     }
 }

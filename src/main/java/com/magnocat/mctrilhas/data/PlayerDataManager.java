@@ -277,6 +277,13 @@ public class PlayerDataManager {
             player.sendMessage(ChatColor.GREEN + "Você também recebeu um troféu especial!");
         }
 
+        /* Comentado temporariamente para desativar a integração com BlueMap
+        // --- LÓGICA DE INTEGRAÇÃO COM BLUEMAP ---
+        if (plugin.getBlueMapManager() != null) {
+            // Passa a chave da configuração para obter o nome da insígnia.
+            plugin.getBlueMapManager().addBadgeMarker(player, configKey);
+        }
+        */
         // --- LÓGICA DE ANÚNCIO GLOBAL ---
         if (plugin.getConfig().getBoolean("badge-announcement.enabled", false)) {
             String title = plugin.getConfig().getString("badge-announcement.title", "&6&lINSÍGNIA!");

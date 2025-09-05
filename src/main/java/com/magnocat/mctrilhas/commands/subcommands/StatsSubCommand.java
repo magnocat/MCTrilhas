@@ -9,29 +9,32 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
 import java.text.NumberFormat;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.List;
 
 @SuppressWarnings("deprecation")
-public class StatsSubCommand extends SubCommand {
+public class StatsSubCommand implements SubCommand {
 
+    private final MCTrilhasPlugin plugin;
     private final NumberFormat numberFormat;
 
     public StatsSubCommand(MCTrilhasPlugin plugin) {
-        super(plugin);
+        this.plugin = plugin;
         this.numberFormat = NumberFormat.getNumberInstance(new Locale("pt", "BR"));
         this.numberFormat.setGroupingUsed(true);
     }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        if (args.length < 2) {
-            sender.sendMessage(ChatColor.RED + "Uso: /scout stats <jogador>");
+        if (args.length < 1) {
+            sender.sendMessage(ChatColor.RED + "Uso: " + getSyntax());
             return;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
         if (!target.hasPlayedBefore() && !target.isOnline()) {
-            sender.sendMessage(ChatColor.RED + "Jogador não encontrado: " + args[1]);
+            sender.sendMessage(ChatColor.RED + "Jogador não encontrado: " + args[0]);
             return;
         }
 
@@ -74,12 +77,12 @@ public class StatsSubCommand extends SubCommand {
 
     @Override
     public String getPermission() {
-        return "mctrilhas.scout.stats";
+        return "mctrilhas.scout.admin";
     }
 
     @Override
     public String getSyntax() {
-        return "/scout stats <jogador>";
+        return "/scout admin stats <jogador>";
     }
 
     @Override
@@ -90,5 +93,13 @@ public class StatsSubCommand extends SubCommand {
     @Override
     public String getName() {
         return "stats";
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+        if (args.length == 1) {
+            return null; // Usa o completador padrão do Bukkit para nomes de jogadores
+        }
+        return Collections.emptyList();
     }
 }

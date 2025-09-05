@@ -12,11 +12,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation") // Suprime avisos de API depreciada (ex: ChatColor)
-public class ScoutCommandExecutor implements CommandExecutor {
+public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
 
     private final MCTrilhasPlugin plugin;
     private final Map<String, SubCommand> subCommands = new HashMap<>();
@@ -82,5 +84,30 @@ public class ScoutCommandExecutor implements CommandExecutor {
             .filter(cmd -> cmd.isAdminCommand() && sender.hasPermission(cmd.getPermission()))
             .sorted(Comparator.comparing(SubCommand::getName))
             .forEach(cmd -> sender.sendMessage(ChatColor.RED + cmd.getSyntax() + ChatColor.GRAY + " - " + cmd.getDescription()));
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        // Se estiver completando o primeiro argumento (o nome do subcomando)
+        if (args.length == 1) {
+            String partialCommand = args[0].toLowerCase();
+            return subCommands.values().stream()
+                    .filter(subCmd -> sender.hasPermission(subCmd.getPermission()))
+                    .map(SubCommand::getName)
+                    .filter(name -> name.toLowerCase().startsWith(partialCommand))
+                    .sorted()
+                    .collect(Collectors.toList());
+        }
+
+        // Se estiver completando argumentos de um subcomando específico
+        if (args.length > 1) {
+            SubCommand subCommand = subCommands.get(args[0].toLowerCase());
+            if (subCommand != null && sender.hasPermission(subCommand.getPermission())) {
+                // Delega a lógica de autocompletar para o subcomando correto
+                return subCommand.onTabComplete(sender, Arrays.copyOfRange(args, 1, args.length));
+            }
+        }
+
+        return Collections.emptyList();
     }
 }
