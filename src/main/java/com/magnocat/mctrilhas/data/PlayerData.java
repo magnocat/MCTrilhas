@@ -2,6 +2,7 @@ package com.magnocat.mctrilhas.data;
 
 import com.magnocat.mctrilhas.badges.BadgeType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,15 +14,15 @@ import java.util.UUID;
 public class PlayerData {
 
     private final UUID playerUUID;
-    private final List<String> earnedBadges;
+    private final Map<String, Long> earnedBadgesMap; // Armazena o ID da insígnia e o timestamp da conquista.
     private final Map<BadgeType, Double> progressMap;
     private final Set<String> visitedBiomes; // Armazena os biomas únicos visitados.
     private boolean progressMessagesDisabled;
     private long lastDailyRewardTime;
 
-    public PlayerData(UUID playerUUID, List<String> earnedBadges, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime) {
+    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime) {
         this.playerUUID = playerUUID;
-        this.earnedBadges = earnedBadges;
+        this.earnedBadgesMap = earnedBadgesMap;
         this.progressMap = progressMap;
         this.visitedBiomes = visitedBiomes;
         this.progressMessagesDisabled = progressMessagesDisabled;
@@ -34,7 +35,7 @@ public class PlayerData {
 
     public boolean hasBadge(String badgeId) {
         // Faz a verificação ignorando maiúsculas/minúsculas para ser mais robusto.
-        return earnedBadges.stream().anyMatch(badgeId::equalsIgnoreCase);
+        return earnedBadgesMap.containsKey(badgeId.toLowerCase());
     }
 
     public double getProgress(BadgeType type) {
@@ -46,7 +47,15 @@ public class PlayerData {
     }
 
     public List<String> getEarnedBadges() {
-        return earnedBadges;
+        return new ArrayList<>(earnedBadgesMap.keySet());
+    }
+
+    /**
+     * Retorna o mapa completo de insígnias com seus timestamps.
+     * @return Um mapa de ID da insígnia para o timestamp da conquista.
+     */
+    public Map<String, Long> getEarnedBadgesMap() {
+        return earnedBadgesMap;
     }
 
     public Map<BadgeType, Double> getProgressMap() {

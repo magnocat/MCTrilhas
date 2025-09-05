@@ -22,6 +22,7 @@ public class AdminSubCommand implements SubCommand {
         registerSubCommand(new AddBadgeSubCommand(plugin));
         registerSubCommand(new RemoveBadgeSubCommand(plugin));
         registerSubCommand(new StatsSubCommand(plugin));
+        registerSubCommand(new ForceWebDataSubCommand(plugin));
     }
 
     private void registerSubCommand(SubCommand subCommand) {

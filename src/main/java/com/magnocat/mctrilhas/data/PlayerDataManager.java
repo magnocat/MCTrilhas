@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 @SuppressWarnings("deprecation")
 public class PlayerDataManager {
@@ -47,13 +49,31 @@ public class PlayerDataManager {
     public void loadPlayerData(UUID uuid) {
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
         if (!playerFile.exists()) {
-            // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez
-            playerDataCache.put(uuid, new PlayerData(uuid, new ArrayList<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0));
+            // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
+            // A estrutura de insígnias agora é um Map<String, Long>.
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0));
             return;
         }
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-        List<String> earnedBadges = config.getStringList("earned-badges");
+
+        // A estrutura de insígnias agora é um Map<String, Long> (badgeId -> timestamp).
+        Map<String, Long> earnedBadges = new HashMap<>();
+        // Lógica de migração: se o formato antigo (lista) existir, converte para o novo (mapa).
+        if (config.isList("earned-badges")) {
+            plugin.getLogger().info("Migrando dados de insígnias para o novo formato para o jogador " + uuid);
+            List<String> oldBadges = config.getStringList("earned-badges");
+            oldBadges.forEach(badgeId -> earnedBadges.put(badgeId.toLowerCase(), 1L)); // Usa 1L para indicar que é um dado legado.
+            config.set("earned-badges", null); // Remove a chave antiga.
+        } else if (config.isConfigurationSection("earned-badges-timed")) {
+            ConfigurationSection badgesSection = config.getConfigurationSection("earned-badges-timed");
+            if (badgesSection != null) {
+                for (String badgeId : badgesSection.getKeys(false)) {
+                    earnedBadges.put(badgeId.toLowerCase(), badgesSection.getLong(badgeId));
+                }
+            }
+        }
+
         boolean progressMessagesDisabled = config.getBoolean("settings.progress-messages-disabled", false);
         long lastDailyReward = config.getLong("last-daily-reward", 0);
         // Carrega a lista de biomas visitados
@@ -96,7 +116,11 @@ public class PlayerDataManager {
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
         FileConfiguration config = new YamlConfiguration();
 
-        config.set("earned-badges", playerData.getEarnedBadges());
+        // Salva o novo mapa de insígnias com timestamps.
+        playerData.getEarnedBadgesMap().forEach((badgeId, timestamp) -> {
+            config.set("earned-badges-timed." + badgeId, timestamp);
+        });
+
         config.set("settings.progress-messages-disabled", playerData.areProgressMessagesDisabled());
         config.set("last-daily-reward", playerData.getLastDailyRewardTime());
         // Salva a lista de biomas visitados
@@ -179,7 +203,8 @@ public class PlayerDataManager {
     public void addBadge(Player player, String badgeId) {
         PlayerData data = getPlayerData(player.getUniqueId());
         if (data != null && !data.hasBadge(badgeId)) {
-            data.getEarnedBadges().add(badgeId.toLowerCase());
+            // Adiciona a insígnia com o timestamp atual.
+            data.getEarnedBadgesMap().put(badgeId.toLowerCase(), System.currentTimeMillis());
         }
     }
 
@@ -194,7 +219,7 @@ public class PlayerDataManager {
         if (data == null) return;
 
         // Remove a insígnia da lista de conquistadas, ignorando maiúsculas/minúsculas.
-        data.getEarnedBadges().removeIf(earned -> earned.equalsIgnoreCase(badgeId));
+        data.getEarnedBadgesMap().remove(badgeId.toLowerCase());
 
         // Zera o progresso para o tipo de insígnia correspondente.
         try {
@@ -310,7 +335,7 @@ public class PlayerDataManager {
 
     public List<String> getEarnedBadges(UUID uuid) {
         PlayerData data = getPlayerData(uuid);
-        return data != null ? data.getEarnedBadges() : new ArrayList<>();
+        return data != null ? new ArrayList<>(data.getEarnedBadgesMap().keySet()) : new ArrayList<>();
     }
 
     // --- Métodos para o comando /scout ---
@@ -354,7 +379,7 @@ public class PlayerDataManager {
                 try {
                     UUID uuid = UUID.fromString(playerFile.getName().replace(".yml", ""));
                     FileConfiguration playerData = YamlConfiguration.loadConfiguration(playerFile);
-                    allCounts.put(uuid, playerData.getStringList("earned-badges").size());
+                    allCounts.put(uuid, playerData.getConfigurationSection("earned-badges-timed").getKeys(false).size());
                 } catch (IllegalArgumentException e) {
                     plugin.getLogger().warning("Arquivo de jogador com nome inválido ignorado: " + playerFile.getName());
                 }
@@ -362,7 +387,7 @@ public class PlayerDataManager {
         }
 
         // Sobrescreve com dados do cache para garantir que os dados de jogadores online estejam atualizados.
-        playerDataCache.values().forEach(data -> allCounts.put(data.getPlayerUUID(), data.getEarnedBadges().size()));
+        playerDataCache.values().forEach(data -> allCounts.put(data.getPlayerUUID(), data.getEarnedBadgesMap().size()));
         return allCounts;
     }
 
@@ -372,25 +397,76 @@ public class PlayerDataManager {
      *
      * @return Um {@link CompletableFuture} que, quando completo, conterá um mapa com o UUID de cada jogador e sua contagem de insígnias.
      */
-    public CompletableFuture<Map<UUID, Integer>> getAllBadgeCountsAsync() {
+    public CompletableFuture<Map<UUID, Integer>> getAllTimeBadgeCountsAsync() {
+        // Para o ranking de todos os tempos, não precisamos de filtro de tempo.
+        return getFilteredBadgeCountsAsync(timestamp -> true);
+    }
+
+    /**
+     * Obtém a contagem de insígnias conquistadas hoje por todos os jogadores.
+     * @return Um CompletableFuture com o mapa de contagens diárias.
+     */
+    public CompletableFuture<Map<UUID, Integer>> getDailyBadgeCountsAsync() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        long startOfDay = cal.getTimeInMillis();
+
+        return getFilteredBadgeCountsAsync(timestamp -> timestamp >= startOfDay);
+    }
+
+    /**
+     * Obtém a contagem de insígnias conquistadas no mês atual por todos os jogadores.
+     * @return Um CompletableFuture com o mapa de contagens mensais.
+     */
+    public CompletableFuture<Map<UUID, Integer>> getMonthlyBadgeCountsAsync() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        long startOfMonth = cal.getTimeInMillis();
+
+        return getFilteredBadgeCountsAsync(timestamp -> timestamp >= startOfMonth);
+    }
+
+    /**
+     * Método genérico para obter contagens de insígnias com base em um filtro de tempo.
+     * @param timeFilter Um predicado que retorna true se o timestamp da insígnia deve ser contado.
+     * @return Um CompletableFuture com o mapa de contagens filtradas.
+     */
+    private CompletableFuture<Map<UUID, Integer>> getFilteredBadgeCountsAsync(Predicate<Long> timeFilter) {
         return CompletableFuture.supplyAsync(() -> {
-            Map<UUID, Integer> allCounts = new HashMap<>(); // Use um mapa normal aqui, pois é preenchido em um único thread.
+            Map<UUID, Integer> filteredCounts = new HashMap<>();
             File[] playerFiles = playerDataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
 
             if (playerFiles != null) {
                 for (File playerFile : playerFiles) {
                     try {
                         UUID uuid = UUID.fromString(playerFile.getName().replace(".yml", ""));
-                        FileConfiguration playerData = YamlConfiguration.loadConfiguration(playerFile);
-                        allCounts.put(uuid, playerData.getStringList("earned-badges").size());
+                        FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+                        ConfigurationSection badgesSection = config.getConfigurationSection("earned-badges-timed");
+                        if (badgesSection != null) {
+                            long count = badgesSection.getKeys(false).stream()
+                                    .map(badgesSection::getLong)
+                                    .filter(timeFilter)
+                                    .count();
+                            if (count > 0) filteredCounts.put(uuid, (int) count);
+                        }
                     } catch (IllegalArgumentException e) {
                         plugin.getLogger().warning("Arquivo de jogador com nome inválido ignorado: " + playerFile.getName());
                     }
                 }
             }
             // Garante que os dados de jogadores online (que podem não ter sido salvos ainda) sejam os mais atuais.
-            playerDataCache.values().forEach(data -> allCounts.put(data.getPlayerUUID(), data.getEarnedBadges().size()));
-            return allCounts;
+            playerDataCache.values().forEach(data -> {
+                long count = data.getEarnedBadgesMap().values().stream().filter(timeFilter).count();
+                if (count > 0) filteredCounts.put(data.getPlayerUUID(), (int) count);
+            });
+            return filteredCounts;
         });
     }
 }
