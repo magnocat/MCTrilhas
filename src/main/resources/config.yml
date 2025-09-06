@@ -45,6 +45,9 @@ badges:
       enchantments:
         - "efficiency:2"
         - "unbreaking:1"
+    reward-map:
+      image: "maps/lumberjack_badge.png"
+      name: "&6Troféu de {player}: {badgeName}"
 
   MINING:
     name: "Insígnia de Minerador"
@@ -75,7 +78,7 @@ badges:
       # Caminho da imagem (128x128) dentro da pasta 'resources' do plugin.
       image: "maps/mining_badge.png"
       # Nome do item do mapa. {badgeName} será substituído pelo nome da insígnia.
-      name: "&6Troféu: {badgeName}"
+      name: "&6Troféu de {player}: {badgeName}"
 
   COOKING:
     name: "Insígnia de Cozinheiro"
@@ -89,6 +92,9 @@ badges:
       lore:
         - "&7Cozinhe seus alimentos duas vezes mais rápido."
       enchantments: [] # Adicionado para consistência
+    reward-map:
+      image: "maps/cooking_badge.png"
+      name: "&6Troféu de {player}: {badgeName}"
 
   BUILDER:
     name: "Insígnia de Construtor"
@@ -102,6 +108,9 @@ badges:
       lore:
         - "&7Para guardar todos os seus materiais."
       enchantments: [] # Adicionado para consistência
+    reward-map:
+      image: "maps/builder_badge.png"
+      name: "&6Troféu de {player}: {badgeName}"
 
   FISHING:
     name: "Insígnia de Pescador"
@@ -118,6 +127,9 @@ badges:
       enchantments:
         - "lure:2"
         - "unbreaking:1"
+    reward-map:
+      image: "maps/fishing_badge.png"
+      name: "&6Troféu de {player}: {badgeName}"
 
   FARMING:
     name: "Insígnia de Agricultor"
@@ -143,6 +155,9 @@ badges:
       enchantments:
         - "fortune:2"
         - "unbreaking:1"
+    reward-map:
+      image: "maps/farming_badge.png"
+      name: "&6Troféu de {player}: {badgeName}"
 
   CRAFTING:
     name: "Insígnia de Artesão"
@@ -155,6 +170,9 @@ badges:
       name: "&6Bancada de Trabalho do Mestre"
       lore:
         - "&7Criações mais rápidas e eficientes."
+    reward-map:
+      image: "maps/crafting_badge.png"
+      name: "&6Troféu de {player}: {badgeName}"
 
   EXPLORER:
     name: "Insígnia de Explorador"
@@ -169,6 +187,9 @@ badges:
         - "&7Nunca se perca em suas aventuras."
       enchantments:
         - "unbreaking:3"
+    reward-map:
+      image: "maps/explorer_badge.png"
+      name: "&6Troféu de {player}: {badgeName}"
 
 # Recompensa diária para os jogadores
 daily-reward:

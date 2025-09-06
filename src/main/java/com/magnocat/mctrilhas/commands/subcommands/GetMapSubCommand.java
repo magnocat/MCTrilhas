@@ -75,7 +75,9 @@ public class GetMapSubCommand implements SubCommand {
         // Verifica se o jogador já tem o mapa no inventário
         String mapName = plugin.getBadgeConfigManager().getBadgeConfig().getString("badges." + configKey + ".reward-map.name", "");
         String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString("badges." + configKey + ".name", configKey);
-        String finalMapName = ChatColor.translateAlternateColorCodes('&', mapName.replace("{badgeName}", badgeName));
+        String finalMapName = ChatColor.translateAlternateColorCodes('&', mapName
+                .replace("{badgeName}", badgeName)
+                .replace("{player}", player.getName()));
 
         for (ItemStack item : player.getInventory().getContents()) {
             if (item != null && item.hasItemMeta() && item.getItemMeta().getDisplayName().equals(finalMapName)) {

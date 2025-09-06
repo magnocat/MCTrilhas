@@ -1,17 +1,24 @@
 package com.magnocat.mctrilhas.web;
 
-import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+
+import com.magnocat.mctrilhas.MCTrilhasPlugin;
 
 public class WebDataManager {
 
@@ -20,9 +27,10 @@ public class WebDataManager {
 
     public WebDataManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
-        // Assume que a pasta web do TinyServer está em 'plugins/TinyServer/web/'
+        // OBS: O padrão do TinyServer é 'htdocs'. Verifique se 'web' é a pasta correta no seu setup.
+        // File tinyServerWebRoot = new File(plugin.getDataFolder().getParentFile(), "TinyServer/htdocs");
         // E criamos uma subpasta 'data' para nossos arquivos.
-        File tinyServerWebRoot = new File(plugin.getDataFolder().getParentFile(), "TinyServer/web");
+        File tinyServerWebRoot = new File(plugin.getDataFolder().getParentFile(), "TinyServer/htdocs");
         this.webDataFolder = new File(tinyServerWebRoot, "data");
         if (!webDataFolder.exists()) {
             webDataFolder.mkdirs();
@@ -97,6 +105,10 @@ public class WebDataManager {
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> generateLeaderboardJson("leaderboard-monthly.json", plugin.getPlayerDataManager().getMonthlyBadgeCountsAsync()), 40L, 28800L);
         // Ranking Geral (Anual/Total): atualiza a cada 24 horas (1728000 ticks)
         Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> generateLeaderboardJson("leaderboard-all-time.json", plugin.getPlayerDataManager().getAllTimeBadgeCountsAsync()), 60L, 1728000L);
+        // Gravador de contagem de jogadores: roda a cada 10 minutos (12000 ticks)
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::recordPlayerCount, 100L, 12000L);
+        // Limpeza do arquivo de estatísticas: roda a cada 6 horas (43200 ticks * 10 = 432000)
+        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::cleanupPlayerStatsFile, 1200L, 432000L);
     }
 
     /**
@@ -107,5 +119,60 @@ public class WebDataManager {
         generateLeaderboardJson("leaderboard-daily.json", plugin.getPlayerDataManager().getDailyBadgeCountsAsync());
         generateLeaderboardJson("leaderboard-monthly.json", plugin.getPlayerDataManager().getMonthlyBadgeCountsAsync());
         generateLeaderboardJson("leaderboard-all-time.json", plugin.getPlayerDataManager().getAllTimeBadgeCountsAsync());
+        // Também grava a contagem de jogadores atual
+        recordPlayerCount();
+    }
+
+    /**
+     * Grava a contagem de jogadores atual anexando-a ao arquivo CSV.
+     * Esta é uma operação rápida, ideal para ser executada com frequência.
+     */
+    public void recordPlayerCount() {
+        File statsFile = new File(webDataFolder, "player_stats.csv");
+        String line = System.currentTimeMillis() + "," + Bukkit.getOnlinePlayers().size() + "\n";
+        try {
+            // Apenas anexa a nova linha. Muito mais rápido.
+            Files.write(statsFile.toPath(), line.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            plugin.getLogger().severe("Não foi possível anexar dados ao player_stats.csv: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Limpa o arquivo de estatísticas de jogadores, removendo entradas com mais de 24 horas.
+     * Este método é projetado para ser chamado com menos frequência do que recordPlayerCount.
+     */
+    private void cleanupPlayerStatsFile() {
+        File statsFile = new File(webDataFolder, "player_stats.csv");
+        if (!statsFile.exists()) {
+            return;
+        }
+
+        long cutoffTimestamp = System.currentTimeMillis() - TimeUnit.HOURS.toMillis(24);
+        List<String> validLines = new java.util.ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(statsFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                try {
+                    long timestamp = Long.parseLong(line.split(",")[0]);
+                    if (timestamp >= cutoffTimestamp) {
+                        validLines.add(line);
+                    }
+                } catch (Exception e) { /* Ignora linhas malformadas */ }
+            }
+        } catch (IOException e) {
+            plugin.getLogger().warning("Não foi possível ler player_stats.csv para limpeza: " + e.getMessage());
+            return; // Aborta se não conseguir ler.
+        }
+
+        // Escreve apenas as linhas válidas de volta, limpando o arquivo.
+        try {
+            Files.write(statsFile.toPath(), validLines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            plugin.getLogger().info("Arquivo 'player_stats.csv' limpo com sucesso.");
+        } catch (IOException e) {
+            plugin.getLogger().severe("Não foi possível escrever em player_stats.csv após a limpeza: " + e.getMessage());
+        }
     }
 }

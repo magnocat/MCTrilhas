@@ -1,6 +1,5 @@
 package com.magnocat.mctrilhas.maps;
 
-import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -10,8 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapView;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.magnocat.mctrilhas.MCTrilhasPlugin;
 
 /**
  * Gerencia a criação e entrega de recompensas em formato de mapa.
@@ -57,7 +55,11 @@ public class MapRewardManager {
 
             String name = mapSection.getString("name", "&6Troféu: {badgeName}");
             String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString("badges." + badgeConfigKey + ".name", badgeConfigKey);
-            mapMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name.replace("{badgeName}", badgeName)));
+            
+            // Substitui ambos os placeholders: {badgeName} e {player}
+            String finalName = name.replace("{badgeName}", badgeName).replace("{player}", player.getName());
+
+            mapMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', finalName));
 
             mapItem.setItemMeta(mapMeta);
         }
