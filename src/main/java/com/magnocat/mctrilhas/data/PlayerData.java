@@ -1,6 +1,8 @@
 package com.magnocat.mctrilhas.data;
 
 import com.magnocat.mctrilhas.badges.BadgeType;
+import com.magnocat.mctrilhas.ranks.Rank;
+import org.bukkit.Location;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +21,20 @@ public class PlayerData {
     private final Set<String> visitedBiomes; // Armazena os biomas únicos visitados.
     private boolean progressMessagesDisabled;
     private long lastDailyRewardTime;
+    private Rank rank;
+    private long activePlaytimeTicks; // Armazena o tempo de jogo ativo em ticks.
+    private transient Location lastAfkCheckLocation; // Não é salvo no arquivo.
 
-    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime) {
+    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks) {
         this.playerUUID = playerUUID;
         this.earnedBadgesMap = earnedBadgesMap;
         this.progressMap = progressMap;
         this.visitedBiomes = visitedBiomes;
         this.progressMessagesDisabled = progressMessagesDisabled;
         this.lastDailyRewardTime = lastDailyRewardTime;
+        this.rank = rank;
+        this.activePlaytimeTicks = activePlaytimeTicks;
+        this.lastAfkCheckLocation = null;
     }
 
     public UUID getPlayerUUID() {
@@ -80,5 +88,29 @@ public class PlayerData {
 
     public void setLastDailyRewardTime(long lastDailyRewardTime) {
         this.lastDailyRewardTime = lastDailyRewardTime;
+    }
+
+    public Rank getRank() {
+        return rank;
+    }
+
+    public void setRank(Rank rank) {
+        this.rank = rank;
+    }
+
+    public long getActivePlaytimeTicks() {
+        return activePlaytimeTicks;
+    }
+
+    public void addActivePlaytimeTicks(long ticks) {
+        this.activePlaytimeTicks += ticks;
+    }
+
+    public Location getLastAfkCheckLocation() {
+        return lastAfkCheckLocation;
+    }
+
+    public void setLastAfkCheckLocation(Location lastAfkCheckLocation) {
+        this.lastAfkCheckLocation = lastAfkCheckLocation;
     }
 }

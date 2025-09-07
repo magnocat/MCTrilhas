@@ -207,3 +207,25 @@ daily-reward:
     claim-success: "&aVocê coletou sua recompensa diária! Volte amanhã para mais."
     cooldown: "&cVocê já coletou sua recompensa. Tente novamente em &e{time}&c."
     login-notification: "&a[!] Sua recompensa diária está disponível! Use &e/daily&a para coletar."
+
+# Seção de configuração para o sistema de progressão de ranques.
+# Defina os requisitos para que um jogador seja promovido para o ranque especificado.
+# O ranque CHEFE não tem requisitos, pois é concedido manualmente.
+ranks:
+  LOBINHO:
+    required-playtime-hours: 10
+    required-badges: 2
+    required-account-age-days: 30 # 1 mês
+  ESCOTEIRO:
+    required-playtime-hours: 30
+    required-badges: 4
+    required-account-age-days: 60 # 2 meses
+  SENIOR:
+    required-playtime-hours: 80
+    required-badges: 6
+    required-account-age-days: 90 # 3 meses
+  PIONEIRO:
+    required-playtime-hours: 150
+    # Requer todas as 8 insígnias.
+    required-badges: 8
+    required-account-age-days: 120 # 4 meses

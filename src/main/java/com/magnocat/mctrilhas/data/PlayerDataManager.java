@@ -2,8 +2,10 @@ package com.magnocat.mctrilhas.data;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.badges.BadgeType;
+import com.magnocat.mctrilhas.ranks.Rank;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -50,8 +52,8 @@ public class PlayerDataManager {
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
         if (!playerFile.exists()) {
             // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
-            // A estrutura de insígnias agora é um Map<String, Long>.
-            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0));
+            // O ranque inicial é sempre FILHOTE.
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0));
             return;
         }
 
@@ -78,6 +80,20 @@ public class PlayerDataManager {
         long lastDailyReward = config.getLong("last-daily-reward", 0);
         // Carrega a lista de biomas visitados
         List<String> visitedBiomesList = config.getStringList("visited-biomes");
+        // Carrega o ranque do jogador, com FILHOTE como padrão.
+        Rank rank = Rank.fromString(config.getString("rank", "FILHOTE"));
+        // Carrega o tempo de jogo ativo.
+        long activePlaytimeTicks = config.getLong("active-playtime-ticks", 0);
+
+        // Lógica de migração única para jogadores existentes sem tempo de jogo ativo.
+        if (activePlaytimeTicks == 0 && !config.contains("playtime-migrated")) {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+            if (offlinePlayer.hasPlayedBefore()) {
+                activePlaytimeTicks = (long) offlinePlayer.getStatistic(org.bukkit.Statistic.PLAY_ONE_MINUTE);
+                config.set("playtime-migrated", true); // Marca que a migração foi feita.
+                plugin.getLogger().info("Migrando tempo de jogo para " + offlinePlayer.getName() + ". Tempo de jogo inicial definido como " + (activePlaytimeTicks / 72000) + " horas.");
+            }
+        }
 
         Map<BadgeType, Double> progressMap = new EnumMap<>(BadgeType.class);
         if (config.isConfigurationSection("progress")) {
@@ -92,7 +108,7 @@ public class PlayerDataManager {
             }
         }
 
-        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward);
+        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks);
         playerDataCache.put(uuid, playerData);
     }
 
@@ -125,6 +141,8 @@ public class PlayerDataManager {
         config.set("last-daily-reward", playerData.getLastDailyRewardTime());
         // Salva a lista de biomas visitados
         config.set("visited-biomes", new ArrayList<>(playerData.getVisitedBiomes()));
+        config.set("rank", playerData.getRank().name());
+        config.set("active-playtime-ticks", playerData.getActivePlaytimeTicks());
 
         // Salva o mapa de progresso
         playerData.getProgressMap().forEach((type, progress) -> {
@@ -324,6 +342,9 @@ public class PlayerDataManager {
                 onlinePlayer.sendTitle(title, subtitle, 10, 70, 20);
             }
         }
+
+        // Após conceder uma recompensa, verifica se o jogador pode ser promovido.
+        plugin.getRankManager().checkAndPromote(player);
     }
 
     public void removeBadge(Player player, String badgeId) {

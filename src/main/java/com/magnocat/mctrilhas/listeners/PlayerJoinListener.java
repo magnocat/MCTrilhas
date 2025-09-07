@@ -37,6 +37,9 @@ public class PlayerJoinListener implements Listener {
 
         // 3. Agenda a verificação da recompensa diária para não sobrecarregar o login.
         scheduleDailyRewardNotification(player);
+
+        // 4. Agenda a verificação de promoção de ranque.
+        scheduleRankPromotionCheck(player);
     }
 
     /**
@@ -81,5 +84,16 @@ public class PlayerJoinListener implements Listener {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', notification));
             }
         }, 100L); // Atraso de 5 segundos (100 ticks)
+    }
+
+    /**
+     * Agenda uma tarefa para verificar se o jogador pode ser promovido.
+     * @param player O jogador a ser verificado.
+     */
+    private void scheduleRankPromotionCheck(Player player) {
+        // Atraso de 10 segundos para garantir que todas as estatísticas do jogador estejam carregadas.
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            plugin.getRankManager().checkAndPromote(player);
+        }, 200L); // Atraso de 10 segundos (200 ticks)
     }
 }

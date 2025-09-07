@@ -1,13 +1,7 @@
 package com.magnocat.mctrilhas.commands;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.commands.subcommands.BadgesSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.AdminSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.GetMapSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.ProgressSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.ReloadSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.VersionSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.*;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,24 +11,19 @@ import org.bukkit.command.TabCompleter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("deprecation") // Suprime avisos de API depreciada (ex: ChatColor)
 public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
 
     private final MCTrilhasPlugin plugin;
-    private final Map<String, SubCommand> subCommands = new HashMap<>();
+    private final Map<String, SubCommand> subCommands = new LinkedHashMap<>();
 
     public ScoutCommandExecutor(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
-        registerSubCommands();
-    }
-
-    private void registerSubCommands() {
-        // Comandos de jogador
+        // Registra todos os subcomandos na ordem desejada para o help
         registerSubCommand(new BadgesSubCommand(plugin));
         registerSubCommand(new ProgressSubCommand(plugin));
-        registerSubCommand(new VersionSubCommand(plugin));
         registerSubCommand(new GetMapSubCommand(plugin));
-        // Comandos de administração
+        registerSubCommand(new ToggleProgressSubCommand(plugin));
+        registerSubCommand(new VersionSubCommand(plugin));
         registerSubCommand(new ReloadSubCommand(plugin));
         registerSubCommand(new AdminSubCommand(plugin));
     }
@@ -46,7 +35,7 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sendUsage(sender);
+            sendHelpMessage(sender);
             return true;
         }
 
@@ -54,7 +43,7 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
         SubCommand subCommand = subCommands.get(subCommandName);
 
         if (subCommand == null) {
-            sender.sendMessage(ChatColor.RED + "Comando desconhecido. Use /scout para ver a lista de comandos.");
+            sender.sendMessage(ChatColor.RED + "Comando desconhecido. Use '/scout' para ver a lista de comandos.");
             return true;
         }
 
@@ -63,51 +52,60 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        // Passa os argumentos restantes (excluindo o nome do subcomando)
         String[] subCommandArgs = Arrays.copyOfRange(args, 1, args.length);
         subCommand.execute(sender, subCommandArgs);
-
         return true;
     }
 
-    private void sendUsage(CommandSender sender) {
-        sender.sendMessage(ChatColor.GOLD + "--- Comandos de Escoteiro ---");
+    private void sendHelpMessage(CommandSender sender) {
+        sender.sendMessage(ChatColor.GOLD + "--- Comandos do MCTrilhas ---");
+        // Exibe os comandos de jogador
+        for (SubCommand subCommand : subCommands.values()) {
+            // Pula o comando 'admin' em si, pois seus subcomandos serão listados separadamente
+            if (subCommand.isAdminCommand()) {
+                continue;
+            }
+            if (sender.hasPermission(subCommand.getPermission())) {
+                sender.sendMessage(ChatColor.AQUA + subCommand.getSyntax() + ChatColor.GRAY + " - " + subCommand.getDescription());
+            }
+        }
 
-        // Comandos de jogador
-        subCommands.values().stream()
-            .filter(cmd -> !cmd.isAdminCommand() && sender.hasPermission(cmd.getPermission()))
-            .sorted(Comparator.comparing(SubCommand::getName))
-            .forEach(cmd -> sender.sendMessage(ChatColor.AQUA + cmd.getSyntax() + ChatColor.GRAY + " - " + cmd.getDescription()));
-
-        // Comandos de admin
-        subCommands.values().stream()
-            .filter(cmd -> cmd.isAdminCommand() && sender.hasPermission(cmd.getPermission()))
-            .sorted(Comparator.comparing(SubCommand::getName))
-            .forEach(cmd -> sender.sendMessage(ChatColor.RED + cmd.getSyntax() + ChatColor.GRAY + " - " + cmd.getDescription()));
+        // Se o remetente for um administrador, exibe a seção de administração
+        SubCommand adminCommand = subCommands.get("admin");
+        if (adminCommand != null && sender.hasPermission(adminCommand.getPermission())) {
+            sender.sendMessage(""); // Linha de espaçamento
+            sender.sendMessage(ChatColor.RED + "--- Comandos de Admin ---");
+            if (adminCommand instanceof AdminSubCommand) {
+                AdminSubCommand adminSubCommand = (AdminSubCommand) adminCommand;
+                // Itera sobre os subcomandos internos do AdminSubCommand
+                for (SubCommand adminSub : adminSubCommand.getAdminSubCommands().values()) {
+                    sender.sendMessage(ChatColor.AQUA + adminSub.getSyntax() + ChatColor.GRAY + " - " + adminSub.getDescription());
+                }
+            }
+        }
+        // Adiciona a dica sobre o saldo de Totens
+        if (plugin.getEconomy() != null) {
+            sender.sendMessage(ChatColor.GRAY + "Para ver seu saldo de Totens, use /balance.");
+        }
+        sender.sendMessage(ChatColor.GOLD + "-----------------------------");
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        // Se estiver completando o primeiro argumento (o nome do subcomando)
         if (args.length == 1) {
             String partialCommand = args[0].toLowerCase();
-            return subCommands.values().stream()
-                    .filter(subCmd -> sender.hasPermission(subCmd.getPermission()))
-                    .map(SubCommand::getName)
+            return subCommands.keySet().stream()
+                    .filter(name -> sender.hasPermission(subCommands.get(name).getPermission()))
                     .filter(name -> name.toLowerCase().startsWith(partialCommand))
                     .sorted()
                     .collect(Collectors.toList());
         }
-
-        // Se estiver completando argumentos de um subcomando específico
         if (args.length > 1) {
             SubCommand subCommand = subCommands.get(args[0].toLowerCase());
             if (subCommand != null && sender.hasPermission(subCommand.getPermission())) {
-                // Delega a lógica de autocompletar para o subcomando correto
                 return subCommand.onTabComplete(sender, Arrays.copyOfRange(args, 1, args.length));
             }
         }
-
         return Collections.emptyList();
     }
 }

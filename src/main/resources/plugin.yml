@@ -17,6 +17,11 @@ commands:
     usage: /<command>
     permission: mctrilhas.daily
     aliases: [recompensa, reward]
+  ranque:
+    description: Mostra seu progresso para o próximo ranque escoteiro.
+    usage: /<command>
+    permission: mctrilhas.ranque
+    aliases: [rank]
     permission-message: "§cVocê não tem permissão para usar este comando."
 
 permissions:
@@ -27,6 +32,7 @@ permissions:
       mctrilhas.daily: true
       mctrilhas.admin: true
       mctrilhas.scout.getmap: true
+      mctrilhas.ranque: true
       mctrilhas.progress.other: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
@@ -36,6 +42,9 @@ permissions:
     default: true
   mctrilhas.daily:
     description: Permite ao jogador coletar a recompensa diária.
+    default: true
+  mctrilhas.ranque:
+    description: Permite ao jogador ver seu progresso de ranque.
     default: true
   mctrilhas.admin:
     description: Permite acesso aos comandos administrativos, como remover insígnias.

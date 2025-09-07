@@ -2,6 +2,7 @@ package com.magnocat.mctrilhas;
 
 import com.magnocat.mctrilhas.badges.BadgeManager;
 import com.magnocat.mctrilhas.commands.DailyCommand;
+import com.magnocat.mctrilhas.commands.RankCommand;
 // import com.magnocat.mctrilhas.integrations.BlueMapManager; // Comentado temporariamente
 import com.magnocat.mctrilhas.maps.MapRewardManager;
 import com.magnocat.mctrilhas.managers.BadgeConfigManager;
@@ -18,6 +19,8 @@ import com.magnocat.mctrilhas.listeners.MiningListener;
 import com.magnocat.mctrilhas.listeners.PlayerJoinListener;
 import com.magnocat.mctrilhas.listeners.PlayerQuitListener;
 import com.magnocat.mctrilhas.listeners.MenuListener;
+import com.magnocat.mctrilhas.ranks.RankManager;
+import com.magnocat.mctrilhas.trackers.ActivityTracker;
 import com.magnocat.mctrilhas.menus.BadgeMenu;
 import com.magnocat.mctrilhas.storage.BlockPersistenceManager;
 import com.magnocat.mctrilhas.updater.UpdateChecker;
@@ -40,6 +43,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private BadgeMenu badgeMenu;
     private MapRewardManager mapRewardManager;
     private WebDataManager webDataManager;
+    private RankManager rankManager;
     // private BlueMapManager blueMapManager; // Comentado temporariamente
     private Economy econ = null;
 
@@ -54,6 +58,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
         // Inicia a geração de dados para a página web.
         webDataManager.scheduleUpdates();
+
+        // Inicia o rastreador de atividade de jogadores.
+        new ActivityTracker(this).schedule();
 
         getLogger().info("MCTrilhas foi ativado com sucesso!");
 
@@ -100,6 +107,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.badgeMenu = new BadgeMenu(this);
         this.mapRewardManager = new MapRewardManager(this);
         this.webDataManager = new WebDataManager(this);
+        this.rankManager = new RankManager(this);
         
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
@@ -116,6 +124,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         getCommand("scout").setExecutor(scoutExecutor);
         getCommand("scout").setTabCompleter(scoutExecutor);
         getCommand("daily").setExecutor(new DailyCommand(this));
+        getCommand("ranque").setExecutor(new RankCommand(this));
         getLogger().info("Comandos registrados.");
     }
 
@@ -164,6 +173,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
     public WebDataManager getWebDataManager() {
         return webDataManager;
+    }
+
+    public RankManager getRankManager() {
+        return rankManager;
     }
 
     /* Comentado temporariamente

@@ -3,6 +3,7 @@ package com.magnocat.mctrilhas.commands.subcommands;
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import java.util.Collections;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -82,6 +83,13 @@ public class AdminSubCommand implements SubCommand {
         sender.sendMessage(ChatColor.GOLD + "-----------------------------------------");
     }
 
+    /**
+     * Retorna uma visão não modificável dos subcomandos de administração.
+     * @return Um mapa dos subcomandos de admin.
+     */
+    public Map<String, SubCommand> getAdminSubCommands() {
+        return Collections.unmodifiableMap(subCommands);
+    }
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
         // /scout admin <sub-comando> [argumentos...]
