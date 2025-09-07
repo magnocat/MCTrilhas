@@ -1,0 +1,48 @@
+# Arquivo de locais para a Caça ao Tesouro.
+# Adicione quantos locais quiser. O sistema escolherá aleatoriamente entre eles.
+#
+# Formato: 'world,x,y,z,description'
+# - world: O nome do mundo (ex: "world", "world_nether").
+# - x, y, z: As coordenadas exatas do tesouro.
+# - description: Uma dica que será mostrada ao jogador na bússola.
+#
+# Você pode usar o comando /minecraft:tp @s X Y Z no jogo para encontrar coordenadas.
+
+locations:
+  # --- Florestas e Planícies ---
+  - "world,150,64,-230,Perto da grande cachoeira"
+  - "world,280,75,150,No meio de um campo de girassóis"
+  - "world,-45,80,-320,No topo da árvore mais alta da floresta de carvalho"
+  - "world,512,69,45,Escondido atrás de uma colmeia"
+  - "world,-180,63,-180,Em uma clareira com flores raras"
+  # --- Montanhas e Picos ---
+  - "world,-500,120,800,No topo da montanha nevada"
+  - "world,-610,95,750,Dentro de uma caverna de gelo"
+  - "world,800,150,200,No pico mais alto da cordilheira"
+  - "world,750,80,250,Aos pés de uma formação rochosa peculiar"
+  - "world,-480,110,820,Onde a neve nunca derrete"
+  # --- Desertos e Savanas ---
+  - "world,1200,68,-500,Ao lado de um poço abandonado no deserto"
+  - "world,1350,72,-450,No topo de uma pirâmide de areia"
+  - "world,950,80,-600,Sob a sombra de uma árvore de acácia solitária"
+  - "world,1100,64,-550,Enterrado perto de um cacto gigante"
+  - "world,1000,70,-700,Em um vilarejo do deserto"
+  # --- Oceanos e Ilhas ---
+  - "world,2000,63,1500,Em uma pequena ilha no meio do oceano"
+  - "world,2100,45,1600,Em um navio naufragado"
+  - "world,-1500,50,-1200,Dentro de uma ruína subaquática"
+  - "world,2050,68,1450,Numa praia de areia preta"
+  - "world,-1800,64,-1000,Em uma ilha de cogumelos"
+  # --- Pântanos e Mangues ---
+  - "world,-800,64,-900,Na cabana da bruxa"
+  - "world,-850,67,-950,No topo de uma árvore de mangue"
+  - "world,-750,63,-880,Onde os sapos se reúnem"
+  # --- Nether ---
+  - "world_nether,100,50,100,Em uma fortaleza do Nether"
+  - "world_nether,-50,60,-200,Perto de um portal em ruínas"
+  - "world_nether,200,70,50,Em um bastião dos Piglins"
+  - "world_nether,0,40,0,No meio de um delta de basalto"
+  # --- The End ---
+  - "world_the_end,1000,60,0,Em uma End City"
+  - "world_the_end,1200,70,150,A bordo de um navio do End"
+  # Adicione mais locais aqui para ter uma grande variedade!

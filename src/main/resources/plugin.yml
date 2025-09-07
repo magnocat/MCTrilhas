@@ -23,6 +23,11 @@ commands:
     permission: mctrilhas.ranque
     aliases: [rank]
     permission-message: "§cVocê não tem permissão para usar este comando."
+  tesouro:
+    description: Inicia e gerencia sua caça ao tesouro.
+    usage: /<command> [subcomando]
+    permission: mctrilhas.tesouro
+    aliases: [cacatesouro, treasure]
 
 permissions:
   mctrilhas.*:
@@ -34,6 +39,7 @@ permissions:
       mctrilhas.scout.getmap: true
       mctrilhas.ranque: true
       mctrilhas.progress.other: true
+      mctrilhas.tesouro: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
@@ -45,6 +51,9 @@ permissions:
     default: true
   mctrilhas.ranque:
     description: Permite ao jogador ver seu progresso de ranque.
+    default: true
+  mctrilhas.tesouro:
+    description: Permite ao jogador participar da caça ao tesouro.
     default: true
   mctrilhas.admin:
     description: Permite acesso aos comandos administrativos, como remover insígnias.

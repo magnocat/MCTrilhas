@@ -53,7 +53,7 @@ public class PlayerDataManager {
         if (!playerFile.exists()) {
             // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
             // O ranque inicial é sempre FILHOTE.
-            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0));
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1));
             return;
         }
 
@@ -85,6 +85,10 @@ public class PlayerDataManager {
         // Carrega o tempo de jogo ativo.
         long activePlaytimeTicks = config.getLong("active-playtime-ticks", 0);
 
+        // Carrega os dados da caça ao tesouro.
+        List<String> treasureHuntLocations = config.getStringList("treasure-hunt.locations");
+        int currentTreasureHuntStage = config.getInt("treasure-hunt.stage", -1);
+
         // Lógica de migração única para jogadores existentes sem tempo de jogo ativo.
         if (activePlaytimeTicks == 0 && !config.contains("playtime-migrated")) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
@@ -108,7 +112,7 @@ public class PlayerDataManager {
             }
         }
 
-        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks);
+        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage);
         playerDataCache.put(uuid, playerData);
     }
 
@@ -143,6 +147,9 @@ public class PlayerDataManager {
         config.set("visited-biomes", new ArrayList<>(playerData.getVisitedBiomes()));
         config.set("rank", playerData.getRank().name());
         config.set("active-playtime-ticks", playerData.getActivePlaytimeTicks());
+        // Salva os dados da caça ao tesouro.
+        config.set("treasure-hunt.locations", playerData.getTreasureHuntLocations());
+        config.set("treasure-hunt.stage", playerData.getCurrentTreasureHuntStage());
 
         // Salva o mapa de progresso
         playerData.getProgressMap().forEach((type, progress) -> {

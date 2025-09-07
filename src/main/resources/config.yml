@@ -180,11 +180,12 @@ badges:
     required-progress: 25
     reward-totems: 1000
     reward-item-data:
-      material: "COMPASS"
+      material: "SPYGLASS"
       amount: 1
-      name: "&aBússola do Explorador"
+      name: "&aLuneta do Explorador"
       lore:
-        - "&7Nunca se perca em suas aventuras."
+        - "&7Para enxergar além do horizonte."
+        - "&7Um prêmio para olhos curiosos."
       enchantments:
         - "unbreaking:3"
     reward-map:
@@ -229,3 +230,22 @@ ranks:
     # Requer todas as 8 insígnias.
     required-badges: 8
     required-account-age-days: 120 # 4 meses
+
+# Seção de configuração para a Caça ao Tesouro do Explorador
+treasure-hunt:
+  enabled: true
+  # Quantos locais o jogador precisa encontrar para completar a caça.
+  stages-required: 3
+  # Recompensa final por completar a caça ao tesouro.
+  final-reward:
+    reward-totems: 2500
+    reward-item-data:
+      material: "NETHER_STAR"
+      amount: 1
+      name: "&bCoração do Explorador"
+      lore:
+        - "&7A prova definitiva de que"
+        - "&7nenhum segredo do mundo"
+        - "&7está a salvo de você."
+      enchantments:
+        - "unbreaking:1" # Apenas para o efeito de brilho

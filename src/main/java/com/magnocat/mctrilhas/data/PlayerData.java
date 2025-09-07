@@ -24,8 +24,10 @@ public class PlayerData {
     private Rank rank;
     private long activePlaytimeTicks; // Armazena o tempo de jogo ativo em ticks.
     private transient Location lastAfkCheckLocation; // Não é salvo no arquivo.
+    private List<String> treasureHuntLocations; // Lista de locais para a caça ao tesouro atual (formato "world,x,y,z").
+    private int currentTreasureHuntStage; // Estágio atual da caça ao tesouro.
 
-    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks) {
+    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage) {
         this.playerUUID = playerUUID;
         this.earnedBadgesMap = earnedBadgesMap;
         this.progressMap = progressMap;
@@ -35,6 +37,8 @@ public class PlayerData {
         this.rank = rank;
         this.activePlaytimeTicks = activePlaytimeTicks;
         this.lastAfkCheckLocation = null;
+        this.treasureHuntLocations = treasureHuntLocations;
+        this.currentTreasureHuntStage = currentTreasureHuntStage;
     }
 
     public UUID getPlayerUUID() {
@@ -112,5 +116,21 @@ public class PlayerData {
 
     public void setLastAfkCheckLocation(Location lastAfkCheckLocation) {
         this.lastAfkCheckLocation = lastAfkCheckLocation;
+    }
+
+    public List<String> getTreasureHuntLocations() {
+        return treasureHuntLocations;
+    }
+
+    public void setTreasureHuntLocations(List<String> treasureHuntLocations) {
+        this.treasureHuntLocations = treasureHuntLocations;
+    }
+
+    public int getCurrentTreasureHuntStage() {
+        return currentTreasureHuntStage;
+    }
+
+    public void setCurrentTreasureHuntStage(int currentTreasureHuntStage) {
+        this.currentTreasureHuntStage = currentTreasureHuntStage;
     }
 }
