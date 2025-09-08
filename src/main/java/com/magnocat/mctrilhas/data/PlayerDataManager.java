@@ -53,7 +53,7 @@ public class PlayerDataManager {
         if (!playerFile.exists()) {
             // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
             // O ranque inicial é sempre FILHOTE.
-            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1));
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1, 0, false));
             return;
         }
 
@@ -88,6 +88,8 @@ public class PlayerDataManager {
         // Carrega os dados da caça ao tesouro.
         List<String> treasureHuntLocations = config.getStringList("treasure-hunt.locations");
         int currentTreasureHuntStage = config.getInt("treasure-hunt.stage", -1);
+        int treasureHuntsCompleted = config.getInt("treasure-hunt.completions", 0);
+        boolean hasReceivedGrandPrize = config.getBoolean("treasure-hunt.grand-prize-received", false);
 
         // Lógica de migração única para jogadores existentes sem tempo de jogo ativo.
         if (activePlaytimeTicks == 0 && !config.contains("playtime-migrated")) {
@@ -112,7 +114,7 @@ public class PlayerDataManager {
             }
         }
 
-        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage);
+        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedGrandPrize);
         playerDataCache.put(uuid, playerData);
     }
 
@@ -150,6 +152,8 @@ public class PlayerDataManager {
         // Salva os dados da caça ao tesouro.
         config.set("treasure-hunt.locations", playerData.getTreasureHuntLocations());
         config.set("treasure-hunt.stage", playerData.getCurrentTreasureHuntStage());
+        config.set("treasure-hunt.completions", playerData.getTreasureHuntsCompleted());
+        config.set("treasure-hunt.grand-prize-received", playerData.hasReceivedTreasureGrandPrize());
 
         // Salva o mapa de progresso
         playerData.getProgressMap().forEach((type, progress) -> {

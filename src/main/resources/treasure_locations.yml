@@ -45,4 +45,111 @@ locations:
   # --- The End ---
   - "world_the_end,1000,60,0,Em uma End City"
   - "world_the_end,1200,70,150,A bordo de um navio do End"
-  # Adicione mais locais aqui para ter uma grande variedade!
+
+  # --- Cavernas e Subterrâneo ---
+  - "world,120,20,-400,Em uma caverna exuberante (Lush Cave)"
+  - "world,-300,15,600,No fundo de uma ravina profunda"
+  - "world,50,30,-500,Atrás de uma cachoeira subterrânea"
+  - "world,1800,25,1800,Numa cidade ancestral (Ancient City)"
+  - "world,-900,35,-200,Numa mina abandonada"
+  - "world,400,10,1000,Onde cristais de ametista crescem"
+  - "world,-1100,40,1100,Numa fortaleza subterrânea (Stronghold)"
+  - "world,650,22,-700,Em uma caverna de espeleotemas (Dripstone Cave)"
+  - "world,-250,18,850,Numa passagem secreta cheia de teias"
+  - "world,1500,33,-1500,Onde a lava encontra a água no subsolo"
+
+  # --- Estruturas Geradas (Superfície) ---
+  - "world,3000,70,0,Num posto de vigia dos Pillagers"
+  - "world,-2500,68,-100,Numa mansão da floresta (Woodland Mansion)"
+  - "world,1800,65,500,Num portal em ruínas"
+  - "world,-700,69,1300,Numa cabana de bruxa no pântano"
+  - "world,4000,75,-200,Numa vila de planície"
+  - "world,-3500,80,-800,Numa vila da taiga"
+  - "world,2800,85,2800,Num iglu na tundra"
+  - "world,-1900,64,-1900,Num templo da selva"
+  - "world,3300,67,1200,Num templo do deserto"
+  - "world,-4000,63,4000,Numa ruína de trilha (Trail Ruin)"
+
+  # --- Biomas de Gelo e Frio ---
+  - "world,-600,90,900,Entre os picos de gelo (Ice Spikes)"
+  - "world,-750,63,1000,Numa praia congelada"
+  - "world,-850,70,1150,No meio de um rio congelado"
+  - "world,-950,130,1300,No ponto mais alto de uma montanha de cascalho"
+  - "world,-1000,68,1500,Numa floresta de taiga nevada"
+
+  # --- Biomas Quentes e Áridos ---
+  - "world,1600,70,-800,Num oásis no deserto"
+  - "world,1800,75,-1000,No topo de um platô de terracota (Badlands)"
+  - "world,2000,80,-1200,Numa mina abandonada nas badlands"
+  - "world,1400,69,-1400,Sob uma grande árvore na savana"
+  - "world,1700,90,-1100,Num platô de savana quebrado"
+
+  # --- Biomas Úmidos e Densos ---
+  - "world,-2200,80,-2200,No topo de uma árvore gigante da selva"
+  - "world,-2400,65,-2000,Perto de um pé de cacau raro"
+  - "world,-2600,70,-2400,Numa clareira de bambu"
+  - "world,-900,64,-1000,Numa ilha de cogumelos"
+  - "world,-1050,68,-1150,Sob um cogumelo gigante"
+
+  # --- Locais Aquáticos ---
+  - "world,3500,30,3500,Num monumento oceânico"
+  - "world,-3000,40,-3000,Num recife de coral vibrante"
+  - "world,2500,50,-2500,Numa ruína oceânica quente"
+  - "world,-2800,45,2800,Numa ruína oceânica fria"
+  - "world,5000,62,100,Numa praia de areia vermelha"
+
+  # --- Locais Especiais e de Difícil Acesso ---
+  - "world,0,200,0,Flutuando alto acima do ponto zero"
+  - "world,10000,70,10000,Num canto distante do mundo"
+  - "world,-10000,65,-10000,No extremo oposto do mundo"
+  - "world,700,63,700,No centro de um campo de flores"
+  - "world,-1300,68,-1300,Numa floresta de bétulas altas"
+  - "world,2222,77,2222,Num local de coordenadas repetidas"
+  - "world,-3333,66,-3333,Num local de coordenadas repetidas"
+  - "world,1234,80,4321,Num local de coordenadas divertidas"
+
+  # --- Mais locais no Nether ---
+  - "world_nether,300,80,300,No topo de uma floresta carmesim"
+  - "world_nether,-300,75,-300,No meio de uma floresta distorcida"
+  - "world_nether,0,80,-400,Num vale de areia das almas"
+  - "world_nether,400,40,0,Sob um mar de lava"
+  - "world_nether,-250,60,150,Numa ponte de fortaleza quebrada"
+  - "world_nether,150,55,-250,Escondido em um ninho de Piglins"
+  - "world_nether,-50,90,450,No ponto mais alto do teto do Nether"
+
+  # --- Mais locais no End ---
+  - "world_the_end,-1000,60,0,Numa End City sem navio"
+  - "world_the_end,0,60,1000,Perto de um portal do End Gateway"
+  - "world_the_end,1500,55,1500,Numa ilha externa do End"
+  - "world_the_end,-1800,58,-1200,Onde o coro de frutas é abundante"
+  - "world_the_end,2000,62,-2000,Numa torre de obsidiana"
+
+  # --- Adicionais Variados ---
+  - "world,500,63,-2000,Numa floresta escura (Dark Forest)"
+  - "world,-500,70,2500,Numa ravina que corta uma vila"
+  - "world,300,100,-300,Numa ilha flutuante"
+  - "world,250,63,250,No centro exato de um lago"
+  - "world,-600,62,600,Numa praia rochosa (Stony Shore)"
+  - "world,42,64,42,A resposta para a vida, o universo e tudo mais"
+  - "world,1985,70,-1999,Num local nostálgico"
+  - "world,-2024,68,2025,Entre o presente e o futuro"
+  - "world,314,65,159,Um local matematicamente delicioso (Pi)"
+  - "world,271,72,-828,Um local naturalmente lógico (Euler)"
+  - "world,1618,68,1618,Numa proporção áurea"
+  - "world,7,77,7,Um local de sorte"
+  - "world,-88,88,-88,Um local de poder"
+  - "world,1024,64,2048,Num local computacional"
+  - "world,555,55,-555,Num local com um padrão"
+  - "world,1,64,1,Quase no início"
+  - "world,-1,64,-1,Do outro lado do início"
+  - "world,999,99,999,No limite da grandeza"
+  - "world,1337,69,-1337,Num local de elite"
+  - "world,256,64,512,Num local de memória"
+  - "world,64,64,64,Um stack de blocos no mapa"
+  - "world,100,100,100,Um local perfeitamente cúbico"
+  - "world,-200,-60,-300,Nas profundezas da terra"
+  - "world,404,4,404,Tesouro não encontrado... ou será que foi?"
+  - "world,808,68,-808,Num local com uma batida boa"
+  - "world,12,65,25,Um local para se lembrar"
+  - "world,19,99,1,Um local histórico"
+  - "world,20,20,20,Visão perfeita"

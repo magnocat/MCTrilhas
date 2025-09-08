@@ -155,6 +155,9 @@ public class TreasureHuntManager {
             return; // Sem caça ativa, não faz nada.
         }
 
+        // Remove a bússola antiga antes de dar a mensagem de sucesso.
+        removeTreasureCompasses(player);
+
         int currentStage = playerData.getCurrentTreasureHuntStage();
         int totalStages = playerData.getTreasureHuntLocations().size();
 
@@ -166,8 +169,7 @@ public class TreasureHuntManager {
 
         if (nextStage >= totalStages) {
             // Caça concluída!
-            player.sendTitle(ChatColor.GOLD + "Caça Concluída!", ChatColor.YELLOW + "Você encontrou todos os tesouros!", 10, 70, 20);
-            grantFinalReward(player);
+            plugin.getTreasureHuntRewardManager().handleHuntCompletion(player, playerData);
             // Reseta os dados da caça
             playerData.setTreasureHuntLocations(new ArrayList<>());
             playerData.setCurrentTreasureHuntStage(-1);
@@ -179,45 +181,17 @@ public class TreasureHuntManager {
         }
     }
 
-    private void grantFinalReward(Player player) {
-        ConfigurationSection rewardSection = plugin.getConfig().getConfigurationSection("treasure-hunt.final-reward");
-        if (rewardSection == null) {
-            plugin.getLogger().warning("A seção 'treasure-hunt.final-reward' não foi encontrada no config.yml. Nenhuma recompensa final será dada.");
-            return;
-        }
-
-        // Concede Totens
-        double totems = rewardSection.getDouble("reward-totems", 0);
-        if (totems > 0 && plugin.getEconomy() != null) {
-            plugin.getEconomy().depositPlayer(player, totems);
-            player.sendMessage(ChatColor.GREEN + "Você recebeu " + ChatColor.YELLOW + totems + " Totens" + ChatColor.GREEN + " como recompensa final!");
-        }
-
-        // Concede o Item
-        ConfigurationSection itemSection = rewardSection.getConfigurationSection("reward-item-data");
-        if (itemSection != null) {
-            try {
-                Material material = Material.valueOf(itemSection.getString("material", "DIAMOND").toUpperCase());
-                ItemStack rewardItem = new ItemStack(material, itemSection.getInt("amount", 1));
-                ItemMeta meta = rewardItem.getItemMeta();
-                if (meta != null) {
-                    if (itemSection.contains("name")) meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemSection.getString("name")));
-                    if (itemSection.contains("lore")) {
-                        List<String> lore = new ArrayList<>();
-                        itemSection.getStringList("lore").forEach(line -> lore.add(ChatColor.translateAlternateColorCodes('&', line)));
-                        meta.setLore(lore);
-                    }
-                    // Adiciona o brilho de encantamento e o esconde
-                    if (itemSection.isList("enchantments") && !itemSection.getStringList("enchantments").isEmpty()) {
-                        meta.addEnchant(Enchantment.LURE, 1, true);
-                        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                    }
-                    rewardItem.setItemMeta(meta);
+    /**
+     * Remove todas as instâncias da "Bússola do Tesouro" do inventário do jogador.
+     * @param player O jogador a ter o inventário limpo.
+     */
+    private void removeTreasureCompasses(Player player) {
+        ItemStack[] contents = player.getInventory().getContents();
+        for (ItemStack item : contents) {
+            if (item != null && item.getType() == Material.COMPASS && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+                if (item.getItemMeta().getDisplayName().equals(ChatColor.AQUA + "Bússola do Tesouro")) {
+                    player.getInventory().remove(item);
                 }
-                player.getInventory().addItem(rewardItem);
-                player.sendMessage(ChatColor.GREEN + "Você também recebeu um item lendário!");
-            } catch (Exception e) {
-                plugin.getLogger().severe("Erro ao criar item de recompensa final da caça ao tesouro: " + e.getMessage());
             }
         }
     }

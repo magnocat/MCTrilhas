@@ -2,6 +2,7 @@ package com.magnocat.mctrilhas;
 
 import com.magnocat.mctrilhas.badges.BadgeManager;
 import com.magnocat.mctrilhas.commands.DailyCommand;
+import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;
 import com.magnocat.mctrilhas.commands.TreasureHuntCommand;
 import com.magnocat.mctrilhas.commands.RankCommand;
 // import com.magnocat.mctrilhas.integrations.BlueMapManager; // Comentado temporariamente
@@ -23,6 +24,7 @@ import com.magnocat.mctrilhas.listeners.MenuListener;
 import com.magnocat.mctrilhas.listeners.TreasureHuntListener;
 import com.magnocat.mctrilhas.ranks.RankManager;
 import com.magnocat.mctrilhas.quests.TreasureLocationsManager;
+import com.magnocat.mctrilhas.quests.TreasureHuntRewardManager;
 import com.magnocat.mctrilhas.quests.TreasureHuntManager;
 import com.magnocat.mctrilhas.trackers.ActivityTracker;
 import com.magnocat.mctrilhas.menus.BadgeMenu;
@@ -30,6 +32,7 @@ import com.magnocat.mctrilhas.storage.BlockPersistenceManager;
 import com.magnocat.mctrilhas.updater.UpdateChecker;
 import com.magnocat.mctrilhas.web.WebDataManager;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -50,6 +53,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private RankManager rankManager;
     private TreasureHuntManager treasureHuntManager;
     private TreasureLocationsManager treasureLocationsManager;
+    private TreasureHuntRewardManager treasureHuntRewardManager;
     // private BlueMapManager blueMapManager; // Comentado temporariamente
     private Economy econ = null;
 
@@ -61,6 +65,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         loadManagers();
         registerCommands();
         registerListeners();
+        setupPlaceholders();
 
         // Inicia a geração de dados para a página web.
         webDataManager.scheduleUpdates();
@@ -116,6 +121,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.rankManager = new RankManager(this);
         this.treasureHuntManager = new TreasureHuntManager(this);
         this.treasureLocationsManager = new TreasureLocationsManager(this);
+        this.treasureHuntRewardManager = new TreasureHuntRewardManager(this);
         
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
@@ -159,6 +165,15 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         getLogger().info("Ouvintes de eventos registrados.");
     }
 
+    private void setupPlaceholders() {
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new MCTrilhasExpansion(this).register();
+            getLogger().info("Expansão do PlaceholderAPI registrada com sucesso.");
+        } else {
+            getLogger().info("PlaceholderAPI não encontrado. Placeholders estarão desativados.");
+        }
+    }
+
     public PlayerDataManager getPlayerDataManager() {
         return playerDataManager;
     }
@@ -197,6 +212,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
     public TreasureLocationsManager getTreasureLocationsManager() {
         return treasureLocationsManager;
+    }
+
+    public TreasureHuntRewardManager getTreasureHuntRewardManager() {
+        return treasureHuntRewardManager;
     }
 
     /* Comentado temporariamente

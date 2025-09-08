@@ -236,16 +236,27 @@ treasure-hunt:
   enabled: true
   # Quantos locais o jogador precisa encontrar para completar a caça.
   stages-required: 3
-  # Recompensa final por completar a caça ao tesouro.
-  final-reward:
+  # Recompensa dada CADA VEZ que o jogador completa uma caça.
+  per-completion-reward:
     reward-totems: 2500
     reward-item-data:
       material: "NETHER_STAR"
       amount: 1
       name: "&bCoração do Explorador"
       lore:
-        - "&7A prova definitiva de que"
-        - "&7nenhum segredo do mundo"
-        - "&7está a salvo de você."
+        - "&7Um fragmento de poder obtido"
+        - "&7em suas aventuras."
       enchantments:
         - "unbreaking:1" # Apenas para o efeito de brilho
+  # O grande prêmio, concedido apenas UMA VEZ após um certo número de conclusões.
+  grand-prize:
+    completions-required: 3 # Quantas vezes a caça precisa ser completada.
+    reward-item-data:
+      material: "COMPASS"
+      amount: 1
+      name: "&6Bússola do Mestre Explorador"
+      lore:
+        - "&7Aponta para a sua última morte."
+        - "&eUm prêmio por sua persistência incansável."
+      enchantments:
+        - "unbreaking:3"
