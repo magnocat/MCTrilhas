@@ -1,101 +1,87 @@
 package com.magnocat.mctrilhas.updater;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import org.bukkit.Bukkit;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.Scanner;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
-@SuppressWarnings("deprecation") // Suprime avisos de API depreciada (ex: getDescription)
 public class UpdateChecker {
 
     private final MCTrilhasPlugin plugin;
-    private final String repository; // e.g., "magnocat/MCTrilhas"
+    private final String githubRepo; // Formato "usuario/repositorio"
 
-    public UpdateChecker(MCTrilhasPlugin plugin, String repository) {
+    public UpdateChecker(MCTrilhasPlugin plugin, String githubRepo) {
         this.plugin = plugin;
-        this.repository = repository;
+        this.githubRepo = githubRepo;
     }
 
-    /**
-     * Checks for a new version on GitHub asynchronously.
-     */
     public void checkForUpdates() {
-        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                plugin.getLogger().info("Verificando por novas atualizações...");
+                URL url = new URL("https://api.github.com/repos/" + githubRepo + "/releases/latest");
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Accept", "application/vnd.github.v3+json");
 
-                URL url = new URL("https://api.github.com/repos/" + this.repository + "/releases/latest");
-
-                String jsonContent;
-                try (Scanner scanner = new Scanner(url.openStream())) {
-                    jsonContent = scanner.useDelimiter("\\A").next();
-                }
-
-                String latestVersionTag = getJsonValue(jsonContent, "tag_name");
-
-                if (latestVersionTag == null) {
-                    plugin.getLogger().warning("Não foi possível encontrar a versão da última release na API do GitHub.");
+                if (connection.getResponseCode() != 200) {
+                    plugin.getLogger().warning("Não foi possível verificar por atualizações. Código de resposta: " + connection.getResponseCode());
                     return;
                 }
 
+                JsonObject releaseInfo = JsonParser.parseReader(new InputStreamReader(connection.getInputStream())).getAsJsonObject();
+                String latestVersion = releaseInfo.get("tag_name").getAsString().replace("v", "");
                 String currentVersion = plugin.getDescription().getVersion();
 
-                // Compare versions. Assumes tag is "v" + version (e.g., "v1.0.0").
-                if (!latestVersionTag.equals("v" + currentVersion)) {
-                    plugin.getLogger().info("Uma nova versão foi encontrada: " + latestVersionTag);
-                    plugin.getLogger().info("A sua versão é: " + currentVersion);
-                    plugin.getLogger().info("A nova versão será baixada e instalada na próxima reinicialização.");
+                if (isNewerVersion(latestVersion, currentVersion)) {
+                    plugin.getLogger().info("Uma nova versão está disponível: " + latestVersion + " (Você está na " + currentVersion + ")");
 
-                    String downloadUrl = getJsonValue(jsonContent, "browser_download_url");
-                    if (downloadUrl != null && downloadUrl.endsWith(".jar")) {
-                        downloadUpdate(downloadUrl);
-                    } else {
-                        plugin.getLogger().warning("Não foi possível encontrar o link de download do .jar na API.");
-                    }
+                    String downloadUrl = releaseInfo.getAsJsonArray("assets").get(0).getAsJsonObject().get("browser_download_url").getAsString();
+                    String fileName = releaseInfo.getAsJsonArray("assets").get(0).getAsJsonObject().get("name").getAsString();
+
+                    downloadUpdate(downloadUrl, fileName);
                 } else {
-                    plugin.getLogger().info("Você já está com a versão mais recente do plugin (" + currentVersion + ").");
+                    plugin.getLogger().info("Você está com a versão mais recente do MCTrilhas (" + currentVersion + ").");
                 }
 
-            } catch (IOException e) {
-                plugin.getLogger().warning("Não foi possível conectar à API do GitHub para verificar atualizações: " + e.getMessage());
             } catch (Exception e) {
-                plugin.getLogger().warning("Ocorreu um erro inesperado ao verificar por atualizações.");
-                e.printStackTrace();
+                plugin.getLogger().severe("Erro ao verificar por atualizações: " + e.getMessage());
             }
         });
     }
 
-    private String getJsonValue(String json, String key) {
-        String searchKey = "\"" + key + "\":\"";
-        int keyIndex = json.indexOf(searchKey);
-        if (keyIndex == -1) return null;
-        int valueStartIndex = keyIndex + searchKey.length();
-        int valueEndIndex = json.indexOf("\"", valueStartIndex);
-        if (valueEndIndex == -1) return null;
-        return json.substring(valueStartIndex, valueEndIndex);
+    private boolean isNewerVersion(String latestVersion, String currentVersion) {
+        String[] latestParts = latestVersion.split("\\.");
+        String[] currentParts = currentVersion.split("\\.");
+
+        int length = Math.max(latestParts.length, currentParts.length);
+        for (int i = 0; i < length; i++) {
+            int latestPart = i < latestParts.length ? Integer.parseInt(latestParts[i]) : 0;
+            int currentPart = i < currentParts.length ? Integer.parseInt(currentParts[i]) : 0;
+
+            if (latestPart > currentPart) return true;
+            if (latestPart < currentPart) return false;
+        }
+        return false; // Versões são iguais
     }
 
-    private void downloadUpdate(String downloadUrl) throws IOException {
-        URL url = new URL(downloadUrl);
-
-        // The 'update' folder is where Spigot/Paper automatically installs plugins from on restart.
-        File updateFolder = new File(plugin.getDataFolder().getParentFile(), "update");
-        if (!updateFolder.exists()) {
-            updateFolder.mkdirs();
-        }
-
-        // The destination file. Using the plugin's name from plugin.yml ensures it's correct.
-        File destinationFile = new File(updateFolder, plugin.getDescription().getName() + ".jar");
-
-        try (InputStream in = url.openStream()) {
-            // Use Java NIO for efficient and safe file copying.
-            Files.copy(in, destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    private void downloadUpdate(String downloadUrl, String fileName) {
+        try (InputStream in = new URL(downloadUrl).openStream();
+             ReadableByteChannel rbc = Channels.newChannel(in);
+             FileOutputStream fos = new FileOutputStream(new File(plugin.getDataFolder().getParentFile(), fileName))) {
+            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+            plugin.getLogger().info("A nova versão (" + fileName + ") foi baixada para a pasta 'plugins'.");
+            plugin.getLogger().info("Por favor, reinicie o servidor para aplicar a atualização.");
+        } catch (Exception e) {
+            plugin.getLogger().severe("Falha ao baixar a atualização: " + e.getMessage());
         }
     }
 }

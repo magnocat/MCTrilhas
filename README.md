@@ -22,7 +22,7 @@
 - **Sistema de Insígnias**: Sistema de progresso para diversas atividades (mineração, construção, exploração, etc.) que recompensa os jogadores com insígnias.
 - **Recompensas Configuráveis**: Cada insígnia pode conceder itens customizados, dinheiro (via Vault) e mapas-troféu únicos.
 - **Interface Gráfica (GUI)**: Um menu interativo para que os jogadores visualizem suas insígnias e progresso.
-- **Integração Web**: Gera rankings de jogadores (diário, mensal e geral) em arquivos JSON para serem exibidos em uma página web.
+- **API Web Integrada**: Inicia um servidor web próprio que pode hospedar uma página de estatísticas e fornecer dados em tempo real para sites externos, com proteção opcional por chave de API.
 - **Alta Performance**: O sistema de dados dos jogadores é otimizado com cache e operações assíncronas para evitar sobrecarga no servidor.
 - **Atualização Automática**: O plugin verifica por novas versões no GitHub e as baixa automaticamente para serem instaladas na próxima reinicialização.
 
@@ -64,7 +64,6 @@ Abaixo está a lista completa de comandos disponíveis.
 | `/scout admin addbadge <jogador> <insignia>` | Concede uma insígnia e sua recompensa a um jogador. | `mctrilhas.admin` |
 | `/scout admin removebadge <jogador> <insignia>` | Remove uma insígnia de um jogador e zera seu progresso. | `mctrilhas.admin` |
 | `/scout admin stats <jogador>` | Vê as estatísticas de progresso completas de um jogador. | `mctrilhas.admin` |
-| `/scout admin forcewebdata` | Força a geração imediata dos arquivos de ranking para a página web. | `mctrilhas.admin` |
 | `/scout reload` | Recarrega os arquivos de configuração do plugin. | `mctrilhas.admin` |
 
 ### Permissões Detalhadas
@@ -82,7 +81,6 @@ Abaixo está a lista completa de comandos disponíveis.
 | Plugin      | Necessidade | Motivo                               |
 | ----------- | ----------- | ------------------------------------ |
 | **Vault** | **Obrigatório** | Para o sistema de economia (Totens). |
-| **TinyServer** | Opcional | Usado para hospedar a página web que exibe os rankings gerados pelo plugin. |
 
 ## ⚙️ Configuração
 Todas as insígnias, recompensas e configurações gerais são definidas no arquivo `config.yml`, gerado na pasta `plugins/MCTrilhas/`.

@@ -1,15 +1,27 @@
 package com.magnocat.mctrilhas.commands;
 
-import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.commands.subcommands.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.commands.subcommands.AdminSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.BadgesSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.GetMapSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.ProgressSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.ReloadSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.ToggleProgressSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.VersionSubCommand;
 
 public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
 
@@ -83,6 +95,14 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
                 }
             }
         }
+        sender.sendMessage(""); // Linha de espaçamento para dicas
+        if (sender.hasPermission("mctrilhas.ranque")) {
+            sender.sendMessage(ChatColor.DARK_AQUA + "Use /ranque para ver sua evolução escoteira.");
+        }
+        if (sender.hasPermission("mctrilhas.tesouro")) {
+            sender.sendMessage(ChatColor.DARK_AQUA + "Use /tesouro para iniciar uma caça ao tesouro!");
+        }
+
         // Adiciona a dica sobre o saldo de Totens
         if (plugin.getEconomy() != null) {
             sender.sendMessage(ChatColor.GRAY + "Para ver seu saldo de Totens, use /balance.");

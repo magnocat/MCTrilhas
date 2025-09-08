@@ -260,3 +260,14 @@ treasure-hunt:
         - "&eUm prêmio por sua persistência incansável."
       enchantments:
         - "unbreaking:3"
+
+# Seção para a API web integrada.
+# Permite que uma página web externa busque dados do servidor em tempo real.
+web-api:
+  enabled: false
+  # A porta em que o servidor da API irá rodar.
+  # Certifique-se de que esta porta esteja aberta no firewall do seu servidor.
+  port: 8080
+  # Se uma chave for definida, ela será necessária no header 'X-API-Key' para acessar a API.
+  # Deixe em branco para uma API pública.
+  api-key: ""

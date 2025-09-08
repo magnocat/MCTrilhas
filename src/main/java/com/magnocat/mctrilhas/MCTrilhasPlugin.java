@@ -29,8 +29,8 @@ import com.magnocat.mctrilhas.quests.TreasureHuntManager;
 import com.magnocat.mctrilhas.trackers.ActivityTracker;
 import com.magnocat.mctrilhas.menus.BadgeMenu;
 import com.magnocat.mctrilhas.storage.BlockPersistenceManager;
+import com.magnocat.mctrilhas.web.HttpApiManager;
 import com.magnocat.mctrilhas.updater.UpdateChecker;
-import com.magnocat.mctrilhas.web.WebDataManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -49,11 +49,11 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private BlockPersistenceManager blockPersistenceManager;
     private BadgeMenu badgeMenu;
     private MapRewardManager mapRewardManager;
-    private WebDataManager webDataManager;
     private RankManager rankManager;
     private TreasureHuntManager treasureHuntManager;
     private TreasureLocationsManager treasureLocationsManager;
     private TreasureHuntRewardManager treasureHuntRewardManager;
+    private HttpApiManager httpApiManager;
     // private BlueMapManager blueMapManager; // Comentado temporariamente
     private Economy econ = null;
 
@@ -67,8 +67,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         registerListeners();
         setupPlaceholders();
 
-        // Inicia a geração de dados para a página web.
-        webDataManager.scheduleUpdates();
+        // Inicia o novo servidor de API web.
+        httpApiManager.start();
 
         // Inicia o rastreador de atividade de jogadores.
         new ActivityTracker(this).schedule();
@@ -89,6 +89,11 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 playerDataManager.unloadPlayerData(player.getUniqueId());
             }
             getLogger().info("Dados dos jogadores salvos com sucesso.");
+        }
+
+        // Para o servidor da API web.
+        if (httpApiManager != null) {
+            httpApiManager.stop();
         }
 
         getLogger().info("MCTrilhas foi desativado.");
@@ -117,11 +122,11 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.blockPersistenceManager = new BlockPersistenceManager(this);
         this.badgeMenu = new BadgeMenu(this);
         this.mapRewardManager = new MapRewardManager(this);
-        this.webDataManager = new WebDataManager(this);
         this.rankManager = new RankManager(this);
         this.treasureHuntManager = new TreasureHuntManager(this);
         this.treasureLocationsManager = new TreasureLocationsManager(this);
         this.treasureHuntRewardManager = new TreasureHuntRewardManager(this);
+        this.httpApiManager = new HttpApiManager(this);
         
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
@@ -198,10 +203,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         return mapRewardManager;
     }
 
-    public WebDataManager getWebDataManager() {
-        return webDataManager;
-    }
-
     public RankManager getRankManager() {
         return rankManager;
     }
@@ -242,9 +243,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
         // Recarrega os locais de tesouro
         treasureLocationsManager.loadLocations();
-
-        // Recria e registra novamente o DailyCommand para garantir que ele pegue a instância de economia atualizada.
-        getCommand("daily").setExecutor(new DailyCommand(this));
 
         getLogger().info("As configurações (config.yml) do MCTrilhas foram recarregadas.");
     }

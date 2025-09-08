@@ -1,6 +1,10 @@
 package com.magnocat.mctrilhas.commands;
 
-import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -8,10 +12,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.magnocat.mctrilhas.MCTrilhasPlugin;
 
 public class TreasureHuntCommand implements CommandExecutor, TabCompleter {
 
@@ -57,6 +58,7 @@ public class TreasureHuntCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(ChatColor.AQUA + "/tesouro iniciar" + ChatColor.GRAY + " - Começa uma nova caça ao tesouro.");
         player.sendMessage(ChatColor.AQUA + "/tesouro pista" + ChatColor.GRAY + " - Recebe uma pista para o próximo local.");
         player.sendMessage(ChatColor.AQUA + "/tesouro cancelar" + ChatColor.GRAY + " - Abandona a caça ao tesouro atual.");
+        player.sendMessage(ChatColor.DARK_AQUA + "Use /ranque para ver seu progresso escoteiro!");
         player.sendMessage(ChatColor.GOLD + "-----------------------");
     }
 
