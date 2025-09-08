@@ -58,13 +58,13 @@ public class TreasureHuntManager {
 
         if (allLocations.isEmpty()) {
             player.sendMessage(ChatColor.RED + "A caça ao tesouro não pode ser iniciada pois não há locais configurados.");
-            plugin.getLogger().severe("O arquivo 'treasure_locations.yml' está vazio ou não foi encontrado. A caça ao tesouro está desativada.");
+            plugin.logSevere("O arquivo 'treasure_locations.yml' está vazio ou não foi encontrado. A caça ao tesouro está desativada.");
             return;
         }
 
         if (allLocations.size() < stagesRequired) {
             player.sendMessage(ChatColor.RED + "Não há locais de tesouro suficientes configurados para iniciar uma nova caça.");
-            plugin.getLogger().warning("A caça ao tesouro requer " + stagesRequired + " locais, mas apenas " + allLocations.size() + " estão configurados no treasure_locations.yml.");
+            plugin.logWarn("A caça ao tesouro requer " + stagesRequired + " locais, mas apenas " + allLocations.size() + " estão configurados no treasure_locations.yml.");
             return;
         }
 
@@ -97,7 +97,7 @@ public class TreasureHuntManager {
 
         if (currentStage >= locations.size()) {
             player.sendMessage(ChatColor.RED + "Ocorreu um erro com sua caça ao tesouro. Por favor, contate um administrador.");
-            plugin.getLogger().severe("Erro na caça ao tesouro do jogador " + player.getName() + ": estágio atual (" + currentStage + ") é inválido para a lista de locais (tamanho " + locations.size() + ").");
+            plugin.logSevere("Erro na caça ao tesouro do jogador " + player.getName() + ": estágio atual (" + currentStage + ") é inválido para a lista de locais (tamanho " + locations.size() + ").");
             cancelHunt(player);
             return;
         }
@@ -127,7 +127,7 @@ public class TreasureHuntManager {
 
         } catch (Exception e) {
             player.sendMessage(ChatColor.RED + "Ocorreu um erro ao ler o local do tesouro. Por favor, contate um administrador.");
-            plugin.getLogger().severe("Erro ao processar local de tesouro '" + locationString + "': " + e.getMessage());
+            plugin.logSevere("Erro ao processar local de tesouro '" + locationString + "': " + e.getMessage());
         }
     }
 

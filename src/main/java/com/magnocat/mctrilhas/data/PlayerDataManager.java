@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 @SuppressWarnings("deprecation")
@@ -35,6 +36,11 @@ public class PlayerDataManager {
     private final MCTrilhasPlugin plugin;
     private final File playerDataFolder;
     private final Map<UUID, PlayerData> playerDataCache = new HashMap<>();
+
+    // Caches para os rankings, populados pelos métodos Async e lidos pelo PlaceholderAPI.
+    private final Map<UUID, Integer> dailyBadgeCountsCache = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> monthlyBadgeCountsCache = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> allTimeBadgeCountsCache = new ConcurrentHashMap<>();
 
     public PlayerDataManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
@@ -63,7 +69,7 @@ public class PlayerDataManager {
         Map<String, Long> earnedBadges = new HashMap<>();
         // Lógica de migração: se o formato antigo (lista) existir, converte para o novo (mapa).
         if (config.isList("earned-badges")) {
-            plugin.getLogger().info("Migrando dados de insígnias para o novo formato para o jogador " + uuid);
+            plugin.logInfo("Migrando dados de insígnias para o novo formato para o jogador " + uuid);
             List<String> oldBadges = config.getStringList("earned-badges");
             oldBadges.forEach(badgeId -> earnedBadges.put(badgeId.toLowerCase(), 1L)); // Usa 1L para indicar que é um dado legado.
             config.set("earned-badges", null); // Remove a chave antiga.
@@ -97,7 +103,7 @@ public class PlayerDataManager {
             if (offlinePlayer.hasPlayedBefore()) {
                 activePlaytimeTicks = (long) offlinePlayer.getStatistic(org.bukkit.Statistic.PLAY_ONE_MINUTE);
                 config.set("playtime-migrated", true); // Marca que a migração foi feita.
-                plugin.getLogger().info("Migrando tempo de jogo para " + offlinePlayer.getName() + ". Tempo de jogo inicial definido como " + (activePlaytimeTicks / 72000) + " horas.");
+                plugin.logInfo("Migrando tempo de jogo para " + offlinePlayer.getName() + ". Tempo de jogo inicial definido como " + (activePlaytimeTicks / 72000) + " horas.");
             }
         }
 
@@ -109,7 +115,7 @@ public class PlayerDataManager {
                     double progress = config.getDouble("progress." + typeStr);
                     progressMap.put(type, progress);
                 } catch (IllegalArgumentException e) {
-                    plugin.getLogger().warning("Tipo de progresso inválido '" + typeStr + "' encontrado no arquivo de dados do jogador " + uuid);
+                    plugin.logWarn("Tipo de progresso inválido '" + typeStr + "' encontrado no arquivo de dados do jogador " + uuid);
                 }
             }
         }
@@ -163,7 +169,7 @@ public class PlayerDataManager {
         try {
             config.save(playerFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("Não foi possível salvar o arquivo de dados para o jogador " + uuid);
+            plugin.logSevere("Não foi possível salvar o arquivo de dados para o jogador " + uuid);
             e.printStackTrace();
         }
     }
@@ -256,7 +262,7 @@ public class PlayerDataManager {
             data.getProgressMap().put(type, 0.0);
         } catch (IllegalArgumentException e) {
             // Loga um aviso se o tipo de insígnia for inválido, mas não para a execução.
-            plugin.getLogger().warning("Tentativa de zerar progresso para uma insígnia inválida '" + badgeId + "' para o jogador " + player.getName());
+            plugin.logWarn("Tentativa de zerar progresso para uma insígnia inválida '" + badgeId + "' para o jogador " + player.getName());
         }
     }
 
@@ -314,7 +320,7 @@ public class PlayerDataManager {
                 }
                 player.getInventory().addItem(rewardItem);
             } catch (Exception e) {
-                plugin.getLogger().severe("Erro ao criar item de recompensa para a insígnia '" + configKey + "': " + e.getMessage());
+                plugin.logSevere("Erro ao criar item de recompensa para a insígnia '" + configKey + "': " + e.getMessage());
             }
         }
 
@@ -413,7 +419,7 @@ public class PlayerDataManager {
                     FileConfiguration playerData = YamlConfiguration.loadConfiguration(playerFile);
                     allCounts.put(uuid, playerData.getConfigurationSection("earned-badges-timed").getKeys(false).size());
                 } catch (IllegalArgumentException e) {
-                    plugin.getLogger().warning("Arquivo de jogador com nome inválido ignorado: " + playerFile.getName());
+                    plugin.logWarn("Arquivo de jogador com nome inválido ignorado: " + playerFile.getName());
                 }
             }
         }
@@ -431,7 +437,12 @@ public class PlayerDataManager {
      */
     public CompletableFuture<Map<UUID, Integer>> getAllTimeBadgeCountsAsync() {
         // Para o ranking de todos os tempos, não precisamos de filtro de tempo.
-        return getFilteredBadgeCountsAsync(timestamp -> true);
+        CompletableFuture<Map<UUID, Integer>> future = getFilteredBadgeCountsAsync(timestamp -> true);
+        return future.thenApply(counts -> {
+            this.allTimeBadgeCountsCache.clear();
+            this.allTimeBadgeCountsCache.putAll(counts);
+            return counts;
+        });
     }
 
     /**
@@ -446,7 +457,12 @@ public class PlayerDataManager {
         cal.set(Calendar.MILLISECOND, 0);
         long startOfDay = cal.getTimeInMillis();
 
-        return getFilteredBadgeCountsAsync(timestamp -> timestamp >= startOfDay);
+        CompletableFuture<Map<UUID, Integer>> future = getFilteredBadgeCountsAsync(timestamp -> timestamp >= startOfDay);
+        return future.thenApply(counts -> {
+            this.dailyBadgeCountsCache.clear();
+            this.dailyBadgeCountsCache.putAll(counts);
+            return counts;
+        });
     }
 
     /**
@@ -462,7 +478,12 @@ public class PlayerDataManager {
         cal.set(Calendar.MILLISECOND, 0);
         long startOfMonth = cal.getTimeInMillis();
 
-        return getFilteredBadgeCountsAsync(timestamp -> timestamp >= startOfMonth);
+        CompletableFuture<Map<UUID, Integer>> future = getFilteredBadgeCountsAsync(timestamp -> timestamp >= startOfMonth);
+        return future.thenApply(counts -> {
+            this.monthlyBadgeCountsCache.clear();
+            this.monthlyBadgeCountsCache.putAll(counts);
+            return counts;
+        });
     }
 
     /**
@@ -489,7 +510,7 @@ public class PlayerDataManager {
                             if (count > 0) filteredCounts.put(uuid, (int) count);
                         }
                     } catch (IllegalArgumentException e) {
-                        plugin.getLogger().warning("Arquivo de jogador com nome inválido ignorado: " + playerFile.getName());
+                        plugin.logWarn("Arquivo de jogador com nome inválido ignorado: " + playerFile.getName());
                     }
                 }
             }
@@ -500,5 +521,35 @@ public class PlayerDataManager {
             });
             return filteredCounts;
         });
+    }
+
+    // --- Métodos Síncronos para PlaceholderAPI ---
+
+    /**
+     * Obtém a contagem de insígnias diárias de um jogador a partir do cache.
+     * Operação síncrona e rápida para o PlaceholderAPI.
+     * @param playerUuid O UUID do jogador.
+     * @return O número de insígnias ganhas hoje, ou 0 se não estiver no cache.
+     */
+    public int getDailyBadgeCount(UUID playerUuid) {
+        return dailyBadgeCountsCache.getOrDefault(playerUuid, 0);
+    }
+
+    /**
+     * Obtém a contagem de insígnias mensais de um jogador a partir do cache.
+     * @param playerUuid O UUID do jogador.
+     * @return O número de insígnias ganhas este mês, ou 0.
+     */
+    public int getMonthlyBadgeCount(UUID playerUuid) {
+        return monthlyBadgeCountsCache.getOrDefault(playerUuid, 0);
+    }
+
+    /**
+     * Obtém a contagem total de insígnias de um jogador a partir do cache.
+     * @param playerUuid O UUID do jogador.
+     * @return O número total de insígnias, ou 0.
+     */
+    public int getAllTimeBadgeCount(UUID playerUuid) {
+        return allTimeBadgeCountsCache.getOrDefault(playerUuid, 0);
     }
 }

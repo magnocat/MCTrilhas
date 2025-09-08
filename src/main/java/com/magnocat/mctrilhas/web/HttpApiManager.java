@@ -151,12 +151,18 @@ public class HttpApiManager {
     }
 
     private String getMimeType(String path) {
-        if (path.endsWith(".css")) return "text/css";
-        if (path.endsWith(".js")) return "application/javascript";
-        if (path.endsWith(".png")) return "image/png";
-        if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
-        if (path.endsWith(".svg")) return "image/svg+xml";
-        return "text/html"; // Padrão
+        int lastDot = path.lastIndexOf('.');
+        if (lastDot == -1) return "application/octet-stream"; // Tipo genérico
+
+        return switch (path.substring(lastDot + 1).toLowerCase()) {
+            case "css" -> "text/css";
+            case "js" -> "application/javascript";
+            case "png", "ico" -> "image/png"; // Adicionado .ico
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "svg" -> "image/svg+xml";
+            case "json" -> "application/json"; // Adicionado .json para o manifest
+            default -> "text/html"; // Padrão para .html e outros
+        };
     }
 
     public void stop() {

@@ -33,7 +33,7 @@ public class UpdateChecker {
                 connection.setRequestProperty("Accept", "application/vnd.github.v3+json");
 
                 if (connection.getResponseCode() != 200) {
-                    plugin.getLogger().warning("Não foi possível verificar por atualizações. Código de resposta: " + connection.getResponseCode());
+                    plugin.logWarn("Não foi possível verificar por atualizações. Código de resposta: " + connection.getResponseCode());
                     return;
                 }
 
@@ -42,18 +42,18 @@ public class UpdateChecker {
                 String currentVersion = plugin.getDescription().getVersion();
 
                 if (isNewerVersion(latestVersion, currentVersion)) {
-                    plugin.getLogger().info("Uma nova versão está disponível: " + latestVersion + " (Você está na " + currentVersion + ")");
+                    plugin.logInfo("Uma nova versão está disponível: " + latestVersion + " (Você está na " + currentVersion + ")");
 
                     String downloadUrl = releaseInfo.getAsJsonArray("assets").get(0).getAsJsonObject().get("browser_download_url").getAsString();
                     String fileName = releaseInfo.getAsJsonArray("assets").get(0).getAsJsonObject().get("name").getAsString();
 
                     downloadUpdate(downloadUrl, fileName);
                 } else {
-                    plugin.getLogger().info("Você está com a versão mais recente do MCTrilhas (" + currentVersion + ").");
+                    plugin.logInfo("Você está com a versão mais recente do MCTrilhas (" + currentVersion + ").");
                 }
 
             } catch (Exception e) {
-                plugin.getLogger().severe("Erro ao verificar por atualizações: " + e.getMessage());
+                plugin.logSevere("Erro ao verificar por atualizações: " + e.getMessage());
             }
         });
     }
@@ -78,10 +78,10 @@ public class UpdateChecker {
              ReadableByteChannel rbc = Channels.newChannel(in);
              FileOutputStream fos = new FileOutputStream(new File(plugin.getDataFolder().getParentFile(), fileName))) {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-            plugin.getLogger().info("A nova versão (" + fileName + ") foi baixada para a pasta 'plugins'.");
-            plugin.getLogger().info("Por favor, reinicie o servidor para aplicar a atualização.");
+            plugin.logInfo("A nova versão (" + fileName + ") foi baixada para a pasta 'plugins'.");
+            plugin.logInfo("Por favor, reinicie o servidor para aplicar a atualização.");
         } catch (Exception e) {
-            plugin.getLogger().severe("Falha ao baixar a atualização: " + e.getMessage());
+            plugin.logSevere("Falha ao baixar a atualização: " + e.getMessage());
         }
     }
 }

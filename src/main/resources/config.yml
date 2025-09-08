@@ -20,6 +20,21 @@ badge-announcement:
   # O subtítulo que aparece abaixo do título principal.
   subtitle: "&e{player} &7conquistou a insígnia &b{badgeName}&7!"
 
+# Configuração para a habilidade especial do machado de lenhador (corte rápido de árvores).
+lumberjack-axe:
+  # Se 'true', a habilidade de corte rápido só funcionará com o item customizado abaixo.
+  # Se 'false', funcionará com qualquer machado (comportamento padrão).
+  enabled: true
+  # Definição do item que ativa a habilidade.
+  # O jogador deve estar segurando um item que corresponda a TODAS estas propriedades.
+  custom-item:
+    material: "DIAMOND_AXE"
+    # O nome do item deve corresponder exatamente (incluindo cores).
+    name: "&bMachado do Lenhador"
+    # A lore do item também deve corresponder exatamente.
+    lore:
+      - "&7Eficiência aprimorada para o trabalho."
+
 # Seção onde todas as insígnias são definidas.
 badges:
   # Ativa a interface gráfica (GUI) para o comando /scout badges.
@@ -264,10 +279,10 @@ treasure-hunt:
 # Seção para a API web integrada.
 # Permite que uma página web externa busque dados do servidor em tempo real.
 web-api:
-  enabled: false
+  enabled: true
   # A porta em que o servidor da API irá rodar.
   # Certifique-se de que esta porta esteja aberta no firewall do seu servidor.
-  port: 8080
+  port: 22222
   # Se uma chave for definida, ela será necessária no header 'X-API-Key' para acessar a API.
   # Deixe em branco para uma API pública.
   api-key: ""

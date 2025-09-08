@@ -2,7 +2,7 @@ name: MCTrilhas
 version: '${project.version}'
 main: com.magnocat.mctrilhas.MCTrilhasPlugin
 api-version: '1.20'
-authors: [MagnoCat]
+author: MagnoCat
 description: Plugin de trilhas e insígnias com temática escoteira para o servidor MC Trilhas.
 website: https://github.com/magnocat/MCTrilhas
 softdepend: [Vault, WorldGuard, PlaceholderAPI]

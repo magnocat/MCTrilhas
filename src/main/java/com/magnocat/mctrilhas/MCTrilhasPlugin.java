@@ -1,45 +1,47 @@
 package com.magnocat.mctrilhas;
 
-import com.magnocat.mctrilhas.badges.BadgeManager;
-import com.magnocat.mctrilhas.commands.DailyCommand;
-import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;
-import com.magnocat.mctrilhas.commands.TreasureHuntCommand;
-import com.magnocat.mctrilhas.commands.RankCommand;
-// import com.magnocat.mctrilhas.integrations.BlueMapManager; // Comentado temporariamente
-import com.magnocat.mctrilhas.maps.MapRewardManager;
-import com.magnocat.mctrilhas.managers.BadgeConfigManager;
-import com.magnocat.mctrilhas.data.PlayerDataManager;
-import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;
-import com.magnocat.mctrilhas.listeners.BuilderListener;
-import com.magnocat.mctrilhas.listeners.CookingListener;
-import com.magnocat.mctrilhas.listeners.CraftingListener;
-import com.magnocat.mctrilhas.listeners.ExplorerListener;
-import com.magnocat.mctrilhas.listeners.FishingListener;
-import com.magnocat.mctrilhas.listeners.FarmingListener;
-import com.magnocat.mctrilhas.listeners.LumberjackListener;
-import com.magnocat.mctrilhas.listeners.MiningListener;
-import com.magnocat.mctrilhas.listeners.PlayerJoinListener;
-import com.magnocat.mctrilhas.listeners.PlayerQuitListener;
-import com.magnocat.mctrilhas.listeners.MenuListener;
-import com.magnocat.mctrilhas.listeners.TreasureHuntListener;
-import com.magnocat.mctrilhas.ranks.RankManager;
-import com.magnocat.mctrilhas.quests.TreasureLocationsManager;
-import com.magnocat.mctrilhas.quests.TreasureHuntRewardManager;
-import com.magnocat.mctrilhas.quests.TreasureHuntManager;
-import com.magnocat.mctrilhas.trackers.ActivityTracker;
-import com.magnocat.mctrilhas.menus.BadgeMenu;
-import com.magnocat.mctrilhas.storage.BlockPersistenceManager;
-import com.magnocat.mctrilhas.web.HttpApiManager;
-import com.magnocat.mctrilhas.updater.UpdateChecker;
-import net.milkbowl.vault.economy.Economy;
+import java.util.Arrays;
+import java.util.List;
+
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Arrays;
-import java.util.List;
+import com.magnocat.mctrilhas.badges.BadgeManager;
+import com.magnocat.mctrilhas.commands.DailyCommand;
+import com.magnocat.mctrilhas.commands.RankCommand;
+import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;
+import com.magnocat.mctrilhas.commands.TreasureHuntCommand;
+import com.magnocat.mctrilhas.data.PlayerDataManager;
+import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;
+import com.magnocat.mctrilhas.listeners.BuilderListener;
+import com.magnocat.mctrilhas.listeners.CookingListener;
+import com.magnocat.mctrilhas.listeners.CraftingListener;
+import com.magnocat.mctrilhas.listeners.ExplorerListener;
+import com.magnocat.mctrilhas.listeners.FarmingListener;
+import com.magnocat.mctrilhas.listeners.FishingListener;
+import com.magnocat.mctrilhas.listeners.LumberjackListener;
+import com.magnocat.mctrilhas.listeners.MenuListener;
+import com.magnocat.mctrilhas.listeners.MiningListener;
+import com.magnocat.mctrilhas.listeners.PlayerJoinListener;
+import com.magnocat.mctrilhas.listeners.PlayerQuitListener;
+import com.magnocat.mctrilhas.listeners.TreasureHuntListener;
+import com.magnocat.mctrilhas.managers.BadgeConfigManager;
+import com.magnocat.mctrilhas.maps.MapRewardManager;
+import com.magnocat.mctrilhas.menus.BadgeMenu;
+import com.magnocat.mctrilhas.quests.TreasureHuntManager;
+import com.magnocat.mctrilhas.quests.TreasureHuntRewardManager;
+import com.magnocat.mctrilhas.quests.TreasureLocationsManager;
+import com.magnocat.mctrilhas.ranks.RankManager;
+import com.magnocat.mctrilhas.storage.BlockPersistenceManager;
+import com.magnocat.mctrilhas.trackers.ActivityTracker;
+import com.magnocat.mctrilhas.updater.UpdateChecker;
+import com.magnocat.mctrilhas.web.HttpApiManager;
+
+import net.milkbowl.vault.economy.Economy;
 
 public final class MCTrilhasPlugin extends JavaPlugin {
 
@@ -67,13 +69,27 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         registerListeners();
         setupPlaceholders();
 
+        // Tarefa para atualizar os caches dos rankings periodicamente para o PlaceholderAPI.
+        // Isso garante que os dados exibidos no jogo (via TAB, por exemplo) estejam sempre recentes,
+        // independentemente do acesso à API web.
+        new org.bukkit.scheduler.BukkitRunnable() {
+            @Override
+            public void run() {
+                logInfo("Atualizando caches dos rankings (diário, mensal, geral)...");
+                // Apenas chamar os métodos já é o suficiente, pois eles atualizam o cache internamente.
+                playerDataManager.getDailyBadgeCountsAsync();
+                playerDataManager.getMonthlyBadgeCountsAsync();
+                playerDataManager.getAllTimeBadgeCountsAsync();
+            }
+        }.runTaskTimerAsynchronously(this, 20L * 60, 20L * 60 * 5); // Inicia após 1 minuto, repete a cada 5 minutos
+
         // Inicia o novo servidor de API web.
         httpApiManager.start();
 
         // Inicia o rastreador de atividade de jogadores.
         new ActivityTracker(this).schedule();
 
-        getLogger().info("MCTrilhas foi ativado com sucesso!");
+        logInfo("MCTrilhas foi ativado com sucesso!");
 
         // Inicia a verificação por atualizações.
         new UpdateChecker(this, "magnocat/MCTrilhas").checkForUpdates();
@@ -83,12 +99,12 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     public void onDisable() {
         // Salva os dados de todos os jogadores online para evitar perda de dados durante um reload ou desligamento.
         if (playerDataManager != null) {
-            getLogger().info("Salvando dados dos jogadores online...");
+            logInfo("Salvando dados dos jogadores online...");
             // Itera sobre os jogadores online e salva seus dados do cache para o arquivo.
             for (Player player : getServer().getOnlinePlayers()) {
                 playerDataManager.unloadPlayerData(player.getUniqueId());
             }
-            getLogger().info("Dados dos jogadores salvos com sucesso.");
+            logInfo("Dados dos jogadores salvos com sucesso.");
         }
 
         // Para o servidor da API web.
@@ -96,22 +112,22 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             httpApiManager.stop();
         }
 
-        getLogger().info("MCTrilhas foi desativado.");
+        logInfo("MCTrilhas foi desativado.");
     }
 
     private void setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            getLogger().severe("Vault não encontrado! As recompensas em Totens serão desativadas.");
+            logSevere("Vault não encontrado! As recompensas em Totens serão desativadas.");
             return;
         }
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
-            getLogger().severe("Nenhum provedor de economia do Vault foi encontrado!");
+            logSevere("Nenhum provedor de economia do Vault foi encontrado!");
             return;
         }
         econ = rsp.getProvider();
         if (econ != null) {
-            getLogger().info("Vault e um provedor de economia foram encontrados com sucesso!");
+            logInfo("Vault e um provedor de economia foram encontrados com sucesso!");
         }
     }
 
@@ -134,7 +150,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             this.blueMapManager = new BlueMapManager(this);
             getLogger().info("Integração com BlueMap ativada.");
         }*/
-        getLogger().info("Gerenciadores e menus inicializados.");
+        logInfo("Gerenciadores e menus inicializados.");
     }
 
     private void registerCommands() {
@@ -147,7 +163,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         TreasureHuntCommand treasureHuntExecutor = new TreasureHuntCommand(this);
         getCommand("tesouro").setExecutor(treasureHuntExecutor);
         getCommand("tesouro").setTabCompleter(treasureHuntExecutor);
-        getLogger().info("Comandos registrados.");
+        logInfo("Comandos registrados.");
     }
 
     private void registerListeners() {
@@ -167,15 +183,15 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
-        getLogger().info("Ouvintes de eventos registrados.");
+        logInfo("Ouvintes de eventos registrados.");
     }
 
     private void setupPlaceholders() {
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new MCTrilhasExpansion(this).register();
-            getLogger().info("Expansão do PlaceholderAPI registrada com sucesso.");
+            logInfo("Expansão do PlaceholderAPI registrada com sucesso.");
         } else {
-            getLogger().info("PlaceholderAPI não encontrado. Placeholders estarão desativados.");
+            logInfo("PlaceholderAPI não encontrado. Placeholders estarão desativados.");
         }
     }
 
@@ -244,6 +260,20 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         // Recarrega os locais de tesouro
         treasureLocationsManager.loadLocations();
 
-        getLogger().info("As configurações (config.yml) do MCTrilhas foram recarregadas.");
+        logInfo("As configurações (config.yml) do MCTrilhas foram recarregadas.");
+    }
+
+    // --- Métodos de Log com Cores ---
+
+    public void logInfo(String message) {
+        getLogger().info(ChatColor.AQUA + "[MCTrilhas] " + ChatColor.WHITE + message);
+    }
+
+    public void logWarn(String message) {
+        getLogger().warning(ChatColor.YELLOW + "[MCTrilhas] " + ChatColor.WHITE + message);
+    }
+
+    public void logSevere(String message) {
+        getLogger().severe(ChatColor.RED + "[MCTrilhas] " + ChatColor.WHITE + message);
     }
 }

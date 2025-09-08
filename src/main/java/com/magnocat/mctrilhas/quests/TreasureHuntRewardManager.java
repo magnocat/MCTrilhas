@@ -43,7 +43,7 @@ public class TreasureHuntRewardManager {
     private void grantPerCompletionReward(Player player) {
         ConfigurationSection rewardSection = plugin.getConfig().getConfigurationSection("treasure-hunt.per-completion-reward");
         if (rewardSection == null) {
-            plugin.getLogger().warning("A seção 'treasure-hunt.per-completion-reward' não foi encontrada no config.yml. Nenhuma recompensa será dada.");
+            plugin.logWarn("A seção 'treasure-hunt.per-completion-reward' não foi encontrada no config.yml. Nenhuma recompensa será dada.");
             return;
         }
 
@@ -96,7 +96,7 @@ public class TreasureHuntRewardManager {
                 player.sendMessage(ChatColor.GREEN + successMessage);
             }
         } catch (Exception e) {
-            plugin.getLogger().severe("Erro ao criar item de recompensa da caça ao tesouro: " + e.getMessage());
+            plugin.logSevere("Erro ao criar item de recompensa da caça ao tesouro: " + e.getMessage());
         }
     }
 }
