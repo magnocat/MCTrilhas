@@ -4,6 +4,7 @@ import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
+import com.magnocat.mctrilhas.data.PlayerData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,27 +44,28 @@ public class MCTrilhasExpansion extends PlaceholderExpansion {
             return null;
         }
 
+        String lowerParams = params.toLowerCase();
+
         // Lida com os placeholders de contagem de insígnias.
         // Ex: %mctrilhas_badges_daily%, %mctrilhas_badges_monthly%, %mctrilhas_badges_alltime%
-        int count;
-        switch (params.toLowerCase()) {
+        switch (lowerParams) {
+            case "rank":
+                // O método getRank foi adicionado ao PlayerDataManager para buscar o ranque
+                // de jogadores online (do cache) e offline (do arquivo).
+                // Isso retornará o nome do ranque em maiúsculas (ex: ESCOTEIRO).
+                return dataManager.getRank(player.getUniqueId()).name();
             case "badges_daily":
                 // NOTA: Este método precisa existir no seu PlayerDataManager e retornar a contagem diária.
-                count = dataManager.getDailyBadgeCount(player.getUniqueId());
-                break;
+                return String.valueOf(dataManager.getDailyBadgeCount(player.getUniqueId()));
             case "badges_monthly":
                 // NOTA: Este método precisa existir no seu PlayerDataManager e retornar a contagem mensal.
-                count = dataManager.getMonthlyBadgeCount(player.getUniqueId());
-                break;
+                return String.valueOf(dataManager.getMonthlyBadgeCount(player.getUniqueId()));
             case "badges_alltime":
                 // NOTA: Este método precisa existir no seu PlayerDataManager e retornar a contagem total.
-                count = dataManager.getAllTimeBadgeCount(player.getUniqueId());
-                break;
+                return String.valueOf(dataManager.getAllTimeBadgeCount(player.getUniqueId()));
             default:
                 // Se o placeholder não for reconhecido, retorna null.
                 return null;
         }
-
-        return String.valueOf(count);
     }
 }

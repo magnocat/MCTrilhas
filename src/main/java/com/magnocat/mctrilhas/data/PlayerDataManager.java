@@ -178,6 +178,26 @@ public class PlayerDataManager {
         return playerDataCache.get(playerUUID);
     }
 
+    /**
+     * Obtém o ranque de um jogador. Para jogadores online, lê do cache. Para jogadores offline, lê do arquivo.
+     * <p>
+     * <strong>Aviso:</strong> A leitura de arquivos para jogadores offline no thread principal pode impactar a performance
+     * se usada em larga escala (ex: em uma tablist com muitos jogadores offline).
+     *
+     * @param uuid O UUID do jogador.
+     * @return O {@link Rank} do jogador, ou o ranque padrão (FILHOTE) se não for encontrado.
+     */
+    public Rank getRank(UUID uuid) {
+        // Primeiro, verifica o cache (para jogadores online)
+        if (playerDataCache.containsKey(uuid)) {
+            return playerDataCache.get(uuid).getRank();
+        }
+        // Se não estiver no cache, lê do arquivo (para jogadores offline)
+        File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
+        FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+        return Rank.fromString(config.getString("rank", "FILHOTE"));
+    }
+
     // --- Métodos de conveniência para serem usados pelos listeners e comandos ---
 
     public void addProgress(Player player, BadgeType type, double amount) {
@@ -337,13 +357,6 @@ public class PlayerDataManager {
             player.sendMessage(ChatColor.GREEN + "Você também recebeu um troféu especial!");
         }
 
-        /* Comentado temporariamente para desativar a integração com BlueMap
-        // --- LÓGICA DE INTEGRAÇÃO COM BLUEMAP ---
-        if (plugin.getBlueMapManager() != null) {
-            // Passa a chave da configuração para obter o nome da insígnia.
-            plugin.getBlueMapManager().addBadgeMarker(player, configKey);
-        }
-        */
         // --- LÓGICA DE ANÚNCIO GLOBAL ---
         if (plugin.getConfig().getBoolean("badge-announcement.enabled", false)) {
             String title = plugin.getConfig().getString("badge-announcement.title", "&6&lINSÍGNIA!");
@@ -354,13 +367,13 @@ public class PlayerDataManager {
             subtitle = ChatColor.translateAlternateColorCodes('&', subtitle.replace("{player}", player.getName()).replace("{badgeName}", badgeName));
 
             // Envia o título para todos os jogadores online
-            // Os números são: fadeIn (em ticks), stay (em ticks), fadeOut (em ticks)
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                // fadeIn, stay, fadeOut (em ticks)
                 onlinePlayer.sendTitle(title, subtitle, 10, 70, 20);
             }
         }
 
-        // Após conceder uma recompensa, verifica se o jogador pode ser promovido.
+        // Após conceder todas as recompensas, verifica se o jogador pode ser promovido.
         plugin.getRankManager().checkAndPromote(player);
     }
 
