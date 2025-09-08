@@ -142,10 +142,15 @@ public class HttpApiManager {
             }
 
             exchange.getResponseHeaders().set("Content-Type", getMimeType(path));
-            byte[] content = resourceStream.readAllBytes();
-            exchange.sendResponseHeaders(200, content.length);
+            // Envia o cabeçalho com tamanho 0, pois vamos transmitir os dados em chunks.
+            exchange.sendResponseHeaders(200, 0);
             try (OutputStream os = exchange.getResponseBody()) {
-                os.write(content);
+                // Transmite o arquivo em pedaços para economizar memória.
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = resourceStream.read(buffer)) != -1) {
+                    os.write(buffer, 0, bytesRead);
+                }
             }
         }
     }
