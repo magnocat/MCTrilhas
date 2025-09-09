@@ -7,8 +7,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="author" content="MagnoCat Tecnologia https://magno.cat">
-        <!-- Chart.js CDN -->
+    
+    <!-- Cole o código do Google AdSense aqui (o que vai no <head>) -->
+
+    <!-- Chart.js e seu adaptador de data (ESSENCIAL para o gráfico funcionar) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
     <title>MC Trilhas - Servidor Minecraft Escoteiro</title>
     
@@ -38,7 +42,7 @@
         }
         body {
             font-family: 'Roboto', sans-serif;
-            background-image: url('http://magnocat.net:22222/bg.jpg');
+            background-image: url('/bg.jpg');
             background-color: #f7fafc;
             color: #333;
             margin: 0;
@@ -131,6 +135,41 @@
             </ul>
         </section>
         <!-- Rankings -->
+        <!-- Como Jogar -->
+        <section class="card">
+            <h2 class="section-title">Como Jogar</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Instruções Java -->
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">☕ Java Edition</h3>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li>No menu principal, clique em <strong>Multijogador</strong>.</li>
+                        <li>Clique em <strong>Adicionar Servidor</strong>.</li>
+                        <li>Em "Nome do Servidor", digite <strong>MC Trilhas</strong>.</li>
+                        <li>Em "Endereço do Servidor", cole: <strong>mcj.magnocat.net</strong></li>
+                        <li>Clique em <strong>Concluído</strong> e entre na aventura!</li>
+                    </ol>
+                </div>
+                <!-- Instruções Bedrock -->
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">📱 Bedrock Edition</h3>
+                    <p class="text-sm mb-2">(Celular, Videogame, Windows 10/11)</p>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li>No menu principal, vá para a aba <strong>Servidores</strong>.</li>
+                        <li>Role até o final e clique em <strong>Adicionar Servidor</strong>.</li>
+                        <li>Em "Nome do Servidor", digite <strong>MC Trilhas</strong>.</li>
+                        <li>Em "Endereço do Servidor", cole: <strong>mcb.magnocat.net</strong></li>
+                        <li>A porta é <strong>19132</strong> (geralmente já vem preenchida).</li>
+                        <li>Clique em <strong>Salvar</strong> e entre na aventura!</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exemplo de local para um bloco de anúncios do AdSense -->
+        <!-- <div class="card text-center p-4">Seu bloco de anúncios aqui</div> -->
+
+        <!-- Rankings -->
         <section class="grid md:grid-cols-3 gap-6">
             <!-- Ranking Diário -->
             <div class="card">
@@ -170,29 +209,15 @@
             </div>
         </section>
 
-        <!-- Lista de Acesso -->
+        <!-- Links Úteis -->
         <section class="card">
-            <h2 class="section-title">Links de Acesso</h2>
+            <h2 class="section-title">Links Úteis</h2>
             <div class="space-y-4">
                 <div class="link-item">
                     <i class="fas fa-gamepad text-2xl text-green-600" aria-label="Ícone de gamepad"></i>
                     <div>
                         <a href="http://magnocat.net:22222" target="_blank" class="text-blue-600 hover:underline font-semibold">magnocat.net</a>
                         <p>Este site.</p>
-                    </div>
-                </div>
-                <div class="link-item">
-                    <i class="fas fa-cube text-2xl text-green-600" aria-label="Ícone de cubo"></i>
-                    <div>
-                        <a href="minecraft://mcj.magnocat.net" target="_blank" class="text-blue-600 hover:underline font-semibold">mcj.magnocat.net</a>
-                        <p>Servidor Minecraft Java Edition para aventuras épicas.</p>
-                    </div>
-                </div>
-                <div class="link-item">
-                    <i class="fas fa-cube text-2xl text-green-600" aria-label="Ícone de cubo"></i>
-                    <div>
-                        <a href="minecraft://mcb.magnocat.net" target="_blank" class="text-blue-600 hover:underline font-semibold">mcb.magnocat.net</a>
-                        <p>Servidor Minecraft Bedrock Edition para jogadores multiplataforma.</p>
                     </div>
                 </div>
                 <div class="link-item">
@@ -206,7 +231,7 @@
                     <i class="fab fa-discord text-2xl text-green-600" aria-label="Ícone do Discord"></i>
                     <div>
                         <a href="http://discord.magnocat.net" target="_blank" class="text-blue-600 hover:underline font-semibold">discord.magnocat.net</a>
-                        <p>Junte-se à nossa comunidade no Discord para novidades, suporte e para reportar problemas ou sugestões!</p>
+                        <p>Precisa de ajuda, quer sugerir algo ou apenas conversar? Junte-se à nossa comunidade no Discord! É o nosso principal canal para suporte, novidades e interação.</p>
                     </div>
                 </div>
                 <div class="link-item">
@@ -217,12 +242,6 @@
                     </div>
                 </div>
             </div>
-        </section>
-
-        <!-- Suporte e Contato -->
-        <section class="card">
-            <h2 class="section-title">Suporte e Contato</h2>
-            <p class="text-lg">Precisa de ajuda ou quer sugerir algo? Junte-se ao nosso <a href="http://discord.magnocat.net" target="_blank" class="text-blue-600 hover:underline">Discord</a> para suporte direto da equipe e da comunidade!</p>
         </section>
 
         <!-- Sobre o Grupo Escoteiro -->
@@ -236,13 +255,30 @@
 
     <!-- Rodapé -->
     <footer class="footer">
-        <p>© 2025 MagnoCat Tecnologia. Todos os direitos reservados.</p>
+        <p>© <span id="copyright-year">2024</span> MagnoCat Tecnologia. Todos os direitos reservados.</p>
         <p>Inspirado pelo <a href="https://g.co/kgs/idwXxCh" target="_blank" class="text-green-400 hover:underline">Grupo Escoteiro do Ar Cidade das Flores</a>.</p>
     </footer>
     
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Adicione sua chave de API aqui se você configurou uma no config.yml do plugin
+    // --- Lógica do PWA: Registra o Service Worker ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then(registration => {
+                console.log('ServiceWorker registrado com sucesso:', registration.scope);
+            }, err => {
+                console.error('Falha ao registrar o ServiceWorker:', err);
+            });
+        });
+    }
+
+    // --- Lógica do Rodapé: Atualiza o ano do copyright ---
+    const startYear = 2024;
+    const currentYear = new Date().getFullYear();
+    const yearEl = document.getElementById('copyright-year');
+    yearEl.textContent = (currentYear > startYear) ? `${startYear} - ${currentYear}` : startYear;
+
+    // --- Lógica da API: Busca e renderiza os dados do servidor ---
     const API_KEY = ''; // Ex: 'sua-chave-secreta-aqui'
     const API_ENDPOINT = '/api/v1/data';
 
