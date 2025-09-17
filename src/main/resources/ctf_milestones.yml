@@ -1,0 +1,64 @@
+# ----------------------------------------------------------------
+#  Recompensas de Marco Histórico (Milestones) do CTF
+# ----------------------------------------------------------------
+#
+# Defina aqui as recompensas que os jogadores recebem ao atingir
+# certas marcas em suas estatísticas permanentes de CTF.
+#
+# Estrutura:
+# milestones:
+#   <tipo_de_estatistica>: (kills, wins, flagCaptures)
+#     - id: "id_unico_da_recompensa" (NÃO MUDE ISSO DEPOIS DE DEFINIDO)
+#       name: "Nome do Marco Histórico"
+#       required: <numero_necessario>
+#       reward-item:
+#         material: "NOME_DO_MATERIAL"
+#         amount: <quantidade>
+#         name: "&bNome do Item"
+#         lore:
+#           - "&7Linha 1 da descrição"
+#           - "&7Linha 2 da descrição"
+#         enchantments:
+#           - "enchantment_name:level" (opcional)
+
+milestones:
+  kills:
+    - id: "ctf_kills_1"
+      name: "100 Abates no CTF"
+      required: 100
+      reward-item:
+        material: "NETHER_STAR"
+        amount: 1
+        name: "&cMedalha do Artilheiro"
+        lore:
+          - "&7Concedida por alcançar 100 abates"
+          - "&7em partidas de Capture a Bandeira."
+          - ""
+          - "&6Um troféu para exibir seu valor em combate."
+        enchantments:
+          - "unbreaking:1" # Apenas para o efeito de brilho
+
+    - id: "ctf_kills_2"
+      name: "500 Abates no CTF"
+      required: 500
+      reward-item:
+        material: "DIAMOND"
+        amount: 1
+        name: "&bDiamante de Sangue"
+        lore:
+          - "&7Concedido por alcançar 500 abates."
+          - ""
+          - "&cSeu nome ecoa nos campos de batalha."
+
+  wins:
+    - id: "ctf_wins_1"
+      name: "10 Vitórias no CTF"
+      required: 10
+      reward-item:
+        material: "EMERALD"
+        amount: 1
+        name: "&aJóia do Campeão"
+        lore:
+          - "&7Concedida por alcançar 10 vitórias."
+          - ""
+          - "&eO primeiro de muitos triunfos."

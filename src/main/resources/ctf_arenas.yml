@@ -1,0 +1,39 @@
+# ----------------------------------------------------------------
+#  Configuração das Arenas de Capture The Flag (CTF)
+# ----------------------------------------------------------------
+#
+# Cada seção aqui representa uma arena. A chave (ex: floresta_densa) é o ID interno da arena.
+#
+# Formato das localizações: "mundo,x,y,z,yaw,pitch"
+# - mundo: O nome do mundo onde a arena está (ex: minigames).
+# - x, y, z: As coordenadas.
+# - yaw, pitch: A direção para onde o jogador vai olhar (opcional, mas recomendado para spawns).
+#
+# min-players: Mínimo de jogadores para a partida começar.
+# max-players: Máximo de jogadores na arena.
+# score-to-win: Pontuação necessária para vencer a partida.
+# game-duration-seconds: Duração da partida em segundos (ex: 600 para 10 minutos).
+# countdown-seconds: Duração da contagem regressiva inicial em segundos.
+# flag-reset-seconds: Tempo em segundos para a bandeira caída voltar para a base.
+#
+arenas:
+  exemplo_arena:
+    # Nome de exibição da arena (suporta códigos de cor com &)
+    name: "&aArena de Exemplo"
+    min-players: 2
+    max-players: 8
+    score-to-win: 3
+    game-duration-seconds: 600 # 10 minutos
+    countdown-seconds: 10 # 10 segundos
+    flag-reset-seconds: 30 # 30 segundos
+    locations:
+      # Ponto de espera para os jogadores antes da partida começar
+      lobby: "world,0.5,100.0,0.5,0,0"
+      # Spawn do time vermelho
+      red-spawn: "world,50.5,65.0,0.5,90,0"
+      # Spawn do time azul
+      blue-spawn: "world,-50.5,65.0,0.5,-90,0"
+      # Localização inicial da bandeira vermelha
+      red-flag: "world,55.5,66.0,0.5,0,0"
+      # Localização inicial da bandeira azul
+      blue-flag: "world,-55.5,66.0,0.5,0,0"

@@ -28,6 +28,11 @@ commands:
     usage: /<command> [subcomando]
     permission: mctrilhas.tesouro
     aliases: [cacatesouro, treasure]
+  ctf:
+    description: Comando principal para o modo de jogo Capture a Bandeira.
+    usage: /ctf <subcomando>
+    aliases: [capturetheflag]
+    permission: mctrilhas.ctf.use
 
 permissions:
   mctrilhas.*:
@@ -40,6 +45,13 @@ permissions:
       mctrilhas.ranque: true
       mctrilhas.progress.other: true
       mctrilhas.tesouro: true
+      mctrilhas.ctf.use: true
+      mctrilhas.ctf.join: true
+      mctrilhas.ctf.leave: true
+      mctrilhas.ctf.list: true
+      mctrilhas.ctf.stats: true
+      mctrilhas.ctf.stats.other: true
+      mctrilhas.ctf.admin: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
@@ -55,6 +67,27 @@ permissions:
   mctrilhas.tesouro:
     description: Permite ao jogador participar da caça ao tesouro.
     default: true
+  mctrilhas.ctf.use:
+    description: Permite usar os comandos básicos do CTF.
+    default: true
+  mctrilhas.ctf.join:
+    description: Permite entrar na fila do CTF.
+    default: true
+  mctrilhas.ctf.leave:
+    description: Permite sair da fila do CTF.
+    default: true
+  mctrilhas.ctf.list:
+    description: Permite listar as arenas de CTF.
+    default: true
+  mctrilhas.ctf.stats:
+    description: Permite ver as próprias estatísticas de CTF.
+    default: true
+  mctrilhas.ctf.stats.other:
+    description: Permite ver as estatísticas de CTF de outros jogadores.
+    default: op
+  mctrilhas.ctf.admin:
+    description: Permite gerenciar as arenas de CTF.
+    default: op
   mctrilhas.admin:
     description: Permite acesso aos comandos administrativos, como remover insígnias.
     default: op

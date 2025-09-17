@@ -2,6 +2,7 @@ package com.magnocat.mctrilhas.web;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.magnocat.mctrilhas.data.PlayerCTFStats;
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.sun.net.httpserver.HttpServer;
 import org.bukkit.Bukkit;
@@ -25,12 +26,17 @@ public class HttpApiManager {
     private final MCTrilhasPlugin plugin;
     private HttpServer server;
     private final Gson gson = new GsonBuilder().create();
-    private final Map<String, Object> cachedData = new ConcurrentHashMap<>();
-    private long lastCacheTime = 0;
-    private static final long CACHE_DURATION_MS = 60 * 1000; // 1 minuto
 
     private final List<Map<String, Object>> activityHistory = new CopyOnWriteArrayList<>();
     private static final int MAX_HISTORY_POINTS = 144; // 144 pontos * 10 min = 24 horas
+
+    // Caches para os rankings
+    private final Map<String, Integer> dailyLeaderboardCache = new ConcurrentHashMap<>();
+    private final Map<String, Integer> monthlyLeaderboardCache = new ConcurrentHashMap<>();
+    private final Map<String, Integer> allTimeLeaderboardCache = new ConcurrentHashMap<>();
+    private final Map<String, Integer> ctfWinsLeaderboardCache = new ConcurrentHashMap<>();
+    private final Map<String, Integer> ctfKillsLeaderboardCache = new ConcurrentHashMap<>();
+    private final Map<String, Integer> ctfCapturesLeaderboardCache = new ConcurrentHashMap<>();
 
     public HttpApiManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
@@ -38,87 +44,32 @@ public class HttpApiManager {
 
     public void start() {
         if (!plugin.getConfig().getBoolean("web-api.enabled", false)) {
-            plugin.getLogger().info("API web integrada está desativada na configuração.");
+            plugin.logInfo("API web integrada está desativada na configuração.");
             return;
         }
 
         scheduleActivitySnapshot();
 
-        int port = plugin.getConfig().getInt("web-api.port", 8080);
+        int port = plugin.getConfig().getInt("web-api.port", 22222);
         try {
             server = HttpServer.create(new InetSocketAddress(port), 0);
 
             // Contexto para a API de dados dinâmicos
-            server.createContext("/api/v1/data", exchange -> {
-                // Configura headers para permitir o acesso de qualquer origem (CORS)
-                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-                exchange.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8");
-
-                if (!"GET".equals(exchange.getRequestMethod())) {
-                    exchange.sendResponseHeaders(405, -1); // Method Not Allowed
-                    return;
-                }
-
-                // --- Verificação da Chave de API ---
-                String requiredKey = plugin.getConfig().getString("web-api.api-key", "").trim();
-                if (!requiredKey.isEmpty()) {
-                    String providedKey = exchange.getRequestHeaders().getFirst("X-API-Key");
-                    if (!requiredKey.equals(providedKey)) {
-                        String error = "{\"error\":\"Chave de API inválida ou não fornecida.\"}";
-                        exchange.sendResponseHeaders(403, error.length()); // Forbidden
-                        try (OutputStream os = exchange.getResponseBody()) {
-                            os.write(error.getBytes());
-                        }
-                        return;
-                    }
-                }
-
-                // Usa dados do cache se ainda forem válidos
-                if (System.currentTimeMillis() - lastCacheTime < CACHE_DURATION_MS) {
-                    String jsonResponse = gson.toJson(cachedData);
-                    byte[] responseBytes = jsonResponse.getBytes("UTF-8");
-                    exchange.sendResponseHeaders(200, responseBytes.length);
-                    try (OutputStream os = exchange.getResponseBody()) {
-                        os.write(responseBytes);
-                    }
-                    return;
-                }
-
-                // Se o cache expirou, gera novos dados de forma assíncrona
-                generateApiData().thenAccept(data -> {
-                    try {
-                        cachedData.clear();
-                        cachedData.putAll(data);
-                        lastCacheTime = System.currentTimeMillis();
-
-                        String jsonResponse = gson.toJson(data);
-                        byte[] responseBytes = jsonResponse.getBytes("UTF-8");
-
-                        exchange.sendResponseHeaders(200, responseBytes.length);
-                        try (OutputStream os = exchange.getResponseBody()) {
-                            os.write(responseBytes);
-                        }
-                    } catch (IOException e) {
-                        plugin.getLogger().severe("Erro ao enviar resposta da API: " + e.getMessage());
-                    }
-                }).exceptionally(ex -> {
-                    plugin.getLogger().severe("Erro ao gerar dados para a API: " + ex.getMessage());
-                    try {
-                        exchange.sendResponseHeaders(500, -1); // Internal Server Error
-                    } catch (IOException ignored) {}
-                    return null;
-                });
-            });
+            server.createContext("/api/v1/data", this::handleApiDataRequest);
 
             // Contexto para servir arquivos estáticos (o site)
             server.createContext("/", this::handleStaticFileRequest);
 
             server.setExecutor(null); // usa o executor padrão
             server.start();
-            plugin.getLogger().info("Servidor da API web iniciado na porta: " + port);
+            plugin.logInfo("Servidor da API web iniciado na porta: " + port);
+
+            // Agenda a atualização do cache dos rankings
+            long updateInterval = 20L * 60 * 5; // 5 minutos
+            plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this::updateAllLeaderboardCaches, 20L * 10, updateInterval);
 
         } catch (IOException e) {
-            plugin.getLogger().severe("Falha ao iniciar o servidor da API web: " + e.getMessage());
+            plugin.logSevere("Falha ao iniciar o servidor da API web: " + e.getMessage());
         }
     }
 
@@ -155,6 +106,41 @@ public class HttpApiManager {
         }
     }
 
+    private void handleApiDataRequest(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+        // Configura headers para permitir o acesso de qualquer origem (CORS)
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8");
+
+        if (!"GET".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+            return;
+        }
+
+        // --- Verificação da Chave de API ---
+        String requiredKey = plugin.getConfig().getString("web-api.api-key", "").trim();
+        if (!requiredKey.isEmpty()) {
+            String providedKey = exchange.getRequestHeaders().getFirst("X-API-Key");
+            if (!requiredKey.equals(providedKey)) {
+                String error = "{\"error\":\"Chave de API inválida ou não fornecida.\"}";
+                exchange.sendResponseHeaders(403, error.length()); // Forbidden
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(error.getBytes());
+                }
+                return;
+            }
+        }
+
+        // Gera os dados da API usando os caches
+        Map<String, Object> apiData = generateApiDataFromCache();
+        String jsonResponse = gson.toJson(apiData);
+        byte[] responseBytes = jsonResponse.getBytes("UTF-8");
+
+        exchange.sendResponseHeaders(200, responseBytes.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(responseBytes);
+        }
+    }
+
     private String getMimeType(String path) {
         int lastDot = path.lastIndexOf('.');
         if (lastDot == -1) return "application/octet-stream"; // Tipo genérico
@@ -173,23 +159,41 @@ public class HttpApiManager {
     public void stop() {
         if (server != null) {
             server.stop(0);
-            plugin.getLogger().info("Servidor da API web parado.");
+            plugin.logInfo("Servidor da API web parado.");
         }
     }
 
-    private CompletableFuture<Map<String, Object>> generateApiData() {
-        CompletableFuture<Map<UUID, Integer>> allTimeFuture = plugin.getPlayerDataManager().getAllTimeBadgeCountsAsync();
-        CompletableFuture<Map<UUID, Integer>> monthlyFuture = plugin.getPlayerDataManager().getMonthlyBadgeCountsAsync();
-        CompletableFuture<Map<UUID, Integer>> dailyFuture = plugin.getPlayerDataManager().getDailyBadgeCountsAsync();
+    private void updateAllLeaderboardCaches() {
+        plugin.logInfo("Atualizando caches dos rankings para a API Web...");
+        // Atualiza rankings de insígnias
+        plugin.getPlayerDataManager().getDailyBadgeCountsAsync().thenAccept(counts -> dailyLeaderboardCache.putAll(formatLeaderboard(counts)));
+        plugin.getPlayerDataManager().getMonthlyBadgeCountsAsync().thenAccept(counts -> monthlyLeaderboardCache.putAll(formatLeaderboard(counts)));
+        plugin.getPlayerDataManager().getAllTimeBadgeCountsAsync().thenAccept(counts -> allTimeLeaderboardCache.putAll(formatLeaderboard(counts)));
+        // Atualiza rankings de CTF
+        updateCtfLeaderboardCaches();
+    }
 
-        return CompletableFuture.allOf(allTimeFuture, monthlyFuture, dailyFuture).thenApply(v -> {
-            Map<String, Object> apiData = new HashMap<>();
-            apiData.put("serverStatus", Map.of("onlinePlayers", Bukkit.getOnlinePlayers().size(), "maxPlayers", Bukkit.getMaxPlayers()));
-            apiData.put("leaderboards", Map.of("allTime", formatLeaderboard(allTimeFuture.join()), "monthly", formatLeaderboard(monthlyFuture.join()), "daily", formatLeaderboard(dailyFuture.join())));
-            apiData.put("activityHistory", activityHistory);
-            apiData.put("lastUpdated", System.currentTimeMillis());
-            return apiData;
+    private void updateCtfLeaderboardCaches() {
+        plugin.getPlayerDataManager().getAllPlayerCTFStatsAsync().thenAccept(allStats -> {
+            ctfWinsLeaderboardCache.clear();
+            ctfKillsLeaderboardCache.clear();
+            ctfCapturesLeaderboardCache.clear();
+
+            ctfWinsLeaderboardCache.putAll(sortAndLimit(allStats, PlayerCTFStats::getWins));
+            ctfKillsLeaderboardCache.putAll(sortAndLimit(allStats, PlayerCTFStats::getKills));
+            ctfCapturesLeaderboardCache.putAll(sortAndLimit(allStats, PlayerCTFStats::getFlagCaptures));
+            plugin.logInfo("Caches de ranking do CTF atualizados.");
         });
+    }
+
+    private Map<String, Object> generateApiDataFromCache() {
+        Map<String, Object> apiData = new HashMap<>();
+        apiData.put("serverStatus", Map.of("onlinePlayers", Bukkit.getOnlinePlayers().size(), "maxPlayers", Bukkit.getMaxPlayers()));
+        apiData.put("leaderboards", Map.of("allTime", allTimeLeaderboardCache, "monthly", monthlyLeaderboardCache, "daily", dailyLeaderboardCache));
+        apiData.put("ctfLeaderboards", Map.of("wins", ctfWinsLeaderboardCache, "kills", ctfKillsLeaderboardCache, "captures", ctfCapturesLeaderboardCache));
+        apiData.put("activityHistory", activityHistory);
+        apiData.put("lastUpdated", System.currentTimeMillis());
+        return apiData;
     }
 
     private Map<String, Integer> formatLeaderboard(Map<UUID, Integer> rawData) {
@@ -197,6 +201,21 @@ public class HttpApiManager {
                 .sorted(Map.Entry.<UUID, Integer>comparingByValue().reversed())
                 .limit(10) // Limita ao top 10
                 .collect(Collectors.toMap(entry -> Bukkit.getOfflinePlayer(entry.getKey()).getName(), Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+    }
+
+    private Map<String, Integer> sortAndLimit(Map<UUID, PlayerCTFStats> statsMap, java.util.function.Function<PlayerCTFStats, Integer> valueExtractor) {
+        return statsMap.entrySet().stream()
+                .sorted(Map.Entry.<UUID, PlayerCTFStats>comparingByValue((s1, s2) -> Integer.compare(valueExtractor.apply(s2), valueExtractor.apply(s1))))
+                .limit(10) // Limita ao top 10
+                .collect(Collectors.toMap(
+                        entry -> {
+                            String name = Bukkit.getOfflinePlayer(entry.getKey()).getName();
+                            return name != null ? name : entry.getKey().toString().substring(0, 8);
+                        },
+                        entry -> valueExtractor.apply(entry.getValue()),
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
     }
 
     private void scheduleActivitySnapshot() {

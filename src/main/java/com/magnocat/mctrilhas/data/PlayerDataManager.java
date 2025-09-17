@@ -59,14 +59,14 @@ public class PlayerDataManager {
         if (!playerFile.exists()) {
             // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
             // O ranque inicial é sempre FILHOTE.
-            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1, 0, false));
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>()));
             return;
         }
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
 
         // A estrutura de insígnias agora é um Map<String, Long> (badgeId -> timestamp).
-        Map<String, Long> earnedBadges = new HashMap<>();
+        Map<String, Long> earnedBadges = new HashMap<>(); 
         // Lógica de migração: se o formato antigo (lista) existir, converte para o novo (mapa).
         if (config.isList("earned-badges")) {
             plugin.logInfo("Migrando dados de insígnias para o novo formato para o jogador " + uuid);
@@ -97,6 +97,9 @@ public class PlayerDataManager {
         int treasureHuntsCompleted = config.getInt("treasure-hunt.completions", 0);
         boolean hasReceivedGrandPrize = config.getBoolean("treasure-hunt.grand-prize-received", false);
 
+        // Carrega os marcos de CTF já reivindicados.
+        List<String> claimedCtfMilestones = config.getStringList("claimed-ctf-milestones");
+
         // Lógica de migração única para jogadores existentes sem tempo de jogo ativo.
         if (activePlaytimeTicks == 0 && !config.contains("playtime-migrated")) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
@@ -120,7 +123,7 @@ public class PlayerDataManager {
             }
         }
 
-        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedGrandPrize);
+        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedGrandPrize, new HashSet<>(claimedCtfMilestones));
         playerDataCache.put(uuid, playerData);
     }
 
@@ -160,6 +163,7 @@ public class PlayerDataManager {
         config.set("treasure-hunt.stage", playerData.getCurrentTreasureHuntStage());
         config.set("treasure-hunt.completions", playerData.getTreasureHuntsCompleted());
         config.set("treasure-hunt.grand-prize-received", playerData.hasReceivedTreasureGrandPrize());
+        config.set("claimed-ctf-milestones", new ArrayList<>(playerData.getClaimedCtfMilestones()));
 
         // Salva o mapa de progresso
         playerData.getProgressMap().forEach((type, progress) -> {
@@ -564,5 +568,63 @@ public class PlayerDataManager {
      */
     public int getAllTimeBadgeCount(UUID playerUuid) {
         return allTimeBadgeCountsCache.getOrDefault(playerUuid, 0);
+    }
+
+    // --- Métodos para o Sistema de Estatísticas e Marcos do CTF ---
+
+    public PlayerCTFStats getPlayerCTFStats(UUID playerUUID) {
+        File playerFile = new File(playerDataFolder, playerUUID.toString() + ".yml");
+        if (!playerFile.exists()) {
+            return new PlayerCTFStats(); // Retorna estatísticas zeradas para um novo jogador
+        }
+        FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+        return PlayerCTFStats.fromConfig(config.getConfigurationSection("ctf-stats"));
+    }
+
+    public void savePlayerCTFStats(UUID playerUUID, PlayerCTFStats stats) {
+        File playerFile = new File(playerDataFolder, playerUUID.toString() + ".yml");
+        FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+        stats.saveToConfig(config.createSection("ctf-stats"));
+        try {
+            config.save(playerFile);
+        } catch (IOException e) {
+            plugin.getLogger().severe("Não foi possível salvar as estatísticas de CTF para " + playerUUID);
+        }
+    }
+
+    public boolean hasClaimedCtfMilestone(UUID playerUUID, String milestoneId) {
+        PlayerData data = getPlayerData(playerUUID);
+        return data != null && data.getClaimedCtfMilestones().contains(milestoneId.toLowerCase());
+    }
+
+    public void addClaimedCtfMilestone(UUID playerUUID, String milestoneId) {
+        PlayerData data = getPlayerData(playerUUID);
+        if (data != null) {
+            data.getClaimedCtfMilestones().add(milestoneId.toLowerCase());
+        }
+    }
+
+    /**
+     * Obtém as estatísticas de CTF de todos os jogadores de forma assíncrona.
+     * @return Um CompletableFuture com o mapa de UUID para PlayerCTFStats.
+     */
+    public CompletableFuture<Map<UUID, PlayerCTFStats>> getAllPlayerCTFStatsAsync() {
+        return CompletableFuture.supplyAsync(() -> {
+            Map<UUID, PlayerCTFStats> allStats = new HashMap<>();
+            File[] playerFiles = playerDataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+
+            if (playerFiles != null) {
+                for (File playerFile : playerFiles) {
+                    try {
+                        UUID uuid = UUID.fromString(playerFile.getName().replace(".yml", ""));
+                        FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+                        allStats.put(uuid, PlayerCTFStats.fromConfig(config.getConfigurationSection("ctf-stats")));
+                    } catch (Exception e) {
+                        plugin.logWarn("Arquivo de jogador com nome inválido ou erro de leitura ignorado: " + playerFile.getName());
+                    }
+                }
+            }
+            return allStats;
+        });
     }
 }

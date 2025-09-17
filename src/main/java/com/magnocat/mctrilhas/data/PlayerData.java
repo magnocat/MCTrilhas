@@ -28,8 +28,9 @@ public class PlayerData {
     private int currentTreasureHuntStage; // Estágio atual da caça ao tesouro.
     private int treasureHuntsCompleted; // Contador de caças ao tesouro concluídas.
     private boolean hasReceivedTreasureGrandPrize; // Flag para garantir que o grande prêmio seja dado apenas uma vez.
+    private final Set<String> claimedCtfMilestones;
 
-    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize) {
+    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones) {
         this.playerUUID = playerUUID;
         this.earnedBadgesMap = earnedBadgesMap;
         this.progressMap = progressMap;
@@ -43,6 +44,7 @@ public class PlayerData {
         this.currentTreasureHuntStage = currentTreasureHuntStage;
         this.treasureHuntsCompleted = treasureHuntsCompleted;
         this.hasReceivedTreasureGrandPrize = hasReceivedTreasureGrandPrize;
+        this.claimedCtfMilestones = claimedCtfMilestones;
     }
 
     public UUID getPlayerUUID() {
@@ -152,5 +154,9 @@ public class PlayerData {
 
     public void setHasReceivedTreasureGrandPrize(boolean hasReceivedTreasureGrandPrize) {
         this.hasReceivedTreasureGrandPrize = hasReceivedTreasureGrandPrize;
+    }
+
+    public Set<String> getClaimedCtfMilestones() {
+        return claimedCtfMilestones;
     }
 }

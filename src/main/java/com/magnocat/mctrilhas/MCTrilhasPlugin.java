@@ -15,6 +15,10 @@ import com.magnocat.mctrilhas.commands.DailyCommand;
 import com.magnocat.mctrilhas.commands.RankCommand;
 import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;
 import com.magnocat.mctrilhas.commands.TreasureHuntCommand;
+import com.magnocat.mctrilhas.ctf.CTFCommand;
+import com.magnocat.mctrilhas.ctf.CTFManager;
+import com.magnocat.mctrilhas.ctf.CTFArena; // Import para usar o método parseLocation
+import com.magnocat.mctrilhas.ctf.milestones.CTFMilestoneManager;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
 import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;
 import com.magnocat.mctrilhas.listeners.BuilderListener;
@@ -29,6 +33,7 @@ import com.magnocat.mctrilhas.listeners.MiningListener;
 import com.magnocat.mctrilhas.listeners.PlayerJoinListener;
 import com.magnocat.mctrilhas.listeners.PlayerQuitListener;
 import com.magnocat.mctrilhas.listeners.TreasureHuntListener;
+import com.magnocat.mctrilhas.ctf.CTFListener;
 import com.magnocat.mctrilhas.managers.BadgeConfigManager;
 import com.magnocat.mctrilhas.maps.MapRewardManager;
 import com.magnocat.mctrilhas.menus.BadgeMenu;
@@ -41,6 +46,7 @@ import com.magnocat.mctrilhas.trackers.ActivityTracker;
 import com.magnocat.mctrilhas.updater.UpdateChecker;
 import com.magnocat.mctrilhas.web.HttpApiManager;
 
+import org.bukkit.Location;
 import net.milkbowl.vault.economy.Economy;
 
 public final class MCTrilhasPlugin extends JavaPlugin {
@@ -56,6 +62,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private TreasureLocationsManager treasureLocationsManager;
     private TreasureHuntRewardManager treasureHuntRewardManager;
     private HttpApiManager httpApiManager;
+    private CTFManager ctfManager;
+    private CTFMilestoneManager ctfMilestoneManager;
     // private BlueMapManager blueMapManager; // Comentado temporariamente
     private Economy econ = null;
 
@@ -68,6 +76,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         registerCommands();
         registerListeners();
         setupPlaceholders();
+
+        // Carrega as arenas do CTF
+        ctfManager.loadArenas();
 
         // Tarefa para atualizar os caches dos rankings periodicamente para o PlaceholderAPI.
         // Isso garante que os dados exibidos no jogo (via TAB, por exemplo) estejam sempre recentes,
@@ -143,6 +154,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.treasureLocationsManager = new TreasureLocationsManager(this);
         this.treasureHuntRewardManager = new TreasureHuntRewardManager(this);
         this.httpApiManager = new HttpApiManager(this);
+        this.ctfManager = new CTFManager(this);
+        this.ctfMilestoneManager = new CTFMilestoneManager(this);
         
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
@@ -163,6 +176,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         TreasureHuntCommand treasureHuntExecutor = new TreasureHuntCommand(this);
         getCommand("tesouro").setExecutor(treasureHuntExecutor);
         getCommand("tesouro").setTabCompleter(treasureHuntExecutor);
+        CTFCommand ctfExecutor = new CTFCommand(this);
+        getCommand("ctf").setExecutor(ctfExecutor); 
+        getCommand("ctf").setTabCompleter(ctfExecutor);
         logInfo("Comandos registrados.");
     }
 
@@ -179,7 +195,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new ExplorerListener(this),
                 new PlayerQuitListener(this), // Essencial para salvar os dados do jogador ao sair.
                 new MenuListener(),
-                new TreasureHuntListener(this)
+                new TreasureHuntListener(this),
+                new CTFListener(this)
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
@@ -235,6 +252,14 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         return treasureHuntRewardManager;
     }
 
+    public CTFManager getCtfManager() {
+        return ctfManager;
+    }
+
+    public CTFMilestoneManager getCtfMilestoneManager() {
+        return ctfMilestoneManager;
+    }
+
     /* Comentado temporariamente
     public BlueMapManager getBlueMapManager() {
         return blueMapManager;
@@ -260,7 +285,25 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         // Recarrega os locais de tesouro
         treasureLocationsManager.loadLocations();
 
+        // Recarrega as arenas de CTF
+        ctfManager.loadArenas();
+
         logInfo("As configurações (config.yml) do MCTrilhas foram recarregadas.");
+    }
+
+    /**
+     * Teleporta um jogador para o local do hub definido no config.yml.
+     * @param player O jogador a ser teleportado.
+     */
+    public void teleportToHub(Player player) {
+        String hubLocString = getConfig().getString("server-settings.hub-location");
+        Location hubLocation = CTFArena.parseLocation(hubLocString); // Reutiliza o método de parse da arena
+        if (hubLocation != null) {
+            player.teleport(hubLocation);
+        } else {
+            logWarn("A localização do hub não está definida ou é inválida no config.yml. O jogador não foi teleportado.");
+            player.sendMessage(ChatColor.RED + "Erro: O local de retorno (hub) não está configurado no servidor.");
+        }
     }
 
     // --- Métodos de Log com Cores ---

@@ -76,6 +76,23 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
     *   **Funcionalidades:** Desafios, filas, kits de equipamento padronizados, estatísticas de vitórias/derrotas.
     *   **Integrações:** Planejado para usar WorldGuard (para arenas) e Citizens (para NPCs de gerenciamento).
 
+*   ### Sistema CTF (Capture The Flag)
+    *   **Descrição:** Um modo de jogo competitivo baseado em equipes (ex: Vermelha vs. Azul) onde o objetivo é invadir a base inimiga, capturar a bandeira e trazê-la para a própria base para pontuar.
+    *   **Funcionalidades:**
+        *   Arenas dedicadas com bases, bandeiras e pontos de respawn.
+        *   Sistema de times e balanceamento automático de jogadores.
+        *   Kits de equipamento pré-definidos para um jogo justo.
+        *   Placar em tempo real e recompensas para a equipe vencedora (ex: 100 Totens por vitória).
+        *   **Seleção de Kits (Futuro):** Menu para escolher entre diferentes classes (ex: Arqueiro, Tanque, Batedor) antes da partida.
+    *   **Integrações Futuras (com Sistema de Clãs):**
+        *   Partidas de Clã vs. Clã.
+        *   Filas para times pré-formados por membros do mesmo clã.
+        *   Rankings de Clãs específicos para o modo CTF.
+        *   Ferramentas para organização de torneios.
+        *   **Integração com BlueMap:** Exibição em tempo real da posição das bandeiras e status da partida no mapa web.
+    *   **Recompensas Especiais (Futuro):**
+        *   Troféus customizados (similar aos de insígnias) para campeonatos.
+
 *   ### Sistema "Vale dos Pioneiros" (Terrenos de Jogadores)
     *   **Descrição:** Um mundo de construção criativa onde jogadores de ranque elevado podem comprar e proteger seus próprios terrenos.
     *   **Funcionalidades:** Compra de terrenos usando Totens, proteção automática da área, gerenciamento de permissões para amigos.
