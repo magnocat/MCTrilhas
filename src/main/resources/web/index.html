@@ -209,6 +209,46 @@
             </p>
         </section>
 
+        <!-- Guia de Criação de Arena CTF -->
+        <section class="card">
+            <h2 class="section-title">Como Criar sua Própria Arena de CTF (Guia para Admins)</h2>
+            <p class="mb-4 text-lg">
+                Administradores podem expandir a diversão adicionando novas arenas ao servidor! O processo é simples e usa plugins comuns como <a href="https://dev.bukkit.org/projects/multiverse-core" target="_blank" class="text-blue-600 hover:underline">Multiverse-Core</a> e <a href="https://dev.bukkit.org/projects/worldedit" target="_blank" class="text-blue-600 hover:underline">WorldEdit</a>. Recomendamos criar as arenas em um mundo separado e vazio para melhor organização e performance.
+            </p>
+
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Passo 1: Criar um Mundo Vazio (Void)</h3>
+                    <p class="mb-2">Primeiro, crie um mundo limpo que servirá como contêiner para suas arenas. Use o seguinte comando do Multiverse:</p>
+                    <code class="block bg-gray-100 p-2 rounded">/mv create arenas_ctf normal -g VoidGenerator</code>
+                    <p class="mt-2 text-sm text-gray-600">Este comando cria um mundo chamado <strong>arenas_ctf</strong> que é completamente vazio. Depois, teleporte-se para ele com <code>/mv tp arenas_ctf</code>.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Passo 2: Importar sua Arena (Schematic)</h3>
+                    <p class="mb-2">Com sua arena já salva como um arquivo <code>.schematic</code> ou <code>.schem</code>, siga estes passos:</p>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li>Coloque o arquivo da sua arena na pasta <code>plugins/WorldEdit/schematics/</code>.</li>
+                        <li>No jogo, dentro do mundo vazio, carregue o arquivo com: <code class="bg-gray-100 p-1 rounded">//schem load nome_do_seu_arquivo</code></li>
+                        <li>Posicione-se onde deseja que a arena apareça e cole-a com: <code class="bg-gray-100 p-1 rounded">//paste</code></li>
+                        <li class="text-sm text-gray-600">Dica: Se a posição não ficou boa, use <code>//undo</code> para desfazer e tente novamente.</li>
+                    </ol>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Passo 3: Registrar a Arena no MCTrilhas</h3>
+                    <p class="mb-2">Agora que a construção está no mundo, você precisa dizer ao plugin onde ficam os pontos importantes. Use os comandos de administrador do CTF:</p>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li>Inicie o processo: <code>/ctf admin create id_da_sua_arena</code> (ex: <code>castelo</code>, <code>floresta</code>).</li>
+                        <li>Voe até cada local importante e defina os pontos (lobby, redspawn, bluespawn, redflag, blueflag) usando <code>/ctf admin set &lt;tipo&gt;</code>.</li>
+                        <li>Verifique se todos os pontos foram definidos com <code>/ctf admin status</code>.</li>
+                        <li>Finalize e salve a arena com: <code>/ctf admin save</code></li>
+                    </ol>
+                    <p class="mt-2">Pronto! Sua arena será carregada e estará disponível para as próximas partidas.</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Comandos do Servidor -->
         <section class="card">
             <h2 class="section-title">Comandos do Servidor</h2>

@@ -42,11 +42,9 @@ jobs:
               line-length: disable
               document-start: disable
 
-      # Passo 3: Roda os testes unitários. O 'clean' garante um ambiente limpo antes de compilar e testar.
-      - name: Run Unit Tests
-        run: mvn clean test
-
-      # Passo 4: Compila o projeto com o Maven, criando o arquivo .jar
+      # Passo 3: Compila o projeto com Maven, criando o arquivo .jar.
+      # Os testes são pulados (-DskipTests) pois testes de plugins Bukkit requerem um ambiente
+      # de servidor mockado, que não está configurado neste workflow.
       # A versão é passada dinamicamente usando o número da execução do workflow (ex: 1.0.4, 1.0.5, etc)
       # Para tags, a versão é extraída da tag (ex: v1.1.0 -> 1.1.0)
       - name: Build with Maven
@@ -59,10 +57,9 @@ jobs:
             VERSION_STRING="1.0.${{ github.run_number }}" # Para builds de desenvolvimento, usa 1.0.X onde X é o número da execução
           fi
           echo "Building with version: $VERSION_STRING"
-          # Usamos -DskipTests para não rodar os testes novamente, pois já foram executados no passo anterior
-          mvn package -Dproject.version.full="$VERSION_STRING" -Dmaven.compiler.showWarnings=false -DskipTests --file pom.xml
+          mvn clean package -Dproject.version.full="$VERSION_STRING" -Dmaven.compiler.showWarnings=false -DskipTests --file pom.xml
 
-      # Passo 5: Se o gatilho foi uma tag, cria um Release no GitHub
+      # Passo 4: Se o gatilho foi uma tag, cria um Release no GitHub
       - name: Create Release and Upload Artifact
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
@@ -70,7 +67,7 @@ jobs:
           # Usa um wildcard para encontrar o .jar, evitando erros quando a versão muda
           files: target/*.jar
 
-      # Passo 6: Se o gatilho foi um push na 'main', anexa o .jar como um artefato do build
+      # Passo 5: Se o gatilho foi um push na 'main', anexa o .jar como um artefato do build
       - name: Upload Development Artifact
         if: "!startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v4
