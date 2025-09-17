@@ -58,6 +58,9 @@ public class HttpApiManager {
             // Contexto para a API de dados dinâmicos
             server.createContext("/api/v1/data", this::handleApiDataRequest);
 
+            // Contexto para a API de login do admin
+            server.createContext("/api/v1/admin/login", this::handleAdminLoginRequest);
+
             // Contexto para servir arquivos estáticos (o site)
             server.createContext("/", this::handleStaticFileRequest);
 
@@ -80,9 +83,10 @@ public class HttpApiManager {
             path = "/index.html"; // Rota padrão
         }
 
-        // Redireciona para a página de login do admin se o caminho for /admin
-        if (path.equals("/admin")) {
-            path = "/admin/index.html";
+        // Redireciona para a página de login do admin.
+        // Futuramente, isso será mais inteligente: se o usuário não estiver logado, vai para login.html. Se estiver, vai para index.html.
+        if (path.equals("/admin") || path.equals("/admin/")) {
+            path = "/admin/login.html"; // Por enquanto, sempre mostra a página de login.
         }
 
         // Medida de segurança simples para evitar ataques de "directory traversal"
@@ -147,6 +151,48 @@ public class HttpApiManager {
         }
     }
 
+    private void handleAdminLoginRequest(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+        // Habilita CORS para o painel de administração
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, OPTIONS");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+
+        // Responde a requisições OPTIONS para o pre-flight do CORS
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1); // No Content
+            return;
+        }
+
+        if (!"POST".equals(exchange.getRequestMethod())) {
+            sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use POST.\"}");
+            return;
+        }
+
+        try {
+            // Lê o corpo da requisição (JSON)
+            String requestBody = new String(exchange.getRequestBody().readAllBytes());
+            @SuppressWarnings("unchecked")
+            Map<String, String> loginData = gson.fromJson(requestBody, Map.class);
+            String providedUser = loginData.get("username");
+            String providedPass = loginData.get("password");
+
+            // Obtém credenciais do config.yml
+            String requiredUser = plugin.getConfig().getString("web-api.admin-credentials.username", "admin");
+            String requiredPass = plugin.getConfig().getString("web-api.admin-credentials.password", "changeme");
+
+            if (requiredUser.equals(providedUser) && requiredPass.equals(providedPass)) {
+                // Sucesso! Futuramente, aqui geraríamos um token de sessão.
+                sendJsonResponse(exchange, 200, "{\"success\":true, \"message\":\"Login bem-sucedido!\"}");
+            } else {
+                // Falha
+                sendJsonResponse(exchange, 401, "{\"success\":false, \"error\":\"Usuário ou senha inválidos.\"}");
+            }
+        } catch (Exception e) {
+            plugin.logSevere("Erro ao processar requisição de login: " + e.getMessage());
+            sendJsonResponse(exchange, 500, "{\"success\":false, \"error\":\"Erro interno do servidor.\"}");
+        }
+    }
+
     private String getMimeType(String path) {
         int lastDot = path.lastIndexOf('.');
         if (lastDot == -1) return "application/octet-stream"; // Tipo genérico
@@ -161,6 +207,16 @@ public class HttpApiManager {
             default -> "text/html"; // Padrão para .html e outros
         };
     }
+
+    private void sendJsonResponse(com.sun.net.httpserver.HttpExchange exchange, int statusCode, String jsonResponse) throws IOException {
+        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+        byte[] responseBytes = jsonResponse.getBytes("UTF-8");
+        exchange.sendResponseHeaders(statusCode, responseBytes.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(responseBytes);
+        }
+    }
+
 
     public void stop() {
         if (server != null) {

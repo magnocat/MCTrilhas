@@ -299,3 +299,7 @@ web-api:
   # Se uma chave for definida, ela será necessária no header 'X-API-Key' para acessar a API.
   # Deixe em branco para uma API pública.
   api-key: ""
+  # Novas credenciais para o painel de administração
+  admin-credentials:
+    username: "admin"
+    password: "changeme" # IMPORTANTE: Altere esta senha!
