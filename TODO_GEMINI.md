@@ -62,19 +62,33 @@ Revisão das principais funcionalidades implementadas e decisões tomadas:
 
 ---
 
-## 5. Roadmap de Funcionalidades Futuras
+## 5. Roadmap de Funcionalidades
 
 Este é o plano de longo prazo para as próximas grandes funcionalidades, conforme discutido e documentado em `docs/DOCUMENTACAO_TECNICA.md`.
+
+*   ### 🎯 EM FOCO: Sistema de Duelos 1v1
+    *   **Descrição:** Um sistema de combate justo e competitivo em arenas designadas.
+    *   **Funcionalidades Planejadas:**
+        *   Sistema de desafios diretos (`/duelo desafiar <jogador>`).
+        *   Arenas configuráveis em `duel_arenas.yml`.
+        *   Kits de equipamento padronizados e selecionáveis (`duel_kits.yml`).
+        *   Contagem regressiva e gerenciamento completo da partida.
+        *   Estatísticas de Vitórias/Derrotas e um sistema de ranking (ELO).
+
+*   ### Sistema de Comunidade e Segurança (Graylist Híbrido)
+    *   **Descrição:** Um sistema para proteger o servidor de jogadores mal-intencionados, mantendo-o acessível para a comunidade escoteira.
+    *   **Funcionalidades Planejadas:**
+        *   **Ranque "Visitante":** Novos jogadores entram com permissões limitadas (não podem construir/quebrar).
+        *   **Sistema de Apadrinhamento:** Membros existentes podem usar `/apadrinhar <jogador>` para promover um visitante. O padrinho se torna responsável e pode sofrer penalidades (perda de Totens) se o afilhado for banido.
+        *   **Sistema de Aplicação via Site:** Visitantes sem padrinho podem preencher um formulário no site interno do servidor.
+        *   **Notificação de Aplicação:** O envio do formulário notifica os administradores (via Discord/in-game) para revisão manual.
+        *   **Ponte para o Mundo Real:** Se um candidato não for escoteiro, seus dados de aplicação serão coletados e encaminhados para uma sede escoteira parceira, servindo como uma ponte para o recrutamento no mundo real.
+        *   **Comandos de Moderação:** `/aprovar <jogador>` para promover manualmente após análise da aplicação.
 
 *   ### Sistema de Clãs
     *   **Descrição:** Permitirá que jogadores se organizem em grupos formais ("patrulhas" ou "tropas").
     *   **Funcionalidades:** Criação de clã, convites, cargos (líder, oficial), base do clã, banco de itens/Totens compartilhado.
     *   **Comandos:** `/cla criar`, `/cla convidar`, `/cla base`, etc.
-
-*   ### Sistema de Duelos 1v1
-    *   **Descrição:** Um sistema de combate justo e competitivo em arenas designadas.
-    *   **Funcionalidades:** Desafios, filas, kits de equipamento padronizados, estatísticas de vitórias/derrotas.
-    *   **Integrações:** Planejado para usar WorldGuard (para arenas) e Citizens (para NPCs de gerenciamento).
 
 *   ### Sistema CTF (Capture The Flag)
     *   **Descrição:** Um modo de jogo competitivo baseado em equipes (ex: Vermelha vs. Azul) onde o objetivo é invadir a base inimiga, capturar a bandeira e trazê-la para a própria base para pontuar.
@@ -97,6 +111,19 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
     *   **Descrição:** Um mundo de construção criativa onde jogadores de ranque elevado podem comprar e proteger seus próprios terrenos.
     *   **Funcionalidades:** Compra de terrenos usando Totens, proteção automática da área, gerenciamento de permissões para amigos.
     *   **Integrações:** Planejado para usar Multiverse (para o mundo), WorldGuard (para as proteções) e BlueMap (para visualização no mapa web).
+
+*   ### Painel de Administração e Portal da Família (Web)
+    *   **Descrição:** Uma plataforma web robusta para gerenciamento do servidor e acompanhamento parental, baseada no template AdminLTE.
+    *   **Funcionalidades Planejadas (Painel do Admin):**
+        *   Área de login segura (`/admin`) com credenciais definidas no `config.yml`.
+        *   Visualização de jogadores com paginação (para evitar sobrecarga), mostrando dados básicos. Clicar em um jogador abrirá uma visão detalhada.
+        *   Gerenciamento de dados de jogadores (conceder insígnias, ajustar Totens, etc.) via API.
+        *   Visualização de logs de denúncias e estatísticas de comportamento.
+        *   Capacidade de executar comandos no servidor remotamente.
+    *   **Funcionalidades Planejadas (Portal da Família):**
+        *   Geração de um link/token de acesso único e secreto com o comando `/familia token`.
+        *   Acesso de duas formas: diretamente pelo link (`magnocat.net/familia/<token>`) ou inserindo o token em uma página dedicada (`magnocat.net/familia`).
+        *   Exibição de estatísticas de jogo do filho: horas jogadas, horários de login, últimas conquistas, etc., em formato de gráficos e relatórios.
 
 ---
 

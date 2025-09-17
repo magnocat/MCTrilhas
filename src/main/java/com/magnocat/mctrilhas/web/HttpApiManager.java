@@ -1,12 +1,5 @@
 package com.magnocat.mctrilhas.web;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.magnocat.mctrilhas.data.PlayerCTFStats;
-import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.sun.net.httpserver.HttpServer;
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitRunnable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,10 +9,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+
+import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.data.PlayerCTFStats;
+import com.sun.net.httpserver.HttpServer;
 
 public class HttpApiManager {
 
@@ -77,6 +78,11 @@ public class HttpApiManager {
         String path = exchange.getRequestURI().getPath();
         if (path.equals("/")) {
             path = "/index.html"; // Rota padrão
+        }
+
+        // Redireciona para a página de login do admin se o caminho for /admin
+        if (path.equals("/admin")) {
+            path = "/admin/index.html";
         }
 
         // Medida de segurança simples para evitar ataques de "directory traversal"

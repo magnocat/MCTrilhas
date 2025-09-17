@@ -94,21 +94,37 @@ MCTrilhas/
 
 ---
 
-## 4. Sistemas Futuros (Planejados)
+## 4. Sistemas Futuros e em Desenvolvimento
 
-### 4.1. Sistema de Clãs
+### 4.1. Sistema de Duelos 1v1 (EM FOCO)
+*   **Descrição:** Um sistema de combate justo e competitivo.
+*   **Estrutura:** `duels/DuelManager.java`, `duels/DuelArena.java`, `duels/DuelGame.java`, `duels/DuelKit.java`.
+*   **Dados:** Novos arquivos `duel_arenas.yml` e `duel_kits.yml` serão criados. As estatísticas (vitórias, derrotas, ELO) serão adicionadas ao arquivo de dados de cada jogador.
+*   **Lógica:**
+    1.  Um jogador usa `/duelo desafiar <jogador>`.
+    2.  O `DuelManager` registra o desafio e notifica o alvo.
+    3.  Se aceito, o `DuelManager` encontra uma `DuelArena` livre.
+    4.  Uma nova instância de `DuelGame` é criada, que teleporta os jogadores, aplica o kit, inicia a contagem regressiva e gerencia o combate.
+    5.  Ao final, o `DuelGame` restaura o estado dos jogadores e os teleporta de volta, registrando o resultado.
+
+### 4.2. Sistema de Clãs
 *   **Descrição:** Permitirá que jogadores se organizem em grupos formais.
 *   **Estrutura:** `clans/Clan.java`, `clans/ClanManager.java`.
 *   **Dados:** Nova pasta `plugins/MCTrilhas/clans/` com um arquivo `.yml` para cada clã.
 *   **Comandos:** `/cla criar`, `/cla convidar`, `/cla sair`, `/cla base fundar`.
 
-### 4.2. Sistema de Duelos 1v1
-*   **Descrição:** Um sistema de combate justo e competitivo.
-*   **Estrutura:** `duels/DuelManager.java`, `duels/Arena.java`.
-*   **Lógica:** Gerenciamento de desafios, teleporte para arenas, aplicação de kits de equipamento padronizados e restauração de inventário.
-*   **Integração:** Usará **WorldGuard** para definir as arenas e **Citizens** para criar um NPC "Mestre de Duelos" que gerenciará as filas e estatísticas.
+### 4.3. Sistema de Comunidade e Segurança (Graylist Híbrido)
+*   **Descrição:** Uma abordagem em camadas para proteger o servidor, combinando automação e interação da comunidade.
+*   **Estrutura:** `community/PromotionManager.java`, `listeners/PlayerProtectionListener.java`.
+*   **Lógica:**
+    1.  **Graylist:** O `PlayerProtectionListener` cancela eventos (quebrar blocos, abrir baús) para jogadores com o ranque "Visitante" (a ser criado).
+    2.  **Apadrinhamento:** O comando `/apadrinhar <jogador>` verifica se o autor é um membro e se o alvo é um "Visitante". Se sim, promove o alvo e registra o padrinho nos dados do novo membro. Um sistema de penalidades será acionado se o afilhado for banido.
+    3.  **Aplicação Web:** Um novo endpoint no `HttpApiManager` receberá dados de um formulário do `index.html`. O formulário perguntará se o candidato já é escoteiro.
+        *   Se **sim**, a aplicação é registrada para aprovação manual do admin.
+        *   Se **não**, a aplicação é registrada em um arquivo separado (ex: `recrutamento.log`) e/ou enviada via webhook para um canal específico do Discord, para ser encaminhada a uma sede escoteira parceira.
+    4.  **Aprovação Manual:** O comando `/aprovar <jogador>` permitirá que um admin promova um "Visitante" a membro, finalizando o processo de aplicação.
 
-### 4.3. Sistema "Vale dos Pioneiros" (Terrenos de Jogadores)
+### 4.4. Sistema "Vale dos Pioneiros" (Terrenos de Jogadores)
 *   **Descrição:** Um mundo de construção criativa onde jogadores podem comprar terrenos.
 *   **Estrutura:** `plots/PlotManager.java`.
 *   **Lógica:** Verificará o ranque e a economia (via **Vault**) do jogador para autorizar a compra.
@@ -116,6 +132,21 @@ MCTrilhas/
     *   **Multiverse:** Para criar e gerenciar o mundo "Vale dos Pioneiros".
     *   **WorldGuard:** Para criar e gerenciar as regiões protegidas de cada terreno.
     *   **BlueMap:** Para adicionar marcadores 3D customizados no mapa web, indicando a localização e o dono de cada terreno/base.
+
+### 4.5. Painel de Administração e Portal da Família (Web)
+*   **Descrição:** Uma expansão significativa da API Web para criar um painel de gerenciamento completo e um portal de visualização para pais.
+*   **Estrutura:**
+    *   Novas pastas em `resources/web/`: `admin/` (para os arquivos do AdminLTE) e `familia/` (para a página do portal).
+    *   Novos endpoints na classe `HttpApiManager` para lidar com autenticação e requisições de dados/ações.
+*   **Lógica (Painel do Admin):**
+    1.  **Autenticação:** Um endpoint `/api/v1/admin/login` validará credenciais do `config.yml` e retornará um token de sessão.
+    2.  **Listagem de Jogadores:** O endpoint `/api/v1/admin/players` retornará uma lista paginada e simplificada de jogadores para evitar sobrecarga.
+    3.  **Dados Detalhados:** O endpoint `/api/v1/admin/player/<uuid>` buscará todos os dados de um jogador específico sob demanda.
+    4.  **Ações:** Endpoints de `POST` (ex: `/api/v1/admin/player/<uuid>/ban`) enfileirarão tarefas no scheduler principal do Bukkit para serem executadas de forma segura.
+*   **Lógica (Portal da Família):**
+    1.  **Geração de Token:** O comando `/familia token` gerará um token único e seguro, que será salvo no arquivo de dados do jogador.
+    2.  **Acesso via Link:** O `HttpApiManager` terá um handler para rotas como `/familia/<token>` que valida o token e serve a página de relatório.
+    3.  **Acesso via Formulário:** A página `familia/index.html` terá um formulário que envia o token para um endpoint `/api/v1/familia/report`, que então redireciona para a página de relatório correta.
 
 ---
 
