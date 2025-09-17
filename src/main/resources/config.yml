@@ -276,6 +276,13 @@ treasure-hunt:
       enchantments: 
         - "unbreaking:3"
 
+# Configurações do modo de jogo Capture a Bandeira (CTF)
+ctf-settings:
+  # Tempo em segundos que o sistema espera por mais jogadores na fila antes de iniciar uma partida.
+  # Isso permite que jogos maiores (ex: 4v4) se formem.
+  # Defina como 0 para iniciar as partidas instantaneamente assim que o mínimo de jogadores for atingido.
+  queue-countdown-seconds: 30
+
 # Configurações Gerais do Servidor
 server-settings:
   # Local para onde os jogadores são teleportados após eventos (como o fim de uma partida de CTF).

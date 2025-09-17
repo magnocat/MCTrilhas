@@ -3,12 +3,14 @@ package com.magnocat.mctrilhas.ctf;
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import org.bukkit.Location;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -27,9 +29,13 @@ public class CTFManager {
     private final Queue<UUID> playerQueue = new LinkedList<>();
     private File arenaConfigFile;
     private FileConfiguration arenaConfig;
+    private BukkitTask queueCountdownTask;
+    private final int queueCountdownTime;
+    private boolean isCountdownRunning = false;
 
     public CTFManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
+        this.queueCountdownTime = plugin.getConfig().getInt("ctf-settings.queue-countdown-seconds", 30);
     }
 
     /**
@@ -96,7 +102,8 @@ public class CTFManager {
             return;
         }
         playerQueue.add(player.getUniqueId());
-        player.sendMessage(ChatColor.GREEN + "Você entrou na fila para uma partida de Capture a Bandeira!");
+        player.sendMessage(ChatColor.GREEN + "Você entrou na fila para uma partida de Capture a Bandeira! (" + playerQueue.size() + "/" + getMaxPlayersOfAvailableArenas() + ")");
+        broadcastToQueue(ChatColor.AQUA + player.getName() + ChatColor.GRAY + " entrou na fila. (" + playerQueue.size() + "/" + getMaxPlayersOfAvailableArenas() + ")", player.getUniqueId());
         plugin.logInfo("[CTF] " + player.getName() + " entrou na fila. Total: " + playerQueue.size());
 
         tryToStartGame();
@@ -115,7 +122,13 @@ public class CTFManager {
         } else if (playerQueue.remove(player.getUniqueId())) {
             // O jogador estava na fila
             player.sendMessage(ChatColor.RED + "Você saiu da fila do CTF.");
+            broadcastToQueue(ChatColor.AQUA + player.getName() + ChatColor.GRAY + " saiu da fila. (" + playerQueue.size() + "/" + getMaxPlayersOfAvailableArenas() + ")", player.getUniqueId());
             plugin.logInfo("[CTF] " + player.getName() + " saiu da fila. Total: " + playerQueue.size());
+
+            // Se o número de jogadores cair abaixo do mínimo durante a contagem, cancela.
+            if (isCountdownRunning && playerQueue.size() < getMinPlayersForAnyArena()) {
+                cancelCountdown("Jogadores insuficientes.");
+            }
         } else {
             player.sendMessage(ChatColor.YELLOW + "Você não está em nenhuma partida ou fila de CTF.");
         }
@@ -125,43 +138,107 @@ public class CTFManager {
      * Tenta iniciar uma nova partida se houver jogadores suficientes na fila e uma arena disponível.
      */
     private void tryToStartGame() {
-        Optional<CTFArena> availableArena = loadedArenas.stream()
+        // Se uma contagem já está em andamento, não faz nada.
+        if (isCountdownRunning) {
+            return;
+        }
+
+        // Verifica se há uma arena disponível e jogadores suficientes.
+        boolean canStart = loadedArenas.stream()
                 .filter(arena -> !isArenaInUse(arena))
-                .filter(arena -> playerQueue.size() >= arena.getMinPlayers())
-                .findFirst();
+                .anyMatch(arena -> playerQueue.size() >= arena.getMinPlayers());
 
-        if (availableArena.isPresent()) {
-            CTFArena arena = availableArena.get();
-
-            int playersForGame = Math.min(playerQueue.size(), arena.getMaxPlayers());
-            // Garante que o número de jogadores seja par para balancear os times
-            if (playersForGame % 2 != 0) {
-                playersForGame--;
+        if (canStart) {
+            // Se o tempo de espera é zero, inicia a partida imediatamente.
+            if (queueCountdownTime <= 0) {
+                startGameFromQueue();
+                return;
             }
 
-            if (playersForGame < arena.getMinPlayers()) {
-                return; // Não há jogadores suficientes após o ajuste para número par.
-            }
+            // Inicia a contagem regressiva.
+            isCountdownRunning = true;
+            plugin.logInfo("[CTF] Jogadores suficientes na fila. Iniciando contagem regressiva de " + queueCountdownTime + "s.");
 
-            List<Player> participants = new ArrayList<>();
-            for (int i = 0; i < playersForGame; i++) {
-                UUID playerUUID = playerQueue.poll();
-                if (playerUUID != null) {
-                    Player p = Bukkit.getPlayer(playerUUID);
-                    if (p != null) {
-                        participants.add(p);
+            queueCountdownTask = new BukkitRunnable() {
+                int countdown = queueCountdownTime;
+
+                @Override
+                public void run() {
+                    // Validações a cada segundo
+                    boolean arenaStillAvailable = loadedArenas.stream().anyMatch(arena -> !isArenaInUse(arena));
+                    if (playerQueue.size() < getMinPlayersForAnyArena() || !arenaStillAvailable) {
+                        cancelCountdown("Jogadores insuficientes ou nenhuma arena disponível.");
+                        this.cancel();
+                        return;
+                    }
+
+                    if (countdown > 0) {
+                        if (countdown % 10 == 0 || countdown <= 5) {
+                            broadcastToQueue(ChatColor.GREEN + "A partida começará em " + ChatColor.YELLOW + countdown + " segundos" + ChatColor.GREEN + "...", null);
+                            broadcastSoundToQueue(Sound.BLOCK_NOTE_BLOCK_HAT, 1.0f, 1.0f);
+                        }
+                        countdown--;
+                    } else {
+                        // Tempo esgotado, inicia a partida.
+                        startGameFromQueue();
+                        this.cancel();
                     }
                 }
-            }
-
-            plugin.logInfo("[CTF] Iniciando partida na arena '" + arena.getName() + "' com " + participants.size() + " jogadores.");
-            CTFGame newGame = new CTFGame(plugin, arena, participants);
-            activeGames.add(newGame);
-            for (Player p : participants) {
-                playerGameMap.put(p.getUniqueId(), newGame);
-            }
+            }.runTaskTimer(plugin, 0L, 20L);
         }
     }
+
+    /**
+     * Pega os jogadores da fila e inicia a partida. Chamado quando a contagem regressiva termina.
+     */
+    private void startGameFromQueue() {
+        isCountdownRunning = false;
+        queueCountdownTask = null;
+
+        // Encontra a melhor arena para o número atual de jogadores na fila.
+        Optional<CTFArena> bestArena = findBestArenaForQueue();
+
+        if (bestArena.isEmpty()) {
+            broadcastToQueue(ChatColor.RED + "Não foi possível encontrar uma arena adequada. Tentando novamente...", null);
+            plugin.logWarn("[CTF] Contagem finalizada, mas nenhuma arena foi encontrada para " + playerQueue.size() + " jogadores.");
+            return;
+        }
+
+        CTFArena arena = bestArena.get();
+
+        int playersForGame = Math.min(playerQueue.size(), arena.getMaxPlayers());
+        // Garante que o número de jogadores seja par para balancear os times.
+        if (playersForGame % 2 != 0) {
+            playersForGame--;
+        }
+
+        if (playersForGame < arena.getMinPlayers()) {
+            broadcastToQueue(ChatColor.RED + "Não há jogadores suficientes para iniciar a partida. A busca foi reiniciada.", null);
+            return;
+        }
+
+        List<Player> participants = new ArrayList<>();
+        for (int i = 0; i < playersForGame; i++) {
+            UUID playerUUID = playerQueue.poll();
+            if (playerUUID != null) {
+                Player p = Bukkit.getPlayer(playerUUID);
+                if (p != null) {
+                    participants.add(p);
+                }
+            }
+        }
+
+        plugin.logInfo("[CTF] Iniciando partida na arena '" + arena.getName() + "' com " + participants.size() + " jogadores.");
+        CTFGame newGame = new CTFGame(plugin, arena, participants);
+        activeGames.add(newGame);
+        for (Player p : participants) {
+            playerGameMap.put(p.getUniqueId(), newGame);
+        }
+
+        // Se ainda houver jogadores suficientes na fila, tenta iniciar outra contagem.
+        tryToStartGame();
+    }
+
 
     /**
      * Finaliza uma partida, removendo-a da lista de jogos ativos e limpando os dados dos jogadores.
@@ -174,6 +251,65 @@ public class CTFManager {
                 team.getPlayers().forEach(playerUUID -> playerGameMap.remove(playerUUID))
         );
         plugin.logInfo("[CTF] Partida na arena '" + game.getArena().getName() + "' finalizada.");
+
+    }
+
+    private Optional<CTFArena> findBestArenaForQueue() {
+        // Lógica simples: pega a primeira arena livre que comporte os jogadores.
+        return loadedArenas.stream()
+                .filter(arena -> !isArenaInUse(arena))
+                .filter(arena -> playerQueue.size() >= arena.getMinPlayers())
+                .findFirst();
+    }
+
+    private void cancelCountdown(String reason) {
+        if (queueCountdownTask != null) {
+            queueCountdownTask.cancel();
+            queueCountdownTask = null;
+        }
+        isCountdownRunning = false;
+        broadcastToQueue(ChatColor.RED + "A contagem regressiva para a partida foi cancelada. " + reason, null);
+        plugin.logInfo("[CTF] Contagem regressiva da fila cancelada. Razão: " + reason);
+    }
+
+    private void broadcastToQueue(String message, UUID playerToExclude) {
+        for (UUID uuid : playerQueue) {
+            if (playerToExclude != null && uuid.equals(playerToExclude)) {
+                continue;
+            }
+            Player p = Bukkit.getPlayer(uuid);
+            if (p != null) {
+                p.sendMessage(message);
+            }
+        }
+    }
+
+    private void broadcastSoundToQueue(Sound sound, float volume, float pitch) {
+        for (UUID uuid : playerQueue) {
+            Player p = Bukkit.getPlayer(uuid);
+            if (p != null) {
+                p.playSound(p.getLocation(), sound, volume, pitch);
+            }
+        }
+    }
+
+    private int getMaxPlayersOfAvailableArenas() {
+        return loadedArenas.stream()
+                .filter(arena -> !isArenaInUse(arena))
+                .mapToInt(CTFArena::getMaxPlayers)
+                .max()
+                .orElse(16); // Usa 16 como um padrão genérico se nenhuma arena estiver disponível.
+    }
+
+    /**
+     * Retorna o número mínimo de jogadores necessários para iniciar uma partida em qualquer arena.
+     * @return O menor `min-players` entre todas as arenas.
+     */
+    private int getMinPlayersForAnyArena() {
+        return loadedArenas.stream()
+                .mapToInt(CTFArena::getMinPlayers)
+                .min()
+                .orElse(2); // Padrão de 2 se nenhuma arena for encontrada.
     }
 
     /**
