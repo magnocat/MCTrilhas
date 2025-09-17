@@ -149,6 +149,7 @@ locations:
   - "world,100,100,100,Um local perfeitamente cúbico"
   - "world,-200,-60,-300,Nas profundezas da terra"
   - "world,404,4,404,Tesouro não encontrado... ou será que foi?"
+
   - "world,808,68,-808,Num local com uma batida boa"
   - "world,12,65,25,Um local para se lembrar"
   - "world,19,99,1,Um local histórico"

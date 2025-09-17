@@ -22,10 +22,10 @@ arenas:
     name: "&aArena de Exemplo"
     min-players: 2
     max-players: 8
-    score-to-win: 3
-    game-duration-seconds: 600 # 10 minutos
-    countdown-seconds: 10 # 10 segundos
-    flag-reset-seconds: 30 # 30 segundos
+    score-to-win: 3 
+    game-duration-seconds: 600  # 10 minutos
+    countdown-seconds: 10  # 10 segundos
+    flag-reset-seconds: 30  # 30 segundos
     locations:
       # Ponto de espera para os jogadores antes da partida começar
       lobby: "world,0.5,100.0,0.5,0,0"

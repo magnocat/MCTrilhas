@@ -122,7 +122,7 @@ badges:
       name: "&dCaixa do Construtor"
       lore:
         - "&7Para guardar todos os seus materiais."
-      enchantments: [] # Adicionado para consistência
+      enchantments: []  # Adicionado para consistência
     reward-map:
       image: "maps/builder_badge.png"
       name: "&6Troféu de {player}: {badgeName}"
@@ -185,7 +185,7 @@ badges:
       name: "&6Bancada de Trabalho do Mestre"
       lore:
         - "&7Criações mais rápidas e eficientes."
-    reward-map:
+    reward-map: 
       image: "maps/crafting_badge.png"
       name: "&6Troféu de {player}: {badgeName}"
 
@@ -201,7 +201,7 @@ badges:
       lore:
         - "&7Para enxergar além do horizonte."
         - "&7Um prêmio para olhos curiosos."
-      enchantments:
+      enchantments: 
         - "unbreaking:3"
     reward-map:
       image: "maps/explorer_badge.png"
@@ -218,7 +218,7 @@ daily-reward:
     name: "&6Maçã Dourada Diária"
     lore:
       - "&7Um presente por sua dedicação!"
-    enchantments: [] # Sem encantamentos para a maçã
+    enchantments: []  # Sem encantamentos para a maçã
   messages:
     claim-success: "&aVocê coletou sua recompensa diária! Volte amanhã para mais."
     cooldown: "&cVocê já coletou sua recompensa. Tente novamente em &e{time}&c."
@@ -229,22 +229,22 @@ daily-reward:
 # O ranque CHEFE não tem requisitos, pois é concedido manualmente.
 ranks:
   LOBINHO:
-    required-playtime-hours: 10
+    required-playtime-hours: 10 
     required-badges: 2
-    required-account-age-days: 30 # 1 mês
+    required-account-age-days: 30  # 1 mês
   ESCOTEIRO:
-    required-playtime-hours: 30
+    required-playtime-hours: 30 
     required-badges: 4
-    required-account-age-days: 60 # 2 meses
+    required-account-age-days: 60  # 2 meses
   SENIOR:
-    required-playtime-hours: 80
+    required-playtime-hours: 80 
     required-badges: 6
-    required-account-age-days: 90 # 3 meses
+    required-account-age-days: 90  # 3 meses
   PIONEIRO:
     required-playtime-hours: 150
     # Requer todas as 8 insígnias.
     required-badges: 8
-    required-account-age-days: 120 # 4 meses
+    required-account-age-days: 120  # 4 meses
 
 # Seção de configuração para a Caça ao Tesouro do Explorador
 treasure-hunt:
@@ -261,11 +261,11 @@ treasure-hunt:
       lore:
         - "&7Um fragmento de poder obtido"
         - "&7em suas aventuras."
-      enchantments:
-        - "unbreaking:1" # Apenas para o efeito de brilho
+      enchantments: 
+        - "unbreaking:1"  # Apenas para o efeito de brilho
   # O grande prêmio, concedido apenas UMA VEZ após um certo número de conclusões.
   grand-prize:
-    completions-required: 3 # Quantas vezes a caça precisa ser completada.
+    completions-required: 3  # Quantas vezes a caça precisa ser completada.
     reward-item-data:
       material: "COMPASS"
       amount: 1
@@ -273,7 +273,7 @@ treasure-hunt:
       lore:
         - "&7Aponta para a sua última morte."
         - "&eUm prêmio por sua persistência incansável."
-      enchantments:
+      enchantments: 
         - "unbreaking:3"
 
 # Configurações Gerais do Servidor
