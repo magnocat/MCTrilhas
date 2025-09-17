@@ -1,15 +1,12 @@
 # ⚜️ MCTrilhas ⚜️
 
-<!-- Substitua pela URL da sua imagem de banner -->
 <p align="center">
-  <img src="https://i.imgur.com/your-banner-image.png" alt="Banner do MCTrilhas" />
-</p>
-
-<p align="center">
-[![Build Status](https://github.com/magnocat/MCTrilhas/actions/workflows/build.yml/badge.svg)](https://github.com/magnocat/MCTrilhas/actions/workflows/build.yml)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/magnocat/MCTrilhas?style=for-the-badge&label=Versão)
-![Linguagem Principal](https://img.shields.io/github/languages/top/magnocat/MCTrilhas?style=for-the-badge&label=Linguagem)
-![Licença](https://img.shields.io/github/license/magnocat/MCTrilhas?style=for-the-badge&label=Licença)
+  <a href="https://github.com/magnocat/MCTrilhas/actions/workflows/build.yml" title="Build Status">
+    <img src="https://github.com/magnocat/MCTrilhas/actions/workflows/build.yml/badge.svg" alt="Build Status">
+  </a>
+  <img src="https://img.shields.io/github/v/release/magnocat/MCTrilhas?style=for-the-badge&label=Versão" alt="Versão do Release">
+  <img src="https://img.shields.io/github/languages/top/magnocat/MCTrilhas?style=for-the-badge&label=Linguagem" alt="Linguagem Principal">
+  <img src="https://img.shields.io/github/license/magnocat/MCTrilhas?style=for-the-badge&label=Licença" alt="Licença">
 </p>
 
 **MCTrilhas** é um plugin customizado para servidores Paper/Spigot com temática escoteira, que implementa um sistema de insígnias, progresso e recompensas para engajar os jogadores.
@@ -44,7 +41,7 @@ O **MCTrilhas** é um plugin customizado para servidores Minecraft (Paper/Spigot
 ## 🚀 Tecnologias Utilizadas
 O projeto é construído com tecnologias modernas para garantir performance e escalabilidade.
 
-<p>
+<p align="center">
   <img src="https://img.shields.io/badge/Java-17-orange?style=for-the-badge&logo=openjdk" alt="Java 17" />
   <img src="https://img.shields.io/badge/Maven-3-red?style=for-the-badge&logo=apachemaven" alt="Maven" />
   <img src="https://img.shields.io/badge/Paper-API-lightgrey?style=for-the-badge&logo=papermc" alt="Paper API" />
