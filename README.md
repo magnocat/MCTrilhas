@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-![Build Status](https://img.shields.io/github/actions/workflow/status/magnocat/MCTrilhas/build.yml?branch=main&label=Build&style=for-the-badge)
+[![Build Status](https://github.com/magnocat/MCTrilhas/actions/workflows/build.yml/badge.svg)](https://github.com/magnocat/MCTrilhas/actions/workflows/build.yml)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/magnocat/MCTrilhas?style=for-the-badge&label=Versão)
 ![Linguagem Principal](https://img.shields.io/github/languages/top/magnocat/MCTrilhas?style=for-the-badge&label=Linguagem)
 ![Licença](https://img.shields.io/github/license/magnocat/MCTrilhas?style=for-the-badge&label=Licença)
