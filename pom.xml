@@ -13,7 +13,7 @@
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.version.full>1.0.20</project.version.full> <!-- Default for local development -->
+        <project.version.full>1.0.21</project.version.full> <!-- Default for local development -->
         <!-- Centralized dependency versions for easy updates -->
         <paper.api.version>1.20.4-R0.1-SNAPSHOT</paper.api.version>
         <vault.api.version>1.7.1</vault.api.version>
