@@ -32,7 +32,10 @@ commands:
     description: Comando principal para o modo de jogo Capture a Bandeira.
     usage: /ctf <subcomando>
     aliases: [capturetheflag]
-    permission: mctrilhas.ctf.use
+  familia:
+    description: Comandos relacionados ao Portal da Família.
+    usage: /<command> <subcomando>
+    aliases: [family]
 
 permissions:
   mctrilhas.*:
@@ -54,6 +57,7 @@ permissions:
       mctrilhas.ctf.admin: true
       mctrilhas.admin.silent-join: true
       mctrilhas.admin.bypass: true
+      mctrilhas.familia.use: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
@@ -87,6 +91,9 @@ permissions:
   mctrilhas.ctf.stats.other:
     description: Permite ver as estatísticas de CTF de outros jogadores.
     default: op
+  mctrilhas.familia.use:
+    description: Permite usar os comandos do Portal da Família.
+    default: true
   mctrilhas.ctf.admin:
     description: Permite gerenciar as arenas de CTF.
     default: op

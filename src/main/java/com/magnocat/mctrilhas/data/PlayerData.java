@@ -29,8 +29,9 @@ public class PlayerData {
     private int treasureHuntsCompleted; // Contador de caças ao tesouro concluídas.
     private boolean hasReceivedTreasureGrandPrize; // Flag para garantir que o grande prêmio seja dado apenas uma vez.
     private final Set<String> claimedCtfMilestones;
+    private String webAccessToken;
 
-    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones) {
+    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones, String webAccessToken) {
         this.playerUUID = playerUUID;
         this.earnedBadgesMap = earnedBadgesMap;
         this.progressMap = progressMap;
@@ -45,6 +46,7 @@ public class PlayerData {
         this.treasureHuntsCompleted = treasureHuntsCompleted;
         this.hasReceivedTreasureGrandPrize = hasReceivedTreasureGrandPrize;
         this.claimedCtfMilestones = claimedCtfMilestones;
+        this.webAccessToken = webAccessToken;
     }
 
     public UUID getPlayerUUID() {
@@ -158,5 +160,13 @@ public class PlayerData {
 
     public Set<String> getClaimedCtfMilestones() {
         return claimedCtfMilestones;
+    }
+
+    public String getWebAccessToken() {
+        return webAccessToken;
+    }
+
+    public void setWebAccessToken(String webAccessToken) {
+        this.webAccessToken = webAccessToken;
     }
 }

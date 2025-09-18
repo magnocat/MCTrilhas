@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.magnocat.mctrilhas.badges.BadgeManager;
 import com.magnocat.mctrilhas.commands.DailyCommand;
+import com.magnocat.mctrilhas.commands.FamilyCommand;
 import com.magnocat.mctrilhas.commands.RankCommand;
 import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;
 import com.magnocat.mctrilhas.commands.TreasureHuntCommand;
@@ -179,8 +180,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         getCommand("tesouro").setExecutor(treasureHuntExecutor);
         getCommand("tesouro").setTabCompleter(treasureHuntExecutor);
         CTFCommand ctfExecutor = new CTFCommand(this);
-        getCommand("ctf").setExecutor(ctfExecutor); 
+        getCommand("ctf").setExecutor(ctfExecutor);
         getCommand("ctf").setTabCompleter(ctfExecutor);
+        getCommand("familia").setExecutor(new FamilyCommand(this));
         logInfo("Comandos registrados.");
     }
 

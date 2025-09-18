@@ -1,9 +1,10 @@
 package com.magnocat.mctrilhas.web;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,12 +15,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerCTFStats;
+import com.magnocat.mctrilhas.data.PlayerData;
 import com.sun.net.httpserver.HttpServer;
 
 public class HttpApiManager {
@@ -61,8 +64,21 @@ public class HttpApiManager {
             // Contexto para a API de login do admin
             server.createContext("/api/v1/admin/login", this::handleAdminLoginRequest);
 
-            // Contexto para servir arquivos estáticos (o site)
-            server.createContext("/", this::handleStaticFileRequest);
+            // Contexto para a API de dados de um jogador específico via token
+            server.createContext("/api/v1/player", this::handlePlayerDataRequest);
+
+            // Define o diretório raiz de onde os arquivos web serão servidos.
+            Path webRoot = new File(plugin.getDataFolder(), "web").toPath();
+
+            // Extrai os arquivos web do .jar para a pasta de dados do plugin, garantindo que existam.
+            // O 'true' garante que eles sejam sobrescritos se houver uma nova versão no plugin.
+            plugin.saveResource("web/index.html", true);
+            plugin.saveResource("web/admin/login.html", true);
+            plugin.saveResource("web/admin/player_dashboard.html", true);
+            plugin.saveResource("web/404.html", true);
+
+            // Usa o novo handler seguro para servir todos os arquivos do diretório web.
+            server.createContext("/", new SecureHttpFileHandler(webRoot));
 
             server.setExecutor(null); // usa o executor padrão
             server.start();
@@ -74,45 +90,6 @@ public class HttpApiManager {
 
         } catch (IOException e) {
             plugin.logSevere("Falha ao iniciar o servidor da API web: " + e.getMessage());
-        }
-    }
-
-    private void handleStaticFileRequest(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
-        String path = exchange.getRequestURI().getPath();
-        if (path.equals("/")) {
-            path = "/index.html"; // Rota padrão
-        }
-
-        // Redireciona para a página de login do admin.
-        // Futuramente, isso será mais inteligente: se o usuário não estiver logado, vai para login.html. Se estiver, vai para index.html.
-        if (path.equals("/admin") || path.equals("/admin/")) {
-            path = "/admin/login.html"; // Por enquanto, sempre mostra a página de login.
-        }
-
-        // Medida de segurança simples para evitar ataques de "directory traversal"
-        if (path.contains("..")) {
-            exchange.sendResponseHeaders(400, -1); // Bad Request
-            return;
-        }
-
-        String resourcePath = "web" + path;
-        try (InputStream resourceStream = plugin.getResource(resourcePath)) {
-            if (resourceStream == null) {
-                exchange.sendResponseHeaders(404, -1); // Not Found
-                return;
-            }
-
-            exchange.getResponseHeaders().set("Content-Type", getMimeType(path));
-            // Envia o cabeçalho com tamanho 0, pois vamos transmitir os dados em chunks.
-            exchange.sendResponseHeaders(200, 0);
-            try (OutputStream os = exchange.getResponseBody()) {
-                // Transmite o arquivo em pedaços para economizar memória.
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = resourceStream.read(buffer)) != -1) {
-                    os.write(buffer, 0, bytesRead);
-                }
-            }
         }
     }
 
@@ -193,19 +170,66 @@ public class HttpApiManager {
         }
     }
 
-    private String getMimeType(String path) {
-        int lastDot = path.lastIndexOf('.');
-        if (lastDot == -1) return "application/octet-stream"; // Tipo genérico
+    private void handlePlayerDataRequest(com.sun.net.httpserver.HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        if (!"GET".equals(exchange.getRequestMethod())) {
+            sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use GET.\"}");
+            return;
+        }
 
-        return switch (path.substring(lastDot + 1).toLowerCase()) {
-            case "css" -> "text/css";
-            case "js" -> "application/javascript";
-            case "png", "ico" -> "image/png"; // Adicionado .ico
-            case "jpg", "jpeg" -> "image/jpeg";
-            case "svg" -> "image/svg+xml";
-            case "json" -> "application/json"; // Adicionado .json para o manifest
-            default -> "text/html"; // Padrão para .html e outros
-        };
+        Map<String, String> params = queryToMap(exchange.getRequestURI().getQuery());
+        String token = params.get("token");
+
+        if (token == null || token.isEmpty()) {
+            sendJsonResponse(exchange, 400, "{\"error\":\"Token não fornecido.\"}");
+            return;
+        }
+
+        UUID playerUUID = plugin.getPlayerDataManager().getPlayerUUIDByToken(token);
+        if (playerUUID == null) {
+            sendJsonResponse(exchange, 404, "{\"error\":\"Token inválido ou jogador não encontrado.\"}");
+            return;
+        }
+
+        // Carrega os dados do jogador. Funciona para online e offline.
+        // Se o jogador estiver online, pega do cache. Se offline, carrega do arquivo.
+        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(playerUUID);
+        if (playerData == null) {
+            // Se o jogador estiver offline, os dados não estarão no cache principal.
+            // Precisamos carregá-los temporariamente.
+            // A forma mais simples é usar o próprio sistema de carregamento, mas sem manter no cache.
+            // Por enquanto, vamos assumir que o sistema de cache de token é suficiente.
+            // Se for um problema, precisaremos de um método para carregar dados offline.
+            // Para simplificar, vamos carregar e descarregar.
+            plugin.getPlayerDataManager().loadPlayerData(playerUUID);
+            playerData = plugin.getPlayerDataManager().getPlayerData(playerUUID);
+            plugin.getPlayerDataManager().unloadPlayerData(playerUUID); // Remove do cache online
+        }
+
+        if (playerData == null) {
+             sendJsonResponse(exchange, 500, "{\"error\":\"Não foi possível carregar os dados do jogador.\"}");
+             return;
+        }
+
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
+        PlayerCTFStats ctfStats = plugin.getPlayerDataManager().getPlayerCTFStats(playerUUID);
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("name", offlinePlayer.getName());
+        responseData.put("uuid", playerUUID.toString());
+        responseData.put("rank", playerData.getRank().name());
+        responseData.put("playtimeHours", playerData.getActivePlaytimeTicks() / 72000);
+        responseData.put("totems", plugin.getEconomy() != null ? plugin.getEconomy().getBalance(offlinePlayer) : 0);
+        responseData.put("ctfStats", ctfStats); // O objeto já é serializável pelo Gson
+        
+        // Calcula o progresso das insígnias
+        Map<String, Double> badgeProgress = new HashMap<>();
+        playerData.getProgressMap().forEach((badgeType, progress) -> {
+            badgeProgress.put(badgeType.name(), progress);
+        });
+        responseData.put("badgeProgress", badgeProgress);
+
+        sendJsonResponse(exchange, 200, gson.toJson(responseData));
     }
 
     private void sendJsonResponse(com.sun.net.httpserver.HttpExchange exchange, int statusCode, String jsonResponse) throws IOException {
@@ -217,6 +241,19 @@ public class HttpApiManager {
         }
     }
 
+    private Map<String, String> queryToMap(String query) {
+        if (query == null) {
+            return new HashMap<>();
+        }
+        Map<String, String> result = new HashMap<>();
+        for (String param : query.split("&")) {
+            String[] entry = param.split("=");
+            if (entry.length > 1) {
+                result.put(entry[0], entry[1]);
+            }
+        }
+        return result;
+    }
 
     public void stop() {
         if (server != null) {

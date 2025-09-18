@@ -36,6 +36,7 @@ public class PlayerDataManager {
     private final MCTrilhasPlugin plugin;
     private final File playerDataFolder;
     private final Map<UUID, PlayerData> playerDataCache = new HashMap<>();
+    private final Map<String, UUID> tokenToUuidCache = new ConcurrentHashMap<>();
 
     // Caches para os rankings, populados pelos métodos Async e lidos pelo PlaceholderAPI.
     private final Map<UUID, Integer> dailyBadgeCountsCache = new ConcurrentHashMap<>();
@@ -48,6 +49,23 @@ public class PlayerDataManager {
         if (!playerDataFolder.exists()) {
             playerDataFolder.mkdirs();
         }
+        // Inicia o carregamento inicial do cache de tokens de forma assíncrona.
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, this::populateTokenCache);
+    }
+
+    private void populateTokenCache() {
+        plugin.logInfo("Iniciando varredura inicial para cache de tokens de acesso web...");
+        File[] playerFiles = playerDataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+        if (playerFiles == null) return;
+
+        for (File playerFile : playerFiles) {
+            FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+            String token = config.getString("web-access-token");
+            if (token != null && !token.isEmpty()) {
+                tokenToUuidCache.put(token, UUID.fromString(playerFile.getName().replace(".yml", "")));
+            }
+        }
+        plugin.logInfo("Cache de tokens populado com " + tokenToUuidCache.size() + " tokens.");
     }
 
     /**
@@ -58,8 +76,8 @@ public class PlayerDataManager {
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
         if (!playerFile.exists()) {
             // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
-            // O ranque inicial é sempre FILHOTE.
-            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>()));
+            // O ranque inicial é sempre FILHOTE. O token é nulo até ser gerado.
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null));
             return;
         }
 
@@ -100,6 +118,9 @@ public class PlayerDataManager {
         // Carrega os marcos de CTF já reivindicados.
         List<String> claimedCtfMilestones = config.getStringList("claimed-ctf-milestones");
 
+        // Carrega o token de acesso web, se existir.
+        String webAccessToken = config.getString("web-access-token", null);
+
         // Lógica de migração única para jogadores existentes sem tempo de jogo ativo.
         if (activePlaytimeTicks == 0 && !config.contains("playtime-migrated")) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
@@ -123,8 +144,13 @@ public class PlayerDataManager {
             }
         }
 
-        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedGrandPrize, new HashSet<>(claimedCtfMilestones));
+        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedGrandPrize, new HashSet<>(claimedCtfMilestones), webAccessToken);
         playerDataCache.put(uuid, playerData);
+
+        // Adiciona o token ao cache rápido
+        if (webAccessToken != null && !webAccessToken.isEmpty()) {
+            tokenToUuidCache.put(webAccessToken, uuid);
+        }
     }
 
     /**
@@ -135,6 +161,11 @@ public class PlayerDataManager {
         if (playerDataCache.containsKey(uuid)) {
             savePlayerData(uuid);
             playerDataCache.remove(uuid);
+            // Remove o token do cache rápido
+            PlayerData data = getPlayerData(uuid);
+            if (data != null && data.getWebAccessToken() != null) {
+                tokenToUuidCache.remove(data.getWebAccessToken());
+            }
         }
     }
 
@@ -164,6 +195,7 @@ public class PlayerDataManager {
         config.set("treasure-hunt.completions", playerData.getTreasureHuntsCompleted());
         config.set("treasure-hunt.grand-prize-received", playerData.hasReceivedTreasureGrandPrize());
         config.set("claimed-ctf-milestones", new ArrayList<>(playerData.getClaimedCtfMilestones()));
+        config.set("web-access-token", playerData.getWebAccessToken());
 
         // Salva o mapa de progresso
         playerData.getProgressMap().forEach((type, progress) -> {
@@ -180,6 +212,15 @@ public class PlayerDataManager {
 
     public PlayerData getPlayerData(UUID playerUUID) {
         return playerDataCache.get(playerUUID);
+    }
+
+    /**
+     * Encontra o UUID de um jogador de forma rápida usando o cache de tokens.
+     * @param token O token de acesso web.
+     * @return O UUID do jogador, ou null se não for encontrado.
+     */
+    public UUID getPlayerUUIDByToken(String token) {
+        return tokenToUuidCache.get(token);
     }
 
     /**
