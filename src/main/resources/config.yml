@@ -71,7 +71,7 @@ badges:
     required-progress: 50000
     # Lista de materiais ou tags que contam para o progresso.
     tracked-items:
-      - "TAG:STONE_ORE_REPLACEABLES" # Cobre Stone, Deepslate, Andesite, etc.
+      - "TAG:STONE_ORE_REPLACEABLES"  # Cobre Stone, Deepslate, Andesite, etc.
       - "TAG:COAL_ORES"
       - "TAG:IRON_ORES"
       - "TAG:COPPER_ORES"
@@ -106,7 +106,7 @@ badges:
       name: "&6Defumador do Chef"
       lore:
         - "&7Cozinhe seus alimentos duas vezes mais rápido."
-      enchantments: [] # Adicionado para consistência
+      enchantments: []  # Adicionado para consistência
     reward-map:
       image: "maps/cooking_badge.png"
       name: "&6Troféu de {player}: {badgeName}"
