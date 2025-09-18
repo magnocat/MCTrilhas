@@ -106,7 +106,7 @@ badges:
       name: "&6Defumador do Chef"
       lore:
         - "&7Cozinhe seus alimentos duas vezes mais rápido."
-      enchantments: []  # Adicionado para consistência
+      enchantments: [] # Adicionado para consistência
     reward-map:
       image: "maps/cooking_badge.png"
       name: "&6Troféu de {player}: {badgeName}"
