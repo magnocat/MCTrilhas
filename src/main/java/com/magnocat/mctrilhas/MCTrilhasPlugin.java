@@ -19,9 +19,11 @@ import com.magnocat.mctrilhas.ctf.CTFCommand;
 import com.magnocat.mctrilhas.ctf.CTFManager;
 import com.magnocat.mctrilhas.ctf.CTFArena; // Import para usar o método parseLocation
 import com.magnocat.mctrilhas.ctf.milestones.CTFMilestoneManager;
+import com.magnocat.mctrilhas.listeners.AdminPrivacyListener;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
 import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;
 import com.magnocat.mctrilhas.listeners.BuilderListener;
+import com.magnocat.mctrilhas.listeners.CommandBlockerListener;
 import com.magnocat.mctrilhas.listeners.CookingListener;
 import com.magnocat.mctrilhas.listeners.CraftingListener;
 import com.magnocat.mctrilhas.listeners.ExplorerListener;
@@ -196,7 +198,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new PlayerQuitListener(this), // Essencial para salvar os dados do jogador ao sair.
                 new MenuListener(),
                 new TreasureHuntListener(this),
-                new CTFListener(this)
+                new CTFListener(this),
+                new CommandBlockerListener(this),
+                new AdminPrivacyListener(this)
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));

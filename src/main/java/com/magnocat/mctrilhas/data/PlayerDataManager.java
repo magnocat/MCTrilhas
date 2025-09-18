@@ -511,12 +511,18 @@ public class PlayerDataManager {
     private CompletableFuture<Map<UUID, Integer>> getFilteredBadgeCountsAsync(Predicate<Long> timeFilter) {
         return CompletableFuture.supplyAsync(() -> {
             Map<UUID, Integer> filteredCounts = new HashMap<>();
+            List<String> hiddenUuids = plugin.getConfig().getStringList("privacy-settings.hide-from-leaderboards");
             File[] playerFiles = playerDataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
 
             if (playerFiles != null) {
                 for (File playerFile : playerFiles) {
                     try {
                         UUID uuid = UUID.fromString(playerFile.getName().replace(".yml", ""));
+                        // Não inclui jogadores escondidos nos rankings
+                        if (hiddenUuids.contains(uuid.toString())) {
+                            continue;
+                        }
+
                         FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
                         ConfigurationSection badgesSection = config.getConfigurationSection("earned-badges-timed");
                         if (badgesSection != null) {
@@ -533,6 +539,11 @@ public class PlayerDataManager {
             }
             // Garante que os dados de jogadores online (que podem não ter sido salvos ainda) sejam os mais atuais.
             playerDataCache.values().forEach(data -> {
+                // Não inclui jogadores escondidos nos rankings
+                if (hiddenUuids.contains(data.getPlayerUUID().toString())) {
+                    return; // Continua para o próximo item do forEach
+                }
+
                 long count = data.getEarnedBadgesMap().values().stream().filter(timeFilter).count();
                 if (count > 0) filteredCounts.put(data.getPlayerUUID(), (int) count);
             });
@@ -611,12 +622,17 @@ public class PlayerDataManager {
     public CompletableFuture<Map<UUID, PlayerCTFStats>> getAllPlayerCTFStatsAsync() {
         return CompletableFuture.supplyAsync(() -> {
             Map<UUID, PlayerCTFStats> allStats = new HashMap<>();
+            List<String> hiddenUuids = plugin.getConfig().getStringList("privacy-settings.hide-from-leaderboards");
             File[] playerFiles = playerDataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
 
             if (playerFiles != null) {
                 for (File playerFile : playerFiles) {
                     try {
                         UUID uuid = UUID.fromString(playerFile.getName().replace(".yml", ""));
+                        // Não inclui jogadores escondidos nos rankings
+                        if (hiddenUuids.contains(uuid.toString())) {
+                            continue;
+                        }
                         FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
                         allStats.put(uuid, PlayerCTFStats.fromConfig(config.getConfigurationSection("ctf-stats")));
                     } catch (Exception e) {

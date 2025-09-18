@@ -303,3 +303,27 @@ web-api:
   admin-credentials:
     username: "admin"
     password: "changeme" # IMPORTANTE: Altere esta senha!
+
+# Seção para o bloqueador de comandos.
+command-blocker:
+  enabled: true
+  # Lista de comandos EXTERNOS (de outros plugins, como Essentials) que são permitidos.
+  # Comandos do próprio MCTrilhas (como /scout, /daily, /ctf) já são permitidos automaticamente.
+  # Todos os outros comandos serão bloqueados para jogadores sem a permissão 'mctrilhas.admin.bypass'.
+  allowed-commands:
+    # Comandos de comunicação do Essentials
+    - "tell"
+    - "msg"
+    - "r"
+  block-message: "&cEste comando não está disponível."
+
+# Configurações de privacidade
+privacy-settings:
+  # Jogadores com a permissão 'mctrilhas.admin.silent-join' entrarão e sairão do servidor silenciosamente.
+  # Adicione os UUIDs dos administradores aqui para escondê-los de todos os rankings e placares públicos.
+  # Exemplo:
+  # hide-from-leaderboards:
+  #   - "d8a9b7c6-e5f4-a3b2-c1d0-e9f8a7b6c5d4"
+  hide-from-leaderboards: []
+  # Se 'true', administradores (OP) entrarão automaticamente no modo /vanish ao logar.
+  auto-vanish-on-join: true
