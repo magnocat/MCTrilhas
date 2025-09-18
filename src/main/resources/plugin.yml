@@ -52,6 +52,8 @@ permissions:
       mctrilhas.ctf.stats: true
       mctrilhas.ctf.stats.other: true
       mctrilhas.ctf.admin: true
+      mctrilhas.admin.silent-join: true
+      mctrilhas.admin.bypass: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
@@ -93,4 +95,10 @@ permissions:
     default: op
   mctrilhas.progress.other:
     description: Permite ver o progresso de outros jogadores.
+    default: op
+  mctrilhas.admin.silent-join:
+    description: Permite que o jogador entre e saia do servidor silenciosamente.
+    default: op
+  mctrilhas.admin.bypass:
+    description: Permite que o jogador ignore o bloqueador de comandos.
     default: op

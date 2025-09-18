@@ -22,7 +22,7 @@ arenas:
     name: "&aArena de Exemplo"
     min-players: 2
     max-players: 8
-    score-to-win: 3 
+    score-to-win: 3
     game-duration-seconds: 600  # 10 minutos
     countdown-seconds: 10  # 10 segundos
     flag-reset-seconds: 30  # 30 segundos

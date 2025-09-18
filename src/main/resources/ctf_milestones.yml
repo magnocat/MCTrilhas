@@ -35,7 +35,7 @@ milestones:
           - "&7em partidas de Capture a Bandeira."
           - ""
           - "&6Um troféu para exibir seu valor em combate."
-        enchantments: 
+        enchantments:
           - "unbreaking:1"  # Apenas para o efeito de brilho
 
     - id: "ctf_kills_2"

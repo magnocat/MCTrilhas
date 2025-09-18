@@ -106,7 +106,7 @@ badges:
       name: "&6Defumador do Chef"
       lore:
         - "&7Cozinhe seus alimentos duas vezes mais rápido."
-      enchantments: [] # Adicionado para consistência
+      enchantments: []  # Adicionado para consistência
     reward-map:
       image: "maps/cooking_badge.png"
       name: "&6Troféu de {player}: {badgeName}"
@@ -185,7 +185,7 @@ badges:
       name: "&6Bancada de Trabalho do Mestre"
       lore:
         - "&7Criações mais rápidas e eficientes."
-    reward-map: 
+    reward-map:
       image: "maps/crafting_badge.png"
       name: "&6Troféu de {player}: {badgeName}"
 
@@ -201,7 +201,7 @@ badges:
       lore:
         - "&7Para enxergar além do horizonte."
         - "&7Um prêmio para olhos curiosos."
-      enchantments: 
+      enchantments:
         - "unbreaking:3"
     reward-map:
       image: "maps/explorer_badge.png"
@@ -229,15 +229,15 @@ daily-reward:
 # O ranque CHEFE não tem requisitos, pois é concedido manualmente.
 ranks:
   LOBINHO:
-    required-playtime-hours: 10 
+    required-playtime-hours: 10
     required-badges: 2
     required-account-age-days: 30  # 1 mês
   ESCOTEIRO:
-    required-playtime-hours: 30 
+    required-playtime-hours: 30
     required-badges: 4
     required-account-age-days: 60  # 2 meses
   SENIOR:
-    required-playtime-hours: 80 
+    required-playtime-hours: 80
     required-badges: 6
     required-account-age-days: 90  # 3 meses
   PIONEIRO:
@@ -261,7 +261,7 @@ treasure-hunt:
       lore:
         - "&7Um fragmento de poder obtido"
         - "&7em suas aventuras."
-      enchantments: 
+      enchantments:
         - "unbreaking:1"  # Apenas para o efeito de brilho
   # O grande prêmio, concedido apenas UMA VEZ após um certo número de conclusões.
   grand-prize:
@@ -273,7 +273,7 @@ treasure-hunt:
       lore:
         - "&7Aponta para a sua última morte."
         - "&eUm prêmio por sua persistência incansável."
-      enchantments: 
+      enchantments:
         - "unbreaking:3"
 
 # Configurações do modo de jogo Capture a Bandeira (CTF)
@@ -302,7 +302,7 @@ web-api:
   # Novas credenciais para o painel de administração
   admin-credentials:
     username: "admin"
-    password: "changeme" # IMPORTANTE: Altere esta senha!
+    password: "changeme"  # IMPORTANTE: Altere esta senha!
 
 # Seção para o bloqueador de comandos.
 command-blocker:
