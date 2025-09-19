@@ -49,6 +49,7 @@ import com.magnocat.mctrilhas.data.ActivityTracker;
 import com.magnocat.mctrilhas.updater.UpdateChecker;
 import com.magnocat.mctrilhas.web.HttpApiManager;
 
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.Location;
 import net.milkbowl.vault.economy.Economy;
 
@@ -68,6 +69,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private CTFManager ctfManager;
     private CTFMilestoneManager ctfMilestoneManager;
     // private BlueMapManager blueMapManager; // Comentado temporariamente
+    private BukkitTask placeholderApiCacheUpdater;
+    private BukkitTask webApiCacheUpdater;
     private Economy econ = null;
 
     @Override
@@ -88,20 +91,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
         // Carrega as arenas do CTF
         ctfManager.loadArenas();
-
-        // Tarefa para atualizar os caches dos rankings periodicamente para o PlaceholderAPI.
-        // Isso garante que os dados exibidos no jogo (via TAB, por exemplo) estejam sempre recentes,
-        // independentemente do acesso à API web.
-        new org.bukkit.scheduler.BukkitRunnable() {
-            @Override
-            public void run() {
-                logInfo("Atualizando caches dos rankings (diário, mensal, geral)...");
-                // Apenas chamar os métodos já é o suficiente, pois eles atualizam o cache internamente.
-                playerDataManager.getDailyBadgeCountsAsync();
-                playerDataManager.getMonthlyBadgeCountsAsync();
-                playerDataManager.getAllTimeBadgeCountsAsync();
-            }
-        }.runTaskTimerAsynchronously(this, 20L * 60, 20L * 60 * 5); // Inicia após 1 minuto, repete a cada 5 minutos
 
         // Inicia o novo servidor de API web.
         httpApiManager.start();
@@ -318,17 +307,71 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         }
     }
 
+    /**
+     * Inicia as tarefas agendadas para atualizar os caches de ranking.
+     * Esta função é chamada quando o primeiro jogador entra no servidor.
+     */
+    public void startCacheUpdateTasks() {
+        // Verifica se as tarefas já estão em execução para evitar duplicação.
+        if ((placeholderApiCacheUpdater != null && !placeholderApiCacheUpdater.isCancelled()) ||
+            (webApiCacheUpdater != null && !webApiCacheUpdater.isCancelled())) {
+            return; // Tarefas já estão ativas.
+        }
+
+        logInfo("Primeiro jogador entrou. Iniciando tarefas de atualização de cache de rankings.");
+
+        // Tarefa para o PlaceholderAPI
+        placeholderApiCacheUpdater = new org.bukkit.scheduler.BukkitRunnable() {
+            @Override
+            public void run() {
+                logInfo("Atualizando caches de ranking para PlaceholderAPI...");
+                playerDataManager.getDailyBadgeCountsAsync();
+                playerDataManager.getMonthlyBadgeCountsAsync();
+                playerDataManager.getAllTimeBadgeCountsAsync();
+            }
+        }.runTaskTimerAsynchronously(this, 20L * 60, 20L * 60 * 5); // Inicia após 1 min, repete a cada 5 min
+
+        // Tarefa para a API Web
+        if (httpApiManager != null) {
+            webApiCacheUpdater = new org.bukkit.scheduler.BukkitRunnable() {
+                @Override
+                public void run() {
+                    httpApiManager.updateAllLeaderboardCaches();
+                }
+            }.runTaskTimerAsynchronously(this, 20L * 10, 20L * 60 * 5); // Inicia após 10s, repete a cada 5 min
+        }
+    }
+
+    /**
+     * Para as tarefas agendadas de atualização de cache.
+     * Esta função é chamada quando o último jogador sai do servidor.
+     */
+    public void stopCacheUpdateTasks() {
+        logInfo("Último jogador saiu. Parando tarefas de atualização de cache de rankings.");
+        if (placeholderApiCacheUpdater != null) {
+            placeholderApiCacheUpdater.cancel();
+            placeholderApiCacheUpdater = null;
+        }
+        if (webApiCacheUpdater != null) {
+            webApiCacheUpdater.cancel();
+            webApiCacheUpdater = null;
+        }
+    }
     // --- Métodos de Log com Cores ---
 
     public void logInfo(String message) {
-        getLogger().info(ChatColor.AQUA + "[MCTrilhas] " + ChatColor.WHITE + message);
+        // Removido o prefixo e as cores manuais. O logger do Bukkit já adiciona o nome do plugin.
+        // Isso corrige a exibição de caracteres estranhos como '?b' no console.
+        getLogger().info(message);
     }
 
     public void logWarn(String message) {
-        getLogger().warning(ChatColor.YELLOW + "[MCTrilhas] " + ChatColor.WHITE + message);
+        // Removido o prefixo e as cores manuais.
+        getLogger().warning(message);
     }
 
     public void logSevere(String message) {
-        getLogger().severe(ChatColor.RED + "[MCTrilhas] " + ChatColor.WHITE + message);
+        // Removido o prefixo e as cores manuais.
+        getLogger().severe(message);
     }
 }

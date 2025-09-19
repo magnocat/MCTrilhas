@@ -32,13 +32,22 @@ public class PlayerJoinListener implements Listener {
         // Esta ação é síncrona para garantir que os dados estejam disponíveis imediatamente.
         playerDataManager.loadPlayerData(player.getUniqueId());
 
-        // 2. Envia a mensagem de boas-vindas com a data do último acesso.
+        // 2. Verifica se este é o primeiro jogador a entrar no servidor.
+        // Se for, inicia as tarefas de atualização de cache que estavam paradas.
+        // A verificação é feita com 1 tick de atraso para garantir que a contagem de jogadores esteja correta.
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (plugin.getServer().getOnlinePlayers().size() == 1) {
+                plugin.startCacheUpdateTasks();
+            }
+        }, 1L);
+
+        // 3. Envia a mensagem de boas-vindas com a data do último acesso.
         sendWelcomeMessage(player);
 
-        // 3. Agenda a verificação da recompensa diária para não sobrecarregar o login.
+        // 4. Agenda a verificação da recompensa diária para não sobrecarregar o login.
         scheduleDailyRewardNotification(player);
 
-        // 4. Agenda a verificação de promoção de ranque.
+        // 5. Agenda a verificação de promoção de ranque.
         scheduleRankPromotionCheck(player);
     }
 

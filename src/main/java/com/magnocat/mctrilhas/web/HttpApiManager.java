@@ -110,10 +110,6 @@ public class HttpApiManager {
             server.start();
             plugin.logInfo("Servidor da API web iniciado na porta: " + port);
 
-            // Agenda a atualização do cache dos rankings
-            long updateInterval = 20L * 60 * 5; // 5 minutos
-            plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this::updateAllLeaderboardCaches, 20L * 10, updateInterval);
-
         } catch (IOException e) {
             plugin.logSevere("Falha ao iniciar o servidor da API web: " + e.getMessage());
         }
@@ -571,13 +567,7 @@ public class HttpApiManager {
         }
     }
 
-    private void updateAllLeaderboardCaches() {
-        // Otimização: Se não houver jogadores online, não há necessidade de atualizar os rankings.
-        if (Bukkit.getOnlinePlayers().isEmpty()) {
-            plugin.logInfo("Nenhum jogador online. Pulando atualização dos caches de ranking.");
-            return;
-        }
-
+    public void updateAllLeaderboardCaches() {
         plugin.logInfo("Atualizando caches dos rankings para a API Web...");
         // Atualiza rankings de insígnias
         plugin.getPlayerDataManager().getDailyBadgeCountsAsync().thenAccept(counts -> dailyLeaderboardCache.putAll(formatLeaderboard(counts)));

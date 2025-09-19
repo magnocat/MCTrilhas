@@ -109,6 +109,7 @@
     <placeholderapi.version>2.11.5</placeholderapi.version>
     <java.version>17</java.version>
     <vault.api.version>1.7.1</vault.api.version>
+    <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
     <worldguard.version>7.0.9</worldguard.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.version.full>1.0.21</project.version.full>

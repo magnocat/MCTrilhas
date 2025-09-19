@@ -20,6 +20,12 @@ public class PlayerQuitListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+
+        // Verifica se este é o último jogador a sair do servidor.
+        // Se for, para as tarefas de atualização de cache para economizar recursos.
+        if (plugin.getServer().getOnlinePlayers().size() == 1) {
+            plugin.stopCacheUpdateTasks();
+        }
         // Salva os dados do jogador do cache para o arquivo e o remove da memória.
         plugin.getPlayerDataManager().unloadPlayerData(player.getUniqueId());
     }
