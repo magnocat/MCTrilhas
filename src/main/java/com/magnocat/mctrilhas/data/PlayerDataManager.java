@@ -3,6 +3,7 @@ package com.magnocat.mctrilhas.data;
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.badges.BadgeType;
 import com.magnocat.mctrilhas.ranks.Rank;
+import com.magnocat.mctrilhas.utils.ItemFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -38,6 +39,7 @@ public class PlayerDataManager {
     private final Map<UUID, PlayerData> playerDataCache = new HashMap<>();
     private final Map<String, UUID> tokenToUuidCache = new ConcurrentHashMap<>();
 
+    private final Map<UUID, Rank> offlineRankCache = new ConcurrentHashMap<>();
     // Caches para os rankings, populados pelos métodos Async e lidos pelo PlaceholderAPI.
     private final Map<UUID, Integer> dailyBadgeCountsCache = new ConcurrentHashMap<>();
     private final Map<UUID, Integer> monthlyBadgeCountsCache = new ConcurrentHashMap<>();
@@ -83,6 +85,62 @@ public class PlayerDataManager {
 
         FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
 
+        PlayerData playerData = createPlayerDataFromConfig(uuid, config);
+        playerDataCache.put(uuid, playerData);
+
+        // Adiciona o token ao cache rápido
+        if (playerData.getWebAccessToken() != null && !playerData.getWebAccessToken().isEmpty()) {
+            tokenToUuidCache.put(playerData.getWebAccessToken(), uuid);
+        }
+
+        // Remove o jogador do cache de ranques offline, pois agora ele está online e seus dados estão no cache principal.
+        offlineRankCache.remove(uuid);
+    }
+
+    /**
+     * Salva os dados de um jogador do cache para o arquivo e o remove do cache.
+     * @param uuid O UUID do jogador.
+     */
+    public void unloadPlayerData(UUID uuid) {
+        // Pega os dados do jogador do cache ANTES de removê-lo.
+        PlayerData data = playerDataCache.get(uuid);
+        if (data != null) {
+            savePlayerData(uuid);
+
+            // Adiciona o ranque do jogador ao cache de ranques offline antes de descarregá-lo.
+            offlineRankCache.put(uuid, data.getRank());
+
+            playerDataCache.remove(uuid);
+            // Agora, com os dados em mãos, remove o token do cache de acesso rápido.
+            if (data.getWebAccessToken() != null && !data.getWebAccessToken().isEmpty()) {
+                tokenToUuidCache.remove(data.getWebAccessToken());
+            }
+        }
+    }
+
+    /**
+     * Carrega os dados de um jogador offline diretamente do arquivo, SEM adicioná-los ao cache principal.
+     * Este método é seguro para ser usado em threads assíncronas para ler dados de jogadores offline
+     * sem causar race conditions com o login/logout do jogador.
+     *
+     * @param uuid O UUID do jogador.
+     * @return Um objeto PlayerData com os dados do jogador, ou null se o arquivo não existir.
+     */
+    public PlayerData loadOfflinePlayerData(UUID uuid) {
+        File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
+        if (!playerFile.exists()) {
+            return null;
+        }
+
+        FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+        return createPlayerDataFromConfig(uuid, config);
+    }
+
+    /**
+     * Método central e privado para criar um objeto PlayerData a partir de um FileConfiguration.
+     * Contém toda a lógica de leitura e migração de dados, evitando duplicação de código.
+     */
+    private PlayerData createPlayerDataFromConfig(UUID uuid, FileConfiguration config) {
         // A estrutura de insígnias agora é um Map<String, Long> (badgeId -> timestamp).
         Map<String, Long> earnedBadges = new HashMap<>(); 
         // Lógica de migração: se o formato antigo (lista) existir, converte para o novo (mapa).
@@ -144,29 +202,7 @@ public class PlayerDataManager {
             }
         }
 
-        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedGrandPrize, new HashSet<>(claimedCtfMilestones), webAccessToken);
-        playerDataCache.put(uuid, playerData);
-
-        // Adiciona o token ao cache rápido
-        if (webAccessToken != null && !webAccessToken.isEmpty()) {
-            tokenToUuidCache.put(webAccessToken, uuid);
-        }
-    }
-
-    /**
-     * Salva os dados de um jogador do cache para o arquivo e o remove do cache.
-     * @param uuid O UUID do jogador.
-     */
-    public void unloadPlayerData(UUID uuid) {
-        if (playerDataCache.containsKey(uuid)) {
-            savePlayerData(uuid);
-            playerDataCache.remove(uuid);
-            // Remove o token do cache rápido
-            PlayerData data = getPlayerData(uuid);
-            if (data != null && data.getWebAccessToken() != null) {
-                tokenToUuidCache.remove(data.getWebAccessToken());
-            }
-        }
+        return new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedGrandPrize, new HashSet<>(claimedCtfMilestones), webAccessToken);
     }
 
     public void savePlayerData(UUID uuid) {
@@ -233,14 +269,27 @@ public class PlayerDataManager {
      * @return O {@link Rank} do jogador, ou o ranque padrão (FILHOTE) se não for encontrado.
      */
     public Rank getRank(UUID uuid) {
-        // Primeiro, verifica o cache (para jogadores online)
+        // 1. Verifica o cache de jogadores online (mais rápido)
         if (playerDataCache.containsKey(uuid)) {
             return playerDataCache.get(uuid).getRank();
         }
-        // Se não estiver no cache, lê do arquivo (para jogadores offline)
+
+        // 2. Verifica o cache de ranques de jogadores offline
+        if (offlineRankCache.containsKey(uuid)) {
+            return offlineRankCache.get(uuid);
+        }
+
+        // 3. Como último recurso, lê do arquivo (operação mais lenta)
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
+        if (!playerFile.exists()) {
+            return Rank.FILHOTE; // Jogador provavelmente nunca entrou no servidor.
+        }
         FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-        return Rank.fromString(config.getString("rank", "FILHOTE"));
+        Rank rank = Rank.fromString(config.getString("rank", "FILHOTE"));
+
+        // Armazena o resultado no cache offline para futuras requisições rápidas.
+        offlineRankCache.put(uuid, rank);
+        return rank;
     }
 
     // --- Métodos de conveniência para serem usados pelos listeners e comandos ---
@@ -370,22 +419,11 @@ public class PlayerDataManager {
         String rewardItemPath = "badges." + configKey + ".reward-item-data";
         if (plugin.getBadgeConfigManager().getBadgeConfig().isConfigurationSection(rewardItemPath)) {
             ConfigurationSection itemSection = plugin.getBadgeConfigManager().getBadgeConfig().getConfigurationSection(rewardItemPath);
-            try {
-                Material material = Material.valueOf(Objects.requireNonNull(itemSection.getString("material")).toUpperCase());
-                ItemStack rewardItem = new ItemStack(material, itemSection.getInt("amount", 1));
-                ItemMeta meta = rewardItem.getItemMeta();
-                if (meta != null) {
-                    if (itemSection.contains("name")) meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemSection.getString("name")));
-                    if (itemSection.contains("lore")) {
-                        List<String> lore = new ArrayList<>();
-                        itemSection.getStringList("lore").forEach(line -> lore.add(ChatColor.translateAlternateColorCodes('&', line)));
-                        meta.setLore(lore);
-                    }
-                    rewardItem.setItemMeta(meta);
-                }
+            ItemStack rewardItem = ItemFactory.createFromConfig(itemSection);
+            if (rewardItem != null) {
                 player.getInventory().addItem(rewardItem);
-            } catch (Exception e) {
-                plugin.logSevere("Erro ao criar item de recompensa para a insígnia '" + configKey + "': " + e.getMessage());
+            } else {
+                plugin.logSevere("Erro ao criar item de recompensa para a insígnia '" + configKey + "'. Verifique a configuração.");
             }
         }
 

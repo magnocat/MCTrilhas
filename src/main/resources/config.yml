@@ -223,6 +223,10 @@ daily-reward:
     claim-success: "&aVocê coletou sua recompensa diária! Volte amanhã para mais."
     cooldown: "&cVocê já coletou sua recompensa. Tente novamente em &e{time}&c."
     login-notification: "&a[!] Sua recompensa diária está disponível! Use &e/daily&a para coletar."
+    inventory-full: "&cSeu inventário está cheio! Libere espaço para coletar sua recompensa."
+    economy-error: "&cOcorreu um erro ao processar sua recompensa. Contate um administrador."
+    disabled: "&cO sistema de recompensa diária está desativado."
+    totem-reward: "&e+ {amount} Totens!"
 
 # Seção de configuração para o sistema de progressão de ranques.
 # Defina os requisitos para que um jogador seja promovido para o ranque especificado.
@@ -282,6 +286,44 @@ ctf-settings:
   # Isso permite que jogos maiores (ex: 4v4) se formem.
   # Defina como 0 para iniciar as partidas instantaneamente assim que o mínimo de jogadores for atingido.
   queue-countdown-seconds: 30
+  # Recompensa em Totens para cada jogador do time vencedor.
+  win-reward-totems: 100
+  # Mensagem enviada ao jogador vencedor. Placeholder: {amount}
+  win-reward-message: "&6Você recebeu &e{amount} Totens&6 pela vitória!"
+  # Porcentagem da recompensa normal que é dada em uma vitória por desistência (W.O.). (Ex: 10 para 10%)
+  forfeit-reward-percentage: 10
+  # Mensagem para vitória por desistência. Placeholder: {amount}
+  forfeit-win-message: "&6Sua equipe venceu por desistência e recebeu &e{amount} Totens&6."
+  # Kit de itens padrão para os jogadores de CTF.
+  # A armadura de couro será colorida automaticamente com a cor do time.
+  kit:
+    armor:
+      helmet:
+        material: "LEATHER_HELMET"
+      chestplate:
+        material: "LEATHER_CHESTPLATE"
+      leggings:
+        material: "LEATHER_LEGGINGS"
+      boots:
+        material: "LEATHER_BOOTS"
+    # Os números representam o "slot" do inventário (0-8 é a hotbar).
+    items:
+      '0':
+        material: "IRON_SWORD"
+        amount: 1
+      '1':
+        material: "BOW"
+        amount: 1
+      '2':
+        material: "GOLDEN_APPLE"
+        amount: 2
+      '3':
+        material: "COOKED_BEEF"
+        amount: 16
+      '8':
+        material: "ARROW"
+        amount: 32
+
 
 # Configurações Gerais do Servidor
 server-settings:
@@ -299,10 +341,25 @@ web-api:
   # Se uma chave for definida, ela será necessária no header 'X-API-Key' para acessar a API.
   # Deixe em branco para uma API pública.
   api-key: ""
+  # URL base para o painel do jogador. Ex: "http://magnocat.net" ou "http://123.45.67.89:22222"
+  # NÃO inclua a barra no final.
+  base-url: "http://SEU_IP_EXTERNO:22222"
+  # Tempo em segundos que os dados de um jogador específico ficam no cache da API.
+  # Isso melhora a performance e evita sobrecarga. 60 segundos é um bom valor.
+  player-data-cache-seconds: 60
   # Novas credenciais para o painel de administração
   admin-credentials:
     username: "admin"
-    password: "changeme"  # IMPORTANTE: Altere esta senha!
+    # A senha agora é um hash SHA-256. Se você alterar a senha, apague o 'salt' para que um novo seja gerado.
+    password: "changeme"
+    # O 'salt' é gerado automaticamente na primeira vez que o servidor inicia com uma senha nova. Não altere este valor.
+    salt: ""
+  # Chave secreta para assinar os tokens de sessão (JWT) do painel de administração.
+  # DEIXE EM BRANCO para que uma chave segura seja gerada automaticamente na primeira inicialização.
+  # Se você alterar esta chave, todos os administradores logados serão desconectados.
+  jwt-secret: ""
+  # Duração da sessão de um administrador em horas.
+  jwt-expiration-hours: 24
 
 # Seção para o bloqueador de comandos.
 command-blocker:

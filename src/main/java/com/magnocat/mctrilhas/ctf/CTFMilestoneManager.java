@@ -1,16 +1,14 @@
-package com.magnocat.mctrilhas.ctf.milestones;
+package com.magnocat.mctrilhas.ctf;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerCTFStats;
+import com.magnocat.mctrilhas.utils.ItemFactory;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
 import java.util.*;
@@ -84,8 +82,12 @@ public class CTFMilestoneManager {
     }
 
     private void grantMilestoneReward(Player player, CTFMilestone milestone) {
-        ItemStack rewardItem = createRewardItem(milestone.getRewardItemSection());
-        player.getInventory().addItem(rewardItem);
+        ItemStack rewardItem = ItemFactory.createFromConfig(milestone.getRewardItemSection());
+        if (rewardItem != null) {
+            player.getInventory().addItem(rewardItem);
+        } else {
+            plugin.getLogger().severe("Erro ao criar item de recompensa para o marco histórico '" + milestone.getId() + "'. Verifique a configuração em ctf_milestones.yml.");
+        }
 
         player.sendMessage(ChatColor.GOLD + "---------------------------------");
         player.sendMessage(ChatColor.AQUA + "  Marco Histórico Alcançado!");
@@ -94,38 +96,6 @@ public class CTFMilestoneManager {
         player.sendMessage(ChatColor.WHITE + "  Você recebeu um item especial como recompensa!");
         player.sendMessage(ChatColor.GOLD + "---------------------------------");
         player.playSound(player.getLocation(), org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.2f);
-    }
-
-    private ItemStack createRewardItem(ConfigurationSection itemSection) {
-        try {
-            Material material = Material.valueOf(itemSection.getString("material", "STONE").toUpperCase());
-            ItemStack item = new ItemStack(material, itemSection.getInt("amount", 1));
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null) {
-                if (itemSection.contains("name")) {
-                    meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemSection.getString("name")));
-                }
-                if (itemSection.isList("lore")) {
-                    List<String> lore = new ArrayList<>();
-                    itemSection.getStringList("lore").forEach(line -> lore.add(ChatColor.translateAlternateColorCodes('&', line)));
-                    meta.setLore(lore);
-                }
-                if (itemSection.isList("enchantments")) {
-                    for (String ench : itemSection.getStringList("enchantments")) {
-                        String[] parts = ench.split(":");
-                        Enchantment enchantment = Enchantment.getByName(parts[0].toUpperCase());
-                        if (enchantment != null) {
-                            meta.addEnchant(enchantment, Integer.parseInt(parts[1]), true);
-                        }
-                    }
-                }
-                item.setItemMeta(meta);
-            }
-            return item;
-        } catch (Exception e) {
-            plugin.getLogger().severe("Erro ao criar item de recompensa de marco histórico: " + e.getMessage());
-            return new ItemStack(Material.STONE, 1); // Retorna um item padrão em caso de erro
-        }
     }
 
     /**

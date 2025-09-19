@@ -512,13 +512,7 @@
                 document.getElementById('stat-totems').textContent = data.totems.toLocaleString('pt-BR');
 
                 // Renderiza o gráfico de progresso das insígnias
-                // Precisamos dos requisitos para calcular a porcentagem. Isso deve vir da API ou ser hardcoded.
-                // Por enquanto, vamos simular.
-                const badgeRequirements = {
-                    'MINING': 50000, 'LUMBERJACK': 10000, 'BUILDER': 80000,
-                    'FARMING': 5000, 'FISHING': 250, 'COOKING': 5000,
-                    'CRAFTING': 1000, 'EXPLORER': 25
-                };
+                // Os nomes das insígnias ainda estão hardcoded, mas os valores vêm da API.
                 const badgeNames = {
                     'MINING': 'Minerador', 'LUMBERJACK': 'Lenhador', 'BUILDER': 'Construtor',
                     'FARMING': 'Fazendeiro', 'FISHING': 'Pescador', 'COOKING': 'Cozinheiro',
@@ -526,19 +520,23 @@
                 };
 
                 const progressPercentages = {};
-                for (const badgeId in data.badgeProgress) {
-                    const progress = data.badgeProgress[badgeId];
-                    const required = badgeRequirements[badgeId] || 1;
-                    const percentage = Math.min(100, (progress / required) * 100);
-                    const displayName = badgeNames[badgeId] || badgeId;
+                // Itera sobre os requisitos recebidos da API para construir o gráfico
+                for (const badgeId in data.badgeRequirements) {
+                    const required = data.badgeRequirements[badgeId];
+                    const progress = data.badgeProgress[badgeId] || 0; // Pega o progresso atual ou 0 se não houver
+
+                    // Garante que não haverá divisão por zero se o requisito for 0
+                    const percentage = required > 0 ? Math.min(100, (progress / required) * 100) : 0;
+                    const displayName = badgeNames[badgeId] || badgeId; // Usa o nome amigável ou o ID
                     progressPercentages[displayName] = Math.round(percentage);
                 }
                 renderBadgeProgressChart(progressPercentages);
 
-                // Atualiza a lista de jogadores recentes (usando dados gerais da API)
-                // Supondo que a API retorne uma lista de jogadores recentes
-                const recentPlayers = data.leaderboards.allTime; // Usando um ranking como exemplo
-                updateRecentPlayers(recentPlayers);
+                // A lista de jogadores recentes não está disponível neste painel individual.
+                const recentPlayersList = document.getElementById('recent-players-list');
+                if (recentPlayersList) {
+                    recentPlayersList.innerHTML = '<p class="p-4 text-muted">Informação de outros jogadores não disponível neste painel.</p>';
+                }
             }
 
             function renderBadgeProgressChart(progressData) {
@@ -581,24 +579,6 @@
 
                 const chart = new ApexCharts(chartEl, options);
                 chart.render();
-            }
-
-            function updateRecentPlayers(players) {
-                const listEl = document.getElementById('recent-players-list');
-                if (!listEl) return;
-
-                listEl.innerHTML = ''; // Limpa o placeholder
-
-                Object.keys(players).slice(0, 8).forEach(playerName => { // Pega os 8 primeiros
-                    const col = document.createElement('div');
-                    col.className = 'col-3 p-2';
-                    col.innerHTML = `
-                        <img class="img-fluid rounded-circle" src="https://cravatar.eu/helmavatar/${playerName}/128.png" alt="${playerName}">
-                        <a class="btn fw-bold fs-7 text-secondary text-truncate w-100 p-0" href="#">${playerName}</a>
-                        <div class="fs-8 text-muted">Online</div>
-                    `;
-                    listEl.appendChild(col);
-                });
             }
 
             // 4. Inicia o processo

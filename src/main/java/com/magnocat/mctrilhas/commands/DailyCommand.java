@@ -41,7 +41,7 @@ public class DailyCommand implements CommandExecutor {
 
         // Validações iniciais
         if (dailyRewardSection == null || !dailyRewardSection.getBoolean("enabled", false)) {
-            sendMessage(player, dailyRewardSection, "messages.disabled", "&cO sistema de recompensa diaria esta desativado.");
+            sendMessage(player, dailyRewardSection, "messages.disabled", "&cO sistema de recompensa diária está desativado.");
             return true;
         }
 
@@ -60,7 +60,9 @@ public class DailyCommand implements CommandExecutor {
         if (currentTime - lastClaim >= cooldownMillis) {
             handleRewardClaim(player, dailyRewardSection);
         } else {
-            handleCooldownMessage(player, dailyRewardSection, lastClaim, cooldownMillis);
+            long remainingMillis = (lastClaim + cooldownMillis) - System.currentTimeMillis();
+            String timeRemaining = formatTime(remainingMillis);
+            sendMessage(player, dailyRewardSection, "messages.cooldown", "&cVocê já coletou sua recompensa. Tente novamente em &e{time}&c.", "{time}", timeRemaining);
         }
 
         return true;
@@ -72,7 +74,7 @@ public class DailyCommand implements CommandExecutor {
 
         // Verifica se há espaço no inventário ANTES de dar qualquer recompensa
         if (rewardItem != null && player.getInventory().firstEmpty() == -1) {
-            sendMessage(player, dailyRewardSection, "messages.inventory-full", "&cSeu inventario esta cheio! Libere espaco para coletar sua recompensa diaria.");
+            sendMessage(player, dailyRewardSection, "messages.inventory-full", "&cSeu inventário está cheio! Libere espaço para coletar sua recompensa.");
             return;
         }
 
@@ -88,21 +90,11 @@ public class DailyCommand implements CommandExecutor {
         playerDataManager.setLastDailyRewardTime(player.getUniqueId(), System.currentTimeMillis());
 
         // Envia mensagens de sucesso
-        String successMessage = dailyRewardSection.getString("messages.claim-success", "&aVoce coletou sua recompensa diaria!");
-        player.sendMessage(ChatColor.translateAlternateColorCodes('&', successMessage.replace("{amount}", String.valueOf(totemAmount))));
+        sendMessage(player, dailyRewardSection, "messages.claim-success", "&aVocê coletou sua recompensa diária! Volte amanhã para mais.");
         
         if (totemAmount > 0) {
-            String totemMessage = plugin.getConfig().getString("totem-reward-message", "&e+ {amount} Totens!");
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', totemMessage.replace("{amount}", String.valueOf(totemAmount))));
+            sendMessage(player, dailyRewardSection, "messages.totem-reward", "&e+ {amount} Totens!", "{amount}", String.valueOf(totemAmount));
         }
-    }
-
-    private void handleCooldownMessage(Player player, ConfigurationSection dailyRewardSection, long lastClaim, long cooldownMillis) {
-        long remainingMillis = (lastClaim + cooldownMillis) - System.currentTimeMillis();
-        String timeRemaining = formatTime(remainingMillis);
-
-        String cooldownMessage = dailyRewardSection.getString("messages.cooldown", "&cVoce ja coletou sua recompensa. Tente novamente em &e{time}&c.");
-        player.sendMessage(ChatColor.translateAlternateColorCodes('&', cooldownMessage.replace("{time}", timeRemaining)));
     }
 
     /**
@@ -119,11 +111,23 @@ public class DailyCommand implements CommandExecutor {
     /**
      * Helper para enviar mensagens configuráveis para o jogador.
      */
-    private void sendMessage(Player player, ConfigurationSection section, String path, String defaultValue) {
+    private void sendMessage(Player player, ConfigurationSection section, String path, String defaultValue, String... replacements) {
         String message = defaultValue;
         if (section != null) {
             message = section.getString(path, defaultValue);
         }
+
+        // Aplica os placeholders (ex: "{time}", "12h 30m")
+        if (replacements != null && replacements.length > 0) {
+            if (replacements.length % 2 != 0) {
+                plugin.logWarn("Número ímpar de argumentos de substituição para sendMessage. As substituições serão ignoradas.");
+            } else {
+                for (int i = 0; i < replacements.length; i += 2) {
+                    message = message.replace(replacements[i], replacements[i + 1]);
+                }
+            }
+        }
+
         player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
     }
 }

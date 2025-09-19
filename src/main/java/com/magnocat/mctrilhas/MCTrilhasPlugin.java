@@ -19,7 +19,7 @@ import com.magnocat.mctrilhas.commands.TreasureHuntCommand;
 import com.magnocat.mctrilhas.ctf.CTFCommand;
 import com.magnocat.mctrilhas.ctf.CTFManager;
 import com.magnocat.mctrilhas.ctf.CTFArena; // Import para usar o método parseLocation
-import com.magnocat.mctrilhas.ctf.milestones.CTFMilestoneManager;
+import com.magnocat.mctrilhas.ctf.CTFMilestoneManager;
 import com.magnocat.mctrilhas.listeners.AdminPrivacyListener;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
 import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;
@@ -45,7 +45,7 @@ import com.magnocat.mctrilhas.quests.TreasureHuntRewardManager;
 import com.magnocat.mctrilhas.quests.TreasureLocationsManager;
 import com.magnocat.mctrilhas.ranks.RankManager;
 import com.magnocat.mctrilhas.storage.BlockPersistenceManager;
-import com.magnocat.mctrilhas.trackers.ActivityTracker;
+import com.magnocat.mctrilhas.data.ActivityTracker;
 import com.magnocat.mctrilhas.updater.UpdateChecker;
 import com.magnocat.mctrilhas.web.HttpApiManager;
 

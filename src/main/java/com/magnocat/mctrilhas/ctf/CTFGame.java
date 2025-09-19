@@ -1,6 +1,7 @@
 package com.magnocat.mctrilhas.ctf;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.utils.ItemFactory;
 import com.magnocat.mctrilhas.data.PlayerCTFStats;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
@@ -8,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
@@ -171,7 +173,8 @@ public class CTFGame {
         }.runTaskTimer(plugin, 20L, 20L);
     }
 
-    public void endGame(TeamColor winner) {
+    public void endGame(TeamColor winner, boolean isForfeit) {
+        if (gameState == GameState.ENDING) return; // Evita chamadas duplas
         this.gameState = GameState.ENDING;
         if (gameTimer != null) gameTimer.cancel();
 
@@ -183,17 +186,38 @@ public class CTFGame {
         // Constrói e transmite o resumo de fim de jogo ANTES de restaurar os jogadores
         broadcastEndGameSummary(winner);
 
+        double rewardAmount;
+        String formattedRewardMessage;
+
+        if (isForfeit) {
+            double fullReward = plugin.getConfig().getDouble("ctf-settings.win-reward-totems", 100);
+            double forfeitPercentage = plugin.getConfig().getDouble("ctf-settings.forfeit-reward-percentage", 10.0);
+            rewardAmount = fullReward * (forfeitPercentage / 100.0);
+
+            String rewardMessageTemplate = plugin.getConfig().getString("ctf-settings.forfeit-win-message", "&6Sua equipe venceu por desistência e recebeu &e{amount} Totens&6.");
+            formattedRewardMessage = ChatColor.translateAlternateColorCodes('&', rewardMessageTemplate.replace("{amount}", String.valueOf((int)rewardAmount)));
+        } else {
+            rewardAmount = plugin.getConfig().getDouble("ctf-settings.win-reward-totems", 0);
+            String rewardMessageTemplate = plugin.getConfig().getString("ctf-settings.win-reward-message", "&6Você recebeu &e{amount} Totens&6 pela vitória!");
+            formattedRewardMessage = ChatColor.translateAlternateColorCodes('&', rewardMessageTemplate.replace("{amount}", String.valueOf((int)rewardAmount)));
+        }
+
         if (winner == null) {
             broadcastMessage(ChatColor.GOLD + "A partida terminou em empate!");
         } else {
-            broadcastMessage(winner.getChatColor() + "O time " + winner.getDisplayName() + " venceu a partida!");
-            
+            if (isForfeit) {
+                TeamColor forfeitingTeamColor = (winner == teamOne) ? teamTwo : teamOne;
+                broadcastMessage(forfeitingTeamColor.getChatColor() + "O time " + forfeitingTeamColor.getDisplayName() + " desistiu da partida.");
+                broadcastMessage(winner.getChatColor() + "O time " + winner.getDisplayName() + " venceu por desistência!");
+            } else {
+                broadcastMessage(winner.getChatColor() + "O time " + winner.getDisplayName() + " venceu a partida!");
+            }
+
             // Dá a recompensa para o time vencedor
             CTFTeam winningTeam = teams.get(winner);
             if (winningTeam != null) {
                 Economy econ = plugin.getEconomy();
-                if (econ != null) {
-                    double rewardAmount = 100.0; // Recompensa de 100 Totens
+                if (econ != null && rewardAmount > 0) {
                     for (UUID playerUUID : winningTeam.getPlayers()) {
                         econ.depositPlayer(Bukkit.getOfflinePlayer(playerUUID), rewardAmount);
                     }
@@ -212,8 +236,10 @@ public class CTFGame {
                 restorePlayerState(player);
                 plugin.teleportToHub(player);
                 if (winner != null && teams.get(winner).getPlayers().contains(player.getUniqueId())) {
-                    player.sendMessage(ChatColor.GOLD + "Você recebeu 100 Totens pela vitória!");
-                } else if (winner != null) {
+                    if (rewardAmount > 0) {
+                        player.sendMessage(formattedRewardMessage);
+                    }
+                } else if (winner != null) { // Jogador do time perdedor
                     player.sendMessage(ChatColor.GRAY + "O time adversário venceu. Mais sorte na próxima vez!");
                 }
             }
@@ -260,11 +286,11 @@ public class CTFGame {
         CTFTeam teamTwo = teams.get(this.teamTwo);
 
         if (teamOne.getScore() > teamTwo.getScore()) {
-            endGame(teamOne.getColor());
+            endGame(teamOne.getColor(), false);
         } else if (teamTwo.getScore() > teamOne.getScore()) {
-            endGame(teamTwo.getColor());
+            endGame(teamTwo.getColor(), false);
         } else {
-            endGame(null); // Empate
+            endGame(null, false); // Empate
         }
     }
 
@@ -274,7 +300,8 @@ public class CTFGame {
 
         TeamColor teamColor = playerTeams.remove(player.getUniqueId());
         if (teamColor != null) {
-            teams.get(teamColor).removePlayer(player.getUniqueId());
+            CTFTeam leftTeam = teams.get(teamColor);
+            leftTeam.removePlayer(player.getUniqueId());
 
             // Verifica se o jogador estava carregando uma bandeira e a derruba
             for (CTFFlag flag : flags.values()) {
@@ -287,6 +314,13 @@ public class CTFGame {
             }
 
             broadcastMessage(teamColor.getChatColor() + player.getName() + ChatColor.YELLOW + " saiu da partida.");
+
+            // Se o time ficou vazio, o outro time vence por desistência.
+            // A verificação gameState == GameState.IN_PROGRESS impede que isso aconteça se o jogo já estiver terminando.
+            if (gameState == GameState.IN_PROGRESS && leftTeam.getPlayers().isEmpty()) {
+                TeamColor winningTeamColor = (teamColor == teamOne) ? teamTwo : teamOne;
+                endGame(winningTeamColor, true);
+            }
         }
     }
 
@@ -419,7 +453,7 @@ public class CTFGame {
                     
                     // Verifica se o time atingiu a pontuação para vencer
                     if (playerTeam.getScore() >= arena.getScoreToWin()) {
-                        endGame(playerTeamColor);
+                        endGame(playerTeamColor, false);
                     }
                 } else {
                     player.sendTitle("", ChatColor.RED + "Sua bandeira precisa estar na base para pontuar!", 10, 40, 10);
@@ -605,37 +639,48 @@ public class CTFGame {
         player.setLevel(0);
     }
 
+    /**
+     * Aplica o kit de itens configurado no config.yml ao jogador.
+     * @param player O jogador que receberá o kit.
+     */
     private void applyKit(Player player) {
         TeamColor teamColor = playerTeams.get(player.getUniqueId());
         if (teamColor == null) return;
 
         PlayerInventory inv = player.getInventory();
-        inv.clear(); // Garante que o inventário esteja limpo antes de aplicar o kit
+        inv.clear();
 
-        // Armadura de couro colorida
-        inv.setHelmet(createColoredArmor(Material.LEATHER_HELMET, teamColor.getArmorColor()));
-        inv.setChestplate(createColoredArmor(Material.LEATHER_CHESTPLATE, teamColor.getArmorColor()));
-        inv.setLeggings(createColoredArmor(Material.LEATHER_LEGGINGS, teamColor.getArmorColor()));
-        inv.setBoots(createColoredArmor(Material.LEATHER_BOOTS, teamColor.getArmorColor()));
+        ConfigurationSection kitSection = plugin.getConfig().getConfigurationSection("ctf-settings.kit");
+        if (kitSection == null) {
+            plugin.logWarn("Seção 'ctf-settings.kit' não encontrada no config.yml. Nenhum kit foi aplicado.");
+            return;
+        }
+
+        // Armadura
+        ConfigurationSection armorSection = kitSection.getConfigurationSection("armor");
+        if (armorSection != null) {
+            inv.setHelmet(createTeamArmor(armorSection.getConfigurationSection("helmet"), teamColor));
+            inv.setChestplate(createTeamArmor(armorSection.getConfigurationSection("chestplate"), teamColor));
+            inv.setLeggings(createTeamArmor(armorSection.getConfigurationSection("leggings"), teamColor));
+            inv.setBoots(createTeamArmor(armorSection.getConfigurationSection("boots"), teamColor));
+        }
 
         // Itens
-        inv.setItem(0, new ItemStack(Material.IRON_SWORD));
-        inv.setItem(1, new ItemStack(Material.BOW));
-        inv.setItem(2, new ItemStack(Material.GOLDEN_APPLE, 2));
-        inv.setItem(3, new ItemStack(Material.COOKED_BEEF, 16));
-        inv.setItem(8, new ItemStack(Material.ARROW, 32));
+        ConfigurationSection itemsSection = kitSection.getConfigurationSection("items");
+        if (itemsSection != null) {
+            for (String slotStr : itemsSection.getKeys(false)) {
+                try {
+                    int slot = Integer.parseInt(slotStr);
+                    ConfigurationSection itemConfig = itemsSection.getConfigurationSection(slotStr);
+                    ItemStack item = ItemFactory.createFromConfig(itemConfig);
+                    if (item != null) inv.setItem(slot, item);
+                } catch (NumberFormatException e) {
+                    plugin.logWarn("Slot inválido '" + slotStr + "' na configuração do kit CTF.");
+                }
+            }
+        }
 
         player.updateInventory();
-    }
-
-    private ItemStack createColoredArmor(Material leatherPiece, Color color) {
-        ItemStack item = new ItemStack(leatherPiece);
-        LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
-        if (meta != null) {
-            meta.setColor(color);
-            item.setItemMeta(meta);
-        }
-        return item;
     }
 
     private CTFFlag getFlagCarriedBy(Player player) {
@@ -645,6 +690,18 @@ public class CTFGame {
             }
         }
         return null;
+    }
+
+    private ItemStack createTeamArmor(ConfigurationSection armorConfig, TeamColor teamColor) {
+        if (armorConfig == null) return null;
+        ItemStack armorPiece = ItemFactory.createFromConfig(armorConfig);
+        // Se a peça de armadura for de couro, colore com a cor do time.
+        if (armorPiece != null && armorPiece.getItemMeta() instanceof LeatherArmorMeta) {
+            LeatherArmorMeta meta = (LeatherArmorMeta) armorPiece.getItemMeta();
+            meta.setColor(teamColor.getArmorColor());
+            armorPiece.setItemMeta(meta);
+        }
+        return armorPiece;
     }
 
     // --- Getters ---

@@ -1,4 +1,4 @@
-package com.magnocat.mctrilhas.trackers;
+package com.magnocat.mctrilhas.data;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerData;

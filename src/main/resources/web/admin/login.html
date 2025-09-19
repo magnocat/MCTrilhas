@@ -65,15 +65,15 @@
       <!-- /.login-logo -->
       <div class="card">
         <div class="card-body login-card-body">
-          <p class="login-box-msg">Faça login para iniciar sua sessão</p>
+          <p class="login-box-msg">Faça o login para iniciar sua sessão</p>
           <form id="login-form">
             <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
             <div class="input-group mb-3">
-              <input type="text" class="form-control" placeholder="Usuário" id="username" required />
+              <input type="text" class="form-control" placeholder="Usuário" id="username" name="username" required />
               <div class="input-group-text"><span class="bi bi-person-fill"></span></div>
             </div>
             <div class="input-group mb-3">
-              <input type="password" class="form-control" placeholder="Senha" id="password" required />
+              <input type="password" class="form-control" placeholder="Senha" id="password" name="password" required />
               <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
             </div>
             <!--begin::Row-->
@@ -144,54 +144,62 @@
       });
     </script>
     <!--end::OverlayScrollbars Configure-->
+
     <!--begin::Login Script-->
+    <script src="./js/auth.js"></script>
     <script>
-      document.getElementById('login-form').addEventListener('submit', async (event) => {
-        event.preventDefault(); // Impede o envio padrão do formulário
+        document.addEventListener('DOMContentLoaded', () => {
+            // Se o usuário já tiver um token, redireciona para o painel
+            if (getToken()) {
+                window.location.href = 'admin.html';
+                return;
+            }
 
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const errorDiv = document.getElementById('error-message');
-        const submitButton = event.target.querySelector('button[type="submit"]');
+            const loginForm = document.getElementById('login-form');
+            const errorDiv = document.getElementById('error-message');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const submitButton = loginForm.querySelector('button[type="submit"]');
 
-        const username = usernameInput.value;
-        const password = passwordInput.value;
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (errorDiv) errorDiv.classList.add('d-none');
 
-        // Desabilita o botão e mostra um spinner
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Entrando...';
-        errorDiv.classList.add('d-none');
+                    // Desabilita o botão e mostra um spinner
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Entrando...';
 
-        try {
-          const response = await fetch('/api/v1/admin/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password }),
-          });
+                    const username = usernameInput.value;
+                    const password = passwordInput.value;
 
-          const result = await response.json();
+                    try {
+                        const response = await fetch('/api/v1/admin/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username, password }),
+                        });
 
-          if (response.ok && result.success) {
-            // Sucesso! Redireciona para o dashboard principal.
-            // Futuramente, salvaremos o token de sessão aqui.
-            window.location.href = './index.html'; // Redireciona para o dashboard
-          } else {
-            // Falha no login
-            errorDiv.textContent = result.error || 'Ocorreu um erro. Tente novamente.';
-            errorDiv.classList.remove('d-none');
-          }
-        } catch (error) {
-          console.error('Erro na requisição de login:', error);
-          errorDiv.textContent = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
-          errorDiv.classList.remove('d-none');
-        } finally {
-          // Reabilita o botão
-          submitButton.disabled = false;
-          submitButton.innerHTML = 'Entrar';
-        }
-      });
+                        const data = await response.json();
+
+                        if (data.success && data.token) {
+                            saveToken(data.token);
+                            window.location.href = 'admin.html';
+                        } else {
+                            errorDiv.textContent = data.error || 'Ocorreu um erro desconhecido.';
+                            errorDiv.classList.remove('d-none');
+                        }
+                    } catch (err) {
+                        console.error('Erro na requisição de login:', err);
+                        errorDiv.textContent = 'Não foi possível conectar ao servidor.';
+                        errorDiv.classList.remove('d-none');
+                    } finally {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Entrar';
+                    }
+                });
+            }
+        });
     </script>
     <!--end::Login Script-->
     <!--end::Script-->

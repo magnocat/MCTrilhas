@@ -88,9 +88,24 @@ MCTrilhas/
 *   **Endpoints:**
     *   `http://<IP>:<porta>/`: Serve o arquivo `index.html` e outros arquivos estáticos (`.css`, `.js`) da pasta `web/` do plugin.
     *   `http://<IP>:<porta>/api/v1/data`: Endpoint que retorna um JSON com dados do servidor (rankings, status, etc.).
-*   **Lógica:** Responde a requisições GET. Utiliza um cache interno para o endpoint de dados para evitar sobrecarga.
-*   **Segurança:** O acesso ao endpoint de dados pode ser protegido por uma chave de API (`api-key`) no `config.yml`. A chave deve ser enviada no cabeçalho `X-API-Key` da requisição.
-*   **Configuração:** A porta, ativação e chave da API são controladas pela seção `web-api` no `config.yml`.
+    *   `http://<IP>:<porta>/api/v1/player?token=<token>`: Retorna um JSON com dados detalhados de um jogador específico, validado pelo token.
+    *   `http://<IP>:<porta>/api/v1/admin/login`: Valida as credenciais de administrador.
+    *   `http://<IP>:<porta>/api/v1/admin/players/online`: (Protegido por JWT) Retorna uma lista de jogadores online.
+*   **Lógica:** Responde a requisições GET (para dados) e POST (para login). Utiliza um cache interno para os endpoints de dados (`/api/v1/data` e `/api/v1/player`) para evitar sobrecarga.
+*   **Segurança:**
+    *   **Login do Admin:** A senha do administrador é armazenada como um hash SHA-256 com salt no `config.yml`.
+    *   **Sessão do Admin:** Após o login, um token JWT é gerado e usado para autenticar requisições a endpoints protegidos (ex: `/api/v1/admin/*`).
+    *   **Acesso do Jogador:** O acesso aos dados do jogador é protegido por um token único e secreto gerado em jogo.
+*   **Configuração:** A porta, ativação, URL base, tempo de cache e configurações de segurança (salt, jwt-secret) são controlados pela seção `web-api` no `config.yml`.
+
+### 3.7. Portal da Família (Painel do Jogador)
+*   **Descrição:** Uma página web individual e segura para cada jogador (e sua família) acompanhar seu progresso, estatísticas e tempo de jogo.
+*   **Estrutura:** `web/admin/player_dashboard.html`, `commands/FamilyCommand.java`.
+*   **Fluxo de Trabalho:**
+    1.  **`commands/FamilyCommand`**: O jogador usa `/familia token`. O comando gera um token de acesso único e seguro (se não existir) e o salva no `PlayerData`.
+    2.  **Link Clicável**: O jogador recebe uma mensagem no chat com um link clicável para o painel, contendo o token como parâmetro de URL (ex: `.../player_dashboard.html?token=XYZ`).
+    3.  **`web/HttpApiManager`**: O endpoint `/api/v1/player` recebe a requisição do painel. Ele valida o token, busca os dados do jogador (usando um cache para performance) e retorna um JSON completo com estatísticas, progresso de insígnias e requisitos.
+    4.  **`web/admin/player_dashboard.html`**: O JavaScript da página consome o JSON da API e preenche dinamicamente o painel com os dados do jogador.
 
 ---
 
@@ -133,20 +148,15 @@ MCTrilhas/
     *   **WorldGuard:** Para criar e gerenciar as regiões protegidas de cada terreno.
     *   **BlueMap:** Para adicionar marcadores 3D customizados no mapa web, indicando a localização e o dono de cada terreno/base.
 
-### 4.5. Painel de Administração e Portal da Família (Web)
-*   **Descrição:** Uma expansão significativa da API Web para criar um painel de gerenciamento completo e um portal de visualização para pais.
+### 4.5. Painel de Administração (Web)
+*   **Descrição:** Uma expansão da API Web para criar um painel de gerenciamento completo para administradores, usando o template AdminLTE. O sistema de login, sessão JWT e um dashboard básico com a lista de jogadores online já foram implementados.
 *   **Estrutura:**
-    *   Novas pastas em `resources/web/`: `admin/` (para os arquivos do AdminLTE) e `familia/` (para a página do portal).
+    *   Arquivos na pasta `resources/web/admin/`.
     *   Novos endpoints na classe `HttpApiManager` para lidar com autenticação e requisições de dados/ações.
 *   **Lógica (Painel do Admin):**
-    1.  **Autenticação:** Um endpoint `/api/v1/admin/login` validará credenciais do `config.yml` e retornará um token de sessão.
-    2.  **Listagem de Jogadores:** O endpoint `/api/v1/admin/players` retornará uma lista paginada e simplificada de jogadores para evitar sobrecarga.
-    3.  **Dados Detalhados:** O endpoint `/api/v1/admin/player/<uuid>` buscará todos os dados de um jogador específico sob demanda.
-    4.  **Ações:** Endpoints de `POST` (ex: `/api/v1/admin/player/<uuid>/ban`) enfileirarão tarefas no scheduler principal do Bukkit para serem executadas de forma segura.
-*   **Lógica (Portal da Família):**
-    1.  **Geração de Token:** O comando `/familia token` gerará um token único e seguro, que será salvo no arquivo de dados do jogador.
-    2.  **Acesso via Link:** O `HttpApiManager` terá um handler para rotas como `/familia/<token>` que valida o token e serve a página de relatório.
-    3.  **Acesso via Formulário:** A página `familia/index.html` terá um formulário que envia o token para um endpoint `/api/v1/familia/report`, que então redireciona para a página de relatório correta.
+    1.  **Dashboard Avançado:** Adicionar mais informações ao dashboard, como gráficos de uso de RAM/CPU e estatísticas gerais do servidor.
+    2.  **Gerenciamento de Jogadores:** Criar uma interface para visualizar e editar dados de jogadores (conceder insígnias, ajustar Totens, etc.) via API.
+    3.  **Ações de Moderação:** Adicionar botões na lista de jogadores para executar comandos (kick, ban) remotamente.
 
 ---
 

@@ -31,7 +31,7 @@ O **MCTrilhas** é um plugin customizado para servidores Minecraft (Paper/Spigot
 - **Sistema de Insígnias e Ranques**: Progresso baseado em atividades (mineração, construção, exploração) que recompensa os jogadores com insígnias e os promove em um sistema de ranques escoteiros.
 - **Recompensas Configuráveis**: Cada insígnia concede itens customizados, dinheiro (via Vault) e mapas-troféu únicos.
 - **Modos de Jogo Competitivos**: Inclui um sistema completo de **Capture a Bandeira (CTF)** com arenas, times, placar e estatísticas.
-- **Quests e Recompensas Diárias**: Sistema de Caça ao Tesouro e recompensas diárias para manter os jogadores engajados.
+- **Quests, Recompensas Diárias e Portal da Família**: Sistema de Caça ao Tesouro, recompensas diárias e um painel web individual para cada jogador acompanhar seu progresso.
 - **API Web e Site Integrado**: Inicia um servidor web que hospeda uma página de estatísticas (PWA) e fornece dados em tempo real para sites externos, com proteção opcional por chave de API.
 - **Alta Performance**: O sistema de dados dos jogadores é otimizado com cache e operações assíncronas para evitar sobrecarga no servidor.
 - **Integração com PlaceholderAPI**: Expõe dados como ranque e progresso para outros plugins (TAB, scoreboards, etc.).
@@ -79,6 +79,7 @@ Abaixo está a lista completa de comandos disponíveis.
 | `/daily` | Coleta a recompensa diária de Totens e itens. | `mctrilhas.daily` |
 | `/ranque` | Mostra seu progresso para o próximo ranque. | `mctrilhas.ranque` |
 | `/tesouro` | Inicia ou gerencia sua caça ao tesouro. | `mctrilhas.tesouro` |
+| `/familia token` | Gera seu link pessoal para o Painel da Família. | `mctrilhas.familia.use` |
 | `/ctf join` | Entra na fila para uma partida de CTF. | `mctrilhas.ctf.join` |
 | `/ctf leave` | Sai da fila ou da partida de CTF. | `mctrilhas.ctf.leave` |
 

@@ -58,7 +58,18 @@ Revisão das principais funcionalidades implementadas e decisões tomadas:
     *   Adicionamos um `manifest.json` e um `sw.js` (Service Worker).
     *   O site agora é instalável em dispositivos móveis, funciona offline e carrega mais rápido.
     *   Corrigimos o gráfico de atividade (Chart.js) e melhoramos a estrutura do `index.html` com instruções de como jogar.
-5.  **Refatoração e Qualidade de Código:** Discutimos e aplicamos melhorias, como a atualização periódica dos caches de ranking e a otimização do streaming de arquivos no servidor web. Mantivemos a decisão de manter a lógica de recompensas centralizada no método `grantReward` por preferência do projeto.
+5.  **Portal do Jogador e Tokens de Acesso:** Implementamos o comando `/familia token` para gerar um link único e seguro. Criamos o endpoint `/api/v1/player` para servir dados individuais e desenvolvemos a página `player_dashboard.html` que consome esses dados. Adicionamos um cache para otimizar a performance.
+6.  **Painel de Administração (Sessão e Segurança):** Implementamos um sistema de login seguro com senha criptografada (hash + salt) e sessões baseadas em JSON Web Tokens (JWT), incluindo um dashboard inicial que lista os jogadores online.
+7.  **Melhorias no CTF:**
+    *   Adicionamos lógica para vitória por desistência (W.O.) com recompensa parcial.
+    *   Tornamos as recompensas de vitória totalmente configuráveis no `config.yml`.
+    *   Tornamos o kit de itens dos jogadores totalmente configurável no `config.yml`.
+8.  **Refatoração e Qualidade de Código:** Discutimos e aplicamos melhorias, como a atualização periódica dos caches de ranking e a otimização do streaming de arquivos no servidor web. Mantivemos a decisão de manter a lógica de recompensas centralizada no método `grantReward` por preferência do projeto.
+    *   Centralizamos a criação de itens na `ItemFactory`, removendo código duplicado do `CTFMilestoneManager` e `PlayerDataManager`.
+    *   Limpamos e organizamos o `DailyCommand`, movendo todas as mensagens para o `config.yml`.
+    *   Otimizamos a extração de recursos da web (para acontecer apenas na inicialização) e a leitura de dados de jogadores offline pela API.
+    *   Adicionamos um cache para ranques de jogadores offline para melhorar a performance do PlaceholderAPI.
+    *   Otimizamos a atualização dos caches de ranking para que não rodem se o servidor estiver vazio.
 
 ---
 
@@ -112,18 +123,13 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
     *   **Funcionalidades:** Compra de terrenos usando Totens, proteção automática da área, gerenciamento de permissões para amigos.
     *   **Integrações:** Planejado para usar Multiverse (para o mundo), WorldGuard (para as proteções) e BlueMap (para visualização no mapa web).
 
-*   ### Painel de Administração e Portal da Família (Web)
-    *   **Descrição:** Uma plataforma web robusta para gerenciamento do servidor e acompanhamento parental, baseada no template AdminLTE.
+*   ### Painel de Administração (Web)
+    *   **Descrição:** Uma plataforma web robusta para gerenciamento do servidor, baseada no template AdminLTE. O portal do jogador (`player_dashboard.html`) e o login do admin já foram implementados.
     *   **Funcionalidades Planejadas (Painel do Admin):**
-        *   Área de login segura (`/admin`) com credenciais definidas no `config.yml`.
-        *   Visualização de jogadores com paginação (para evitar sobrecarga), mostrando dados básicos. Clicar em um jogador abrirá uma visão detalhada.
-        *   Gerenciamento de dados de jogadores (conceder insígnias, ajustar Totens, etc.) via API.
-        *   Visualização de logs de denúncias e estatísticas de comportamento.
-        *   Capacidade de executar comandos no servidor remotamente.
-    *   **Funcionalidades Planejadas (Portal da Família):**
-        *   Geração de um link/token de acesso único e secreto com o comando `/familia token`.
-        *   Acesso de duas formas: diretamente pelo link (`magnocat.net/familia/<token>`) ou inserindo o token em uma página dedicada (`magnocat.net/familia`).
-        *   Exibição de estatísticas de jogo do filho: horas jogadas, horários de login, últimas conquistas, etc., em formato de gráficos e relatórios.
+        *   **Implementar Sessão de Admin:** Após o login, gerar um token de sessão (JWT) para autenticar as requisições subsequentes.
+        *   **Dashboard de Admin:** Criar uma página principal para o admin com estatísticas gerais do servidor.
+        *   **Gerenciamento de Jogadores:** Criar uma interface para visualizar e editar dados de jogadores (conceder insígnias, ajustar Totens, etc.) via API.
+        *   **Ações de Moderação:** Adicionar botões para executar comandos (kick, ban) remotamente.
 
 ---
 

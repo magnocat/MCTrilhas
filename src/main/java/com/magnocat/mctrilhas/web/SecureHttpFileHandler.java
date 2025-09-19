@@ -39,9 +39,10 @@ public class SecureHttpFileHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         URI uri = exchange.getRequestURI();
         String pathStr = uri.getPath().equals("/") ? "/index.html" : uri.getPath();
+        String resourcePath = pathStr.startsWith("/") ? pathStr.substring(1) : pathStr;
 
         // Resolve o caminho do arquivo solicitado de forma segura
-        Path requestedFile = webRootDir.resolve(pathStr.substring(1)).normalize();
+        Path requestedFile = webRootDir.resolve(resourcePath).normalize();
 
         // **A VERIFICAÇÃO DE SEGURANÇA MAIS IMPORTANTE**
         // Garante que o caminho solicitado está DENTRO do diretório web raiz.
@@ -53,7 +54,8 @@ public class SecureHttpFileHandler implements HttpHandler {
 
         File file = requestedFile.toFile();
 
-        if (!file.exists() || !file.isFile()) { // Garante que é um arquivo e não um diretório
+        // Verifica se o arquivo existe no disco e se é um arquivo (não um diretório).
+        if (!file.exists() || !file.isFile()) {
             File notFoundPage = webRootDir.resolve("404.html").toFile();
             if (notFoundPage.exists()) {
                 exchange.getResponseHeaders().set("Content-Type", "text/html; charset=utf-8");
