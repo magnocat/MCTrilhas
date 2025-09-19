@@ -8,7 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="author" content="MagnoCat Tecnologia https://magno.cat">
     
-    <!-- Cole o código do Google AdSense aqui (o que vai no <head>) -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7769385014567112"
+     crossorigin="anonymous"></script>
+
 
     <!-- Chart.js e seu adaptador de data (ESSENCIAL para o gráfico funcionar) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -108,6 +110,9 @@
     <header class="header">
         <h1 class="text-4xl font-bold">MC Trilhas - Servidor Minecraft Escoteiro</h1>
         <p class="mt-2 text-lg">Uma aventura digital inspirada nos valores escoteiros!<br>(EM DESENVOLVIMENTO)</p>
+        <button id="install-pwa-btn" class="hidden mt-4 bg-white text-green-700 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-gray-200 transition-colors">
+            <i class="fas fa-download mr-2"></i> Instalar App
+        </button>
     </header>
 
     <!-- Conteúdo Principal -->
@@ -333,8 +338,10 @@
             </div>
         </section>
 
-        <!-- Exemplo de local para um bloco de anúncios do AdSense -->
-        <!-- <div class="card text-center p-4">Seu bloco de anúncios aqui</div> -->
+        <!-- =================================================================== -->
+        <!-- COLE AQUI O CÓDIGO DE UM BLOCO DE ANÚNCIOS DO GOOGLE ADSENSE      -->
+        <!-- Exemplo: <div class="card text-center p-4"> ... ad code ... </div> -->
+        <!-- =================================================================== -->
 
         <!-- Rankings -->
         <section class="grid md:grid-cols-3 gap-6">
@@ -415,12 +422,29 @@
 
     <!-- Rodapé -->
     <footer class="footer">
-        <p>© <span id="copyright-year">2024</span> MagnoCat Tecnologia. Todos os direitos reservados.</p>
+        <p>
+            <a href="/admin/login.html" title="Painel de Administração" style="text-decoration: none; color: inherit;">© <span id="copyright-year">2024</span></a> MagnoCat Tecnologia. Todos os direitos reservados.
+        </p>
         <p>Inspirado pelo <a href="https://g.co/kgs/idwXxCh" target="_blank" class="text-green-400 hover:underline">Grupo Escoteiro do Ar Cidade das Flores</a>.</p>
     </footer>
+
+    <!-- Banner de Consentimento de Cookies -->
+    <div id="cookie-consent-banner" class="hidden fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 shadow-lg z-50 flex items-center justify-between flex-wrap">
+        <p class="flex-grow mb-2 md:mb-0 mr-4">
+            Este site usa cookies para análise e publicidade. Ao continuar, você concorda com nossa 
+            <a href="/privacy.html" class="text-green-400 underline hover:text-green-300">Política de Privacidade</a>.
+        </p>
+        <button id="accept-cookies" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">
+            Entendi
+        </button>
+    </div>
     
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Lógica do PWA: Botão de Instalação ---
+    const installButton = document.getElementById('install-pwa-btn');
+    let deferredPrompt;
+
     // --- Lógica do PWA: Registra o Service Worker ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -430,6 +454,67 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Falha ao registrar o ServiceWorker:', err);
             });
         });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Previne que o mini-infobar apareça no Chrome mobile
+        e.preventDefault();
+        // Guarda o evento para que possa ser disparado depois
+        deferredPrompt = e;
+        // Mostra nosso botão customizado de instalação
+        if (installButton) installButton.classList.remove('hidden');
+    });
+
+    if (installButton) {
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Mostra o prompt de instalação
+                deferredPrompt.prompt();
+                // Espera o usuário responder ao prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`Resposta do usuário ao prompt de instalação: ${outcome}`);
+                // Só podemos usar o prompt uma vez.
+                deferredPrompt = null;
+                // Esconde o botão após o uso
+                installButton.classList.add('hidden');
+            }
+        });
+    }
+
+    // --- Lógica de Consentimento de Cookies (LGPD) ---
+    const cookieBanner = document.getElementById('cookie-consent-banner');
+    const acceptCookiesBtn = document.getElementById('accept-cookies');
+
+    function hasCookieConsent() {
+        return document.cookie.split(';').some((item) => item.trim().startsWith('mctrilhas_cookie_consent='));
+    }
+
+    function giveCookieConsent() {
+        if (cookieBanner) cookieBanner.classList.add('hidden');
+        const expiryDate = new Date();
+        expiryDate.setFullYear(expiryDate.getFullYear() + 1); // Cookie válido por 1 ano
+        document.cookie = `mctrilhas_cookie_consent=true; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
+        initializeTrackers(); // Ativa o Google Analytics/AdSense
+    }
+
+    if (!hasCookieConsent()) {
+        if (cookieBanner) cookieBanner.classList.remove('hidden');
+        if (acceptCookiesBtn) acceptCookiesBtn.addEventListener('click', giveCookieConsent);
+
+        // Auto-aceite após 15 segundos, como solicitado
+        setTimeout(() => {
+            if (!hasCookieConsent()) {
+                giveCookieConsent();
+            }
+        }, 15000);
+    } else {
+        initializeTrackers();
+    }
+
+    function initializeTrackers() {
+        console.log("Consentimento de cookies detectado. Trackers (Analytics/AdSense) podem ser inicializados.");
+        // A lógica do Google Analytics (gtag) que você colar no <head> será executada aqui
+        // se ela já estiver carregada. Se não, ela será executada assim que carregar.
     }
 
     // --- Lógica do Rodapé: Atualiza o ano do copyright ---

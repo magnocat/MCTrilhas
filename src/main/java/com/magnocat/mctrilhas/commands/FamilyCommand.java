@@ -51,7 +51,10 @@ public class FamilyCommand implements CommandExecutor {
         if (token == null || token.isEmpty()) {
             token = generateNewToken();
             playerData.setWebAccessToken(token);
-            // O salvamento agora é feito de forma assíncrona ao deslogar, não precisa salvar aqui.
+            // Salva os dados imediatamente para garantir que o token não seja perdido em caso de reinicialização.
+            plugin.getPlayerDataManager().savePlayerData(player.getUniqueId());
+            // Atualiza o cache de tokens em tempo real para que o link funcione imediatamente.
+            plugin.getPlayerDataManager().updateTokenCache(token, player.getUniqueId());
         }
 
         // Busca a URL base do config.yml, com um fallback para o IP local.
@@ -66,7 +69,7 @@ public class FamilyCommand implements CommandExecutor {
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
         }
-        String dashboardUrl = baseUrl + "/admin/player_dashboard.html?token=" + token;
+        String dashboardUrl = baseUrl + "/admin/pdash.html?token=" + token;
 
         player.sendMessage(Component.text("=============================================", NamedTextColor.GREEN));
         player.sendMessage(Component.text("Seu link de acesso ao Painel da Família:", NamedTextColor.AQUA));

@@ -260,6 +260,15 @@ public class PlayerDataManager {
     }
 
     /**
+     * Adiciona ou atualiza um token no cache de acesso rápido.
+     * Usado quando um novo token é gerado para um jogador online.
+     * @param token O novo token.
+     * @param uuid O UUID do jogador.
+     */
+    public void updateTokenCache(String token, UUID uuid) {
+        tokenToUuidCache.put(token, uuid);
+    }
+    /**
      * Obtém o ranque de um jogador. Para jogadores online, lê do cache. Para jogadores offline, lê do arquivo.
      * <p>
      * <strong>Aviso:</strong> A leitura de arquivos para jogadores offline no thread principal pode impactar a performance
@@ -718,6 +727,21 @@ public class PlayerDataManager {
                         plugin.logWarn("Arquivo de jogador com nome inválido ou erro de leitura ignorado: " + playerFile.getName());
                     }
                 }
+            }
+
+            // Adiciona as estatísticas ao vivo dos jogos em andamento para garantir que o ranking esteja sempre atualizado.
+            List<com.magnocat.mctrilhas.ctf.CTFGame> activeGames = plugin.getCtfManager().getActiveGames();
+            for (com.magnocat.mctrilhas.ctf.CTFGame game : activeGames) {
+                game.getPlayerStats().forEach((uuid, matchStats) -> {
+                    // Pega as estatísticas permanentes que já lemos do arquivo.
+                    PlayerCTFStats permanentStats = allStats.get(uuid);
+                    if (permanentStats != null) {
+                        // Cria uma cópia para não modificar o objeto original e soma as estatísticas da partida atual.
+                        PlayerCTFStats liveStats = new PlayerCTFStats(permanentStats.getWins(), permanentStats.getLosses(), permanentStats.getKills(), permanentStats.getDeaths(), permanentStats.getFlagCaptures());
+                        liveStats.addMatchStats(matchStats, false); // 'won' é false pois a partida não acabou.
+                        allStats.put(uuid, liveStats); // Substitui no mapa com os dados ao vivo.
+                    }
+                });
             }
             return allStats;
         });

@@ -1,5 +1,6 @@
 package com.magnocat.mctrilhas.web;
 
+import java.lang.management.ManagementFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -9,9 +10,11 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Properties;
@@ -42,6 +45,7 @@ import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerCTFStats;
 import com.magnocat.mctrilhas.data.PlayerData;
 import com.magnocat.mctrilhas.utils.SecurityUtils;
+import com.sun.management.OperatingSystemMXBean;
 import com.sun.net.httpserver.HttpServer;
 
 public class HttpApiManager {
@@ -96,6 +100,15 @@ public class HttpApiManager {
 
             // Contexto para a lista de jogadores online (protegido por JWT)
             server.createContext("/api/v1/admin/players/online", this::handleAdminOnlinePlayersRequest);
+
+            // Contexto para as métricas do servidor (CPU, RAM, TPS)
+            server.createContext("/api/v1/admin/server-metrics", this::handleAdminServerMetricsRequest);
+
+            // Contexto para executar ações em jogadores (kick, ban, etc.)
+            server.createContext("/api/v1/admin/player-action", this::handleAdminPlayerActionRequest);
+
+            // Contexto para buscar detalhes de um jogador específico (protegido por JWT)
+            server.createContext("/api/v1/admin/player-details", this::handleAdminPlayerDetailsRequest);
 
             // Contexto para a API de dados de um jogador específico via token
             server.createContext("/api/v1/player", this::handlePlayerDataRequest);
@@ -390,6 +403,11 @@ public class HttpApiManager {
                     } else {
                         playerData.put("ip", "N/A");
                     }
+                    // Adiciona a informação se o jogador possui um token de acesso web.
+                    com.magnocat.mctrilhas.data.PlayerData pData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
+                    boolean hasToken = pData != null && pData.getWebAccessToken() != null && !pData.getWebAccessToken().isEmpty();
+                    playerData.put("hasWebToken", hasToken);
+
                     return playerData;
                 })
                 .collect(Collectors.toList());
@@ -425,6 +443,142 @@ public class HttpApiManager {
         statusData.put("tokenExpiresAt", decodedJWT.getExpiresAt());
 
         sendJsonResponse(exchange, 200, gson.toJson(statusData));
+    }
+
+    private void handleAdminServerMetricsRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        // Verifica se o token de admin é válido
+        if (verifyAdminToken(exchange) == null) {
+            return; // O erro já foi enviado
+        }
+
+        // Coleta as métricas do servidor
+        OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
+        Runtime runtime = Runtime.getRuntime();
+
+        double cpuUsage = osBean.getProcessCpuLoad() * 100;
+        long usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
+        long maxMemory = runtime.maxMemory() / (1024 * 1024);
+        double tps = Bukkit.getTPS()[0]; // Média de 1 minuto
+
+        Map<String, Object> metrics = new HashMap<>();
+        metrics.put("cpuUsage", String.format(Locale.US, "%.2f", cpuUsage));
+        metrics.put("usedMemory", usedMemory);
+        metrics.put("maxMemory", maxMemory);
+        metrics.put("tps", String.format(Locale.US, "%.2f", tps));
+        metrics.put("timestamp", System.currentTimeMillis());
+
+        sendJsonResponse(exchange, 200, gson.toJson(metrics));
+    }
+
+    private void handleAdminPlayerActionRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        // Verifica se o token de admin é válido
+        if (verifyAdminToken(exchange) == null) {
+            return; // O erro já foi enviado
+        }
+
+        if (!"POST".equals(exchange.getRequestMethod())) {
+            sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use POST.\"}");
+            return;
+        }
+
+        try {
+            String requestBody = new String(exchange.getRequestBody().readAllBytes());
+            @SuppressWarnings("unchecked")
+            Map<String, String> actionData = gson.fromJson(requestBody, Map.class);
+
+            String action = actionData.get("action");
+            String targetName = actionData.get("targetName");
+            String reason = actionData.getOrDefault("reason", "Ação executada pelo painel de administração.");
+
+            if (action == null || targetName == null) {
+                sendJsonResponse(exchange, 400, "{\"success\":false, \"error\":\"Ação ou alvo não especificado.\"}");
+                return;
+            }
+
+            // Executa o comando na thread principal do servidor para garantir a segurança.
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    String commandToRun = "";
+                    if ("kick".equalsIgnoreCase(action)) {
+                        commandToRun = "kick " + targetName + " " + reason;
+                    } else if ("ban".equalsIgnoreCase(action)) {
+                        commandToRun = "ban " + targetName + " " + reason;
+                    }
+                    if (!commandToRun.isEmpty()) {
+                        plugin.logInfo("Executando comando via API: " + commandToRun);
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandToRun);
+                    }
+                }
+            }.runTask(plugin);
+
+            sendJsonResponse(exchange, 200, "{\"success\":true, \"message\":\"Ação '" + action + "' para " + targetName + " enviada para execução.\"}");
+        } catch (Exception e) {
+            plugin.logSevere("Erro ao processar ação de jogador via API: " + e.getMessage());
+            sendJsonResponse(exchange, 500, "{\"success\":false, \"error\":\"Erro interno do servidor.\"}");
+        }
+    }
+
+    private void handleAdminPlayerDetailsRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        // Verifica se o token de admin é válido
+        if (verifyAdminToken(exchange) == null) {
+            return; // O erro já foi enviado
+        }
+
+        if (!"GET".equals(exchange.getRequestMethod())) {
+            sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use GET.\"}");
+            return;
+        }
+
+        Map<String, String> params = queryToMap(exchange.getRequestURI().getQuery());
+        String uuidStr = params.get("uuid");
+
+        if (uuidStr == null || uuidStr.isEmpty()) {
+            sendJsonResponse(exchange, 400, "{\"error\":\"UUID do jogador não fornecido.\"}");
+            return;
+        }
+
+        try {
+            UUID playerUUID = UUID.fromString(uuidStr);
+            Map<String, Object> responseData = buildPlayerDetailsMap(playerUUID);
+            if (responseData == null) {
+                sendJsonResponse(exchange, 404, "{\"error\":\"Não foi possível encontrar ou carregar dados para o UUID fornecido.\"}");
+                return;
+            }
+            sendJsonResponse(exchange, 200, gson.toJson(responseData));
+        } catch (IllegalArgumentException e) {
+            sendJsonResponse(exchange, 400, "{\"error\":\"UUID fornecido é inválido.\"}");
+        }
     }
 
     /**
@@ -477,7 +631,6 @@ public class HttpApiManager {
             sendJsonResponse(exchange, 200, cachedResponse.jsonResponse);
             return;
         }
-        // --- Fim da Lógica de Cache ---
 
         UUID playerUUID = plugin.getPlayerDataManager().getPlayerUUIDByToken(token);
         if (playerUUID == null) {
@@ -485,6 +638,20 @@ public class HttpApiManager {
             return;
         }
 
+        Map<String, Object> responseData = buildPlayerDetailsMap(playerUUID);
+        if (responseData == null) {
+            sendJsonResponse(exchange, 500, "{\"error\":\"Não foi possível carregar os dados do jogador.\"}");
+            return;
+        }
+
+        String jsonResponse = gson.toJson(responseData);
+        // Armazena a nova resposta no cache
+        playerResponseCache.put(token, new CachedPlayerResponse(jsonResponse));
+
+        sendJsonResponse(exchange, 200, jsonResponse);
+    }
+
+    private Map<String, Object> buildPlayerDetailsMap(UUID playerUUID) {
         // Tenta obter os dados do cache (para jogadores online).
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(playerUUID);
 
@@ -495,8 +662,7 @@ public class HttpApiManager {
         }
 
         if (playerData == null) {
-             sendJsonResponse(exchange, 500, "{\"error\":\"Não foi possível carregar os dados do jogador.\"}");
-             return;
+            return null;
         }
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
@@ -509,13 +675,19 @@ public class HttpApiManager {
         responseData.put("playtimeHours", playerData.getActivePlaytimeTicks() / 72000);
         responseData.put("totems", plugin.getEconomy() != null ? plugin.getEconomy().getBalance(offlinePlayer) : 0);
         responseData.put("ctfStats", ctfStats); // O objeto já é serializável pelo Gson
-        
+
         // Adiciona o progresso atual das insígnias
         Map<String, Double> badgeProgress = new HashMap<>();
         playerData.getProgressMap().forEach((badgeType, progress) -> {
             badgeProgress.put(badgeType.name(), progress);
         });
         responseData.put("badgeProgress", badgeProgress);
+
+        // Adiciona as insígnias conquistadas
+        List<String> earnedBadges = playerData.getEarnedBadges().stream()
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        responseData.put("earnedBadges", earnedBadges);
 
         // Adiciona os requisitos de progresso para cada insígnia
         Map<String, Double> badgeRequirements = new HashMap<>();
@@ -530,11 +702,7 @@ public class HttpApiManager {
         }
         responseData.put("badgeRequirements", badgeRequirements);
 
-        String jsonResponse = gson.toJson(responseData);
-        // Armazena a nova resposta no cache
-        playerResponseCache.put(token, new CachedPlayerResponse(jsonResponse));
-
-        sendJsonResponse(exchange, 200, jsonResponse);
+        return responseData;
     }
 
     private void sendJsonResponse(HttpExchange exchange, int statusCode, String jsonResponse) throws IOException {
@@ -601,15 +769,19 @@ public class HttpApiManager {
     }
 
     private Map<String, Integer> formatLeaderboard(Map<UUID, Integer> rawData) {
+        List<String> hiddenUuids = plugin.getConfig().getStringList("privacy-settings.hide-from-leaderboards");
         return rawData.entrySet().stream()
+                .filter(entry -> !hiddenUuids.contains(entry.getKey().toString()))
                 .sorted(Map.Entry.<UUID, Integer>comparingByValue().reversed())
                 .limit(10) // Limita ao top 10
                 .collect(Collectors.toMap(entry -> Bukkit.getOfflinePlayer(entry.getKey()).getName(), Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
 
     private Map<String, Integer> sortAndLimit(Map<UUID, PlayerCTFStats> statsMap, java.util.function.Function<PlayerCTFStats, Integer> valueExtractor) {
+        List<String> hiddenUuids = plugin.getConfig().getStringList("privacy-settings.hide-from-leaderboards");
         return statsMap.entrySet().stream()
-                .sorted(Map.Entry.<UUID, PlayerCTFStats>comparingByValue((s1, s2) -> Integer.compare(valueExtractor.apply(s2), valueExtractor.apply(s1))))
+                .filter(entry -> !hiddenUuids.contains(entry.getKey().toString()))
+                .sorted(Map.Entry.comparingByValue(Comparator.comparing(valueExtractor).reversed()))
                 .limit(10) // Limita ao top 10
                 .collect(Collectors.toMap(
                         entry -> {

@@ -4,11 +4,16 @@
     <meta charset="utf-8" />
     <title>MCTrilhas | Painel de Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow">
     <link rel="stylesheet" href="./css/adminlte.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.css" />
 </head>
 <body class="bg-body-tertiary">
     <div class="app-wrapper">
+        <!-- Container para notificações (toasts) -->
+        <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 1050;"></div>
+
         <main class="app-main" style="margin-left: 0;">
             <div class="app-content-header">
                 <div class="container-fluid">
@@ -26,68 +31,365 @@
             </div>
             <div class="app-content">
                 <div class="container-fluid">
-                    <div class="card">
-                        <div class="card-body">
-                            <h1>Bem-vindo, Administrador!</h1>
-                            <p>Esta é uma área protegida. Se você está vendo esta página, seu login foi bem-sucedido.</p>
-                            <p>Futuramente, aqui teremos gráficos e ferramentas de gerenciamento do servidor.</p>
+                    <!-- Linha de Métricas -->
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title">Uso de CPU e TPS do Servidor</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div id="cpu-chart" style="height: 250px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title">Uso de Memória (RAM)</h3>
+                                </div>
+                                <div class="card-body d-flex align-items-center justify-content-center">
+                                    <div id="ram-chart" style="height: 250px; width: 100%;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <!-- Card de Teste da API -->
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h3 class="card-title">Teste de API Protegida</h3>
-                        </div>
-                        <div class="card-body">
-                            <p>Clique no botão abaixo para fazer uma requisição a um endpoint protegido. A requisição só funcionará se o seu token de sessão (JWT) for válido.</p>
-                            <button id="test-api-btn" class="btn btn-info">Testar Endpoint</button>
-                            <div class="mt-3">
-                                <strong>Resultado:</strong>
-                                <pre id="api-result" class="bg-dark text-white p-3 rounded" style="max-height: 300px; overflow-y: auto;">Aguardando teste...</pre>
+
+                    <!-- Linha da Lista de Jogadores -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Jogadores Online</h3>
+                                    <div class="card-tools">
+                                        <button id="refresh-players-btn" class="btn btn-tool" title="Atualizar Lista">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped m-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Jogador</th>
+                                                    <th>Ping</th>
+                                                    <th><i class="bi bi-key-fill" title="Possui Token Web"></i></th>
+                                                    <th>Mundo</th>
+                                                    <th>Gamemode</th>
+                                                    <th>Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="online-players-table-body">
+                                                <!-- Linhas de jogadores serão inseridas aqui -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div id="player-count" class="card-footer text-center">
+                                    Carregando...
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
+
+        <!-- Modal Detalhes do Jogador -->
+        <div class="modal fade" id="player-details-modal" tabindex="-1" aria-labelledby="playerDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="playerDetailsModalLabel">Detalhes de...</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="player-details-modal-body">
+                        <!-- Conteúdo será carregado aqui -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="./js/auth.js"></script>
+    <!-- Bootstrap & Popper JS (Essencial para Modals e Notificações) -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Protege a página, redirecionando para o login se não houver token
             protectPage();
-
-            // Adiciona funcionalidade ao botão de logout
             document.getElementById('logout-button').addEventListener('click', () => logout());
 
-            // Lógica para testar o endpoint protegido
-            const testBtn = document.getElementById('test-api-btn');
-            const resultEl = document.getElementById('api-result');
+            // Instancia o modal para controle via JS
+            const playerDetailsModal = new bootstrap.Modal(document.getElementById('player-details-modal'));
 
-            testBtn.addEventListener('click', async () => {
-                resultEl.textContent = 'Carregando...';
+            // --- Configuração dos Gráficos ---
+            function showNotification(message, type = 'success') {
+                const container = document.getElementById('notification-container');
+                const toast = document.createElement('div');
+                // Permite usar outros tipos de alerta do Bootstrap (info, warning, etc.)
+                toast.className = `alert alert-${type} alert-dismissible fade show shadow-lg`;
+                toast.role = 'alert';
+                toast.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                container.appendChild(toast);
+                // Garante que a notificação desapareça sozinha após 5 segundos.
+                setTimeout(() => {
+                    const alertInstance = bootstrap.Alert.getOrCreateInstance(toast);
+                    if (alertInstance) alertInstance.close();
+                }, 5000);
+            }
+            const MAX_DATA_POINTS = 30; // Mostra os últimos 30 pontos (30 * 5s = 2.5 minutos)
+            let cpuData = [], tpsData = [], timeLabels = [];
+
+            const cpuChartOptions = {
+                series: [{ name: 'CPU (%)', data: [] }, { name: 'TPS', data: [] }],
+                chart: { height: 250, type: 'line', animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 1000 } }, toolbar: { show: false }, zoom: { enabled: false } },
+                stroke: { curve: 'smooth', width: 2 },
+                xaxis: { type: 'category', categories: [], labels: { show: true, rotate: -45, rotateAlways: false, hideOverlappingLabels: true, trim: true, style: { colors: '#888' } } },
+                yaxis: [
+                    { seriesName: 'CPU (%)', axisTicks: { show: true }, axisBorder: { show: true, color: '#008FFB' }, labels: { style: { colors: '#008FFB' } }, title: { text: "CPU (%)", style: { color: '#008FFB' } }, min: 0, max: 100 },
+                    { seriesName: 'TPS', opposite: true, axisTicks: { show: true }, axisBorder: { show: true, color: '#00E396' }, labels: { style: { colors: '#00E396' } }, title: { text: "TPS", style: { color: '#00E396' } }, min: 0, max: 21 }
+                ],
+                tooltip: { theme: 'dark', y: [{ title: { formatter: (val) => `${val}:` } }, { title: { formatter: (val) => `${val}:` } }] },
+                legend: { labels: { colors: '#888' } }
+            };
+
+            const ramChartOptions = {
+                series: [0],
+                chart: { height: 250, type: 'radialBar' },
+                plotOptions: {
+                    radialBar: {
+                        startAngle: -135, endAngle: 135, hollow: { margin: 15, size: '70%' },
+                        dataLabels: {
+                            name: { show: true, offsetY: -10, fontSize: '22px', color: '#888', formatter: () => 'RAM' },
+                            value: { color: '#111', fontSize: '24px', show: true, offsetY: 10, formatter: (val) => `${val.toFixed(1)}%` }
+                        }
+                    }
+                },
+                fill: { type: 'gradient', gradient: { shade: 'dark', type: 'horizontal', shadeIntensity: 0.5, gradientToColors: ['#ABE5A1'], inverseColors: true, opacityFrom: 1, opacityTo: 1, stops: [0, 100] } },
+                stroke: { lineCap: 'round' },
+                labels: ['Percentual']
+            };
+
+            const cpuChart = new ApexCharts(document.querySelector("#cpu-chart"), cpuChartOptions);
+            const ramChart = new ApexCharts(document.querySelector("#ram-chart"), ramChartOptions);
+            cpuChart.render();
+            ramChart.render();
+
+            async function updateMetrics() {
                 try {
-                    const response = await fetch('/api/v1/admin/status', {
-                        method: 'GET',
-                        headers: getAuthHeaders() // Função do auth.js que adiciona o 'Authorization: Bearer <token>'
+                    const response = await fetch('/api/v1/admin/server-metrics', { headers: getAuthHeaders() });
+                    if (!response.ok) { if (response.status === 401) logout(); return; }
+                    const data = await response.json();
+
+                    // Atualiza Gráfico de RAM
+                    const ramUsagePercent = (data.usedMemory / data.maxMemory) * 100;
+                    ramChart.updateSeries([ramUsagePercent]);
+                    ramChart.updateOptions({ plotOptions: { radialBar: { dataLabels: { value: { formatter: () => `${data.usedMemory}MB / ${data.maxMemory}MB` } } } } });
+
+                    // Atualiza Gráfico de CPU/TPS
+                    timeLabels.push(new Date(data.timestamp).toLocaleTimeString('pt-BR'));
+                    cpuData.push(parseFloat(data.cpuUsage));
+                    tpsData.push(parseFloat(data.tps));
+                    if (timeLabels.length > MAX_DATA_POINTS) { timeLabels.shift(); cpuData.shift(); tpsData.shift(); }
+                    cpuChart.updateOptions({ series: [{ data: cpuData }, { data: tpsData }], xaxis: { categories: timeLabels } });
+
+                } catch (error) {
+                    console.error("Erro ao buscar métricas:", error);
+                }
+            }
+
+            // --- Lógica da Lista de Jogadores ---
+            const playersTableBody = document.getElementById('online-players-table-body');
+            const playerCountSpan = document.getElementById('player-count');
+            const refreshButton = document.getElementById('refresh-players-btn');
+
+            async function fetchAndDisplayOnlinePlayers() {
+                if (!playersTableBody || !playerCountSpan) return;
+                playerCountSpan.textContent = 'Atualizando...';
+                try {
+                    const response = await fetch('/api/v1/admin/players/online', { headers: getAuthHeaders() });
+                    if (!response.ok) { if (response.status === 401) logout(); throw new Error(`Erro na API: ${response.status}`); }
+                    const data = await response.json();
+                    playersTableBody.innerHTML = '';
+
+                    if (data.length === 0) {
+                        playersTableBody.innerHTML = '<tr><td colspan="6" class="text-center p-3">Nenhum jogador online.</td></tr>';
+                    } else {
+                        data.forEach(player => {
+                            const row = document.createElement('tr');
+                            const tokenIcon = player.hasWebToken 
+                                ? '<i class="bi bi-key-fill text-success" title="Sim"></i>' 
+                                : '<i class="bi bi-key text-muted" title="Não"></i>';
+                            row.innerHTML = `
+                                <td><img src="https://cravatar.eu/helmavatar/${player.uuid}/24.png" class="rounded-circle me-2" alt="${player.name}" width="24" height="24"> <strong>${player.name}</strong></td>
+                                <td>${player.ping}ms</td>
+                                <td class="text-center">${tokenIcon}</td>
+                                <td>${player.world}</td>
+                                <td>${player.gamemode}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary btn-view-details" title="Ver Detalhes" data-player-uuid="${player.uuid}" data-player-name="${player.name}"><i class="bi bi-eye"></i></button>
+                                    <button class="btn btn-sm btn-warning btn-kick" title="Kick" data-player-name="${player.name}"><i class="bi bi-person-slash"></i></button>
+                                    <button class="btn btn-sm btn-danger btn-ban" title="Ban" data-player-name="${player.name}"><i class="bi bi-hammer"></i></button>
+                                </td>`;
+                            playersTableBody.appendChild(row);
+                        });
+                    }
+                    playerCountSpan.textContent = `${data.length} jogador(es) online.`;
+                } catch (error) {
+                    console.error('Erro ao buscar jogadores:', error);
+                    playersTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger p-3">Falha ao carregar jogadores.</td></tr>`;
+                    playerCountSpan.textContent = 'Erro';
+                }
+            }
+
+            // --- Lógica de Ações nos Jogadores ---
+            const badgeNames = {
+                'MINING': 'Minerador', 'LUMBERJACK': 'Lenhador', 'BUILDER': 'Construtor',
+                'FARMING': 'Fazendeiro', 'FISHING': 'Pescador', 'COOKING': 'Cozinheiro',
+                'CRAFTING': 'Artesão', 'EXPLORER': 'Explorador'
+            };
+            const modalBody = document.getElementById('player-details-modal-body');
+
+            playersTableBody.addEventListener('click', async (event) => {
+                const button = event.target.closest('button');
+                if (!button) return;
+
+                const playerName = button.dataset.playerName;
+
+                if (button.classList.contains('btn-kick')) {
+                    const reason = prompt(`Qual o motivo para KICKAR ${playerName}?`, 'Expulso por um administrador.');
+                    if (reason) { // prompt retorna null se o usuário cancelar
+                        await executePlayerAction('kick', playerName, reason);
+                        setTimeout(fetchAndDisplayOnlinePlayers, 1000); // Atualiza a lista
+                    }
+                }
+
+                if (button.classList.contains('btn-ban')) {
+                    const reason = prompt(`Qual o motivo para BANIR ${playerName}?`, 'Banido por um administrador.');
+                    if (reason) {
+                        await executePlayerAction('ban', playerName, reason);
+                        setTimeout(fetchAndDisplayOnlinePlayers, 1000); // Atualiza a lista
+                    }
+                }
+
+                if (button.classList.contains('btn-view-details')) {
+                    handleViewDetails(playerName, button.dataset.playerUuid);
+                }
+            });
+
+            async function executePlayerAction(action, targetName, reason) {
+                try {
+                    const response = await fetch('/api/v1/admin/player-action', {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ action, targetName, reason })
                     });
 
                     const data = await response.json();
 
-                    if (response.ok) {
-                        resultEl.textContent = JSON.stringify(data, null, 2);
+                    if (response.ok && data.success) {
+                        showNotification(data.message, 'success');
                     } else {
-                        // Se o token for inválido, a API retorna 401
-                        resultEl.textContent = `Erro: ${data.error || response.statusText}`;
-                        if (response.status === 401) {
-                            resultEl.textContent += '\n\nToken inválido. Deslogando em 3 segundos...';
-                            setTimeout(logout, 3000);
-                        }
+                        throw new Error(data.error || 'Ação falhou.');
                     }
                 } catch (error) {
-                    resultEl.textContent = 'Erro de conexão ao tentar acessar a API.';
+                    showNotification(`Erro: ${error.message}`, 'danger');
                 }
-            });
+            }
+
+            async function handleViewDetails(playerName, playerUuid) {
+                document.getElementById('playerDetailsModalLabel').textContent = `Detalhes de ${playerName}`;
+                modalBody.innerHTML = `
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-2">Buscando dados de ${playerName}...</p>
+                    </div>`;
+                playerDetailsModal.show();
+
+                try {
+                    const response = await fetch(`/api/v1/admin/player-details?uuid=${playerUuid}`, { headers: getAuthHeaders() });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Erro na API: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    populateModal(data);
+                } catch (error) {
+                    modalBody.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+                }
+            }
+
+            function populateModal(data) {
+                let badgeProgressHTML = '';
+                for (const badgeId in data.badgeRequirements) {
+                    const required = data.badgeRequirements[badgeId];
+                    const progress = data.badgeProgress[badgeId] || 0;
+                    const percentage = required > 0 ? Math.min(100, (progress / required) * 100) : 0;
+                    const isCompleted = data.earnedBadges.includes(badgeId);
+                    const badgeName = badgeNames[badgeId] || badgeId;
+                    const progressColor = isCompleted ? 'bg-success' : 'bg-primary';
+
+                    badgeProgressHTML += `
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <p class="mb-0">${badgeName} ${isCompleted ? '<i class="bi bi-check-circle-fill text-success"></i>' : ''}</p>
+                                <small class="text-muted">${Math.round(progress).toLocaleString('pt-BR')} / ${required.toLocaleString('pt-BR')}</small>
+                            </div>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar ${progressColor} progress-bar-striped ${isCompleted ? '' : 'progress-bar-animated'}" role="progressbar" style="width: ${percentage}%" aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100">${Math.round(percentage)}%</div>
+                            </div>
+                        </div>`;
+                }
+
+                modalBody.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-4 text-center border-end">
+                            <img src="https://cravatar.eu/helmavatar/${data.uuid}/128.png" class="img-fluid rounded-circle shadow-lg mb-3" alt="${data.name}">
+                            <h3>${data.name}</h3>
+                            <p class="text-muted small">${data.uuid}</p>
+                            <hr>
+                            <ul class="list-group list-group-flush text-start">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">Ranque <span class="badge bg-primary rounded-pill">${data.rank}</span></li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">Totens <span class="badge bg-warning rounded-pill">${data.totems.toLocaleString('pt-BR')}</span></li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">Horas de Jogo <span class="badge bg-info rounded-pill">${data.playtimeHours}</span></li>
+                            </ul>
+                            <h5 class="mt-4">Estatísticas CTF</h5>
+                            <ul class="list-group list-group-flush text-start">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">Vitórias <span class="badge bg-success rounded-pill">${data.ctfStats.wins}</span></li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">Abates <span class="badge bg-danger rounded-pill">${data.ctfStats.kills}</span></li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">Capturas <span class="badge bg-info rounded-pill">${data.ctfStats.flagCaptures}</span></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-8">
+                            <h4>Progresso das Insígnias</h4>
+                            ${badgeProgressHTML}
+                        </div>
+                    </div>`;
+            }
+
+            // --- Inicialização ---
+            if (refreshButton) refreshButton.addEventListener('click', fetchAndDisplayOnlinePlayers);
+            
+            updateMetrics();
+            fetchAndDisplayOnlinePlayers();
+            setInterval(updateMetrics, 5000); // Atualiza métricas a cada 5s
+            setInterval(fetchAndDisplayOnlinePlayers, 30000); // Atualiza jogadores a cada 30s
         });
     </script>
 </body>
