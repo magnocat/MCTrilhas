@@ -102,6 +102,12 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
         if (sender.hasPermission("mctrilhas.tesouro")) {
             sender.sendMessage(ChatColor.DARK_AQUA + "Use /tesouro para iniciar uma caça ao tesouro!");
         }
+        if (sender.hasPermission("mctrilhas.ctf.join")) {
+            sender.sendMessage(ChatColor.DARK_AQUA + "Use /ctf para entrar em uma partida de Capture a Bandeira!");
+        }
+        if (sender.hasPermission("mctrilhas.familia.use")) {
+            sender.sendMessage(ChatColor.DARK_AQUA + "Use /familia para gerar seu link do Painel da Família.");
+        }
 
         // Adiciona a dica sobre o saldo de Totens
         if (plugin.getEconomy() != null) {

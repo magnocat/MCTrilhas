@@ -14,6 +14,8 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.version.full>1.0.21</project.version.full> <!-- Default for local development -->
+        <!-- Define o formato do timestamp que será gerado durante o build -->
+        <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
         <!-- Centralized dependency versions for easy updates -->
         <paper.api.version>1.20.4-R0.1-SNAPSHOT</paper.api.version>
         <vault.api.version>1.7.1</vault.api.version>

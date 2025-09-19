@@ -1,7 +1,10 @@
 package com.magnocat.mctrilhas.web;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URL;
@@ -11,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.security.CodeSource;
@@ -121,29 +125,102 @@ public class HttpApiManager {
      * A extração não sobrescreve arquivos existentes, permitindo personalização.
      */
     private void extractWebResources() {
-        plugin.logInfo("Verificando e extraindo recursos da web...");
-        CodeSource src = plugin.getClass().getProtectionDomain().getCodeSource();
-        if (src != null) {
-            try {
+        String currentBuildTimestamp = getBuildTimestampFromJar();
+        String lastKnownTimestamp = getLastKnownBuildTimestamp();
+
+        if (currentBuildTimestamp != null && currentBuildTimestamp.equals(lastKnownTimestamp)) {
+            plugin.logInfo("Versão do plugin não alterada. Pulando sincronização dos recursos da web.");
+            return;
+        }
+
+        plugin.logInfo("Nova versão do plugin detectada. Sincronizando recursos da web...");
+        try {
+            File webDir = new File(plugin.getDataFolder(), "web");
+
+            // Deleta o diretório web antigo para garantir uma instalação limpa e remover arquivos obsoletos.
+            if (webDir.exists()) {
+                deleteDirectory(webDir);
+            }
+
+            // Extrai os novos recursos do JAR.
+            CodeSource src = plugin.getClass().getProtectionDomain().getCodeSource();
+            if (src != null) {
                 URL jar = src.getLocation();
-                ZipInputStream zip = new ZipInputStream(jar.openStream());
-                while (true) {
-                    ZipEntry e = zip.getNextEntry();
-                    if (e == null) break;
-                    String name = e.getName();
-                    if (name.startsWith("web/")) {
-                        plugin.saveResource(name, false); // false = não sobrescrever
+                try (ZipInputStream zip = new ZipInputStream(jar.openStream())) {
+                    ZipEntry e;
+                    while ((e = zip.getNextEntry()) != null) {
+                        String name = e.getName();
+                        if (name.startsWith("web/")) {
+                            plugin.saveResource(name, false);
+                        }
                     }
                 }
-                plugin.logInfo("Recursos da web extraídos com sucesso.");
-            } catch (IOException e) {
-                plugin.logSevere("Falha ao extrair recursos da web: " + e.getMessage());
+                plugin.logInfo("Recursos da web sincronizados com sucesso.");
+                // Salva o novo timestamp após a sincronização bem-sucedida
+                saveBuildTimestamp(currentBuildTimestamp);
+            } else {
+                plugin.logWarn("Não foi possível encontrar a fonte do JAR para extrair os recursos da web.");
             }
-        } else {
-            plugin.logWarn("Não foi possível encontrar a fonte do JAR para extrair os recursos da web.");
+        } catch (IOException e) {
+            plugin.logSevere("Falha ao sincronizar recursos da web: " + e.getMessage());
         }
     }
 
+    private String getBuildTimestampFromJar() {
+        try (InputStream input = plugin.getResource("build.properties")) {
+            if (input == null) {
+                plugin.logWarn("Arquivo 'build.properties' não encontrado no JAR. A verificação de versão não funcionará.");
+                return null;
+            }
+            Properties prop = new Properties();
+            prop.load(input);
+            String timestamp = prop.getProperty("build.timestamp");
+            // O Maven pode deixar o valor literal se o filtering falhar, então verificamos.
+            if (timestamp != null && !timestamp.startsWith("$")) {
+                return timestamp;
+            }
+        } catch (IOException ex) {
+            plugin.logWarn("Não foi possível ler o 'build.properties': " + ex.getMessage());
+        }
+        return null;
+    }
+    /**
+     * Deleta um diretório e todo o seu conteúdo de forma recursiva.
+     * @param directory O diretório a ser deletado.
+     */
+    private void deleteDirectory(File directory) {
+        File[] allContents = directory.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteDirectory(file);
+            }
+        }
+        directory.delete();
+    }
+
+    private String getLastKnownBuildTimestamp() {
+        File timestampFile = new File(plugin.getDataFolder(), "web_build.info");
+        if (!timestampFile.exists()) {
+            return null;
+        }
+        try (FileInputStream fis = new FileInputStream(timestampFile);
+             java.util.Scanner scanner = new java.util.Scanner(fis)) {
+            return scanner.hasNext() ? scanner.next() : null;
+        } catch (IOException e) {
+            plugin.logWarn("Não foi possível ler o arquivo de timestamp da web: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private void saveBuildTimestamp(String timestamp) {
+        if (timestamp == null) return;
+        File timestampFile = new File(plugin.getDataFolder(), "web_build.info");
+        try (FileWriter writer = new FileWriter(timestampFile, false)) {
+            writer.write(timestamp);
+        } catch (IOException e) {
+            plugin.logSevere("Não foi possível salvar o arquivo de timestamp da web: " + e.getMessage());
+        }
+    }
     /**
      * Verifica as credenciais de administrador no config.yml.
      * Se a senha estiver em texto plano (identificado pela ausência de um 'salt'),

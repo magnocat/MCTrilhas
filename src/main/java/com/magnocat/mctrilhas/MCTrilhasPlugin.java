@@ -76,6 +76,12 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
         setupEconomy();
         loadManagers();
+
+        // Garante que o config.yml no servidor seja atualizado com novas opções
+        // sem sobrescrever as configurações existentes do usuário.
+        // Isso resolve o problema de novas opções não aparecerem após uma atualização.
+        getConfig().options().copyDefaults(true);
+        saveConfig();
         registerCommands();
         registerListeners();
         setupPlaceholders();

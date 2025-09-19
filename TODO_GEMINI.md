@@ -58,7 +58,7 @@ Revisão das principais funcionalidades implementadas e decisões tomadas:
     *   Adicionamos um `manifest.json` e um `sw.js` (Service Worker).
     *   O site agora é instalável em dispositivos móveis, funciona offline e carrega mais rápido.
     *   Corrigimos o gráfico de atividade (Chart.js) e melhoramos a estrutura do `index.html` com instruções de como jogar.
-5.  **Portal do Jogador e Tokens de Acesso:** Implementamos o comando `/familia token` para gerar um link único e seguro. Criamos o endpoint `/api/v1/player` para servir dados individuais e desenvolvemos a página `player_dashboard.html` que consome esses dados. Adicionamos um cache para otimizar a performance.
+5.  **Portal do Jogador e Tokens de Acesso:** Implementamos o comando `/familia token` para gerar um link único e seguro. Criamos o endpoint `/api/v1/player` para servir dados individuais e desenvolvemos a página `pdash.html` que consome esses dados. Adicionamos um cache para otimizar a performance.
 6.  **Painel de Administração (Sessão e Segurança):** Implementamos um sistema de login seguro com senha criptografada (hash + salt) e sessões baseadas em JSON Web Tokens (JWT), incluindo um dashboard inicial que lista os jogadores online.
 7.  **Melhorias no CTF:**
     *   Adicionamos lógica para vitória por desistência (W.O.) com recompensa parcial.
@@ -124,7 +124,7 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
     *   **Integrações:** Planejado para usar Multiverse (para o mundo), WorldGuard (para as proteções) e BlueMap (para visualização no mapa web).
 
 *   ### Painel de Administração (Web)
-    *   **Descrição:** Uma plataforma web robusta para gerenciamento do servidor, baseada no template AdminLTE. O portal do jogador (`player_dashboard.html`) e o login do admin já foram implementados.
+    *   **Descrição:** Uma plataforma web robusta para gerenciamento do servidor, baseada no template AdminLTE. O portal do jogador (`pdash.html`) e o login do admin já foram implementados.
     *   **Funcionalidades Planejadas (Painel do Admin):**
         *   **Implementar Sessão de Admin:** Após o login, gerar um token de sessão (JWT) para autenticar as requisições subsequentes.
         *   **Dashboard de Admin:** Criar uma página principal para o admin com estatísticas gerais do servidor.

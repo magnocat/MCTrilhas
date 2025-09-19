@@ -100,12 +100,12 @@ MCTrilhas/
 
 ### 3.7. Portal da Família (Painel do Jogador)
 *   **Descrição:** Uma página web individual e segura para cada jogador (e sua família) acompanhar seu progresso, estatísticas e tempo de jogo.
-*   **Estrutura:** `web/admin/player_dashboard.html`, `commands/FamilyCommand.java`.
+*   **Estrutura:** `web/admin/pdash.html`, `commands/FamilyCommand.java`.
 *   **Fluxo de Trabalho:**
     1.  **`commands/FamilyCommand`**: O jogador usa `/familia token`. O comando gera um token de acesso único e seguro (se não existir) e o salva no `PlayerData`.
-    2.  **Link Clicável**: O jogador recebe uma mensagem no chat com um link clicável para o painel, contendo o token como parâmetro de URL (ex: `.../player_dashboard.html?token=XYZ`).
+    2.  **Link Clicável**: O jogador recebe uma mensagem no chat com um link clicável para o painel, contendo o token como parâmetro de URL (ex: `.../admin/pdash.html?token=XYZ`).
     3.  **`web/HttpApiManager`**: O endpoint `/api/v1/player` recebe a requisição do painel. Ele valida o token, busca os dados do jogador (usando um cache para performance) e retorna um JSON completo com estatísticas, progresso de insígnias e requisitos.
-    4.  **`web/admin/player_dashboard.html`**: O JavaScript da página consome o JSON da API e preenche dinamicamente o painel com os dados do jogador.
+    4.  **`web/admin/pdash.html`**: O JavaScript da página consome o JSON da API e preenche dinamicamente o painel com os dados do jogador.
 
 ---
 
