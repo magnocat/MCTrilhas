@@ -38,6 +38,36 @@
                     </compilerArgs>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>com.google.gson</pattern>
+                            <shadedPattern>com.magnocat.mctrilhas.lib.gson</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.auth0.jwt</pattern>
+                            <shadedPattern>com.magnocat.mctrilhas.lib.jwt</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <!-- A biblioteca JWT usa a 'Jackson', então também a realocamos por segurança -->
+                            <pattern>com.fasterxml.jackson</pattern>
+                            <shadedPattern>com.magnocat.mctrilhas.lib.jackson</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
+            </plugin>
         </plugins>
         <resources>
             <resource>
