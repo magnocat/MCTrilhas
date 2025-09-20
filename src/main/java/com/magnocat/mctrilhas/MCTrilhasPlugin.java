@@ -1,16 +1,25 @@
 package com.magnocat.mctrilhas;
 
+// Java Standard Library
 import java.util.Arrays;
 import java.util.List;
 
+// Bukkit & Spigot API
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
+// Vault API
+import net.milkbowl.vault.economy.Economy;
+
+// Project-specific Classes
 import com.magnocat.mctrilhas.badges.BadgeManager;
+import com.magnocat.mctrilhas.commands.HUDCommand;
 import com.magnocat.mctrilhas.commands.DailyCommand;
 import com.magnocat.mctrilhas.commands.FamilyCommand;
 import com.magnocat.mctrilhas.commands.RankCommand;
@@ -18,7 +27,6 @@ import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;
 import com.magnocat.mctrilhas.commands.TreasureHuntCommand;
 import com.magnocat.mctrilhas.ctf.CTFCommand;
 import com.magnocat.mctrilhas.ctf.CTFManager;
-import com.magnocat.mctrilhas.ctf.CTFArena; // Import para usar o método parseLocation
 import com.magnocat.mctrilhas.ctf.CTFMilestoneManager;
 import com.magnocat.mctrilhas.listeners.AdminPrivacyListener;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
@@ -49,27 +57,29 @@ import com.magnocat.mctrilhas.storage.BlockPersistenceManager;
 import com.magnocat.mctrilhas.data.ActivityTracker;
 import com.magnocat.mctrilhas.updater.UpdateChecker;
 import com.magnocat.mctrilhas.web.HttpApiManager;
-
-import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.Location;
-import net.milkbowl.vault.economy.Economy;
+import com.magnocat.mctrilhas.hud.HUDManager;
 
 public final class MCTrilhasPlugin extends JavaPlugin {
 
+    // --- Core Managers ---
     private PlayerDataManager playerDataManager;
     private BadgeManager badgeManager;
     private BadgeConfigManager badgeConfigManager;
     private BlockPersistenceManager blockPersistenceManager;
+    private RankManager rankManager;
+
+    // --- Feature Managers ---
     private BadgeMenu badgeMenu;
     private MapRewardManager mapRewardManager;
-    private RankManager rankManager;
     private TreasureHuntManager treasureHuntManager;
     private TreasureLocationsManager treasureLocationsManager;
     private TreasureHuntRewardManager treasureHuntRewardManager;
-    private HttpApiManager httpApiManager;
     private CTFManager ctfManager;
     private CTFMilestoneManager ctfMilestoneManager;
-    // private BlueMapManager blueMapManager; // Comentado temporariamente
+    private HUDManager hudManager;
+    private HttpApiManager httpApiManager;
+
+    // --- Integrations & Tasks ---
     private BukkitTask placeholderApiCacheUpdater;
     private BukkitTask webApiCacheUpdater;
     private Economy econ = null;
@@ -122,6 +132,11 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             httpApiManager.stop();
         }
 
+        // Para o gerenciador de HUD
+        if (hudManager != null) {
+            hudManager.stop();
+        }
+
         logInfo("MCTrilhas foi desativado.");
     }
 
@@ -155,6 +170,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.httpApiManager = new HttpApiManager(this);
         this.ctfManager = new CTFManager(this);
         this.ctfMilestoneManager = new CTFMilestoneManager(this);
+        this.hudManager = new HUDManager(this);
         
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
@@ -179,6 +195,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         getCommand("ctf").setExecutor(ctfExecutor);
         getCommand("ctf").setTabCompleter(ctfExecutor);
         getCommand("familia").setExecutor(new FamilyCommand(this));
+        getCommand("hud").setExecutor(new HUDCommand(this));
         logInfo("Comandos registrados.");
     }
 
@@ -263,6 +280,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         return ctfMilestoneManager;
     }
 
+    public HUDManager getHudManager() {
+        return hudManager;
+    }
+
     public HttpApiManager getHttpApiManager() {
         return httpApiManager;
     }
@@ -303,8 +324,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
      * @param player O jogador a ser teleportado.
      */
     public void teleportToHub(Player player) {
-        String hubLocString = getConfig().getString("server-settings.hub-location");
-        Location hubLocation = CTFArena.parseLocation(hubLocString); // Reutiliza o método de parse da arena
+        String hubLocString = getConfig().getString("server-settings.hub-location", "world,0.5,100.0,0.5,0,0");
+        Location hubLocation = com.magnocat.mctrilhas.ctf.CTFArena.parseLocation(hubLocString); // Reutiliza o método de parse da arena
         if (hubLocation != null) {
             player.teleport(hubLocation);
         } else {

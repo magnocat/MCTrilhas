@@ -36,6 +36,9 @@ commands:
     description: Comandos relacionados ao Portal da Família.
     usage: /<command> <subcomando>
     aliases: [family]
+  hud:
+    description: Ativa ou desativa o painel de estatísticas na tela.
+    usage: /hud
 
 permissions:
   mctrilhas.*:
@@ -58,6 +61,7 @@ permissions:
       mctrilhas.admin.silent-join: true
       mctrilhas.admin.bypass: true
       mctrilhas.familia.use: true
+      mctrilhas.hud: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
@@ -93,6 +97,9 @@ permissions:
     default: op
   mctrilhas.familia.use:
     description: Permite usar os comandos do Portal da Família.
+    default: true
+  mctrilhas.hud:
+    description: Permite ativar ou desativar o HUD de estatísticas.
     default: true
   mctrilhas.ctf.admin:
     description: Permite gerenciar as arenas de CTF.

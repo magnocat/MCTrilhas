@@ -78,6 +78,12 @@ Revisão das principais funcionalidades implementadas e decisões tomadas:
     *   Adicionamos um cache para ranques de jogadores offline para melhorar a performance do PlaceholderAPI.
     *   Otimizamos a atualização dos caches de ranking para que não rodem se o servidor estiver vazio.
     *   Corrigimos o bug do "token fantasma" no comando `/familia token`, garantindo o salvamento imediato.
+9.  **Melhorias em Placeholders:**
+    *   Adicionamos o placeholder `%mctrilhas_rank_formatted%` para exibir o nome do ranque com a capitalização correta (ex: `Escoteiro`).
+    *   Adicionamos placeholders de posição no ranking (ex: `%mctrilhas_rank_pos_daily%`) para mostrar a colocação do jogador.
+    *   Adicionamos o placeholder `%mctrilhas_rank_progress%` para mostrar o requisito mais próximo para o próximo ranque.
+10. **HUD de Estatísticas:**
+    *   Implementamos o comando `/hud` que ativa/desativa uma Boss Bar na tela do jogador, exibindo ranque, totens e contagem de insígnias em tempo real.
 
 ---
 
@@ -144,9 +150,5 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
 ## 6. Próximos Passos Imediatos (Sugestões)
 
 Estas são as tarefas menores e mais imediatas que podemos abordar quando retomarmos o desenvolvimento:
-
-*   **Formatar o Nome do Ranque:** O placeholder `%mctrilhas_rank%` exibe o nome em maiúsculas (ex: `ESCOTEIRO`). O próximo passo lógico seria criar um novo placeholder (ex: `%mctrilhas_rank_formatted%`) para exibir o nome com a capitalização correta (ex: `Escoteiro`).
-
-*   **Placeholder de Posição no Ranking:** Criar um placeholder que mostre a posição exata do jogador nos rankings (diário, mensal, geral), como `#1`, `#5`, etc., em vez de apenas a pontuação.
 
 *   **Placeholder de Progresso para o Próximo Ranque:** Desenvolver um placeholder que mostre o progresso do jogador para o próximo ranque de forma visual ou textual (ex: `5/6 insígnias`).

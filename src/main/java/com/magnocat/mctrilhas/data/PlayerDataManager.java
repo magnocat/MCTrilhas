@@ -301,6 +301,21 @@ public class PlayerDataManager {
         return rank;
     }
 
+    /**
+     * Obtém o próximo ranque na sequência de progressão.
+     * @param currentRank O ranque atual.
+     * @return O próximo ranque, ou null se o ranque atual for o último.
+     */
+    public static Rank getNextRank(Rank currentRank) {
+        if (currentRank == null) return null;
+        Rank[] allRanks = Rank.values();
+        int currentOrdinal = currentRank.ordinal();
+        if (currentOrdinal + 1 < allRanks.length) {
+            return allRanks[currentOrdinal + 1];
+        }
+        return null; // Não há próximo ranque
+    }
+
     // --- Métodos de conveniência para serem usados pelos listeners e comandos ---
 
     public void addProgress(Player player, BadgeType type, double amount) {
@@ -667,6 +682,48 @@ public class PlayerDataManager {
      */
     public int getAllTimeBadgeCount(UUID playerUuid) {
         return allTimeBadgeCountsCache.getOrDefault(playerUuid, 0);
+    }
+
+    /**
+     * Obtém a posição de um jogador em um ranking específico a partir do cache.
+     * @param playerUuid O UUID do jogador.
+     * @param type O tipo de ranking ("daily", "monthly", "alltime").
+     * @return A posição do jogador (ex: 1 para primeiro lugar), ou -1 se ele não estiver no ranking.
+     */
+    public int getRankPosition(UUID playerUuid, String type) {
+        Map<UUID, Integer> targetCache;
+        switch (type.toLowerCase()) {
+            case "daily":
+                targetCache = this.dailyBadgeCountsCache;
+                break;
+            case "monthly":
+                targetCache = this.monthlyBadgeCountsCache;
+                break;
+            case "alltime":
+                targetCache = this.allTimeBadgeCountsCache;
+                break;
+            default:
+                return -1; // Tipo de ranking inválido
+        }
+
+        // Se o jogador não está no cache (provavelmente tem 0 pontos), ele não tem posição.
+        if (!targetCache.containsKey(playerUuid) || targetCache.get(playerUuid) == 0) {
+            return -1;
+        }
+
+        // Cria uma lista a partir do mapa para poder ordená-la.
+        List<Map.Entry<UUID, Integer>> sortedList = new ArrayList<>(targetCache.entrySet());
+        // Ordena a lista em ordem decrescente de pontuação.
+        sortedList.sort(Map.Entry.<UUID, Integer>comparingByValue().reversed());
+
+        // Encontra a posição do jogador na lista ordenada.
+        for (int i = 0; i < sortedList.size(); i++) {
+            if (sortedList.get(i).getKey().equals(playerUuid)) {
+                return i + 1; // A posição é o índice + 1.
+            }
+        }
+
+        return -1; // Não deve acontecer se a chave existe, mas é um fallback seguro.
     }
 
     // --- Métodos para o Sistema de Estatísticas e Marcos do CTF ---
