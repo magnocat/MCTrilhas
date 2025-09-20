@@ -447,6 +447,11 @@ public class HttpApiManager {
 
         if (verifyAdminToken(exchange) == null) { return; }
 
+        Map<String, String> params = queryToMap(exchange.getRequestURI().getQuery());
+        final int page = Integer.parseInt(params.getOrDefault("page", "1"));
+        final int pageSize = Integer.parseInt(params.getOrDefault("pageSize", "25"));
+        final String searchTerm = params.getOrDefault("search", "").toLowerCase(Locale.ROOT);
+
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -460,7 +465,8 @@ public class HttpApiManager {
                             try {
                                 UUID uuid = UUID.fromString(playerFile.getName().replace(".yml", ""));
                                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                                if (offlinePlayer.getName() != null && !offlinePlayer.isOnline()) {
+                                String playerName = offlinePlayer.getName();
+                                if (playerName != null && !offlinePlayer.isOnline() && (searchTerm.isEmpty() || playerName.toLowerCase(Locale.ROOT).contains(searchTerm))) {
                                     Map<String, String> playerData = new HashMap<>();
                                     playerData.put("name", offlinePlayer.getName());
                                     playerData.put("uuid", uuid.toString());
@@ -472,7 +478,20 @@ public class HttpApiManager {
                     }
                     // Ordena por data de último login, do mais recente para o mais antigo
                     offlinePlayers.sort((p1, p2) -> Long.compare(Long.parseLong(p2.get("lastPlayed")), Long.parseLong(p1.get("lastPlayed"))));
-                    sendJsonResponse(exchange, 200, gson.toJson(offlinePlayers));
+
+                    // Lógica de Paginação
+                    int totalPlayers = offlinePlayers.size();
+                    int totalPages = (int) Math.ceil((double) totalPlayers / pageSize);
+                    int fromIndex = (page - 1) * pageSize;
+                    int toIndex = Math.min(fromIndex + pageSize, totalPlayers);
+
+                    List<Map<String, String>> paginatedList = (fromIndex < totalPlayers) ? offlinePlayers.subList(fromIndex, toIndex) : new ArrayList<>();
+
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("players", paginatedList);
+                    response.put("totalPages", totalPages);
+                    response.put("currentPage", page);
+                    sendJsonResponse(exchange, 200, gson.toJson(response));
                 } catch (IOException e) {
                     plugin.logSevere("Erro de IO ao listar jogadores offline via API: " + e.getMessage());
                 }

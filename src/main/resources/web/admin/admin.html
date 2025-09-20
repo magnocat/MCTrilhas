@@ -104,40 +104,73 @@
 
                     <!-- Linha da Lista de Jogadores -->
                     <div class="row mt-4">
-                        <div class="col-lg-7"> <div class="card h-100">
-                                <div class="card-header">
-                                    <h3 class="card-title">Jogadores Online</h3>
-                                    <div class="card-tools">
-                                        <button id="refresh-players-btn" class="btn btn-tool" title="Atualizar Lista">
-                                            <i class="bi bi-arrow-repeat"></i>
-                                        </button>
-                                    </div>
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header p-0">
+                                    <ul class="nav nav-tabs" id="players-tabs" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" id="online-players-tab" data-bs-toggle="tab" href="#online-players-content" role="tab">Jogadores Online</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="offline-players-tab" data-bs-toggle="tab" href="#offline-players-content" role="tab">Jogadores Offline</a>
+                                        </li>
+                                    </ul>
                                 </div>
                                 <div class="card-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped m-0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Jogador</th>
-                                                    <th>Ping</th>
-                                                    <th><i class="bi bi-key-fill" title="Possui Token Web"></i></th>
-                                                    <th>Mundo</th>
-                                                    <th>Gamemode</th>
-                                                    <th>Ações</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="online-players-table-body">
-                                                <!-- Linhas de jogadores serão inseridas aqui -->
-                                            </tbody>
-                                        </table>
+                                    <div class="tab-content" id="players-tabs-content">
+                                        <div class="tab-pane fade show active" id="online-players-content" role="tabpanel">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped m-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Jogador</th>
+                                                            <th>Ping</th>
+                                                            <th><i class="bi bi-key-fill" title="Possui Token Web"></i></th>
+                                                            <th>Mundo</th>
+                                                            <th>Gamemode</th>
+                                                            <th>Ações</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="online-players-table-body"></tbody>
+                                                </table>
+                                            </div>
+                                            <div id="player-count" class="card-footer text-center">Carregando...</div>
+                                        </div>
+                                        <div class="tab-pane fade" id="offline-players-content" role="tabpanel">
+                                            <div class="p-3">
+                                                <input type="text" id="offline-player-search" class="form-control" placeholder="Buscar jogador offline...">
+                                            </div>
+                                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                                <table class="table table-striped m-0" id="offline-players-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Jogador</th>
+                                                            <th>Visto por último</th>
+                                                            <th>Ações</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="offline-players-table-body"></tbody>
+                                                </table>
+                                            </div>
+                                            <div id="offline-player-pagination" class="card-footer d-flex justify-content-between align-items-center">
+                                                <span id="offline-player-count">Carregando...</span>
+                                                <nav>
+                                                    <ul class="pagination pagination-sm m-0">
+                                                        <li class="page-item" id="offline-prev-page"><a class="page-link" href="#">&laquo; Anterior</a></li>
+                                                        <li class="page-item" id="offline-next-page"><a class="page-link" href="#">Próximo &raquo;</a></li>
+                                                    </ul>
+                                                </nav>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div id="player-count" class="card-footer text-center">
-                                    Carregando...
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-5">
+                    </div>
+
+                    <!-- Linha do Chat do Discord -->
+                    <div class="row mt-4">
+                        <div class="col-12">
                             <div class="card h-100">
                                 <div class="card-header">
                                     <h3 class="card-title">Chat do Discord</h3>
@@ -152,6 +185,7 @@
                                     <widgetbot-embed server="1368661284090019880" channel="1368661536641384498" style="width: 100%; height: 100%; position: absolute;"></widgetbot-embed>
                                 </div>
                             </div>
+                        </div>
                     </div>
 
                     <!-- Linha de Estatísticas da Economia -->
@@ -265,26 +299,10 @@
                                 <div class="card-body">
                                     <div id="remote-console-output" class="bg-dark text-white p-3 rounded mb-3" style="height: 200px; overflow-y: scroll; font-family: monospace; white-space: pre-wrap;">&gt; Console pronto. Aguardando comandos...</div>
                                     <form id="remote-console-form" class="d-flex">
-                                        <div class="input-group flex-grow-1">
+                                        <div class="input-group">
                                             <span class="input-group-text">/</span>
                                             <input type="text" id="remote-console-input" class="form-control" placeholder="Digite um comando do servidor..." autocomplete="off" required>
-                                        </div>
-                                        <div class="btn-group ms-2">
                                             <button type="submit" class="btn btn-primary">Enviar</button>
-                                            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <span class="visually-hidden">Comandos Rápidos</span>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end" id="quick-commands-menu">
-                                                <li><a class="dropdown-item" href="#" data-command="say ">Anunciar (say)</a></li>
-                                                <li><a class="dropdown-item" href="#" data-command="kick ">Kickar Jogador</a></li>
-                                                <li><a class="dropdown-item" href="#" data-command="ban ">Banir Jogador</a></li>
-                                                <li><a class="dropdown-item" href="#" data-command="pardon ">Perdoar Ban</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item" href="#" data-command="give ">Dar Item</a></li>
-                                                <li><a class="dropdown-item" href="#" data-command="clear ">Limpar Inventário</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item" href="#" data-command="scout reload">Recarregar Configs MCTrilhas</a></li>
-                                            </ul>
                                         </div>
                                     </form>
                                 </div>
@@ -468,6 +486,10 @@
             // --- Lógica da Lista de Jogadores ---
             const playersTableBody = document.getElementById('online-players-table-body');
             const playerCountSpan = document.getElementById('player-count');
+            const offlinePlayersTableBody = document.getElementById('offline-players-table-body');
+            const offlinePlayerCountSpan = document.getElementById('offline-player-count');
+            let offlineCurrentPage = 1;
+            let offlineTotalPages = 1;
             const refreshButton = document.getElementById('refresh-players-btn');
 
             async function fetchAndDisplayOnlinePlayers() {
@@ -512,6 +534,74 @@
                 }
             }
 
+            async function fetchAndDisplayOfflinePlayers(page = 1, search = '') {
+                if (!offlinePlayersTableBody || !offlinePlayerCountSpan) return;
+                offlinePlayerCountSpan.textContent = 'Atualizando...';
+                offlineCurrentPage = page;
+                try {
+                    const response = await fetch(`/api/v1/admin/players/offline?page=${page}&pageSize=25&search=${search}`, { headers: getAuthHeaders() });
+                    if (!response.ok) {
+                        if (response.status === 401) logout();
+                        throw new Error(`Erro na API: ${response.status}`);
+                    }
+                    const data = await response.json(); // Agora data é { players: [], totalPages: X, currentPage: Y }
+                    offlineTotalPages = data.totalPages;
+                    offlinePlayersTableBody.innerHTML = '';
+
+                    if (data.players.length === 0) {
+                        offlinePlayersTableBody.innerHTML = '<tr><td colspan="3" class="text-center p-3">Nenhum jogador offline encontrado.</td></tr>';
+                    } else {
+                        data.players.forEach(player => {
+                            const lastPlayedDate = new Date(parseInt(player.lastPlayed));
+                            const row = document.createElement('tr');
+                            row.dataset.playerName = player.name.toLowerCase();
+                            row.innerHTML = `
+                                <td><img src="https://cravatar.eu/helmavatar/${player.uuid}/24.png" class="rounded-circle me-2" alt="${player.name}" width="24" height="24"> <strong>${player.name}</strong></td>
+                                <td>${lastPlayedDate.toLocaleString('pt-BR')}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary btn-view-details" title="Ver Detalhes" data-player-uuid="${player.uuid}" data-player-name="${player.name}"><i class="bi bi-eye"></i></button>
+                                </td>`;
+                            offlinePlayersTableBody.appendChild(row);
+                        });
+                    }
+                    offlinePlayerCountSpan.textContent = `Página ${data.currentPage} de ${data.totalPages}`;
+                    renderOfflinePaginationControls();
+                } catch (error) {
+                    console.error('Erro ao buscar jogadores offline:', error);
+                    offlinePlayersTableBody.innerHTML = `<tr><td colspan="3" class="text-center text-danger p-3">Falha ao carregar jogadores.</td></tr>`;
+                    offlinePlayerCountSpan.textContent = 'Erro';
+                }
+            }
+
+            function renderOfflinePaginationControls() {
+                const prevBtn = document.getElementById('offline-prev-page');
+                const nextBtn = document.getElementById('offline-next-page');
+                prevBtn.classList.toggle('disabled', offlineCurrentPage <= 1);
+                nextBtn.classList.toggle('disabled', offlineCurrentPage >= offlineTotalPages);
+            }
+
+            document.getElementById('offline-prev-page').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (offlineCurrentPage > 1) fetchAndDisplayOfflinePlayers(offlineCurrentPage - 1, searchInput.value);
+            });
+
+            document.getElementById('offline-next-page').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (offlineCurrentPage < offlineTotalPages) fetchAndDisplayOfflinePlayers(offlineCurrentPage + 1, searchInput.value);
+            });
+
+            // Lógica da busca de jogadores offline
+            const searchInput = document.getElementById('offline-player-search');
+            if (searchInput) {
+                let searchTimeout;
+                searchInput.addEventListener('keyup', () => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        fetchAndDisplayOfflinePlayers(1, searchInput.value);
+                    }, 500); // Espera 500ms após o usuário parar de digitar
+                });
+            }
+
             // --- Lógica de Ações nos Jogadores ---
             const badgeNames = {
                 'MINING': 'Minerador', 'LUMBERJACK': 'Lenhador', 'BUILDER': 'Construtor',
@@ -519,7 +609,7 @@
                 'CRAFTING': 'Artesão', 'EXPLORER': 'Explorador'
             };
 
-            playersTableBody.addEventListener('click', async (event) => {
+            document.getElementById('players-tabs-content').addEventListener('click', async (event) => {
                 const button = event.target.closest('button');
                 if (!button) return;
 
@@ -894,18 +984,6 @@
                 }
             }
 
-            // Lógica dos comandos rápidos do console
-            const quickCommandsMenu = document.getElementById('quick-commands-menu');
-            if (quickCommandsMenu) {
-                quickCommandsMenu.addEventListener('click', (e) => {
-                    if (e.target.matches('.dropdown-item')) {
-                        e.preventDefault();
-                        consoleInput.value = e.target.dataset.command;
-                        consoleInput.focus();
-                    }
-                });
-            }
-
             // --- Lógica do Console Remoto ---
             const consoleForm = document.getElementById('remote-console-form');
             const consoleInput = document.getElementById('remote-console-input');
@@ -1055,6 +1133,7 @@
             
             updateMetrics();
             fetchAndDisplayOnlinePlayers();
+            fetchAndDisplayOfflinePlayers(); // Carrega a primeira página de jogadores offline
             updateEconomyStats();
             updateAdminList();
             setInterval(updateGameChat, 3000); // Atualiza o chat a cada 3s
