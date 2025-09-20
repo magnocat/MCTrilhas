@@ -1,38 +1,32 @@
 package com.magnocat.mctrilhas.data;
 
+import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.badges.BadgeType;
+import com.magnocat.mctrilhas.utils.ItemFactory;
+
+@SuppressWarnings("deprecation")
+public class PlayerDataManager {
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.badges.BadgeType;
 import com.magnocat.mctrilhas.ranks.Rank;
 import com.magnocat.mctrilhas.utils.ItemFactory;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-
-@SuppressWarnings("deprecation")
-public class PlayerDataManager {
 
     private final MCTrilhasPlugin plugin;
     private final File playerDataFolder;
@@ -269,6 +263,55 @@ public class PlayerDataManager {
         tokenToUuidCache.put(token, uuid);
     }
     /**
+     * Remove um token do cache de acesso rápido.
+     * @param token O token a ser removido.
+     */
+    public void removeTokenFromCache(String token) {
+        if (token != null && !token.isEmpty()) {
+            tokenToUuidCache.remove(token);
+        }
+    }
+
+    /**
+     * Gera um novo token de acesso web para um jogador, invalidando o antigo.
+     * Salva os dados do jogador imediatamente para garantir a persistência do novo token.
+     * @param playerUUID O UUID do jogador.
+     * @return O novo token gerado, ou null em caso de erro.
+     */
+    public String regenerateWebAccessToken(UUID playerUUID) {
+        // Tenta obter os dados do jogador online primeiro.
+        PlayerData playerData = getPlayerData(playerUUID);
+
+        // Se o jogador não estiver online, tenta carregar os dados do arquivo.
+        if (playerData == null) {
+            playerData = loadOfflinePlayerData(playerUUID);
+            // Se ainda assim não encontrar, o jogador não existe ou seu arquivo está corrompido.
+            if (playerData == null) {
+                plugin.logWarn("Tentativa de gerar token para jogador não encontrado (online ou offline): " + playerUUID);
+                return null;
+            }
+        }
+
+        // 1. Invalida o token antigo
+        String oldToken = playerData.getWebAccessToken();
+        removeTokenFromCache(oldToken);
+
+        // 2. Gera um novo token seguro
+        byte[] randomBytes = new byte[32];
+        new java.security.SecureRandom().nextBytes(randomBytes);
+        String newToken = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+
+        // 3. Define o novo token e atualiza o cache
+        playerData.setWebAccessToken(newToken);
+        updateTokenCache(newToken, playerUUID);
+
+        // 4. Salva os dados imediatamente para persistir o novo token
+        savePlayerData(playerUUID);
+
+        return newToken;
+    }
+    /**
+
      * Obtém o ranque de um jogador. Para jogadores online, lê do cache. Para jogadores offline, lê do arquivo.
      * <p>
      * <strong>Aviso:</strong> A leitura de arquivos para jogadores offline no thread principal pode impactar a performance

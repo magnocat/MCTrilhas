@@ -1,18 +1,15 @@
 package com.magnocat.mctrilhas.commands;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.data.PlayerData;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import java.security.SecureRandom;
-import java.util.Base64;
+import org.jetbrains.annotations.NotNull;
 
 public class FamilyCommand implements CommandExecutor {
 
@@ -23,7 +20,7 @@ public class FamilyCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("Este comando só pode ser usado por jogadores.");
             return true;
@@ -32,58 +29,33 @@ public class FamilyCommand implements CommandExecutor {
         Player player = (Player) sender;
 
         if (args.length > 0 && args[0].equalsIgnoreCase("token")) {
-            handleTokenGeneration(player);
-            return true;
-        }
+            player.sendMessage("§eGerando seu link de acesso seguro para o Portal da Família...");
 
-        player.sendMessage(Component.text("Uso incorreto. Tente /familia token", NamedTextColor.RED));
+            // Chama o método centralizado que gera um novo token e invalida o antigo.
+            String token = plugin.getPlayerDataManager().regenerateWebAccessToken(player.getUniqueId());
+
+            if (token == null) {
+                player.sendMessage("§cOcorreu um erro ao gerar seu token. Por favor, contate um administrador.");
+                return true;
+            }
+
+            String baseUrl = plugin.getConfig().getString("web-api.base-url", "http://localhost:22222");
+            // Garante que não haja barras extras
+            if (baseUrl.endsWith("/")) {
+                baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+            }
+            String fullUrl = baseUrl + "/admin/pdash.html?token=" + token;
+
+            player.sendMessage("§aSeu link exclusivo foi gerado! §c(Não compartilhe com ninguém)");
+            player.sendMessage("§7Este link dá acesso ao seu painel de progresso. Se você suspeitar que alguém o acessou, use este comando novamente para gerar um novo link e invalidar o antigo.");
+
+            TextComponent message = new TextComponent("§e[CLIQUE AQUI PARA ABRIR O PAINEL]");
+            message.setClickEvent(new net.md_5.bungee.api.chat.ClickEvent(net.md_5.bungee.api.chat.ClickEvent.Action.OPEN_URL, fullUrl));
+            message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("§aClique para abrir seu painel de progresso!").create()));
+            player.spigot().sendMessage(message);
+        } else {
+            player.sendMessage("§cComando inválido. Use: /familia token");
+        }
         return true;
-    }
-
-    private void handleTokenGeneration(Player player) {
-        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
-        if (playerData == null) {
-            player.sendMessage(Component.text("Erro ao carregar seus dados. Tente relogar.", NamedTextColor.RED));
-            return;
-        }
-
-        String token = playerData.getWebAccessToken();
-        if (token == null || token.isEmpty()) {
-            token = generateNewToken();
-            playerData.setWebAccessToken(token);
-            // Salva os dados imediatamente para garantir que o token não seja perdido em caso de reinicialização.
-            plugin.getPlayerDataManager().savePlayerData(player.getUniqueId());
-            // Atualiza o cache de tokens em tempo real para que o link funcione imediatamente.
-            plugin.getPlayerDataManager().updateTokenCache(token, player.getUniqueId());
-        }
-
-        // Busca a URL base do config.yml, com um fallback para o IP local.
-        String baseUrl = plugin.getConfig().getString("web-api.base-url");
-        if (baseUrl == null || baseUrl.isEmpty() || baseUrl.contains("SEU_IP_EXTERNO")) {
-             player.sendMessage(Component.text("O administrador do servidor ainda não configurou a URL do painel.", NamedTextColor.RED));
-             player.sendMessage(Component.text("Por favor, peça para configurar a opção 'web-api.base-url' no config.yml.", NamedTextColor.GRAY));
-             return;
-        }
-
-        // Garante que não haja barras extras
-        if (baseUrl.endsWith("/")) {
-            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-        }
-        String dashboardUrl = baseUrl + "/admin/pdash.html?token=" + token;
-
-        player.sendMessage(Component.text("=============================================", NamedTextColor.GREEN));
-        player.sendMessage(Component.text("Seu link de acesso ao Painel da Família:", NamedTextColor.AQUA));
-        player.sendMessage(Component.text("CLIQUE AQUI PARA ABRIR", NamedTextColor.YELLOW, TextDecoration.BOLD, TextDecoration.UNDERLINED)
-                .clickEvent(ClickEvent.openUrl(dashboardUrl))
-                .hoverEvent(HoverEvent.showText(Component.text("Clique para abrir o painel no seu navegador!", NamedTextColor.GRAY))));
-        player.sendMessage(Component.text("Este link é único e secreto. Não compartilhe!", NamedTextColor.RED));
-        player.sendMessage(Component.text("=============================================", NamedTextColor.GREEN));
-    }
-
-    private String generateNewToken() {
-        SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[24]; // 24 bytes = 192 bits, resulta em 32 caracteres Base64
-        random.nextBytes(bytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 }

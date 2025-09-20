@@ -66,11 +66,6 @@
               <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
                 <i class="bi bi-list"></i>
               </a>
-            </li>
-          </ul>
-          <!--end::Start Navbar Links-->
-          <!--begin::End Navbar Links-->
-          <ul class="navbar-nav ms-auto">
             <li class="nav-item" id="theme-toggle">
                 <a class="nav-link" href="#" role="button">
                     <i class="bi bi-moon-fill" id="theme-icon-dark"></i>
@@ -209,51 +204,21 @@
           <div class="container-fluid">
             <!-- Info boxes -->
             <div class="row">
-              <div class="col-12 col-sm-6 col-md-3">
-                <div class="info-box">
-                  <span class="info-box-icon text-bg-primary shadow-sm">
-                    <i class="bi bi-people-fill"></i>
-                  </span>
-                  <div class="info-box-content">
-                    <span class="info-box-text">Jogadores Online</span>
-                    <span id="info-online-players" class="info-box-number">...</span>
-                  </div>
-                  <!-- /.info-box-content -->
-                </div>
-                <!-- /.info-box -->
-              </div>
-              <!-- /.col -->
-              <div class="col-12 col-sm-6 col-md-3">
-                <div class="info-box">
-                  <span class="info-box-icon text-bg-danger shadow-sm">
-                    <i class="bi bi-reception-4"></i>
-                  </span>
-                  <div class="info-box-content">
-                    <span class="info-box-text">Seu Ping</span>
-                    <span id="info-player-ping" class="info-box-number">...</span>
-                  </div>
-                  <!-- /.info-box-content -->
-                </div>
-                <!-- /.info-box -->
-              </div>
-              <!-- /.col -->
-              <!-- fix for small devices only -->
-              <!-- <div class="clearfix hidden-md-up"></div> -->
-              <div class="col-12 col-sm-6 col-md-3">
+              <div class="col-12 col-sm-6 col-md-6">
                 <div class="info-box">
                   <span class="info-box-icon text-bg-success shadow-sm">
                     <i class="bi bi-server"></i>
                   </span>
                   <div class="info-box-content">
                     <span class="info-box-text">Status do Servidor</span>
-                    <span id="info-server-status" class="info-box-number">Online</span>
+                    <span id="info-server-status" class="info-box-number">Carregando...</span>
                   </div>
                   <!-- /.info-box-content -->
                 </div>
                 <!-- /.info-box -->
               </div>
               <!-- /.col -->
-              <div class="col-12 col-sm-6 col-md-3">
+              <div class="col-12 col-sm-6 col-md-6">
                 <div class="info-box">
                   <span class="info-box-icon text-bg-warning shadow-sm">
                     <i class="bi bi-coin"></i>
@@ -573,9 +538,7 @@
                 document.getElementById('player-avatar-menu').src = `https://cravatar.eu/helmavatar/${data.uuid}/160.png`;
 
                 // Atualiza os Info Boxes
-                // Para dados do servidor, precisaremos de outro fetch ou endpoint. Por enquanto, vamos focar nos dados do jogador.
-                // document.getElementById('info-online-players').textContent = `${data.serverStatus.onlinePlayers} / ${data.serverStatus.maxPlayers}`;
-                document.getElementById('info-player-ping').textContent = "N/A"; // Ping não é enviado pela API do plugin
+                document.getElementById('info-server-status').textContent = "Online"; // Se a API respondeu, o servidor está online.
                 document.getElementById('info-player-totems').textContent = data.totems.toLocaleString('pt-BR');
 
                 // Atualiza o Relatório de Atividade
