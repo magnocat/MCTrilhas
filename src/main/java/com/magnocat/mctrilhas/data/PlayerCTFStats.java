@@ -13,6 +13,19 @@ public class PlayerCTFStats {
     private int gamesPlayed = 0;
     private int flagCaptures = 0;
 
+    public PlayerCTFStats() {
+        // Construtor padrão
+    }
+
+    // Novo construtor para criar uma cópia com valores específicos
+    public PlayerCTFStats(int wins, int losses, int kills, int deaths, int flagCaptures) {
+        this.wins = wins;
+        this.gamesPlayed = wins + losses;
+        this.kills = kills;
+        this.deaths = deaths;
+        this.flagCaptures = flagCaptures;
+    }
+
     public void addMatchStats(com.magnocat.mctrilhas.ctf.CTFPlayerStats matchStats, boolean won) {
         this.kills += matchStats.getKills();
         this.deaths += matchStats.getDeaths();
@@ -28,6 +41,10 @@ public class PlayerCTFStats {
     public int getWins() { return wins; }
     public int getGamesPlayed() { return gamesPlayed; }
     public int getFlagCaptures() { return flagCaptures; }
+
+    public int getLosses() {
+        return gamesPlayed - wins;
+    }
 
     public double getKdRatio() {
         if (deaths == 0) {

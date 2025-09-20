@@ -322,6 +322,14 @@ public class CTFManager {
     }
 
     /**
+     * Retorna uma cópia da lista de jogos de CTF atualmente ativos.
+     * @return Uma lista de jogos ativos.
+     */
+    public List<CTFGame> getActiveGames() {
+        return new ArrayList<>(activeGames);
+    }
+
+    /**
      * Verifica se uma arena já está sendo usada em uma partida ativa.
      * @param arena A arena a ser verificada.
      * @return true se a arena estiver em uso, false caso contrário.

@@ -29,6 +29,7 @@ import com.magnocat.mctrilhas.listeners.CookingListener;
 import com.magnocat.mctrilhas.listeners.CraftingListener;
 import com.magnocat.mctrilhas.listeners.ExplorerListener;
 import com.magnocat.mctrilhas.listeners.FarmingListener;
+import com.magnocat.mctrilhas.listeners.GameChatListener;
 import com.magnocat.mctrilhas.listeners.FishingListener;
 import com.magnocat.mctrilhas.listeners.LumberjackListener;
 import com.magnocat.mctrilhas.listeners.MenuListener;
@@ -197,7 +198,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new TreasureHuntListener(this),
                 new CTFListener(this),
                 new CommandBlockerListener(this),
-                new AdminPrivacyListener(this)
+                new AdminPrivacyListener(this),
+                new GameChatListener(this)
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
@@ -259,6 +261,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
     public CTFMilestoneManager getCtfMilestoneManager() {
         return ctfMilestoneManager;
+    }
+
+    public HttpApiManager getHttpApiManager() {
+        return httpApiManager;
     }
 
     /* Comentado temporariamente

@@ -8,6 +8,45 @@
     <link rel="stylesheet" href="./css/adminlte.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.css" />
+    <style>
+        .inventory-grid {
+            display: grid;
+            gap: 4px;
+            background-color: #585858;
+            padding: 4px;
+            border: 2px solid #333;
+            border-radius: 4px;
+        }
+        .main-inventory { grid-template-columns: repeat(9, 1fr); }
+        .ender-chest { grid-template-columns: repeat(9, 1fr); }
+        .armor-inventory { grid-template-columns: repeat(1, 1fr); }
+
+        .inventory-slot {
+            width: 54px;
+            height: 54px;
+            background-color: #8b8b8b;
+            border: 1px solid #333;
+            position: relative;
+        }
+        .inventory-item {
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            image-rendering: pixelated; /* For crisp Minecraft sprites */
+            cursor: help;
+        }
+        .item-amount {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px black;
+        }
+    </style>
 </head>
 <body class="bg-body-tertiary">
     <div class="app-wrapper">
@@ -30,6 +69,14 @@
                 </div>
             </div>
             <div class="app-content">
+                <!--begin::End Navbar Links-->
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item" id="theme-toggle">
+                        <a class="nav-link" href="#" role="button">
+                            <i class="bi bi-moon-fill" id="theme-icon-dark"></i>
+                            <i class="bi bi-sun-fill" id="theme-icon-light" style="display: none;"></i>
+                        </a>
+                    </li>
                 <div class="container-fluid">
                     <!-- Linha de Métricas -->
                     <div class="row">
@@ -57,8 +104,7 @@
 
                     <!-- Linha da Lista de Jogadores -->
                     <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card">
+                        <div class="col-lg-7"> <div class="card h-100">
                                 <div class="card-header">
                                     <h3 class="card-title">Jogadores Online</h3>
                                     <div class="card-tools">
@@ -91,6 +137,159 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-lg-5">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title">Chat do Discord</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+                                            <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                                            <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0" style="position: relative; min-height: 450px;">
+                                    <widgetbot-embed server="1368661284090019880" channel="1368661536641384498" style="width: 100%; height: 100%; position: absolute;"></widgetbot-embed>
+                                </div>
+                            </div>
+                    </div>
+
+                    <!-- Linha de Estatísticas da Economia -->
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title">Economia Geral</h3>
+                                </div>
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                    <h2 id="total-totems" class="display-4 fw-bold">...</h2>
+                                    <p class="text-muted">Totens em Circulação</p>
+                                    <small id="economy-last-updated" class="text-muted"></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h3 class="card-title">Top 5 Jogadores Mais Ricos</h3>
+                                    <div class="card-tools">
+                                        <button id="refresh-economy-btn" class="btn btn-tool" title="Atualizar Agora (Ação Pesada)">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul id="richest-players-list" class="list-group list-group-flush">
+                                        <li class="list-group-item text-center p-4"><div class="spinner-border spinner-border-sm"></div> Carregando...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Linha do Chat do Jogo -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card direct-chat direct-chat-primary">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="bi bi-chat-dots-fill me-2"></i>Chat do Jogo
+                                    </h3>
+                                </div>
+                                <div class="card-body">
+                                    <div id="game-chat-messages" class="direct-chat-messages" style="height: 300px;">
+                                        <!-- Mensagens do jogo serão inseridas aqui -->
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <form id="game-chat-form">
+                                        <div class="input-group">
+                                            <input type="text" id="game-chat-input" placeholder="Responder como [Admin Web]..." class="form-control" autocomplete="off" required>
+                                            <button type="submit" class="btn btn-primary">Enviar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Linha do Anúncio Global -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="bi bi-megaphone-fill me-2"></i>Anúncio Global
+                                    </h3>
+                                </div>
+                                <div class="card-body">
+                                    <p>Envie uma mensagem para todos os jogadores online. Você pode usar códigos de cor com '&' (ex: &cOlá a todos!).</p>
+                                    <form id="broadcast-form" class="d-flex">
+                                        <div class="input-group">
+                                            <input type="text" id="broadcast-input" class="form-control" placeholder="Digite sua mensagem..." autocomplete="off" required>
+                                            <button type="submit" class="btn btn-info">Enviar Anúncio</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Linha de Administradores -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="bi bi-shield-lock-fill me-2"></i>Administradores do Servidor
+                                    </h3>
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul id="admin-list" class="list-group list-group-flush">
+                                        <li class="list-group-item text-center p-4"><div class="spinner-border spinner-border-sm"></div> Carregando...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Linha do Console Remoto -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="bi bi-terminal-fill me-2"></i>Console Remoto
+                                    </h3>
+                                </div>
+                                <div class="card-body">
+                                    <div id="remote-console-output" class="bg-dark text-white p-3 rounded mb-3" style="height: 200px; overflow-y: scroll; font-family: monospace; white-space: pre-wrap;">&gt; Console pronto. Aguardando comandos...</div>
+                                    <form id="remote-console-form" class="d-flex">
+                                        <div class="input-group flex-grow-1">
+                                            <span class="input-group-text">/</span>
+                                            <input type="text" id="remote-console-input" class="form-control" placeholder="Digite um comando do servidor..." autocomplete="off" required>
+                                        </div>
+                                        <div class="btn-group ms-2">
+                                            <button type="submit" class="btn btn-primary">Enviar</button>
+                                            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <span class="visually-hidden">Comandos Rápidos</span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" id="quick-commands-menu">
+                                                <li><a class="dropdown-item" href="#" data-command="say ">Anunciar (say)</a></li>
+                                                <li><a class="dropdown-item" href="#" data-command="kick ">Kickar Jogador</a></li>
+                                                <li><a class="dropdown-item" href="#" data-command="ban ">Banir Jogador</a></li>
+                                                <li><a class="dropdown-item" href="#" data-command="pardon ">Perdoar Ban</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item" href="#" data-command="give ">Dar Item</a></li>
+                                                <li><a class="dropdown-item" href="#" data-command="clear ">Limpar Inventário</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item" href="#" data-command="scout reload">Recarregar Configs MCTrilhas</a></li>
+                                            </ul>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -105,7 +304,18 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" id="player-details-modal-body">
-                        <!-- Conteúdo será carregado aqui -->
+                        <ul class="nav nav-tabs" id="playerDetailsTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-pane" type="button" role="tab" aria-controls="overview-pane" aria-selected="true">Visão Geral</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory-pane" type="button" role="tab" aria-controls="inventory-pane" aria-selected="false">Inventário</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-3" id="playerDetailsTabContent">
+                            <div class="tab-pane fade show active" id="overview-pane" role="tabpanel" aria-labelledby="overview-tab"></div>
+                            <div class="tab-pane fade" id="inventory-pane" role="tabpanel" aria-labelledby="inventory-tab"></div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -115,29 +325,71 @@
         </div>
     </div>
     <script src="./js/auth.js"></script>
-    <!-- Bootstrap & Popper JS (Essencial para Modals e Notificações) -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@widgetbot/html-embed"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             protectPage();
+
+            // --- Lógica do Seletor de Tema (Dark/Light Mode) ---
+            const getStoredTheme = () => localStorage.getItem('theme');
+            const getPreferredTheme = () => {
+                const storedTheme = getStoredTheme();
+                if (storedTheme) return storedTheme;
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            };
+
+            const setTheme = (theme) => {
+                document.documentElement.setAttribute('data-bs-theme', theme);
+                const darkIcon = document.getElementById('theme-icon-dark');
+                const lightIcon = document.getElementById('theme-icon-light');
+                if (darkIcon && lightIcon) {
+                    darkIcon.style.display = theme === 'dark' ? 'none' : 'inline-block';
+                    lightIcon.style.display = theme === 'dark' ? 'inline-block' : 'none';
+                }
+            };
+
+            // Aplica o tema ao carregar
+            setTheme(getPreferredTheme());
+
+            // Adiciona o evento de clique no botão
+            const themeToggler = document.getElementById('theme-toggle');
+            if (themeToggler) {
+                themeToggler.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const currentTheme = getStoredTheme() || getPreferredTheme();
+                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                    localStorage.setItem('theme', newTheme);
+                    setTheme(newTheme);
+                });
+            }
+
             document.getElementById('logout-button').addEventListener('click', () => logout());
 
             // Instancia o modal para controle via JS
             const playerDetailsModal = new bootstrap.Modal(document.getElementById('player-details-modal'));
+            const modalBody = document.getElementById('player-details-modal-body');
+            const overviewPane = document.getElementById('overview-pane');
+            const inventoryPane = document.getElementById('inventory-pane');
+            let inventoryLoadedForPlayer = ''; // Guarda o UUID do jogador cujo inventário foi carregado
 
-            // --- Configuração dos Gráficos ---
+            // Limpa o conteúdo e reseta o estado ao fechar o modal
+            playerDetailsModal._element.addEventListener('hidden.bs.modal', () => {
+                overviewPane.innerHTML = '';
+                inventoryPane.innerHTML = '';
+                inventoryLoadedForPlayer = '';
+                // Garante que a primeira aba esteja ativa na próxima vez que abrir
+                const firstTab = document.querySelector('#playerDetailsTabs button[data-bs-target="#overview-pane"]');
+                if (firstTab) {
+                    new bootstrap.Tab(firstTab).show();
+                }
+            });
+
             function showNotification(message, type = 'success') {
                 const container = document.getElementById('notification-container');
                 const toast = document.createElement('div');
-                // Permite usar outros tipos de alerta do Bootstrap (info, warning, etc.)
                 toast.className = `alert alert-${type} alert-dismissible fade show shadow-lg`;
                 toast.role = 'alert';
                 toast.innerHTML = `
@@ -145,12 +397,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 `;
                 container.appendChild(toast);
-                // Garante que a notificação desapareça sozinha após 5 segundos.
                 setTimeout(() => {
                     const alertInstance = bootstrap.Alert.getOrCreateInstance(toast);
                     if (alertInstance) alertInstance.close();
                 }, 5000);
             }
+
+            // --- Configuração dos Gráficos ---
             const MAX_DATA_POINTS = 30; // Mostra os últimos 30 pontos (30 * 5s = 2.5 minutos)
             let cpuData = [], tpsData = [], timeLabels = [];
 
@@ -222,7 +475,10 @@
                 playerCountSpan.textContent = 'Atualizando...';
                 try {
                     const response = await fetch('/api/v1/admin/players/online', { headers: getAuthHeaders() });
-                    if (!response.ok) { if (response.status === 401) logout(); throw new Error(`Erro na API: ${response.status}`); }
+                    if (!response.ok) {
+                        if (response.status === 401) logout();
+                        throw new Error(`Erro na API: ${response.status}`);
+                    }
                     const data = await response.json();
                     playersTableBody.innerHTML = '';
 
@@ -231,9 +487,9 @@
                     } else {
                         data.forEach(player => {
                             const row = document.createElement('tr');
-                            const tokenIcon = player.hasWebToken 
-                                ? '<i class="bi bi-key-fill text-success" title="Sim"></i>' 
-                                : '<i class="bi bi-key text-muted" title="Não"></i>';
+                            const tokenIcon = player.hasWebToken ?
+                                '<i class="bi bi-key-fill text-success" title="Sim"></i>' :
+                                '<i class="bi bi-key text-muted" title="Não"></i>';
                             row.innerHTML = `
                                 <td><img src="https://cravatar.eu/helmavatar/${player.uuid}/24.png" class="rounded-circle me-2" alt="${player.name}" width="24" height="24"> <strong>${player.name}</strong></td>
                                 <td>${player.ping}ms</td>
@@ -262,7 +518,6 @@
                 'FARMING': 'Fazendeiro', 'FISHING': 'Pescador', 'COOKING': 'Cozinheiro',
                 'CRAFTING': 'Artesão', 'EXPLORER': 'Explorador'
             };
-            const modalBody = document.getElementById('player-details-modal-body');
 
             playersTableBody.addEventListener('click', async (event) => {
                 const button = event.target.closest('button');
@@ -272,9 +527,9 @@
 
                 if (button.classList.contains('btn-kick')) {
                     const reason = prompt(`Qual o motivo para KICKAR ${playerName}?`, 'Expulso por um administrador.');
-                    if (reason) { // prompt retorna null se o usuário cancelar
+                    if (reason) {
                         await executePlayerAction('kick', playerName, reason);
-                        setTimeout(fetchAndDisplayOnlinePlayers, 1000); // Atualiza a lista
+                        setTimeout(fetchAndDisplayOnlinePlayers, 1000);
                     }
                 }
 
@@ -282,7 +537,7 @@
                     const reason = prompt(`Qual o motivo para BANIR ${playerName}?`, 'Banido por um administrador.');
                     if (reason) {
                         await executePlayerAction('ban', playerName, reason);
-                        setTimeout(fetchAndDisplayOnlinePlayers, 1000); // Atualiza a lista
+                        setTimeout(fetchAndDisplayOnlinePlayers, 1000);
                     }
                 }
 
@@ -291,16 +546,105 @@
                 }
             });
 
-            async function executePlayerAction(action, targetName, reason) {
+            // Listener unificado para todas as ações de clique dentro do modal de detalhes
+            modalBody.addEventListener('click', async (event) => {
+                const badgeButton = event.target.closest('.btn-badge-action');
+                if (badgeButton) {
+                    const { action, badgeId, playerUuid, playerName } = badgeButton.dataset;
+                    const actionText = action === 'grant' ? 'CONCEDER' : 'REVOGAR';
+
+                    if (confirm(`Tem certeza que deseja ${actionText} a insígnia ${badgeId} para ${playerName}?`)) {
+                        await executeBadgeAction(action, playerUuid, badgeId);
+                        await handleViewDetails(playerName, playerUuid);
+                    }
+                    return;
+                }
+
+                const totemButton = event.target.closest('.btn-totem-action');
+                if (totemButton) {
+                    const { action, playerUuid, playerName } = totemButton.dataset;
+                    const actionText = action === 'give-totems' ? 'DAR' : 'REMOVER';
+                    const amount = prompt(`Quantos Totens você deseja ${actionText} para ${playerName}?`);
+
+                    if (amount && !isNaN(amount) && Number(amount) > 0) {
+                        await executePlayerAction(action, playerName, 'Ajuste de saldo via painel.', amount);
+                        await handleViewDetails(playerName, playerUuid);
+                    } else if (amount !== null) {
+                        alert('Por favor, insira um número válido.');
+                    }
+                    return;
+                }
+            });
+
+            modalBody.addEventListener('change', async (event) => {
+                const selector = event.target.closest('.rank-selector');
+                if (!selector) return;
+
+                const newRank = selector.value;
+                const { playerUuid, playerName, currentRank } = selector.dataset;
+
+                if (confirm(`Tem certeza que deseja alterar o ranque de ${playerName} para ${newRank}?`)) {
+                    await executeRankAction(playerUuid, newRank);
+                    await handleViewDetails(playerName, playerUuid);
+                } else {
+                    selector.value = currentRank;
+                }
+            });
+
+            document.getElementById('playerDetailsTabs').addEventListener('shown.bs.tab', async (event) => {
+                const playerUuid = modalBody.dataset.currentPlayerUuid;
+                if (event.target.id === 'inventory-tab' && inventoryLoadedForPlayer !== playerUuid) {
+                    inventoryLoadedForPlayer = playerUuid;
+                    await handleViewInventory(playerUuid);
+                }
+            });
+
+            async function executePlayerAction(action, targetName, reason, amount = null) {
                 try {
+                    const body = { action, targetName, reason };
+                    if (amount !== null) body.amount = amount;
                     const response = await fetch('/api/v1/admin/player-action', {
                         method: 'POST',
                         headers: getAuthHeaders(),
-                        body: JSON.stringify({ action, targetName, reason })
+                        body: JSON.stringify(body)
                     });
-
                     const data = await response.json();
+                    if (response.ok && data.success) {
+                        showNotification(data.message, 'success');
+                    } else {
+                        throw new Error(data.error || 'Ação falhou.');
+                    }
+                } catch (error) {
+                    showNotification(`Erro: ${error.message}`, 'danger');
+                }
+            }
 
+            async function executeBadgeAction(action, targetUuid, badgeId) {
+                try {
+                    const response = await fetch('/api/v1/admin/badge-action', {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ action, targetUuid, badgeId })
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        showNotification(data.message, 'success');
+                    } else {
+                        throw new Error(data.error || 'Ação falhou.');
+                    }
+                } catch (error) {
+                    showNotification(`Erro: ${error.message}`, 'danger');
+                }
+            }
+
+            async function executeRankAction(targetUuid, rank) {
+                try {
+                    const response = await fetch('/api/v1/admin/rank-action', {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ targetUuid, rank })
+                    });
+                    const data = await response.json();
                     if (response.ok && data.success) {
                         showNotification(data.message, 'success');
                     } else {
@@ -313,7 +657,10 @@
 
             async function handleViewDetails(playerName, playerUuid) {
                 document.getElementById('playerDetailsModalLabel').textContent = `Detalhes de ${playerName}`;
-                modalBody.innerHTML = `
+                modalBody.dataset.currentPlayerUuid = playerUuid;
+                modalBody.dataset.currentPlayerName = playerName;
+
+                overviewPane.innerHTML = `
                     <div class="text-center p-5">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Carregando...</span>
@@ -331,7 +678,7 @@
                     const data = await response.json();
                     populateModal(data);
                 } catch (error) {
-                    modalBody.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+                    overviewPane.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
                 }
             }
 
@@ -343,7 +690,10 @@
                     const percentage = required > 0 ? Math.min(100, (progress / required) * 100) : 0;
                     const isCompleted = data.earnedBadges.includes(badgeId);
                     const badgeName = badgeNames[badgeId] || badgeId;
-                    const progressColor = isCompleted ? 'bg-success' : 'bg-primary';
+                    const progressColor = isCompleted ? 'bg-success' : 'bg-info';
+                    const actionButton = isCompleted ?
+                        `<button class="btn btn-xs btn-danger btn-badge-action" data-action="revoke" data-badge-id="${badgeId}" data-player-uuid="${data.uuid}" data-player-name="${data.name}">Revogar</button>` :
+                        `<button class="btn btn-xs btn-success btn-badge-action" data-action="grant" data-badge-id="${badgeId}" data-player-uuid="${data.uuid}" data-player-name="${data.name}">Conceder</button>`;
 
                     badgeProgressHTML += `
                         <div class="mb-3">
@@ -354,10 +704,11 @@
                             <div class="progress" style="height: 20px;">
                                 <div class="progress-bar ${progressColor} progress-bar-striped ${isCompleted ? '' : 'progress-bar-animated'}" role="progressbar" style="width: ${percentage}%" aria-valuenow="${percentage}" aria-valuemin="0" aria-valuemax="100">${Math.round(percentage)}%</div>
                             </div>
+                            <div class="text-end mt-1">${actionButton}</div>
                         </div>`;
                 }
 
-                modalBody.innerHTML = `
+                overviewPane.innerHTML = `
                     <div class="row">
                         <div class="col-md-4 text-center border-end">
                             <img src="https://cravatar.eu/helmavatar/${data.uuid}/128.png" class="img-fluid rounded-circle shadow-lg mb-3" alt="${data.name}">
@@ -365,8 +716,25 @@
                             <p class="text-muted small">${data.uuid}</p>
                             <hr>
                             <ul class="list-group list-group-flush text-start">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">Ranque <span class="badge bg-primary rounded-pill">${data.rank}</span></li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">Totens <span class="badge bg-warning rounded-pill">${data.totems.toLocaleString('pt-BR')}</span></li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Ranque
+                                    <select class="form-select form-select-sm w-50 rank-selector" data-player-uuid="${data.uuid}" data-player-name="${data.name}" data-current-rank="${data.rank}">
+                                        <option value="FILHOTE" ${data.rank === 'FILHOTE' ? 'selected' : ''}>Filhote</option>
+                                        <option value="LOBINHO" ${data.rank === 'LOBINHO' ? 'selected' : ''}>Lobinho</option>
+                                        <option value="ESCOTEIRO" ${data.rank === 'ESCOTEIRO' ? 'selected' : ''}>Escoteiro</option>
+                                        <option value="SENIOR" ${data.rank === 'SENIOR' ? 'selected' : ''}>Sênior</option>
+                                        <option value="PIONEIRO" ${data.rank === 'PIONEIRO' ? 'selected' : ''}>Pioneiro</option>
+                                        <option value="CHEFE" ${data.rank === 'CHEFE' ? 'selected' : ''}>Chefe</option>
+                                    </select>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Totens
+                                    <div>
+                                        <span class="badge bg-warning rounded-pill me-2">${data.totems.toLocaleString('pt-BR')}</span>
+                                        <button class="btn btn-xs btn-success btn-totem-action" data-action="give-totems" data-player-uuid="${data.uuid}" data-player-name="${data.name}">+</button>
+                                        <button class="btn btn-xs btn-danger btn-totem-action" data-action="take-totems" data-player-uuid="${data.uuid}" data-player-name="${data.name}">-</button>
+                                    </div>
+                                </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">Horas de Jogo <span class="badge bg-info rounded-pill">${data.playtimeHours}</span></li>
                             </ul>
                             <h5 class="mt-4">Estatísticas CTF</h5>
@@ -383,11 +751,313 @@
                     </div>`;
             }
 
+            async function handleViewInventory(playerUuid) {
+                inventoryPane.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div><p>Carregando inventário...</p></div>`;
+                try {
+                    const response = await fetch(`/api/v1/admin/player-inventory?uuid=${playerUuid}`, { headers: getAuthHeaders() });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Erro na API: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    renderInventory(data);
+                } catch (error) {
+                    inventoryPane.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+                }
+            }
+
+            function renderInventory(data) {
+                let armorHTML = '<div class="inventory-grid armor-inventory">';
+                [39, 38, 37, 36].forEach(slotId => armorHTML += `<div class="inventory-slot" data-slot-id="${slotId}"></div>`);
+                armorHTML += '</div>';
+
+                let mainInvHTML = '<div class="inventory-grid main-inventory">';
+                for (let i = 9; i < 36; i++) mainInvHTML += `<div class="inventory-slot" data-slot-id="${i}"></div>`;
+                mainInvHTML += '</div>';
+
+                let hotbarHTML = '<div class="inventory-grid main-inventory mt-1">';
+                for (let i = 0; i < 9; i++) hotbarHTML += `<div class="inventory-slot" data-slot-id="${i}"></div>`;
+                hotbarHTML += '</div>';
+
+                let enderChestHTML = '<h5>Ender Chest</h5><div class="inventory-grid ender-chest">';
+                for (let i = 0; i < 27; i++) enderChestHTML += `<div class="inventory-slot ender-chest-slot" data-slot-id="${i}"></div>`;
+                enderChestHTML += '</div>';
+
+                inventoryPane.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-10">
+                            <h5>Inventário Principal</h5>
+                            ${mainInvHTML}${hotbarHTML}
+                        </div>
+                        <div class="col-md-2">
+                            <h5>Equipado</h5>
+                            ${armorHTML}
+                        </div>
+                    </div>
+                    <hr>${enderChestHTML}`;
+
+                const itemMap = new Map();
+                data.inventory.forEach(item => itemMap.set(item.slot.toString(), item));
+                data.enderChest.forEach(item => itemMap.set(`ender-${item.slot}`, item));
+
+                inventoryPane.querySelectorAll('.inventory-slot').forEach(slotEl => {
+                    const slotId = slotEl.classList.contains('ender-chest-slot') ? `ender-${slotEl.dataset.slotId}` : slotEl.dataset.slotId;
+                    const item = itemMap.get(slotId);
+                    if (item) {
+                        let title = (item.displayName ? item.displayName.replace(/§[0-9a-fk-or]/g, '') : item.material.replace(/_/g, ' '));
+                        if (item.lore) title += `\n${item.lore.map(l => l.replace(/§[0-9a-fk-or]/g, '')).join('\n')}`;
+                        if (item.enchantments) title += `\n\nEncantamentos:\n${Object.entries(item.enchantments).map(([e, l]) => `${e.replace('minecraft:', '')}: ${l}`).join('\n')}`;
+                        slotEl.innerHTML = `<div class="inventory-item" style="background-image: url('https://mc-heads.net/item/${item.material}')" title="${title}" data-bs-toggle="tooltip" data-bs-placement="top"><span class="item-amount">${item.amount > 1 ? item.amount : ''}</span></div>`;
+                    }
+                });
+
+                const tooltipTriggerList = [].slice.call(inventoryPane.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+            }
+
+            // --- Lógica da Economia ---
+            const totalTotemsEl = document.getElementById('total-totems');
+            const richestPlayersListEl = document.getElementById('richest-players-list');
+            const economyLastUpdatedEl = document.getElementById('economy-last-updated');
+            const refreshEconomyBtn = document.getElementById('refresh-economy-btn');
+
+            async function updateEconomyStats() {
+                if (!totalTotemsEl || !richestPlayersListEl) return;
+
+                totalTotemsEl.textContent = '...';
+                richestPlayersListEl.innerHTML = '<li class="list-group-item text-center p-4"><div class="spinner-border spinner-border-sm"></div> Carregando...</li>';
+                if (economyLastUpdatedEl) economyLastUpdatedEl.textContent = '';
+
+                try {
+                    const response = await fetch('/api/v1/admin/economy-stats', { headers: getAuthHeaders() });
+                    if (!response.ok) {
+                        if (response.status === 401) logout();
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Erro na API: ${response.status}`);
+                    }
+                    const data = await response.json();
+
+                    totalTotemsEl.textContent = Math.round(data.totalTotems || 0).toLocaleString('pt-BR');
+                    if (economyLastUpdatedEl && data.lastUpdated) {
+                        economyLastUpdatedEl.textContent = `Atualizado em: ${new Date(data.lastUpdated).toLocaleString('pt-BR')}`;
+                    }
+
+                    richestPlayersListEl.innerHTML = '';
+                    if (data.richestPlayers && data.richestPlayers.length > 0) {
+                        data.richestPlayers.forEach(player => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                            li.innerHTML = `
+                                <span><img src="https://cravatar.eu/helmavatar/${player.uuid}/24.png" class="rounded-circle me-2" alt="${player.name}" width="24" height="24"> ${player.name}</span>
+                                <span class="badge bg-warning rounded-pill">${Math.round(player.balance).toLocaleString('pt-BR')} Totens</span>`;
+                            richestPlayersListEl.appendChild(li);
+                        });
+                    } else {
+                        richestPlayersListEl.innerHTML = '<li class="list-group-item text-center p-4 text-muted">Nenhum dado de economia disponível.</li>';
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar estatísticas da economia:", error);
+                    totalTotemsEl.textContent = 'Erro';
+                    richestPlayersListEl.innerHTML = `<li class="list-group-item text-center p-4 text-danger">${error.message}</li>`;
+                }
+            }
+
+            // --- Lógica da Lista de Admins ---
+            const adminListEl = document.getElementById('admin-list');
+
+            async function updateAdminList() {
+                if (!adminListEl) return;
+                try {
+                    const response = await fetch('/api/v1/admin/list-admins', { headers: getAuthHeaders() });
+                    if (!response.ok) {
+                        if (response.status === 401) logout();
+                        throw new Error(`Erro na API: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    adminListEl.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(admin => {
+                            const onlineStatus = admin.isOnline === 'true' ? '<span class="badge bg-success">Online</span>' : '<span class="badge bg-secondary">Offline</span>';
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                            li.innerHTML = `
+                                <span><img src="https://cravatar.eu/helmavatar/${admin.uuid}/24.png" class="rounded-circle me-2" alt="${admin.name}" width="24" height="24"> ${admin.name}</span>
+                                ${onlineStatus}`;
+                            adminListEl.appendChild(li);
+                        });
+                    } else {
+                        adminListEl.innerHTML = '<li class="list-group-item text-center p-4 text-muted">Nenhum administrador encontrado.</li>';
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar lista de administradores:", error);
+                    adminListEl.innerHTML = `<li class="list-group-item text-center p-4 text-danger">${error.message}</li>`;
+                }
+            }
+
+            // Lógica dos comandos rápidos do console
+            const quickCommandsMenu = document.getElementById('quick-commands-menu');
+            if (quickCommandsMenu) {
+                quickCommandsMenu.addEventListener('click', (e) => {
+                    if (e.target.matches('.dropdown-item')) {
+                        e.preventDefault();
+                        consoleInput.value = e.target.dataset.command;
+                        consoleInput.focus();
+                    }
+                });
+            }
+
+            // --- Lógica do Console Remoto ---
+            const consoleForm = document.getElementById('remote-console-form');
+            const consoleInput = document.getElementById('remote-console-input');
+            const consoleOutput = document.getElementById('remote-console-output');
+
+            consoleForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const command = consoleInput.value.trim();
+                if (!command) return;
+
+                // Adiciona o comando enviado ao log do console
+                logToConsole(`&gt; /${command}`);
+                consoleInput.value = '';
+
+                try {
+                    const response = await fetch('/api/v1/admin/execute-command', {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ command })
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        logToConsole(`&lt; <span class="text-success">${data.message}</span>`);
+                    } else {
+                        throw new Error(data.error || 'Falha ao enviar comando.');
+                    }
+                } catch (error) {
+                    logToConsole(`&lt; <span class="text-danger">Erro: ${error.message}</span>`);
+                }
+            });
+
+            function logToConsole(message) {
+                consoleOutput.innerHTML += `\n${message}`;
+                consoleOutput.scrollTop = consoleOutput.scrollHeight; // Rola para o final
+            }
+
+            // --- Lógica do Chat do Jogo ---
+            const gameChatMessages = document.getElementById('game-chat-messages');
+            const gameChatForm = document.getElementById('game-chat-form');
+            const gameChatInput = document.getElementById('game-chat-input');
+            let lastChatMessageTimestamp = 0;
+
+            async function updateGameChat() {
+                if (!gameChatMessages) return;
+                try {
+                    const response = await fetch(`/api/v1/admin/game-chat?since=${lastChatMessageTimestamp}`, { headers: getAuthHeaders() });
+                    if (!response.ok) {
+                        if (response.status === 401) logout();
+                        return;
+                    }
+                    const messages = await response.json();
+                    if (messages.length > 0) {
+                        messages.forEach(msg => {
+                            const messageDiv = document.createElement('div');
+                            messageDiv.className = 'direct-chat-msg';
+                            messageDiv.innerHTML = `
+                                <div class="direct-chat-infos clearfix">
+                                    <span class="direct-chat-name float-start">${msg.name}</span>
+                                    <span class="direct-chat-timestamp float-end">${new Date(msg.timestamp).toLocaleTimeString('pt-BR')}</span>
+                                </div>
+                                <img class="direct-chat-img" src="https://cravatar.eu/helmavatar/${msg.uuid}/40.png" alt="Avatar">
+                                <div class="direct-chat-text">${escapeHtml(msg.message)}</div>
+                            `;
+                            gameChatMessages.appendChild(messageDiv);
+                        });
+                        lastChatMessageTimestamp = messages[messages.length - 1].timestamp;
+                        gameChatMessages.scrollTop = gameChatMessages.scrollHeight;
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar chat do jogo:", error);
+                }
+            }
+
+            if (gameChatForm) {
+                gameChatForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const message = gameChatInput.value.trim();
+                    if (!message) return;
+
+                    const command = `say [Admin Web] ${message}`;
+                    logToConsole(`&gt; /${command}`);
+                    gameChatInput.value = '';
+
+                    try {
+                        const response = await fetch('/api/v1/admin/execute-command', {
+                            method: 'POST',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify({ command })
+                        });
+                        const data = await response.json();
+                        if (!response.ok || !data.success) {
+                            throw new Error(data.error || 'Falha ao enviar mensagem.');
+                        }
+                        // A mensagem aparecerá no chat do jogo e será capturada pelo próximo poll.
+                    } catch (error) {
+                        logToConsole(`&lt; <span class="text-danger">Erro ao enviar mensagem: ${error.message}</span>`);
+                    }
+                });
+            }
+
+            function escapeHtml(unsafe) { return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+
+            // --- Lógica do Anúncio Global ---
+            const broadcastForm = document.getElementById('broadcast-form');
+            const broadcastInput = document.getElementById('broadcast-input');
+
+            if (broadcastForm) {
+                broadcastForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const message = broadcastInput.value.trim();
+                    if (!message) return;
+
+                    const submitButton = broadcastForm.querySelector('button[type="submit"]');
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
+
+                    try {
+                        const response = await fetch('/api/v1/admin/broadcast-message', {
+                            method: 'POST',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify({ message })
+                        });
+                        const data = await response.json();
+                        if (response.ok && data.success) {
+                            showNotification(data.message, 'success');
+                            broadcastInput.value = ''; // Limpa o campo em caso de sucesso
+                        } else {
+                            throw new Error(data.error || 'Falha ao enviar anúncio.');
+                        }
+                    } catch (error) {
+                        showNotification(`Erro: ${error.message}`, 'danger');
+                    } finally {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Enviar Anúncio';
+                    }
+                });
+            }
+
             // --- Inicialização ---
             if (refreshButton) refreshButton.addEventListener('click', fetchAndDisplayOnlinePlayers);
+            if (refreshEconomyBtn) {
+                refreshEconomyBtn.addEventListener('click', () => {
+                    logToConsole('&gt; /scout admin update-economy-cache (comando simulado)');
+                    showNotification('A atualização da economia é automática a cada hora. Uma atualização manual forçada ainda não foi implementada.', 'info');
+                });
+            }
             
             updateMetrics();
             fetchAndDisplayOnlinePlayers();
+            updateEconomyStats();
+            updateAdminList();
+            setInterval(updateGameChat, 3000); // Atualiza o chat a cada 3s
             setInterval(updateMetrics, 5000); // Atualiza métricas a cada 5s
             setInterval(fetchAndDisplayOnlinePlayers, 30000); // Atualiza jogadores a cada 30s
         });

@@ -59,7 +59,14 @@ Revisão das principais funcionalidades implementadas e decisões tomadas:
     *   O site agora é instalável em dispositivos móveis, funciona offline e carrega mais rápido.
     *   Corrigimos o gráfico de atividade (Chart.js) e melhoramos a estrutura do `index.html` com instruções de como jogar.
 5.  **Portal do Jogador e Tokens de Acesso:** Implementamos o comando `/familia token` para gerar um link único e seguro. Criamos o endpoint `/api/v1/player` para servir dados individuais e desenvolvemos a página `pdash.html` que consome esses dados. Adicionamos um cache para otimizar a performance.
-6.  **Painel de Administração (Sessão e Segurança):** Implementamos um sistema de login seguro com senha criptografada (hash + salt) e sessões baseadas em JSON Web Tokens (JWT), incluindo um dashboard inicial que lista os jogadores online.
+6.  **Painel de Administração Completo:** Implementamos um sistema de login seguro com senha criptografada (hash + salt) e sessões baseadas em JSON Web Tokens (JWT). O painel (`admin.html`) agora é um "canivete suíço" com as seguintes ferramentas:
+    *   **Dashboard de Métricas:** Gráficos em tempo real de CPU, RAM e TPS.
+    *   **Dashboard de Economia:** Exibição do total de Totens em circulação e dos jogadores mais ricos.
+    *   **Gerenciamento de Jogadores:** Lista de jogadores online com ações (Kick, Ban) e um modal de detalhes completo.
+    *   **Editor de Perfil:** No modal, é possível conceder/revogar insígnias, dar/remover Totens e alterar o ranque do jogador.
+    *   **Ferramentas de Inspeção:** Visualizador de inventário e Ender Chest do jogador.
+    *   **Comunicação:** Chat do jogo em tempo real (com capacidade de resposta) e um sistema para enviar anúncios globais.
+    *   **Console Remoto:** Interface para executar qualquer comando do servidor diretamente pelo painel.
 7.  **Melhorias no CTF:**
     *   Adicionamos lógica para vitória por desistência (W.O.) com recompensa parcial.
     *   Tornamos as recompensas de vitória totalmente configuráveis no `config.yml`.
@@ -70,6 +77,7 @@ Revisão das principais funcionalidades implementadas e decisões tomadas:
     *   Otimizamos a extração de recursos da web (para acontecer apenas na inicialização) e a leitura de dados de jogadores offline pela API.
     *   Adicionamos um cache para ranques de jogadores offline para melhorar a performance do PlaceholderAPI.
     *   Otimizamos a atualização dos caches de ranking para que não rodem se o servidor estiver vazio.
+    *   Corrigimos o bug do "token fantasma" no comando `/familia token`, garantindo o salvamento imediato.
 
 ---
 
@@ -126,10 +134,10 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
 *   ### Painel de Administração (Web)
     *   **Descrição:** Uma plataforma web robusta para gerenciamento do servidor, baseada no template AdminLTE. O portal do jogador (`pdash.html`) e o login do admin já foram implementados.
     *   **Funcionalidades Planejadas (Painel do Admin):**
-        *   **Implementar Sessão de Admin:** Após o login, gerar um token de sessão (JWT) para autenticar as requisições subsequentes.
-        *   **Dashboard de Admin:** Criar uma página principal para o admin com estatísticas gerais do servidor.
-        *   **Gerenciamento de Jogadores:** Criar uma interface para visualizar e editar dados de jogadores (conceder insígnias, ajustar Totens, etc.) via API.
-        *   **Ações de Moderação:** Adicionar botões para executar comandos (kick, ban) remotamente.
+        *   **Dashboard Avançado:**
+            *   Análise de retenção de jogadores (novos vs. retornando).
+        *   **Gerenciamento do Servidor:**
+            *   Editor de `config.yml` pela interface web.
 
 ---
 
@@ -142,5 +150,3 @@ Estas são as tarefas menores e mais imediatas que podemos abordar quando retoma
 *   **Placeholder de Posição no Ranking:** Criar um placeholder que mostre a posição exata do jogador nos rankings (diário, mensal, geral), como `#1`, `#5`, etc., em vez de apenas a pontuação.
 
 *   **Placeholder de Progresso para o Próximo Ranque:** Desenvolver um placeholder que mostre o progresso do jogador para o próximo ranque de forma visual ou textual (ex: `5/6 insígnias`).
-
-*   **Monetização:** Integrar o Google AdSense nos locais marcados no `index.html` para ajudar a custear o projeto.

@@ -22,6 +22,212 @@
       content="bootstrap 5, bootstrap, bootstrap 5 admin dashboard, bootstrap 5 dashboard, bootstrap 5 charts, bootstrap 5 calendar, bootstrap 5 datepicker, bootstrap 5 tables, bootstrap 5 datatable, vanilla js datatable, colorlibhq, colorlibhq dashboard, colorlibhq admin dashboard, accessible admin panel, WCAG compliant"
     />
     <!--end::Primary Meta Tags-->
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="icon" type="image/png" sizes="70x70" href="/android-icon-70x70.png">
+    <!--begin::Accessibility Features-->
+    <!-- Skip links will be dynamically added by accessibility.js -->
+    <meta name="supported-color-schemes" content="light dark" />
+    <link rel="preload" href="./css/adminlte.css" as="style" />
+    <!--end::Accessibility Features-->
+    <!--begin::Fonts-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
+      integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q="
+      crossorigin="anonymous"
+      media="print"
+      onload="this.media='all'"
+    />
+    <!--end::Fonts-->
+    <!--begin::Third Party Plugin(OverlayScrollbars)-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css"
+      crossorigin="anonymous"
+    />
+    <!--end::Third Party Plugin(OverlayScrollbars)-->
+    <!--begin::Third Party Plugin(Bootstrap Icons)-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+      crossorigin="anonymous"
+    />
+    <!--end::Third Party Plugin(Bootstrap Icons)-->
+    <!--begin::Required Plugin(AdminLTE)-->
+    <link rel="stylesheet" href="./css/adminlte.css" />
+    <!--end::Required Plugin(AdminLTE)-->
+  </head>
+  <!--end::Head-->
+  <!--begin::Body-->
+  <body class="login-page bg-body-secondary">
+    <div class="login-box">
+      <div class="login-logo">
+        <a href="./index.html"><b>MCTrilhas</b> Admin</a>
+      </div>
+      <!-- /.login-logo -->
+      <div class="card">
+        <div class="card-body login-card-body">
+          <p class="login-box-msg">Faça o login para iniciar sua sessão</p>
+          <form id="login-form">
+            <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="Usuário" id="username" name="username" required />
+              <div class="input-group-text"><span class="bi bi-person-fill"></span></div>
+            </div>
+            <div class="input-group mb-3">
+              <input type="password" class="form-control" placeholder="Senha" id="password" name="password" required />
+              <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
+            </div>
+            <!--begin::Row-->
+            <div class="row">
+              <div class="col-8">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="" id="remember" />
+                  <label class="form-check-label" for="remember"> Lembrar-me </label>
+                </div>
+              </div>
+              <!-- /.col -->
+              <div class="col-4">
+                <div class="d-grid gap-2">
+                  <button type="submit" class="btn btn-primary">Entrar</button>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!--end::Row-->
+          </form>
+          <div class="social-auth-links text-center mb-3 d-grid gap-2">
+            <!-- Social auth links can be removed or kept if needed -->
+          </div>
+          <!-- /.social-auth-links -->
+          <p class="mb-1"><a href="#">Esqueci minha senha</a></p>
+          <p class="mb-0"></p>
+        </div>
+        <!-- /.login-card-body -->
+      </div>
+    </div>
+    <!-- /.login-box -->
+    <!--begin::Third Party Plugin(OverlayScrollbars)-->
+    <script
+      src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
+    <script src="./js/adminlte.js"></script>
+    <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
+    <script>
+      const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+      const Default = {
+        scrollbarTheme: 'os-theme-light',
+        scrollbarAutoHide: 'leave',
+        scrollbarClickScroll: true,
+      };
+      document.addEventListener('DOMContentLoaded', function () {
+        const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+        if (sidebarWrapper && OverlayScrollbarsGlobal?.OverlayScrollbars !== undefined) {
+          OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+            scrollbars: {
+              theme: Default.scrollbarTheme,
+              autoHide: Default.scrollbarAutoHide,
+              clickScroll: Default.scrollbarClickScroll,
+            },
+          });
+        }
+      });
+    </script>
+    <!--end::OverlayScrollbars Configure-->
+
+    <!--begin::Login Script-->
+    <script src="./js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Aplica o tema salvo (claro/escuro) ao carregar a página
+            const getStoredTheme = () => localStorage.getItem('theme');
+            const getPreferredTheme = () => {
+                const storedTheme = getStoredTheme();
+                if (storedTheme) return storedTheme;
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            };
+            document.documentElement.setAttribute('data-bs-theme', getPreferredTheme());
+
+            // Se o usuário já tiver um token, redireciona para o painel
+            if (getToken()) {
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            const loginForm = document.getElementById('login-form');
+            const errorDiv = document.getElementById('error-message');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const submitButton = loginForm.querySelector('button[type="submit"]');
+
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (errorDiv) errorDiv.classList.add('d-none');
+
+                    // Desabilita o botão e mostra um spinner
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Entrando...';
+
+                    const username = usernameInput.value;
+                    const password = passwordInput.value;
+
+                    try {
+                        const response = await fetch('/api/v1/admin/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username, password }),
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success && data.token) {
+                            saveToken(data.token);
+                            window.location.href = 'admin.html';
+                        } else {
+                            errorDiv.textContent = data.error || 'Ocorreu um erro desconhecido.';
+                            errorDiv.classList.remove('d-none');
+                        }
+                    } catch (err) {
+                        console.error('Erro na requisição de login:', err);
+                        errorDiv.textContent = 'Não foi possível conectar ao servidor.';
+                        errorDiv.classList.remove('d-none');
+                    } finally {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Entrar';
+                    }
+                });
+            }
+        });
+    </script>
+    <!--end::Login Script-->
+    <!--end::Script-->
+  </body>
+  <!--end::Body-->
+</html>
+      name="keywords"
+      content="bootstrap 5, bootstrap, bootstrap 5 admin dashboard, bootstrap 5 dashboard, bootstrap 5 charts, bootstrap 5 calendar, bootstrap 5 datepicker, bootstrap 5 tables, bootstrap 5 datatable, vanilla js datatable, colorlibhq, colorlibhq dashboard, colorlibhq admin dashboard, accessible admin panel, WCAG compliant"
+    />
+    <!--end::Primary Meta Tags-->
     <!--begin::Accessibility Features-->
     <!-- Skip links will be dynamically added by accessibility.js -->
     <meta name="supported-color-schemes" content="light dark" />

@@ -1,64 +1,79 @@
 package com.magnocat.mctrilhas.web;
 
-import java.lang.management.ManagementFactory;
+// Java Standard Library
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.nio.file.Path;
+import java.security.CodeSource;
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.security.CodeSource;
-import java.security.SecureRandom;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Base64;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.sun.net.httpserver.HttpExchange;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import java.util.stream.Collectors;
 
+// Bukkit / Spigot API
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
+// External Libraries
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.management.OperatingSystemMXBean;
+import com.sun.net.httpserver.HttpServer;
+import net.kyori.adventure.text.Component;
+
+// Project-specific Classes
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerCTFStats;
 import com.magnocat.mctrilhas.data.PlayerData;
 import com.magnocat.mctrilhas.utils.SecurityUtils;
-import com.sun.management.OperatingSystemMXBean;
-import com.sun.net.httpserver.HttpServer;
 
 public class HttpApiManager {
 
+    // --- Core Components ---
     private final MCTrilhasPlugin plugin;
     private HttpServer server;
     private final Gson gson = new GsonBuilder().create();
     private Algorithm jwtAlgorithm;
 
-    private final List<Map<String, Object>> activityHistory = new CopyOnWriteArrayList<>();
+    // --- Constants ---
     private static final int MAX_HISTORY_POINTS = 144; // 144 pontos * 10 min = 24 horas
+    private static final int MAX_CHAT_HISTORY = 100;
 
-    // Caches para os rankings
+    // --- Caches ---
+    private final List<Map<String, Object>> activityHistory = new CopyOnWriteArrayList<>();
     private final Map<String, Integer> dailyLeaderboardCache = new ConcurrentHashMap<>();
     private final Map<String, Integer> monthlyLeaderboardCache = new ConcurrentHashMap<>();
     private final Map<String, Integer> allTimeLeaderboardCache = new ConcurrentHashMap<>();
@@ -66,6 +81,8 @@ public class HttpApiManager {
     private final Map<String, Integer> ctfKillsLeaderboardCache = new ConcurrentHashMap<>();
     private final Map<String, Integer> ctfCapturesLeaderboardCache = new ConcurrentHashMap<>();
     private final Map<String, CachedPlayerResponse> playerResponseCache = new ConcurrentHashMap<>();
+    private final Map<String, Object> economyStatsCache = new ConcurrentHashMap<>();
+    private final List<Map<String, Object>> chatHistory = new CopyOnWriteArrayList<>();
 
     public HttpApiManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
@@ -85,34 +102,36 @@ public class HttpApiManager {
 
         scheduleActivitySnapshot();
 
+        scheduleEconomyStatsUpdate();
+
         int port = plugin.getConfig().getInt("web-api.port", 22222);
         try {
             server = HttpServer.create(new InetSocketAddress(port), 0);
 
-            // Contexto para a API de dados dinâmicos
+            // --- Public Endpoints ---
             server.createContext("/api/v1/data", this::handleApiDataRequest);
-
-            // Contexto para a API de login do admin
-            server.createContext("/api/v1/admin/login", this::handleAdminLoginRequest);
-
-            // Contexto para um endpoint de admin protegido por JWT
-            server.createContext("/api/v1/admin/status", this::handleAdminStatusRequest);
-
-            // Contexto para a lista de jogadores online (protegido por JWT)
-            server.createContext("/api/v1/admin/players/online", this::handleAdminOnlinePlayersRequest);
-
-            // Contexto para as métricas do servidor (CPU, RAM, TPS)
-            server.createContext("/api/v1/admin/server-metrics", this::handleAdminServerMetricsRequest);
-
-            // Contexto para executar ações em jogadores (kick, ban, etc.)
-            server.createContext("/api/v1/admin/player-action", this::handleAdminPlayerActionRequest);
-
-            // Contexto para buscar detalhes de um jogador específico (protegido por JWT)
-            server.createContext("/api/v1/admin/player-details", this::handleAdminPlayerDetailsRequest);
-
-            // Contexto para a API de dados de um jogador específico via token
             server.createContext("/api/v1/player", this::handlePlayerDataRequest);
 
+            // --- Admin Authentication ---
+            server.createContext("/api/v1/admin/login", this::handleAdminLoginRequest);
+
+            // --- Admin Endpoints (Protected by JWT) ---
+            server.createContext("/api/v1/admin/status", this::handleAdminStatusRequest);
+            server.createContext("/api/v1/admin/players/online", this::handleAdminOnlinePlayersRequest);
+            server.createContext("/api/v1/admin/players/offline", this::handleAdminOfflinePlayersRequest);
+            server.createContext("/api/v1/admin/server-metrics", this::handleAdminServerMetricsRequest);
+            server.createContext("/api/v1/admin/player-action", this::handleAdminPlayerActionRequest);
+            server.createContext("/api/v1/admin/player-details", this::handleAdminPlayerDetailsRequest);
+            server.createContext("/api/v1/admin/badge-action", this::handleAdminBadgeActionRequest);
+            server.createContext("/api/v1/admin/rank-action", this::handleAdminRankActionRequest);
+            server.createContext("/api/v1/admin/player-inventory", this::handleAdminPlayerInventoryRequest);
+            server.createContext("/api/v1/admin/broadcast-message", this::handleAdminBroadcastRequest);
+            server.createContext("/api/v1/admin/economy-stats", this::handleAdminEconomyStatsRequest);
+            server.createContext("/api/v1/admin/game-chat", this::handleAdminGameChatRequest);
+            server.createContext("/api/v1/admin/execute-command", this::handleAdminExecuteCommandRequest);
+            server.createContext("/api/v1/admin/list-admins", this::handleAdminListAdminsRequest);
+
+            // --- Static File Server ---
             // Define o diretório raiz de onde os arquivos web serão servidos.
             Path webRoot = new File(plugin.getDataFolder(), "web").toPath();
 
@@ -415,6 +434,52 @@ public class HttpApiManager {
         sendJsonResponse(exchange, 200, gson.toJson(playersList));
     }
 
+    private void handleAdminOfflinePlayersRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        if (verifyAdminToken(exchange) == null) { return; }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    File playerDataFolder = new File(plugin.getDataFolder(), "playerdata");
+                    File[] playerFiles = playerDataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+                    List<Map<String, String>> offlinePlayers = new ArrayList<>();
+
+                    if (playerFiles != null) {
+                        for (File playerFile : playerFiles) {
+                            try {
+                                UUID uuid = UUID.fromString(playerFile.getName().replace(".yml", ""));
+                                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                if (offlinePlayer.getName() != null && !offlinePlayer.isOnline()) {
+                                    Map<String, String> playerData = new HashMap<>();
+                                    playerData.put("name", offlinePlayer.getName());
+                                    playerData.put("uuid", uuid.toString());
+                                    playerData.put("lastPlayed", String.valueOf(offlinePlayer.getLastPlayed()));
+                                    offlinePlayers.add(playerData);
+                                }
+                            } catch (IllegalArgumentException ignored) {}
+                        }
+                    }
+                    // Ordena por data de último login, do mais recente para o mais antigo
+                    offlinePlayers.sort((p1, p2) -> Long.compare(Long.parseLong(p2.get("lastPlayed")), Long.parseLong(p1.get("lastPlayed"))));
+                    sendJsonResponse(exchange, 200, gson.toJson(offlinePlayers));
+                } catch (IOException e) {
+                    plugin.logSevere("Erro de IO ao listar jogadores offline via API: " + e.getMessage());
+                }
+            }
+        }.runTaskAsynchronously(plugin);
+    }
+
     private void handleAdminStatusRequest(HttpExchange exchange) throws IOException {
         // Configura CORS para permitir cabeçalhos de autorização
         exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
@@ -516,21 +581,48 @@ public class HttpApiManager {
             }
 
             // Executa o comando na thread principal do servidor para garantir a segurança.
+            // A busca do jogador (potencialmente bloqueante) é feita de forma assíncrona primeiro.
             new BukkitRunnable() {
                 @Override
-                public void run() {
-                    String commandToRun = "";
-                    if ("kick".equalsIgnoreCase(action)) {
-                        commandToRun = "kick " + targetName + " " + reason;
-                    } else if ("ban".equalsIgnoreCase(action)) {
-                        commandToRun = "ban " + targetName + " " + reason;
-                    }
-                    if (!commandToRun.isEmpty()) {
-                        plugin.logInfo("Executando comando via API: " + commandToRun);
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandToRun);
-                    }
+                public void run() { // Roda de forma assíncrona
+                    // Esta chamada pode bloquear, por isso está em uma thread assíncrona.
+                    final OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(targetName);
+
+                    // Após obter o jogador, volta para a thread principal para executar a ação.
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() { // Roda na thread principal
+                            if (!targetPlayer.hasPlayedBefore()) {
+                                plugin.logWarn("API action '" + action + "' para '" + targetName + "' falhou: jogador não encontrado.");
+                                return;
+                            }
+
+                            String commandToRun = "";
+                            if ("kick".equalsIgnoreCase(action)) {
+                                commandToRun = "kick " + targetName + " " + reason;
+                            } else if ("ban".equalsIgnoreCase(action)) {
+                                commandToRun = "ban " + targetName + " " + reason;
+                            } else if ("give-totems".equalsIgnoreCase(action) || "take-totems".equalsIgnoreCase(action)) {
+                                if (plugin.getEconomy() != null) {
+                                    try {
+                                        double amount = Double.parseDouble(actionData.getOrDefault("amount", "0"));
+                                        if ("give-totems".equalsIgnoreCase(action)) {
+                                            plugin.getEconomy().depositPlayer(targetPlayer, amount);
+                                        } else {
+                                            plugin.getEconomy().withdrawPlayer(targetPlayer, amount);
+                                        }
+                                    } catch (NumberFormatException ignored) {}
+                                }
+                            }
+
+                            if (!commandToRun.isEmpty()) {
+                                plugin.logInfo("Executando comando via API: " + commandToRun);
+                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandToRun);
+                            }
+                        }
+                    }.runTask(plugin);
                 }
-            }.runTask(plugin);
+            }.runTaskAsynchronously(plugin);
 
             sendJsonResponse(exchange, 200, "{\"success\":true, \"message\":\"Ação '" + action + "' para " + targetName + " enviada para execução.\"}");
         } catch (Exception e) {
@@ -568,16 +660,430 @@ public class HttpApiManager {
             return;
         }
 
+        // Executa a busca de dados de forma assíncrona para não bloquear a thread do servidor web.
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    UUID playerUUID = UUID.fromString(uuidStr);
+                    Map<String, Object> responseData = buildPlayerDetailsMap(playerUUID);
+                    if (responseData == null) {
+                        sendJsonResponse(exchange, 404, "{\"error\":\"Não foi possível encontrar ou carregar dados para o UUID fornecido.\"}");
+                        return;
+                    }
+                    sendJsonResponse(exchange, 200, gson.toJson(responseData));
+                } catch (IllegalArgumentException e) {
+                    try {
+                        sendJsonResponse(exchange, 400, "{\"error\":\"UUID fornecido é inválido.\"}");
+                    } catch (IOException ignored) {}
+                } catch (IOException e) {
+                    plugin.logSevere("Erro de IO ao enviar detalhes do jogador via API: " + e.getMessage());
+                    // Não podemos enviar uma resposta aqui, pois a conexão pode já ter sido fechada.
+                }
+            }
+        }.runTaskAsynchronously(plugin);
+    }
+
+    private void handleAdminBadgeActionRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        if (verifyAdminToken(exchange) == null) { return; }
+
+        if (!"POST".equals(exchange.getRequestMethod())) {
+            sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use POST.\"}");
+            return;
+        }
+
         try {
-            UUID playerUUID = UUID.fromString(uuidStr);
-            Map<String, Object> responseData = buildPlayerDetailsMap(playerUUID);
-            if (responseData == null) {
-                sendJsonResponse(exchange, 404, "{\"error\":\"Não foi possível encontrar ou carregar dados para o UUID fornecido.\"}");
+            String requestBody = new String(exchange.getRequestBody().readAllBytes());
+            @SuppressWarnings("unchecked")
+            Map<String, String> actionData = gson.fromJson(requestBody, Map.class);
+
+            String action = actionData.get("action");
+            String badgeId = actionData.get("badgeId");
+            UUID targetUUID = UUID.fromString(actionData.get("targetUuid"));
+
+            if (action == null || badgeId == null || targetUUID == null) {
+                sendJsonResponse(exchange, 400, "{\"success\":false, \"error\":\"Dados da ação incompletos.\"}");
                 return;
             }
-            sendJsonResponse(exchange, 200, gson.toJson(responseData));
+
+            // Ações de insígnia requerem que o jogador esteja online para receber recompensas/mensagens.
+            Player targetPlayer = Bukkit.getPlayer(targetUUID);
+            if (targetPlayer == null || !targetPlayer.isOnline()) {
+                sendJsonResponse(exchange, 400, "{\"success\":false, \"error\":\"O jogador alvo precisa estar online para esta ação.\"}");
+                return;
+            }
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    try {
+                        boolean success = false;
+                        if ("grant".equalsIgnoreCase(action)) {
+                            success = plugin.getPlayerDataManager().grantBadgeAndReward(targetPlayer, badgeId);
+                        } else if ("revoke".equalsIgnoreCase(action)) {
+                            plugin.getPlayerDataManager().removeBadgeAndResetProgress(targetPlayer, badgeId);
+                            success = true; // Assumimos sucesso, pois o método é void.
+                        }
+
+                        if (success) {
+                            String actionText = "grant".equalsIgnoreCase(action) ? "concedida" : "revogada";
+                            sendJsonResponse(exchange, 200, "{\"success\":true, \"message\":\"Insignia '" + badgeId + "' " + actionText + " para " + targetPlayer.getName() + ".\"}");
+                        } else {
+                            sendJsonResponse(exchange, 400, "{\"success\":false, \"error\":\"Ação falhou. O jogador já pode ter a insígnia ou a insígnia é inválida.\"}");
+                        }
+                    } catch (IOException e) {
+                        plugin.logSevere("Erro de IO ao enviar resposta da ação de insígnia: " + e.getMessage());
+                    }
+                }
+            }.runTask(plugin);
+
+        } catch (Exception e) {
+            plugin.logSevere("Erro ao processar ação de insígnia via API: " + e.getMessage());
+            sendJsonResponse(exchange, 500, "{\"success\":false, \"error\":\"Erro interno do servidor.\"}");
+        }
+    }
+
+    private void handleAdminRankActionRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        if (verifyAdminToken(exchange) == null) { return; }
+
+        if (!"POST".equals(exchange.getRequestMethod())) {
+            sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use POST.\"}");
+            return;
+        }
+
+        try {
+            String requestBody = new String(exchange.getRequestBody().readAllBytes());
+            @SuppressWarnings("unchecked")
+            Map<String, String> actionData = gson.fromJson(requestBody, Map.class);
+
+            final UUID targetUUID = UUID.fromString(actionData.get("targetUuid"));
+            final String rankStr = actionData.get("rank");
+
+            final Player targetPlayer = Bukkit.getPlayer(targetUUID);
+            if (targetPlayer == null || !targetPlayer.isOnline()) {
+                sendJsonResponse(exchange, 400, "{\"success\":false, \"error\":\"O jogador alvo precisa estar online para esta ação.\"}");
+                return;
+            }
+
+            final com.magnocat.mctrilhas.ranks.Rank newRank = com.magnocat.mctrilhas.ranks.Rank.valueOf(rankStr.toUpperCase());
+
+            // Executa a alteração de ranque na thread principal para garantir a segurança.
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    try {
+                        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(targetUUID);
+                        if (playerData != null) {
+                            playerData.setRank(newRank);
+                            targetPlayer.sendMessage("§aSeu ranque foi alterado para §e" + newRank.getDisplayName() + "§a por um administrador.");
+                            sendJsonResponse(exchange, 200, "{\"success\":true, \"message\":\"Ranque de " + targetPlayer.getName() + " alterado para " + newRank.name() + ".\"}");
+                        } else {
+                            sendJsonResponse(exchange, 500, "{\"success\":false, \"error\":\"Não foi possível encontrar os dados do jogador.\"}");
+                        }
+                    } catch (IOException e) {
+                        plugin.logSevere("Erro de IO ao enviar resposta da alteração de ranque: " + e.getMessage());
+                    }
+                }
+            }.runTask(plugin);
+
+        } catch (Exception e) {
+            plugin.logSevere("Erro ao processar alteração de ranque via API: " + e.getMessage());
+            sendJsonResponse(exchange, 500, "{\"success\":false, \"error\":\"Erro interno do servidor: " + e.getMessage() + "\"}");
+        }
+    }
+
+    private void handleAdminPlayerInventoryRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        if (verifyAdminToken(exchange) == null) { return; }
+
+        if (!"GET".equals(exchange.getRequestMethod())) {
+            sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use GET.\"}");
+            return;
+        }
+
+        Map<String, String> params = queryToMap(exchange.getRequestURI().getQuery());
+        String uuidStr = params.get("uuid");
+
+        try {
+            final UUID playerUUID = UUID.fromString(uuidStr);
+
+            // Executa a leitura do inventário na thread principal para garantir a segurança.
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    try {
+                        Player player = Bukkit.getPlayer(playerUUID);
+
+                        if (player == null || !player.isOnline()) {
+                            sendJsonResponse(exchange, 404, "{\"error\":\"O jogador precisa estar online para visualizar o inventário.\"}");
+                            return;
+                        }
+
+                        Map<String, List<Map<String, Object>>> inventories = new HashMap<>();
+                        inventories.put("inventory", serializeInventory(player.getInventory().getContents()));
+                        inventories.put("enderChest", serializeInventory(player.getEnderChest().getContents()));
+
+                        sendJsonResponse(exchange, 200, gson.toJson(inventories));
+                    } catch (IOException e) {
+                        plugin.logSevere("Erro de IO ao enviar inventário do jogador via API: " + e.getMessage());
+                    }
+                }
+            }.runTask(plugin);
         } catch (IllegalArgumentException e) {
             sendJsonResponse(exchange, 400, "{\"error\":\"UUID fornecido é inválido.\"}");
+        }
+    }
+
+    private List<Map<String, Object>> serializeInventory(ItemStack[] contents) {
+        List<Map<String, Object>> serializedItems = new ArrayList<>();
+        for (int i = 0; i < contents.length; i++) {
+            ItemStack item = contents[i];
+            if (item == null || item.getType() == Material.AIR) continue;
+
+            Map<String, Object> itemData = new HashMap<>();
+            itemData.put("slot", i);
+            itemData.put("material", item.getType().name());
+            itemData.put("amount", item.getAmount());
+
+            if (item.hasItemMeta()) {
+                ItemMeta meta = item.getItemMeta();
+                if (meta.hasDisplayName()) itemData.put("displayName", meta.getDisplayName());
+                if (meta.hasLore()) itemData.put("lore", meta.getLore());
+                if (meta.hasEnchants()) itemData.put("enchantments", meta.getEnchants().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getKey().toString(), Map.Entry::getValue)));
+            }
+            serializedItems.add(itemData);
+        }
+        return serializedItems;
+    }
+
+    private void handleAdminBroadcastRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        if (verifyAdminToken(exchange) == null) { return; }
+
+        if (!"POST".equals(exchange.getRequestMethod())) {
+            sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use POST.\"}");
+            return;
+        }
+
+        try {
+            String requestBody = new String(exchange.getRequestBody().readAllBytes());
+            @SuppressWarnings("unchecked")
+            Map<String, String> broadcastData = gson.fromJson(requestBody, Map.class);
+            String message = broadcastData.get("message");
+
+            if (message == null || message.trim().isEmpty()) {
+                sendJsonResponse(exchange, 400, "{\"success\":false, \"error\":\"A mensagem não pode ser vazia.\"}");
+                return;
+            }
+
+            // Executa na thread principal do servidor
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    String formattedMessage = ChatColor.translateAlternateColorCodes('&', message);
+                    Bukkit.broadcast(Component.text(formattedMessage));
+                }
+            }.runTask(plugin);
+
+            sendJsonResponse(exchange, 200, "{\"success\":true, \"message\":\"Anúncio enviado com sucesso.\"}");
+        } catch (Exception e) {
+            plugin.logSevere("Erro ao processar anúncio via API: " + e.getMessage());
+            sendJsonResponse(exchange, 500, "{\"success\":false, \"error\":\"Erro interno do servidor.\"}");
+        }
+    }
+
+    private void handleAdminEconomyStatsRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        if (verifyAdminToken(exchange) == null) { return; }
+
+        if (plugin.getEconomy() == null) {
+            sendJsonResponse(exchange, 503, "{\"error\":\"Vault ou um plugin de economia não está instalado.\"}");
+            return;
+        }
+
+        sendJsonResponse(exchange, 200, gson.toJson(economyStatsCache));
+    }
+
+    private void scheduleEconomyStatsUpdate() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (plugin.getEconomy() == null) {
+                    plugin.logWarn("Vault/Economy não encontrado. Pulando atualização de estatísticas da economia.");
+                    return;
+                }
+                plugin.logInfo("Atualizando cache de estatísticas da economia...");
+
+                List<Map<String, Object>> richestPlayers = new ArrayList<>();
+                double totalEconomy = 0;
+
+                for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+                    if (player.getName() == null) continue;
+                    double balance = plugin.getEconomy().getBalance(player);
+                    if (balance > 0) {
+                        totalEconomy += balance;
+                        richestPlayers.add(Map.of(
+                            "name", player.getName(),
+                            "uuid", player.getUniqueId().toString(),
+                            "balance", balance
+                        ));
+                    }
+                }
+
+                // Ordena e limita a lista
+                richestPlayers.sort((p1, p2) -> Double.compare((double)p2.get("balance"), (double)p1.get("balance")));
+                List<Map<String, Object>> topPlayers = richestPlayers.stream().limit(5).collect(Collectors.toList());
+
+                economyStatsCache.put("totalTotems", totalEconomy);
+                economyStatsCache.put("richestPlayers", topPlayers);
+                economyStatsCache.put("lastUpdated", System.currentTimeMillis());
+                
+                plugin.logInfo("Cache de estatísticas da economia atualizado.");
+            }
+        }.runTaskTimerAsynchronously(plugin, 20L * 60, 20L * 60 * 60); // 1 min de atraso, atualiza a cada hora
+    }
+
+    private void handleAdminGameChatRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        if (verifyAdminToken(exchange) == null) { return; }
+
+        if (!"GET".equals(exchange.getRequestMethod())) {
+            sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use GET.\"}");
+            return;
+        }
+
+        Map<String, String> params = queryToMap(exchange.getRequestURI().getQuery());
+        long since = 0;
+        if (params.containsKey("since")) {
+            try {
+                since = Long.parseLong(params.get("since"));
+            } catch (NumberFormatException e) {
+                // Ignora o parâmetro 'since' se for inválido
+            }
+        }
+
+        final long finalSince = since;
+        List<Map<String, Object>> newMessages = chatHistory.stream()
+                .filter(msg -> (long) msg.get("timestamp") > finalSince)
+                .collect(Collectors.toList());
+
+        sendJsonResponse(exchange, 200, gson.toJson(newMessages));
+    }
+
+    public void addChatMessage(Player player, String message) {
+        if (chatHistory.size() >= MAX_CHAT_HISTORY) {
+            chatHistory.remove(0);
+        }
+        Map<String, Object> chatMessage = new HashMap<>();
+        chatMessage.put("uuid", player.getUniqueId().toString());
+        chatMessage.put("name", player.getName());
+        // Remove códigos de cor da mensagem para exibição limpa no painel
+        chatMessage.put("message", ChatColor.stripColor(message));
+        chatMessage.put("timestamp", System.currentTimeMillis());
+        chatHistory.add(chatMessage);
+    }
+
+    private void handleAdminExecuteCommandRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        // Verifica se o token de admin é válido
+        if (verifyAdminToken(exchange) == null) {
+            return; // O erro já foi enviado
+        }
+
+        if (!"POST".equals(exchange.getRequestMethod())) {
+            sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use POST.\"}");
+            return;
+        }
+
+        try {
+            String requestBody = new String(exchange.getRequestBody().readAllBytes());
+            @SuppressWarnings("unchecked")
+            Map<String, String> commandData = gson.fromJson(requestBody, Map.class);
+            String commandToRun = commandData.get("command");
+
+            if (commandToRun == null || commandToRun.trim().isEmpty()) {
+                sendJsonResponse(exchange, 400, "{\"success\":false, \"error\":\"Comando não pode ser vazio.\"}");
+                return;
+            }
+
+            // Executa o comando na thread principal do servidor
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    plugin.logInfo("Executando comando via Console Remoto da API: /" + commandToRun);
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandToRun);
+                }
+            }.runTask(plugin);
+
+            sendJsonResponse(exchange, 200, "{\"success\":true, \"message\":\"Comando '/" + commandToRun + "' enviado para execução.\"}");
+        } catch (Exception e) {
+            plugin.logSevere("Erro ao processar comando via API: " + e.getMessage());
+            sendJsonResponse(exchange, 500, "{\"success\":false, \"error\":\"Erro interno do servidor.\"}");
         }
     }
 
@@ -622,33 +1128,79 @@ public class HttpApiManager {
             return;
         }
 
-        // --- Lógica de Cache ---
-        long cacheDuration = plugin.getConfig().getLong("web-api.player-data-cache-seconds", 60) * 1000;
-        CachedPlayerResponse cachedResponse = playerResponseCache.get(token);
+        final String finalToken = token;
+        // Executa a busca de dados de forma assíncrona para não bloquear a thread do servidor web.
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    // --- Lógica de Cache ---
+                    long cacheDuration = plugin.getConfig().getLong("web-api.player-data-cache-seconds", 60) * 1000;
+                    CachedPlayerResponse cachedResponse = playerResponseCache.get(finalToken);
 
-        if (cachedResponse != null && (System.currentTimeMillis() - cachedResponse.timestamp < cacheDuration)) {
-            // Cache válido, envia a resposta armazenada
-            sendJsonResponse(exchange, 200, cachedResponse.jsonResponse);
+                    if (cachedResponse != null && (System.currentTimeMillis() - cachedResponse.timestamp < cacheDuration)) {
+                        // Cache válido, envia a resposta armazenada
+                        sendJsonResponse(exchange, 200, cachedResponse.jsonResponse);
+                        return;
+                    }
+
+                    UUID playerUUID = plugin.getPlayerDataManager().getPlayerUUIDByToken(finalToken);
+                    if (playerUUID == null) {
+                        sendJsonResponse(exchange, 404, "{\"error\":\"Token inválido ou jogador não encontrado.\"}");
+                        return;
+                    }
+
+                    Map<String, Object> responseData = buildPlayerDetailsMap(playerUUID);
+                    if (responseData == null) {
+                        sendJsonResponse(exchange, 500, "{\"error\":\"Não foi possível carregar os dados do jogador.\"}");
+                        return;
+                    }
+
+                    String jsonResponse = gson.toJson(responseData);
+                    // Armazena a nova resposta no cache
+                    playerResponseCache.put(finalToken, new CachedPlayerResponse(jsonResponse));
+
+                    sendJsonResponse(exchange, 200, jsonResponse);
+                } catch (IOException e) {
+                    plugin.logSevere("Erro de IO ao enviar dados do jogador via API: " + e.getMessage());
+                }
+            }
+        }.runTaskAsynchronously(plugin);
+    }
+
+    private void handleAdminListAdminsRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
             return;
         }
 
-        UUID playerUUID = plugin.getPlayerDataManager().getPlayerUUIDByToken(token);
-        if (playerUUID == null) {
-            sendJsonResponse(exchange, 404, "{\"error\":\"Token inválido ou jogador não encontrado.\"}");
-            return;
-        }
+        if (verifyAdminToken(exchange) == null) { return; }
 
-        Map<String, Object> responseData = buildPlayerDetailsMap(playerUUID);
-        if (responseData == null) {
-            sendJsonResponse(exchange, 500, "{\"error\":\"Não foi possível carregar os dados do jogador.\"}");
-            return;
-        }
-
-        String jsonResponse = gson.toJson(responseData);
-        // Armazena a nova resposta no cache
-        playerResponseCache.put(token, new CachedPlayerResponse(jsonResponse));
-
-        sendJsonResponse(exchange, 200, jsonResponse);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    List<Map<String, String>> admins = new ArrayList<>();
+                    for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+                        if (player.isOp() || (player.getPlayer() != null && player.getPlayer().hasPermission("mctrilhas.admin"))) {
+                            Map<String, String> adminData = new HashMap<>();
+                            adminData.put("name", player.getName());
+                            adminData.put("uuid", player.getUniqueId().toString());
+                            adminData.put("isOnline", String.valueOf(player.isOnline()));
+                            admins.add(adminData);
+                        }
+                    }
+                    sendJsonResponse(exchange, 200, gson.toJson(admins));
+                } catch (IOException e) {
+                    plugin.logSevere("Erro de IO ao listar administradores via API: " + e.getMessage());
+                }
+            }
+        }.runTaskAsynchronously(plugin);
     }
 
     private Map<String, Object> buildPlayerDetailsMap(UUID playerUUID) {
@@ -684,9 +1236,8 @@ public class HttpApiManager {
         responseData.put("badgeProgress", badgeProgress);
 
         // Adiciona as insígnias conquistadas
-        List<String> earnedBadges = playerData.getEarnedBadges().stream()
-                .map(Enum::name)
-                .collect(Collectors.toList());
+        // A lista já vem como List<String>, a conversão anterior estava incorreta.
+        List<String> earnedBadges = playerData.getEarnedBadges();
         responseData.put("earnedBadges", earnedBadges);
 
         // Adiciona os requisitos de progresso para cada insígnia
