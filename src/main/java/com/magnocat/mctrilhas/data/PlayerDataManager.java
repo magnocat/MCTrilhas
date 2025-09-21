@@ -1,18 +1,18 @@
 package com.magnocat.mctrilhas.data;
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.badges.BadgeType;
-import com.magnocat.mctrilhas.utils.ItemFactory;
-
-@SuppressWarnings("deprecation")
-public class PlayerDataManager {
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,9 +28,11 @@ import com.magnocat.mctrilhas.badges.BadgeType;
 import com.magnocat.mctrilhas.ranks.Rank;
 import com.magnocat.mctrilhas.utils.ItemFactory;
 
+@SuppressWarnings("deprecation")
+public class PlayerDataManager {
     private final MCTrilhasPlugin plugin;
     private final File playerDataFolder;
-    private final Map<UUID, PlayerData> playerDataCache = new HashMap<>();
+    private final Map<UUID, PlayerData> playerDataCache = new ConcurrentHashMap<>();
     private final Map<String, UUID> tokenToUuidCache = new ConcurrentHashMap<>();
 
     private final Map<UUID, Rank> offlineRankCache = new ConcurrentHashMap<>();
@@ -97,17 +99,17 @@ import com.magnocat.mctrilhas.utils.ItemFactory;
      */
     public void unloadPlayerData(UUID uuid) {
         // Pega os dados do jogador do cache ANTES de removê-lo.
-        PlayerData data = playerDataCache.get(uuid);
-        if (data != null) {
-            savePlayerData(uuid);
+        PlayerData playerData = playerDataCache.get(uuid);
+        if (playerData != null) {
+            savePlayerData(playerData);
 
             // Adiciona o ranque do jogador ao cache de ranques offline antes de descarregá-lo.
-            offlineRankCache.put(uuid, data.getRank());
+            offlineRankCache.put(uuid, playerData.getRank());
 
             playerDataCache.remove(uuid);
             // Agora, com os dados em mãos, remove o token do cache de acesso rápido.
-            if (data.getWebAccessToken() != null && !data.getWebAccessToken().isEmpty()) {
-                tokenToUuidCache.remove(data.getWebAccessToken());
+            if (playerData.getWebAccessToken() != null && !playerData.getWebAccessToken().isEmpty()) {
+                tokenToUuidCache.remove(playerData.getWebAccessToken());
             }
         }
     }
@@ -199,13 +201,25 @@ import com.magnocat.mctrilhas.utils.ItemFactory;
         return new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedGrandPrize, new HashSet<>(claimedCtfMilestones), webAccessToken);
     }
 
+    /**
+     * Salva os dados de um jogador online do cache para o arquivo.
+     * @param uuid O UUID do jogador.
+     */
     public void savePlayerData(UUID uuid) {
-        PlayerData playerData = playerDataCache.get(uuid);
+        savePlayerData(playerDataCache.get(uuid));
+    }
+
+    /**
+     * Salva um objeto PlayerData para o arquivo correspondente.
+     * Este método pode salvar dados de jogadores online ou offline.
+     * @param playerData O objeto de dados do jogador a ser salvo.
+     */
+    public void savePlayerData(PlayerData playerData) {
         if (playerData == null) {
             return; // Não há nada para salvar
         }
 
-        File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
+        File playerFile = new File(playerDataFolder, playerData.getPlayerUUID().toString() + ".yml");
         FileConfiguration config = new YamlConfiguration();
 
         // Salva o novo mapa de insígnias com timestamps.
@@ -235,7 +249,7 @@ import com.magnocat.mctrilhas.utils.ItemFactory;
         try {
             config.save(playerFile);
         } catch (IOException e) {
-            plugin.logSevere("Não foi possível salvar o arquivo de dados para o jogador " + uuid);
+            plugin.logSevere("Não foi possível salvar o arquivo de dados para o jogador " + playerData.getPlayerUUID());
             e.printStackTrace();
         }
     }
@@ -306,7 +320,7 @@ import com.magnocat.mctrilhas.utils.ItemFactory;
         updateTokenCache(newToken, playerUUID);
 
         // 4. Salva os dados imediatamente para persistir o novo token
-        savePlayerData(playerUUID);
+        savePlayerData(playerData);
 
         return newToken;
     }
@@ -530,7 +544,7 @@ import com.magnocat.mctrilhas.utils.ItemFactory;
     public void removeBadge(Player player, String badgeId) {
         PlayerData data = getPlayerData(player.getUniqueId());
         if (data != null) {
-            data.getEarnedBadges().remove(badgeId.toLowerCase());
+            data.getEarnedBadgesMap().remove(badgeId.toLowerCase());
         }
     }
 

@@ -1255,8 +1255,8 @@ public class HttpApiManager {
         responseData.put("badgeProgress", badgeProgress);
 
         // Adiciona as insígnias conquistadas
-        // A lista já vem como List<String>, a conversão anterior estava incorreta.
-        List<String> earnedBadges = playerData.getEarnedBadges();
+        // Obtém a lista de IDs das insígnias conquistadas a partir do mapa.
+        List<String> earnedBadges = new ArrayList<>(playerData.getEarnedBadgesMap().keySet());
         responseData.put("earnedBadges", earnedBadges);
 
         // Adiciona os requisitos de progresso para cada insígnia
