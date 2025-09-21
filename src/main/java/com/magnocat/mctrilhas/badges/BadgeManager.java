@@ -39,7 +39,7 @@ public class BadgeManager {
      */
     public void loadBadgesFromConfig() {
         badges.clear();
-        FileConfiguration config = plugin.getBadgeConfigManager().getBadgeConfig();
+        FileConfiguration config = plugin.getConfig();
 
         // Garante que a seção 'badges' exista antes de tentar lê-la.
         if (!config.isConfigurationSection("badges")) {

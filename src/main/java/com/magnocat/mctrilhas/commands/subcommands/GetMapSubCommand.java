@@ -61,7 +61,7 @@ public class GetMapSubCommand implements SubCommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("Este comando só pode ser usado por jogadores.");
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages.player-only-command", "&cEste comando só pode ser usado por jogadores.")));
             return;
         }
 
@@ -89,14 +89,14 @@ public class GetMapSubCommand implements SubCommand {
 
         // 3. Verifica se a insígnia realmente oferece um mapa como recompensa.
         String mapRewardPath = "badges." + badge.id() + ".reward-map";
-        if (!plugin.getBadgeConfigManager().getBadgeConfig().isConfigurationSection(mapRewardPath)) {
+        if (!plugin.getConfig().isConfigurationSection(mapRewardPath)) {
             player.sendMessage(ChatColor.RED + "Esta insígnia não possui um mapa-troféu como recompensa.");
             return;
         }
 
         // 4. Verifica se o jogador já tem o mapa no inventário para evitar duplicação.
-        String mapNameTemplate = plugin.getBadgeConfigManager().getBadgeConfig().getString(mapRewardPath + ".name", "");
-        String finalMapName = ChatColor.translateAlternateColorCodes('&', mapName
+        String mapNameTemplate = plugin.getConfig().getString(mapRewardPath + ".name", "");
+        String finalMapName = ChatColor.translateAlternateColorCodes('&', mapNameTemplate
                 .replace("{badgeName}", badge.name())
                 .replace("{player}", player.getName()));
 
@@ -134,7 +134,7 @@ public class GetMapSubCommand implements SubCommand {
 
             // Filtra apenas as insígnias que o jogador possui E que têm um mapa como recompensa.
             return playerData.getEarnedBadgesMap().keySet().stream()
-                    .filter(id -> plugin.getBadgeConfigManager().getBadgeConfig().isSet("badges." + id + ".reward-map"))
+                    .filter(id -> plugin.getConfig().isSet("badges." + id + ".reward-map"))
                     .filter(id -> id.toLowerCase().startsWith(partialBadge))
                     .sorted()
                     .collect(Collectors.toList());

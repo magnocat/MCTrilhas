@@ -20,21 +20,31 @@
 ### 📜 Índice
 1. [Sobre o Projeto](#-sobre-o-projeto)
 2. [Funcionalidades](#-funcionalidades)
-3. [Como Jogar](#-como-jogar)
-4. [Modos de Jogo](#-modos-de-jogo)
-5. [Lista de Insígnias](#-lista-de-insígnias)
-6. [Comandos e Permissões](#-comandos-e-permissões)
-7. [Roadmap](#-roadmap)
+3. [Painel Web Integrado](#-painel-web-integrado)
+4. [Como Jogar](#-como-jogar)
+5. [Modos de Jogo](#-modos-de-jogo)
+6. [Lista de Insígnias](#-lista-de-insígnias)
+7. [Comandos e Permissões](#-comandos-e-permissões)
+8. [Roadmap](#-roadmap)
 
 ## 📖 Sobre o Projeto
 O **MCTrilhas** é um plugin customizado para servidores Minecraft (Paper/Spigot) com temática escoteira. Seu núcleo é um sistema de progresso que recompensa jogadores com insígnias e itens por realizarem atividades no jogo. O projeto também inclui um site (PWA) integrado para exibir estatísticas e informações do servidor.
-- **Sistema de Insígnias e Ranques**: Progresso baseado em atividades (mineração, construção, exploração) que recompensa os jogadores com insígnias e os promove em um sistema de ranques escoteiros.
+
+## ✨ Funcionalidades
+- **Sistema de Insígnias e Ranques**: Progresso baseado em atividades (mineração, construção, etc.) que recompensa jogadores com insígnias e os promove em um sistema de ranques escoteiros.
 - **Recompensas Configuráveis**: Cada insígnia concede itens customizados, dinheiro (via Vault) e mapas-troféu únicos.
-- **Modos de Jogo Competitivos**: Inclui um sistema completo de **Capture a Bandeira (CTF)** com arenas, times, placar e estatísticas.
-- **Quests, Recompensas Diárias e Portal da Família**: Sistema de Caça ao Tesouro, recompensas diárias e um painel web individual para cada jogador acompanhar seu progresso.
-- **API Web e Site Integrado**: Inicia um servidor web que hospeda uma página de estatísticas (PWA) e fornece dados em tempo real para sites externos, com proteção opcional por chave de API.
+- **Modos de Jogo Competitivos**: Sistema completo de **Capture a Bandeira (CTF)** com arenas, times, placar e estatísticas.
+- **Quests e Recompensas Diárias**: Sistema de Caça ao Tesouro e recompensas diárias para manter os jogadores engajados.
 - **Alta Performance**: O sistema de dados dos jogadores é otimizado com cache e operações assíncronas para evitar sobrecarga no servidor.
 - **Integração com PlaceholderAPI**: Expõe dados como ranque e progresso para outros plugins (TAB, scoreboards, etc.).
+
+## 🌐 Painel Web Integrado
+- **Site Público (PWA)**: Um site instalável e offline-first que exibe rankings, atividade do servidor e informações gerais.
+- **Portal da Família**: Um painel individual e seguro (`/familia token`) para cada jogador (e seus responsáveis) acompanhar seu progresso detalhado.
+- **Painel de Administração**: Uma ferramenta web completa para administradores, com login seguro (JWT), que permite:
+  - Visualizar métricas do servidor (CPU, RAM, TPS).
+  - Gerenciar jogadores (kick, ban, editar ranque, conceder insígnias).
+  - Inspecionar inventários e executar comandos remotamente.
 
 ## 🎮 Como Jogar
 Para entrar no servidor, siga as instruções abaixo:
@@ -80,15 +90,16 @@ Abaixo está a lista completa de comandos disponíveis.
 | `/ranque` | Mostra seu progresso para o próximo ranque. | `mctrilhas.ranque` |
 | `/tesouro` | Inicia ou gerencia sua caça ao tesouro. | `mctrilhas.tesouro` |
 | `/familia token` | Gera seu link pessoal para o Painel da Família. | `mctrilhas.familia.use` |
+| `/hud` | Ativa ou desativa o painel de estatísticas na tela. | `mctrilhas.hud` |
 | `/ctf join` | Entra na fila para uma partida de CTF. | `mctrilhas.ctf.join` |
 | `/ctf leave` | Sai da fila ou da partida de CTF. | `mctrilhas.ctf.leave` |
 
 ### Comandos de Administração
 | Comando | Descrição | Permissão |
 |---|---|---|
-| `/scout admin addbadge <jogador> <insignia>` | Concede uma insígnia e sua recompensa a um jogador. | `mctrilhas.admin` |
-| `/scout admin removebadge <jogador> <insignia>` | Remove uma insígnia de um jogador e zera seu progresso. | `mctrilhas.admin` |
-| `/scout reload` | Recarrega os arquivos de configuração do plugin. | `mctrilhas.admin` |
+| `/scout admin addbadge <jogador> <insignia>` | Concede uma insígnia e sua recompensa a um jogador. | `mctrilhas.scout.admin` |
+| `/scout admin removebadge <jogador> <insignia>` | Remove uma insígnia de um jogador e zera seu progresso. | `mctrilhas.scout.admin` |
+| `/scout admin reload` | Recarrega os arquivos de configuração do plugin. | `mctrilhas.scout.admin` |
 | `/ctf admin create <id>` | Inicia a criação de uma nova arena de CTF. | `mctrilhas.ctf.admin` |
 | `/ctf admin set <tipo>` | Define um local (lobby, spawn, etc.) para a arena. | `mctrilhas.ctf.admin` |
 | `/ctf admin save` | Salva a arena de CTF que está sendo criada. | `mctrilhas.ctf.admin` |

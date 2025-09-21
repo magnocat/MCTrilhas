@@ -1,6 +1,8 @@
 # Arquivos de Build e Saída do Maven
 # A pasta 'target' contém todos os arquivos compilados (.class) e o .jar final.
 target/
+# Arquivo POM gerado pelo maven-shade-plugin, não deve ser versionado.
+dependency-reduced-pom.xml
 
 # Arquivos de Pacotes e Binários
 # Ignora arquivos de pacote se forem colocados acidentalmente fora da pasta 'target'.
@@ -19,9 +21,10 @@ replay_pid*
 
 # Arquivos de Configuração de IDEs
 # Ignora configurações específicas de editores de código para manter o projeto agnóstico.
-.idea/
 *.iml
-.vscode/
+# Ignora a pasta do VSCode, mas permite o arquivo de configurações compartilhadas.
+.vscode/*
+!.vscode/settings.json
 
 # Arquivos Temporários e de Backup
 *.tmp

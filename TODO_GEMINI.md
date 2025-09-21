@@ -1,6 +1,6 @@
 # Resumo do Projeto e Próximos Passos (TODO Gemini)
 
-**Data:** 2024-08-01 (Atualizado)
+**Data:** 21-09-2025 (Revisão Concluída)
 
 Este documento serve como um resumo completo do estado do projeto MCTrilhas, suas tecnologias, histórico de desenvolvimento e o roadmap de funcionalidades futuras. Ele foi criado para servir como um lembrete para nós quando retomarmos o projeto.
 
@@ -40,6 +40,7 @@ O **MCTrilhas** é um plugin customizado para servidores Minecraft (Paper/Spigot
     *   `listeners/`: "Ouvintes" de eventos do jogo.
     *   `data/`: Gerenciamento de dados dos jogadores (`PlayerDataManager`).
     *   `integrations/`: Código para interagir com outros plugins (`MCTrilhasExpansion`).
+    *   `managers/`: [REMOVIDO] Continha classes de gerenciamento legadas.
     *   `web/`: O servidor web integrado (`HttpApiManager`).
 *   `src/main/resources/`: Contém os arquivos de configuração e os recursos estáticos.
     *   `config.yml`, `plugin.yml`, `treasure_locations.yml`: Arquivos de configuração.
@@ -84,6 +85,13 @@ Revisão das principais funcionalidades implementadas e decisões tomadas:
     *   Adicionamos o placeholder `%mctrilhas_rank_progress%` para mostrar o requisito mais próximo para o próximo ranque.
 10. **HUD de Estatísticas:**
     *   Implementamos o comando `/hud` que ativa/desativa uma Boss Bar na tela do jogador, exibindo ranque, totens e contagem de insígnias em tempo real.
+11. **Maratona de Revisão e Refatoração (Agosto/2024):**
+    *   Revisamos todos os arquivos do projeto, um por um.
+    *   Criamos e atualizamos a `DOCUMENTACAO_TECNICA.md` para refletir a arquitetura atual.
+    *   Adicionamos comentários Javadoc em português a todas as classes Java.
+    *   Refatoramos todos os comandos para que suas mensagens sejam lidas do `config.yml`, tornando o plugin 100% personalizável.
+    *   Corrigimos bugs lógicos e inconsistências (ex: `Rank.java`, `HttpApiManager.java`).
+    *   Melhoramos os arquivos de build (`pom.xml`, `.gitignore`) e marcamos classes obsoletas (`BadgeConfigManager`) para remoção futura.
 
 ---
 
@@ -149,6 +157,6 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
 
 ## 6. Próximos Passos Imediatos (Sugestões)
 
-Estas são as tarefas menores e mais imediatas que podemos abordar quando retomarmos o desenvolvimento:
+Com a refatoração concluída, o projeto está pronto para a próxima grande funcionalidade.
 
-*   **Placeholder de Progresso para o Próximo Ranque:** Desenvolver um placeholder que mostre o progresso do jogador para o próximo ranque de forma visual ou textual (ex: `5/6 insígnias`).
+*   **Iniciar Sistema de Duelos 1v1:** Começar a planejar e implementar a arquitetura para o sistema de duelos, conforme definido no roadmap.

@@ -1,6 +1,7 @@
 package com.magnocat.mctrilhas.commands.subcommands;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.badges.Badge;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -8,7 +9,6 @@ import org.bukkit.entity.Player;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -100,10 +100,9 @@ public class AddBadgeSubCommand implements SubCommand {
         // Completa o nome da insígnia para o segundo argumento
         if (args.length == 2) {
             String partialBadge = args[1].toLowerCase();
-            Set<String> badgeIds = plugin.getBadgeConfigManager().getBadgeConfig().getConfigurationSection("badges").getKeys(false);
-
-            return badgeIds.stream()
-                    .filter(id -> !id.equalsIgnoreCase("use-gui"))
+            // Usa o BadgeManager para obter a lista de IDs de insígnias válidas.
+            return plugin.getBadgeManager().getAllBadges().stream()
+                    .map(Badge::id)
                     .filter(id -> id.toLowerCase().startsWith(partialBadge))
                     .sorted()
                     .collect(Collectors.toList());

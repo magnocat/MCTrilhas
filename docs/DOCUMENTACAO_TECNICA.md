@@ -69,12 +69,7 @@ MCTrilhas/
     *   **Carregamento:** No início do plugin, o método `loadBadgesFromConfig` lê a seção `badges` do `config.yml`.
     *   **Criação:** Para cada entrada válida, ele cria um `record` do tipo `Badge` e o armazena em um mapa interno (`Map<String, Badge>`).
     *   **Acesso:** Fornece métodos para obter uma insígnia específica por seu ID (`getBadge`) ou uma lista de todas as insígnias carregadas (`getAllBadges`).
-*   **Dependências:** `MCTrilhasPlugin`, `BadgeConfigManager`, `Badge`, `BadgeType`.
-
-### 3.1.2.1. Gerenciador de Configuração de Insígnias (`managers/BadgeConfigManager.java`) - [OBSOLETO]
-*   **O que é:** Uma classe legada que foi originalmente criada para gerenciar um arquivo `badges.yml` separado.
-*   **Status Atual:** **OBSOLETA**. Esta classe agora é redundante, pois todas as configurações de insígnias foram movidas para o `config.yml` principal, que é gerenciado diretamente pela classe `MCTrilhasPlugin`.
-*   **Plano de Ação:** A classe foi marcada como `@Deprecated`. Seu uso deve ser evitado. As classes que ainda a utilizam serão refatoradas para usar `plugin.getConfig()` para acesso geral à configuração e `plugin.getBadgeManager()` para obter dados específicos de insígnias, respeitando a arquitetura de "fonte única da verdade". A classe será removida completamente após a refatoração.
+*   **Dependências:** `MCTrilhasPlugin`, `Badge`, `BadgeType`.
 
 ### 3.1.3. Tipos de Insígnia (`badges/BadgeType.java`)
 *   **O que é:** Um `enum` que define as categorias de progresso rastreáveis.
@@ -343,7 +338,7 @@ O comando `/scout admin` é gerenciado pela classe `AdminSubCommand`, que atua c
     *   **Operações Assíncronas:** Realiza operações pesadas, como o cálculo de rankings (`getAllTimeBadgeCountsAsync`), de forma assíncrona para não travar o servidor.
     *   **Gerenciamento de Tokens:** Possui um cache otimizado (`tokenToUuidCache`) para validar rapidamente os tokens de acesso do Portal da Família.
     *   **Lógica de Migração:** Contém a lógica para atualizar automaticamente os arquivos de dados de jogadores de formatos antigos para novos quando eles fazem login.
-*   **Dependências:** `MCTrilhasPlugin`, `PlayerData`, `Rank`, `BadgeType`, `ItemFactory`.
+*   **Dependências:** `MCTrilhasPlugin`, `PlayerData`, `Rank`, `BadgeType`, `ItemFactory`, `BadgeManager`.
 
 ---
 
@@ -364,6 +359,10 @@ O comando `/scout admin` é gerenciado pela classe `AdminSubCommand`, que atua c
         *   **Release Oficial:** Para novas tags, o workflow cria automaticamente um novo "Release" na página do GitHub e anexa o arquivo `.jar` a ele, tornando-o público.
 *   **Dependências:** O workflow depende do ambiente do GitHub Actions, do Maven e de actions da comunidade para tarefas específicas como `actions/checkout`, `actions/setup-java`, e `softprops/action-gh-release`.
 
+### 7.2. Artefatos de Build Ignorados
+*   **`target/`**: Esta pasta é completamente ignorada pelo Git. Ela contém todos os arquivos compilados (`.class`), o plugin final (`.jar`) e outros arquivos gerados durante o processo de build do Maven.
+*   **`dependency-reduced-pom.xml`**: Este arquivo é gerado automaticamente pelo `maven-shade-plugin`. Ele representa o `pom.xml` do artefato final, mas com as dependências que foram empacotadas (shaded) removidas. Como é um arquivo gerado, ele também é ignorado pelo Git para manter o repositório limpo.
+
 ---
 
 ## 8. Ambiente de Desenvolvimento
@@ -374,3 +373,21 @@ O comando `/scout admin` é gerenciado pela classe `AdminSubCommand`, que atua c
     *   **`java.compile.nullAnalysis.mode`:** Ativa a análise de código em tempo real para detectar possíveis erros de `NullPointerException`, aumentando a qualidade e a segurança do código.
     *   **`java.configuration.updateBuildConfiguration`:** Garante que o VSCode atualize automaticamente sua configuração de build sempre que o arquivo `pom.xml` for modificado, mantendo as dependências e a estrutura do projeto sempre sincronizadas.
 *   **Propósito:** O objetivo deste arquivo é padronizar o ambiente de desenvolvimento para todos os colaboradores que usam o VSCode, garantindo consistência e ajudando a evitar erros comuns. Ele não afeta o resultado final da compilação do plugin.
+*   **Controle de Versão:** Este arquivo é intencionalmente rastreado pelo Git para que as configurações sejam compartilhadas entre todos os desenvolvedores.
+
+---
+
+## 9. Configuração do Build (pom.xml)
+
+*   **O que é:** O `pom.xml` (Project Object Model) é o arquivo de configuração central do Maven, que gerencia todo o processo de build do projeto.
+*   **O que faz:**
+    *   **Metadados:** Define as informações básicas do projeto, como `groupId`, `artifactId` e `version`. A versão é injetada dinamicamente pelo workflow do GitHub Actions.
+    *   **Propriedades:** Centraliza as versões das dependências (como `paper.api.version`) e outras configurações, facilitando atualizações.
+    *   **Repositórios:** Lista os repositórios de onde o Maven deve baixar as dependências (ex: PaperMC, JitPack).
+    *   **Dependências:** Declara todas as bibliotecas que o plugin utiliza.
+        *   **`provided`**: Dependências que já são fornecidas pelo ambiente do servidor (ex: Paper API, Vault). Elas são usadas para compilar, mas não são incluídas no JAR final.
+        *   **`compile`**: Dependências que são empacotadas dentro do JAR final (ex: Gson, java-jwt).
+    *   **Build:** Contém a configuração dos plugins do Maven.
+        *   **`maven-compiler-plugin`**: Configura o compilador Java para usar a versão 17.
+        *   **`maven-shade-plugin`**: Empacota as dependências de `compile` dentro do JAR final e as "realoca" (renomeia o pacote) para evitar conflitos com outros plugins que possam usar a mesma biblioteca.
+        *   **`resources`**: Habilita o "filtering", que permite substituir placeholders (como `${project.version}`) no `plugin.yml`.

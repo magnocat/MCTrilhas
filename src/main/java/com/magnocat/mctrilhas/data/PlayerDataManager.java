@@ -24,6 +24,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.badges.Badge;
 import com.magnocat.mctrilhas.badges.BadgeType;
 import com.magnocat.mctrilhas.ranks.Rank;
 import com.magnocat.mctrilhas.utils.ItemFactory;
@@ -388,38 +389,30 @@ public class PlayerDataManager {
 
     public void addProgress(Player player, BadgeType type, double amount) {
         PlayerData data = getPlayerData(player.getUniqueId());
-        if (data != null) {
-            data.addProgress(type, amount);
+        if (data == null) return;
 
-            // --- LÓGICA DE CONCLUSÃO DE INSÍGNIA ---
-            // Verifica se o jogador atingiu o progresso necessário para uma nova insígnia.
+        data.addProgress(type, amount);
 
-            String badgeId = type.name();
+        // --- LÓGICA DE CONCLUSÃO DE INSÍGNIA ---
+        String badgeId = type.name();
 
-            // Se o jogador já tem a insígnia, não faz mais nada.
-            if (data.hasBadge(badgeId)) {
-                return;
-            }
+        // Se o jogador já tem a insígnia, não faz mais nada.
+        if (data.hasBadge(badgeId)) {
+            return;
+        }
 
-            // Usa o método que ignora maiúsculas/minúsculas para encontrar a chave no config.yml
-            String configKey = plugin.getBadgeConfigManager().getBadgeConfigKey(badgeId);
-            if (configKey == null) {
-                return; // A insígnia não está configurada.
-            }
+        // Obtém a definição da insígnia do gerenciador centralizado.
+        Badge badge = plugin.getBadgeManager().getBadge(badgeId);
+        if (badge == null || badge.requirement() <= 0) {
+            return; // A insígnia não está configurada ou não tem requisito de progresso.
+        }
 
-            String requiredProgressPath = "badges." + configKey + ".required-progress";
-            if (!plugin.getBadgeConfigManager().getBadgeConfig().contains(requiredProgressPath)) {
-                return; // Não há progresso requerido para esta insígnia.
-            }
+        double currentProgress = data.getProgress(type);
 
-            double requiredProgress = plugin.getBadgeConfigManager().getBadgeConfig().getDouble(requiredProgressPath);
-            double currentProgress = data.getProgress(type);
-
-            if (currentProgress >= requiredProgress) {
-                // O jogador completou a insígnia!
-                addBadge(player, configKey);
-                grantReward(player, configKey, "Parabéns! Você conquistou a ");
-            }
+        if (currentProgress >= badge.requirement()) {
+            // O jogador completou a insígnia!
+            addBadge(player, badge.id());
+            grantReward(player, badge, "Parabéns! Você conquistou a ");
         }
     }
 
@@ -484,62 +477,59 @@ public class PlayerDataManager {
         if (data == null || data.hasBadge(badgeId)) {
             return false; // Jogador não está online ou já possui a insígnia.
         }
-
-        String configKey = plugin.getBadgeConfigManager().getBadgeConfigKey(badgeId);
-        if (configKey == null) {
-            return false; // Insígnia não encontrada na configuração.
+        
+        Badge badge = plugin.getBadgeManager().getBadge(badgeId);
+        if (badge == null) {
+            return false; // Insígnia não encontrada.
         }
 
-        addBadge(player, configKey);
+        addBadge(player, badge.id());
 
-        try {
-            BadgeType type = BadgeType.valueOf(badgeId.toUpperCase());
-            double requiredProgress = plugin.getBadgeConfigManager().getBadgeConfig().getDouble("badges." + configKey + ".required-progress", 1.0);
-            data.getProgressMap().put(type, requiredProgress);
-        } catch (IllegalArgumentException e) {
-            // Não deve acontecer se configKey foi encontrado.
-        }
+        // Define o progresso como completo.
+        data.getProgressMap().put(badge.type(), badge.requirement());
 
-        grantReward(player, configKey, "Você recebeu a ");
+        grantReward(player, badge, "Você recebeu a ");
         return true;
     }
 
-    private void grantReward(Player player, String configKey, String messagePrefix) {
-        String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString("badges." + configKey + ".name", "uma nova insígnia");
-        player.sendMessage(ChatColor.GOLD + messagePrefix + ChatColor.AQUA + badgeName + ChatColor.GOLD + "!");
+    private void grantReward(Player player, Badge badge, String messagePrefix) {
+        player.sendMessage(ChatColor.GOLD + messagePrefix + ChatColor.AQUA + badge.name() + ChatColor.GOLD + "!");
 
-        String rewardItemPath = "badges." + configKey + ".reward-item-data";
-        if (plugin.getBadgeConfigManager().getBadgeConfig().isConfigurationSection(rewardItemPath)) {
-            ConfigurationSection itemSection = plugin.getBadgeConfigManager().getBadgeConfig().getConfigurationSection(rewardItemPath);
+        FileConfiguration config = plugin.getConfig();
+        String badgePath = "badges." + badge.id();
+
+        String rewardItemPath = badgePath + ".reward-item-data";
+        if (config.isConfigurationSection(rewardItemPath)) {
+            ConfigurationSection itemSection = config.getConfigurationSection(rewardItemPath);
             ItemStack rewardItem = ItemFactory.createFromConfig(itemSection);
             if (rewardItem != null) {
                 player.getInventory().addItem(rewardItem);
             } else {
-                plugin.logSevere("Erro ao criar item de recompensa para a insígnia '" + configKey + "'. Verifique a configuração.");
+                plugin.logSevere("Erro ao criar item de recompensa para a insígnia '" + badge.id() + "'. Verifique a configuração.");
             }
         }
 
-        double totems = plugin.getBadgeConfigManager().getBadgeConfig().getDouble("badges." + configKey + ".reward-totems", 0);
+        double totems = config.getDouble(badgePath + ".reward-totems", 0);
         if (totems > 0 && plugin.getEconomy() != null) {
             plugin.getEconomy().depositPlayer(player, totems);
             player.sendMessage(ChatColor.GREEN + "Você recebeu " + ChatColor.YELLOW + totems + " Totens" + ChatColor.GREEN + " como recompensa!");
         }
 
         // --- LÓGICA DE RECOMPENSA EM MAPA ---
-        ItemStack mapReward = plugin.getMapRewardManager().createMapReward(player, configKey);
+        ItemStack mapReward = plugin.getMapRewardManager().createMapReward(player, badge.id());
         if (mapReward != null) {
             player.getInventory().addItem(mapReward);
             player.sendMessage(ChatColor.GREEN + "Você também recebeu um troféu especial!");
         }
 
         // --- LÓGICA DE ANÚNCIO GLOBAL ---
-        if (plugin.getConfig().getBoolean("badge-announcement.enabled", false)) {
-            String title = plugin.getConfig().getString("badge-announcement.title", "&6&lINSÍGNIA!");
-            String subtitle = plugin.getConfig().getString("badge-announcement.subtitle", "&e{player} &7conquistou a insígnia &b{badgeName}&7!");
+        if (config.getBoolean("badge-announcement.enabled", false)) {
+            String title = config.getString("badge-announcement.title", "&6&lINSÍGNIA!");
+            String subtitle = config.getString("badge-announcement.subtitle", "&e{player} &7conquistou a insígnia &b{badgeName}&7!");
 
             // Substitui os placeholders
-            title = ChatColor.translateAlternateColorCodes('&', title.replace("{player}", player.getName()).replace("{badgeName}", badgeName));
-            subtitle = ChatColor.translateAlternateColorCodes('&', subtitle.replace("{player}", player.getName()).replace("{badgeName}", badgeName));
+            title = ChatColor.translateAlternateColorCodes('&', title.replace("{player}", player.getName()).replace("{badgeName}", badge.name()));
+            subtitle = ChatColor.translateAlternateColorCodes('&', subtitle.replace("{player}", player.getName()).replace("{badgeName}", badge.name()));
 
             // Envia o título para todos os jogadores online
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {

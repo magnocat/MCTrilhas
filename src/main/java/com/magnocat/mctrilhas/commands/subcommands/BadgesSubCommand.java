@@ -1,6 +1,7 @@
 package com.magnocat.mctrilhas.commands.subcommands;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.badges.Badge;
 import com.magnocat.mctrilhas.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -138,11 +139,10 @@ public class BadgesSubCommand implements SubCommand {
 
                 sender.sendMessage(ChatColor.GOLD + "--- Insígnias de " + targetName + " ---");
                 earnedBadges.forEach(badgeId -> {
-                    String configKey = plugin.getBadgeConfigManager().getBadgeConfigKey(badgeId);
-                    if (configKey == null) return;
-                    String badgeName = plugin.getBadgeConfigManager().getBadgeConfig().getString("badges." + configKey + ".name", configKey);
-                    String description = plugin.getBadgeConfigManager().getBadgeConfig().getString("badges." + configKey + ".description", "Sem descrição.");
-                    sender.sendMessage(ChatColor.AQUA + "- " + badgeName + ": " + ChatColor.GRAY + description);
+                    Badge badge = plugin.getBadgeManager().getBadge(badgeId);
+                    if (badge != null) {
+                        sender.sendMessage(ChatColor.AQUA + "- " + badge.name() + ": " + ChatColor.GRAY + badge.description());
+                    }
                 });
             });
         });
