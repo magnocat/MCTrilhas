@@ -10,18 +10,27 @@ import org.bukkit.entity.Player;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Gerencia a lógica de promoção de ranques dos jogadores.
+ * Gerencia a lógica de promoção de ranques para os jogadores.
  */
 public class RankManager {
 
     private final MCTrilhasPlugin plugin;
 
+    /**
+     * Construtor do gerenciador de ranques.
+     * @param plugin A instância principal do plugin.
+     */
     public RankManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
     }
 
     /**
      * Verifica se um jogador atende aos requisitos para o próximo ranque e o promove se for o caso.
+     * <p>
+     * Este método é projetado para ser chamado após ações significativas do jogador (ex: ganhar uma insígnia).
+     * Ele opera em um loop para permitir múltiplas promoções em uma única verificação, caso o jogador
+     * atenda aos requisitos de vários ranques de uma vez.
+     *
      * @param player O jogador a ser verificado.
      */
     public void checkAndPromote(Player player) {
@@ -69,12 +78,21 @@ public class RankManager {
                 playerData.setRank(nextRank);
                 promotedInThisCheck = true; // Marca que houve promoção para continuar o loop.
 
-                // Anuncia a promoção para o jogador e para o servidor
-                String promotionMessage = ChatColor.GOLD + "Parabéns! Você foi promovido para o ranque: " + nextRank.getColor() + nextRank.getDisplayName();
-                player.sendMessage(promotionMessage);
-                player.sendTitle(ChatColor.GOLD + "PROMOÇÃO!", nextRank.getColor() + "Você alcançou o ranque " + nextRank.getDisplayName(), 10, 70, 20);
+                // Busca as mensagens de promoção do config.yml
+                String personalMessage = plugin.getConfig().getString("messages.rank-promotion.personal", "&6Parabéns! Você foi promovido para o ranque: {rank_color}{rank_name}");
+                String titleMessage = plugin.getConfig().getString("messages.rank-promotion.title", "&6PROMOÇÃO!");
+                String subtitleMessage = plugin.getConfig().getString("messages.rank-promotion.subtitle", "{rank_color}Você alcançou o ranque {rank_name}");
+                String broadcastMessage = plugin.getConfig().getString("messages.rank-promotion.broadcast", "&e{player_name} demonstrou seu valor e foi promovido para {rank_color}{rank_name}&e!");
 
-                Bukkit.broadcastMessage(ChatColor.YELLOW + player.getName() + " demonstrou seu valor e foi promovido para " + nextRank.getColor() + nextRank.getDisplayName() + ChatColor.YELLOW + "!");
+                // Substitui os placeholders
+                personalMessage = personalMessage.replace("{rank_color}", nextRank.getColor()).replace("{rank_name}", nextRank.getDisplayName());
+                subtitleMessage = subtitleMessage.replace("{rank_color}", nextRank.getColor()).replace("{rank_name}", nextRank.getDisplayName());
+                broadcastMessage = broadcastMessage.replace("{player_name}", player.getName()).replace("{rank_color}", nextRank.getColor()).replace("{rank_name}", nextRank.getDisplayName());
+
+                // Anuncia a promoção para o jogador e para o servidor
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', personalMessage));
+                player.sendTitle(ChatColor.translateAlternateColorCodes('&', titleMessage), ChatColor.translateAlternateColorCodes('&', subtitleMessage), 10, 70, 20);
+                Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', broadcastMessage));
             }
         } while (promotedInThisCheck);
     }

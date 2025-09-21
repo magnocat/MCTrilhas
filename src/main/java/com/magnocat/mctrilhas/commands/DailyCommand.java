@@ -2,8 +2,7 @@ package com.magnocat.mctrilhas.commands;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
-// Usando a classe de fábrica de itens do projeto
-import com.magnocat.mctrilhas.utils.ItemFactory; 
+import com.magnocat.mctrilhas.utils.ItemFactory;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -15,6 +14,12 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Implementa o comando `/daily`.
+ * <p>
+ * Este comando permite que os jogadores reivindiquem uma recompensa diária,
+ * que pode consistir em Totens (moeda) e/ou um item customizado, sujeito a um cooldown configurável.
+ */
 @SuppressWarnings("deprecation")
 public class DailyCommand implements CommandExecutor {
 
@@ -22,17 +27,33 @@ public class DailyCommand implements CommandExecutor {
     private final PlayerDataManager playerDataManager;
     private final Economy economy;
 
+    /**
+     * Construtor do comando de recompensa diária.
+     *
+     * @param plugin A instância principal do plugin, usada para acessar configurações e gerenciadores.
+     */
     public DailyCommand(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
         this.playerDataManager = plugin.getPlayerDataManager();
         this.economy = plugin.getEconomy(); // Assumindo que você tenha um método getEconomy() no plugin principal
     }
 
+    /**
+     * Executa a lógica do comando `/daily` quando um jogador o utiliza.
+     * Verifica se o sistema está ativo, se a economia está funcionando e se o jogador
+     * já cumpriu o tempo de espera (cooldown) para coletar a recompensa novamente.
+     *
+     * @param sender A entidade que executou o comando.
+     * @param command O comando que foi executado.
+     * @param label O alias do comando que foi usado.
+     * @param args Argumentos do comando (não utilizados neste comando).
+     * @return {@code true} se o comando foi tratado com sucesso.
+     */
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            // Mensagem para console, não precisa de config
-            sender.sendMessage("Este comando so pode ser executado por um jogador.");
+            String consoleMessage = plugin.getConfig().getString("messages.console-only-command", "&cEste comando só pode ser executado por um jogador.");
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', consoleMessage));
             return true;
         }
 
@@ -68,6 +89,13 @@ public class DailyCommand implements CommandExecutor {
         return true;
     }
 
+    /**
+     * Lida com a lógica de reivindicação da recompensa.
+     * Verifica o espaço no inventário, deposita a moeda, entrega o item
+     * e atualiza o timestamp da última coleta do jogador.
+     * @param player O jogador que está reivindicando a recompensa.
+     * @param dailyRewardSection A seção de configuração da recompensa diária.
+     */
     private void handleRewardClaim(Player player, ConfigurationSection dailyRewardSection) {
         int totemAmount = dailyRewardSection.getInt("reward-totems", 0);
         ItemStack rewardItem = ItemFactory.createFromConfig(dailyRewardSection.getConfigurationSection("reward-item-data"));
@@ -99,6 +127,9 @@ public class DailyCommand implements CommandExecutor {
 
     /**
      * Formata milissegundos em uma string legível (ex: "12h 30m 15s").
+     *
+     * @param millis A quantidade de milissegundos a ser formatada.
+     * @return Uma string representando o tempo formatado.
      */
     private String formatTime(long millis) {
         long hours = TimeUnit.MILLISECONDS.toHours(millis);
@@ -109,7 +140,14 @@ public class DailyCommand implements CommandExecutor {
     }
 
     /**
-     * Helper para enviar mensagens configuráveis para o jogador.
+     * Envia uma mensagem configurável para o jogador, buscando o texto no `config.yml`.
+     * Permite a substituição de placeholders na mensagem.
+     *
+     * @param player O jogador que receberá a mensagem.
+     * @param section A seção de configuração onde a mensagem está localizada.
+     * @param path O caminho da mensagem dentro da seção.
+     * @param defaultValue A mensagem padrão a ser usada se o caminho não for encontrado.
+     * @param replacements Um varargs de pares de strings (placeholder, valor) para substituição.
      */
     private void sendMessage(Player player, ConfigurationSection section, String path, String defaultValue, String... replacements) {
         String message = defaultValue;

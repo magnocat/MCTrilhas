@@ -18,16 +18,28 @@ import com.magnocat.mctrilhas.commands.subcommands.AdminSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.BadgesSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.GetMapSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.ProgressSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.ReloadSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.ToggleProgressSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.VersionSubCommand;
 
+/**
+ * Executor principal e roteador para o comando `/scout`.
+ * <p>
+ * Esta classe gerencia todos os subcomandos associados ao `/scout`,
+ * delegando a execução para a classe `SubCommand` apropriada.
+ * Ela também lida com a verificação de permissões, a geração de mensagens
+ * de ajuda dinâmicas e o autocompletar (tab completion).
+ */
 public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
 
     private final MCTrilhasPlugin plugin;
     private final Map<String, SubCommand> subCommands = new LinkedHashMap<>();
 
+    /**
+     * Construtor do executor de comandos.
+     * Registra todos os subcomandos disponíveis.
+     * @param plugin A instância principal do plugin.
+     */
     public ScoutCommandExecutor(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
         // Registra todos os subcomandos na ordem desejada para o help
@@ -36,7 +48,6 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
         registerSubCommand(new GetMapSubCommand(plugin));
         registerSubCommand(new ToggleProgressSubCommand(plugin));
         registerSubCommand(new VersionSubCommand(plugin));
-        registerSubCommand(new ReloadSubCommand(plugin));
         registerSubCommand(new AdminSubCommand(plugin));
     }
 
@@ -45,6 +56,15 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
     }
 
     @Override
+    /**
+     * Lida com a execução do comando `/scout`.
+     *
+     * @param sender A entidade que executou o comando.
+     * @param command O comando que foi executado.
+     * @param label O alias do comando que foi usado.
+     * @param args Os argumentos fornecidos, onde o primeiro é o nome do subcomando.
+     * @return {@code true} se o comando foi tratado com sucesso.
+     */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
             sendHelpMessage(sender);
@@ -69,6 +89,11 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    /**
+     * Envia uma mensagem de ajuda contextualizada para o remetente.
+     * A mensagem lista apenas os comandos que o remetente tem permissão para usar.
+     * @param sender A entidade para a qual a mensagem será enviada.
+     */
     private void sendHelpMessage(CommandSender sender) {
         sender.sendMessage(ChatColor.GOLD + "--- Comandos do MCTrilhas ---");
         // Exibe os comandos de jogador
@@ -117,6 +142,15 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
     }
 
     @Override
+    /**
+     * Fornece sugestões de autocompletar para o comando `/scout`.
+     *
+     * @param sender A entidade que está tentando autocompletar o comando.
+     * @param command O comando sendo executado.
+     * @param alias O alias usado.
+     * @param args Os argumentos atuais digitados pelo remetente.
+     * @return Uma lista de sugestões para o próximo argumento.
+     */
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
             String partialCommand = args[0].toLowerCase();

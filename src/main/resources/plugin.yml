@@ -44,24 +44,25 @@ permissions:
   mctrilhas.*:
     description: Dá acesso a todos os comandos do MCTrilhas.
     children:
-      mctrilhas.scout.use: true
-      mctrilhas.daily: true
       mctrilhas.admin: true
-      mctrilhas.scout.getmap: true
-      mctrilhas.ranque: true
-      mctrilhas.progress.other: true
-      mctrilhas.tesouro: true
-      mctrilhas.ctf.use: true
+      mctrilhas.admin.bypass: true
+      mctrilhas.admin.silent-join: true
+      mctrilhas.ctf.admin: true
       mctrilhas.ctf.join: true
       mctrilhas.ctf.leave: true
       mctrilhas.ctf.list: true
       mctrilhas.ctf.stats: true
       mctrilhas.ctf.stats.other: true
-      mctrilhas.ctf.admin: true
-      mctrilhas.admin.silent-join: true
-      mctrilhas.admin.bypass: true
+      mctrilhas.ctf.use: true
+      mctrilhas.daily: true
       mctrilhas.familia.use: true
       mctrilhas.hud: true
+      mctrilhas.progress.other: true
+      mctrilhas.ranque: true
+      mctrilhas.scout.use: true
+      mctrilhas.scout.getmap: true
+      mctrilhas.scout.admin: true
+      mctrilhas.tesouro: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
@@ -105,6 +106,9 @@ permissions:
     description: Permite gerenciar as arenas de CTF.
     default: op
   mctrilhas.admin:
+    description: Permissão principal para acesso a comandos administrativos.
+    default: op
+  mctrilhas.scout.admin:
     description: Permite acesso aos comandos administrativos, como remover insígnias.
     default: op
   mctrilhas.progress.other:

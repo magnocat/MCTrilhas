@@ -376,11 +376,50 @@ command-blocker:
 
 # Configurações de privacidade
 privacy-settings:
-  # Jogadores com a permissão 'mctrilhas.admin.silent-join' entrarão e sairão do servidor silenciosamente.
+  # Se 'true', administradores (com permissão 'mctrilhas.admin.silent-join') entrarão automaticamente no modo /vanish ao logar.
+  auto-vanish-on-join: true
   # Adicione os UUIDs dos administradores aqui para escondê-los de todos os rankings e placares públicos.
   # Exemplo:
-  # hide-from-leaderboards:
-  #   - "d8a9b7c6-e5f4-a3b2-c1d0-e9f8a7b6c5d4"
   hide-from-leaderboards: []
-  # Se 'true', administradores (OP) entrarão automaticamente no modo /vanish ao logar.
-  auto-vanish-on-join: true
+
+# Seção para centralizar as mensagens dos comandos.
+messages:
+  player-only-command: "&cEste comando só pode ser usado por jogadores."
+  console-only-command: "&cEste comando só pode ser executado por um jogador."
+  family-command:
+    generating: "&eGerando seu link de acesso seguro para o Portal da Família..."
+    error: "&cOcorreu um erro ao gerar seu token. Por favor, contate um administrador."
+    success: "&aSeu link exclusivo foi gerado! &c(Não compartilhe com ninguém)"
+    warning: "&7Este link dá acesso ao seu painel de progresso. Se você suspeitar que alguém o acessou, use este comando novamente para gerar um novo link e invalidar o antigo."
+    click-text: "&e[CLIQUE AQUI PARA ABRIR O PAINEL]"
+    hover-text: "&aClique para abrir seu painel de progresso!"
+    invalid-usage: "&cComando inválido. Use: /familia token"
+  rank-command:
+    header: "&6--- Seu Progresso de Ranque ---"
+    current-rank: "&eSeu ranque atual: {rank}"
+    max-rank: "&aVocê alcançou o topo da jornada escoteira! Parabéns!"
+    footer: "&6---------------------------------"
+    data-error: "&cNão foi possível carregar seus dados. Tente novamente em alguns instantes."
+  treasure-command:
+    unknown-subcommand: "&cComando desconhecido. Use /tesouro para ver a ajuda."
+    help:
+      - "&6--- Caça ao Tesouro ---"
+      - "&a/tesouro iniciar &7- Começa uma nova caça ao tesouro."
+      - "&a/tesouro pista &7- Recebe uma pista para o próximo local."
+      - "&a/tesouro cancelar &7- Abandona a caça ao tesouro atual."
+      - "&6-----------------------"
+
+# Configurações para o HUD (BossBar) de estatísticas.
+hud-settings:
+  # Cores disponíveis: PINK, BLUE, RED, GREEN, YELLOW, PURPLE, WHITE
+  color: "BLUE"
+  # Estilos disponíveis: SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, SEGMENTED_20
+  style: "SOLID"
+  # Intervalo de atualização em ticks (20 ticks = 1 segundo). 40 ticks = 2 segundos.
+  update-interval-ticks: 40
+  # Formato do texto. Placeholders: {rank}, {totems}, {badges}
+  format: "&bRanque: &e{rank} &8| &bTotens: &e{totems} &8| &bInsígnias: &e{badges}"
+  messages:
+    enabled: "&aHUD de estatísticas ativado."
+    disabled: "&aHUD de estatísticas desativado."
+    loading: "Carregando estatísticas..."

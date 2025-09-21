@@ -1,22 +1,26 @@
 package com.magnocat.mctrilhas.commands.subcommands;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.badges.Badge;
 import com.magnocat.mctrilhas.badges.BadgeType;
 import com.magnocat.mctrilhas.data.PlayerData;
-import com.magnocat.mctrilhas.ranks.Rank;
 import com.magnocat.mctrilhas.utils.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * Implementa o subcomando `/scout progress [jogador]`.
+ * <p>
+ * Este comando exibe um resumo do progresso de um jogador, mostrando as metas
+ * para as próximas insígnias que ele ainda não conquistou e também o progresso
+ * para o próximo ranque. Funciona para jogadores online e offline.
+ */
 public class ProgressSubCommand implements SubCommand {
 
     private final MCTrilhasPlugin plugin;
@@ -40,49 +44,52 @@ public class ProgressSubCommand implements SubCommand {
     @Override
     public boolean isAdminCommand() { return false; }
 
+    /**
+     * Executa a lógica para exibir o progresso de um jogador.
+     * A busca de dados é feita de forma assíncrona para suportar jogadores offline sem travar o servidor.
+     *
+     * @param sender A entidade que executou o comando.
+     * @param args Os argumentos fornecidos. Pode conter o nome de um jogador alvo.
+     */
     @Override
     public void execute(CommandSender sender, String[] args) {
-        Player target = getTargetPlayer(sender, args);
+        OfflinePlayer target = getTargetPlayer(sender, args);
         if (target == null) return;
 
-        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(target.getUniqueId());
-        if (playerData == null) {
-            sender.sendMessage(ChatColor.RED + "Não foi possível carregar os dados de " + target.getName() + ".");
-            return;
-        }
+        sender.sendMessage(ChatColor.YELLOW + "Buscando progresso de " + target.getName() + "...");
 
-        sender.sendMessage(ChatColor.GOLD + "--- Progresso de " + target.getName() + " ---");
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(target.getUniqueId());
+            if (playerData == null) {
+                playerData = plugin.getPlayerDataManager().loadOfflinePlayerData(target.getUniqueId());
+            }
 
-        displayBadgeProgress(sender, playerData);
-        displayRankProgress(sender, target, playerData);
+            if (playerData == null) {
+                Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(ChatColor.RED + "Não foi possível carregar os dados de " + target.getName() + "."));
+                return;
+            }
 
-        sender.sendMessage(ChatColor.GOLD + "---------------------------------");
+            final PlayerData finalPlayerData = playerData;
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                sender.sendMessage(ChatColor.GOLD + "--- Progresso de " + target.getName() + " ---");
+                displayBadgeProgress(sender, finalPlayerData);
+                displayRankProgress(sender, target, finalPlayerData);
+                sender.sendMessage(ChatColor.GOLD + "---------------------------------");
+            });
+        });
     }
 
     private void displayBadgeProgress(CommandSender sender, PlayerData playerData) {
         sender.sendMessage(ChatColor.DARK_AQUA + "» Progresso das Insígnias:");
         boolean hasUnearnedBadges = false;
 
-        ConfigurationSection badgesSection = plugin.getBadgeConfigManager().getBadgeConfig().getConfigurationSection("badges");
-        if (badgesSection == null) return;
-
-        Set<String> badgeKeys = badgesSection.getKeys(false);
-
-        for (String key : badgeKeys) {
-            if (key.equalsIgnoreCase("use-gui")) continue;
-
-            if (!playerData.hasBadge(key)) {
+        List<Badge> allBadges = plugin.getBadgeManager().getAllBadges();
+        for (Badge badge : allBadges) {
+            if (!playerData.hasBadge(badge.id())) {
                 hasUnearnedBadges = true;
-                String name = badgesSection.getString(key + ".name", key);
-                long required = badgesSection.getLong(key + ".required-progress", 0);
-
-                try {
-                    BadgeType type = BadgeType.valueOf(key.toUpperCase());
-                    long current = (long) playerData.getProgress(type);
-                    MessageUtils.displayRequirement(sender, name, current, required);
-                } catch (IllegalArgumentException ignored) {
-                    // Ignora insígnias sem um tipo de progresso direto (ex: futuras quests)
-                }
+                long required = (long) badge.requirement();
+                long current = (long) playerData.getProgress(badge.type());
+                MessageUtils.displayRequirement(sender, badge.name(), current, required);
             }
         }
 
@@ -91,22 +98,22 @@ public class ProgressSubCommand implements SubCommand {
         }
     }
 
-    private void displayRankProgress(CommandSender sender, Player target, PlayerData playerData) {
+    private void displayRankProgress(CommandSender sender, OfflinePlayer target, PlayerData playerData) {
         sender.sendMessage(""); // Spacer
         sender.sendMessage(ChatColor.DARK_AQUA + "» Progresso de Ranque:");
 
         MessageUtils.displayRankProgress(sender, target, playerData, plugin);
     }
 
-    private Player getTargetPlayer(CommandSender sender, String[] args) {
+    private OfflinePlayer getTargetPlayer(CommandSender sender, String[] args) {
         if (args.length > 0) {
             if (!sender.hasPermission("mctrilhas.progress.other")) {
                 sender.sendMessage(ChatColor.RED + "Você não tem permissão para ver o progresso de outros jogadores.");
                 return null;
             }
-            Player target = Bukkit.getPlayer(args[0]);
-            if (target == null) {
-                sender.sendMessage(ChatColor.RED + "O jogador '" + args[0] + "' não está online.");
+            OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+            if (!target.hasPlayedBefore() && !target.isOnline()) {
+                sender.sendMessage(ChatColor.RED + "Jogador '" + args[0] + "' nunca foi visto neste servidor.");
                 return null;
             }
             return target;

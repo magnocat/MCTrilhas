@@ -1,8 +1,12 @@
 package com.magnocat.mctrilhas.badges;
 
 /**
- * Enum que define os tipos de progresso para as insígnias.
- * Cada tipo corresponde a uma ação que o jogador pode realizar.
+ * Define as categorias de progresso rastreáveis para as insígnias.
+ * <p>
+ * Cada constante neste enum representa um tipo de ação que pode ser monitorada
+ * (ex: quebrar blocos, pescar, etc.). O nome da constante (ex: {@code MINING})
+ * é usado como o identificador interno e deve corresponder à chave da insígnia
+ * no arquivo de configuração.
  */
 public enum BadgeType {
     LUMBERJACK("Lenhador"),
@@ -14,11 +18,19 @@ public enum BadgeType {
     CRAFTING("Artesão"),
     EXPLORER("Explorador");
 
-    private final String name;
+    private final String displayName;
 
-    BadgeType(String name) {
-        this.name = name;
+    /**
+     * Construtor do enum.
+     * @param displayName O nome amigável da categoria, usado para exibição.
+     */
+    BadgeType(String displayName) {
+        this.displayName = displayName;
     }
 
-    public String getName() { return name; }
+    /**
+     * Obtém o nome de exibição amigável para este tipo de insígnia.
+     * @return O nome de exibição (ex: "Mineração").
+     */
+    public String getDisplayName() { return displayName; }
 }

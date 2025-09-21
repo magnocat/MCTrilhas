@@ -4,6 +4,7 @@ import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerData;
 import com.magnocat.mctrilhas.ranks.Rank;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -15,36 +16,62 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Gerencia o sistema de HUD (Heads-Up Display) que exibe informações
+ * aos jogadores através de uma BossBar.
+ */
 public class HUDManager {
 
     private final MCTrilhasPlugin plugin;
     private final Map<UUID, BossBar> activeHUDs = new ConcurrentHashMap<>();
     private BukkitTask updaterTask;
 
+    /**
+     * Construtor do gerenciador de HUD.
+     * @param plugin A instância principal do plugin.
+     */
     public HUDManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
         startUpdater();
     }
 
+    /**
+     * Ativa ou desativa o HUD para um jogador.
+     * @param player O jogador para o qual o HUD será alternado.
+     */
     public void toggleHUD(Player player) {
         UUID playerUUID = player.getUniqueId();
         if (activeHUDs.containsKey(playerUUID)) {
             removeHUD(player);
-            player.sendMessage("§aHUD de estatísticas desativado.");
+            String message = plugin.getConfig().getString("hud-settings.messages.disabled", "&aHUD de estatísticas desativado.");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
         } else {
             showHUD(player);
-            player.sendMessage("§aHUD de estatísticas ativado.");
+            String message = plugin.getConfig().getString("hud-settings.messages.enabled", "&aHUD de estatísticas ativado.");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
         }
     }
 
+    /**
+     * Mostra o HUD para um jogador, criando e configurando a BossBar.
+     * @param player O jogador que verá o HUD.
+     */
     private void showHUD(Player player) {
         UUID playerUUID = player.getUniqueId();
-        BossBar bossBar = Bukkit.createBossBar("Carregando estatísticas...", BarColor.BLUE, BarStyle.SOLID);
+        String loadingText = plugin.getConfig().getString("hud-settings.messages.loading", "Carregando estatísticas...");
+        BarColor color = BarColor.valueOf(plugin.getConfig().getString("hud-settings.color", "BLUE").toUpperCase());
+        BarStyle style = BarStyle.valueOf(plugin.getConfig().getString("hud-settings.style", "SOLID").toUpperCase());
+
+        BossBar bossBar = Bukkit.createBossBar(ChatColor.translateAlternateColorCodes('&', loadingText), color, style);
         bossBar.addPlayer(player);
         activeHUDs.put(playerUUID, bossBar);
         updateHUD(player); // Atualiza imediatamente
     }
 
+    /**
+     * Remove o HUD de um jogador.
+     * @param player O jogador cujo HUD será removido.
+     */
     private void removeHUD(Player player) {
         UUID playerUUID = player.getUniqueId();
         BossBar bossBar = activeHUDs.remove(playerUUID);
@@ -53,11 +80,19 @@ public class HUDManager {
         }
     }
 
+    /**
+     * Limpa o HUD de um jogador quando ele sai do servidor para evitar memory leaks.
+     * @param player O jogador que saiu.
+     */
     public void cleanupOnQuit(Player player) {
         removeHUD(player);
     }
 
+    /**
+     * Inicia a tarefa assíncrona que atualiza todos os HUDs ativos periodicamente.
+     */
     private void startUpdater() {
+        long updateInterval = plugin.getConfig().getLong("hud-settings.update-interval-ticks", 40L);
         this.updaterTask = new BukkitRunnable() {
             @Override
             public void run() {
@@ -68,9 +103,13 @@ public class HUDManager {
                     }
                 }
             }
-        }.runTaskTimerAsynchronously(plugin, 0L, 40L); // Atualiza a cada 2 segundos
+        }.runTaskTimerAsynchronously(plugin, 0L, updateInterval);
     }
 
+    /**
+     * Atualiza o texto e o progresso do HUD de um jogador específico.
+     * @param player O jogador cujo HUD será atualizado.
+     */
     private void updateHUD(Player player) {
         BossBar bossBar = activeHUDs.get(player.getUniqueId());
         if (bossBar == null) return;
@@ -82,25 +121,34 @@ public class HUDManager {
         double balance = (plugin.getEconomy() != null) ? plugin.getEconomy().getBalance(player) : 0;
         int badges = playerData.getEarnedBadgesMap().size();
 
-        String hudText = String.format(
-            "§bRanque: §e%s §8| §bTotens: §e%,.0f §8| §bInsígnias: §e%d",
-            rank.getDisplayName(),
-            balance,
-            badges
-        );
+        String hudFormat = plugin.getConfig().getString("hud-settings.format", "&bRanque: &e{rank} &8| &bTotens: &e{totems} &8| &bInsígnias: &e{badges}");
+
+        String hudText = hudFormat
+                .replace("{rank}", rank.getDisplayName())
+                .replace("{totems}", String.format("%,.0f", balance))
+                .replace("{badges}", String.valueOf(badges));
 
         // Usa runTask para garantir que a modificação da BossBar ocorra na thread principal
         new BukkitRunnable() {
             @Override
             public void run() {
-                bossBar.setTitle(hudText);
+                bossBar.setTitle(ChatColor.translateAlternateColorCodes('&', hudText));
             }
         }.runTask(plugin);
     }
 
+    /**
+     * Para a tarefa de atualização do HUD e limpa todas as BossBars ativas.
+     * Chamado no onDisable do plugin para evitar barras "fantasmas" após um /reload.
+     */
     public void stop() {
         if (updaterTask != null) {
             updaterTask.cancel();
         }
+        // Limpa todas as boss bars ativas para evitar que fiquem na tela após um /reload
+        for (BossBar bossBar : activeHUDs.values()) {
+            bossBar.removeAll();
+        }
+        activeHUDs.clear();
     }
 }

@@ -60,6 +60,20 @@ import com.magnocat.mctrilhas.data.PlayerCTFStats;
 import com.magnocat.mctrilhas.data.PlayerData;
 import com.magnocat.mctrilhas.utils.SecurityUtils;
 
+/**
+ * Gerencia o servidor web integrado e a API RESTful do plugin.
+ * <p>
+ * Esta classe é responsável por:
+ * <ul>
+ *     <li>Iniciar e parar um servidor HTTP leve.</li>
+ *     <li>Servir arquivos estáticos (HTML, CSS, JS) para os painéis web.</li>
+ *     <li>Extrair e atualizar automaticamente os recursos da web a cada nova versão do plugin.</li>
+ *     <li>Fornecer endpoints de API públicos e protegidos para dados do servidor e de jogadores.</li>
+ *     <li>Gerenciar a autenticação de administradores via JWT (JSON Web Tokens).</li>
+ *     <li>Manter caches de dados para rankings e estatísticas para garantir respostas rápidas da API.</li>
+ *     <li>Agendar tarefas assíncronas para atualizar os caches periodicamente.</li>
+ * </ul>
+ */
 public class HttpApiManager {
 
     // --- Core Components ---
@@ -88,6 +102,10 @@ public class HttpApiManager {
         this.plugin = plugin;
     }
 
+    /**
+     * Inicia o servidor web e configura todos os seus componentes.
+     * A inicialização só ocorre se a API estiver habilitada no `config.yml`.
+     */
     public void start() {
         if (!plugin.getConfig().getBoolean("web-api.enabled", false)) {
             plugin.logInfo("API web integrada está desativada na configuração.");

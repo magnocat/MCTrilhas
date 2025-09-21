@@ -11,6 +11,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Implementa o subcomando de administrador `/scout admin addbadge`.
+ * <p>
+ * Este comando permite que um administrador conceda manualmente uma insígnia
+ * e sua recompensa associada a um jogador que esteja online.
+ */
 public class AddBadgeSubCommand implements SubCommand {
 
     private final MCTrilhasPlugin plugin;
@@ -44,6 +50,12 @@ public class AddBadgeSubCommand implements SubCommand {
         return true;
     }
 
+    /**
+     * Executa a lógica para conceder uma insígnia a um jogador.
+     *
+     * @param sender A entidade que executou o comando (geralmente um jogador ou o console).
+     * @param args Os argumentos fornecidos após o nome do subcomando. Espera-se: [nome_do_jogador, id_da_insignia].
+     */
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (args.length < 2) {
@@ -67,6 +79,13 @@ public class AddBadgeSubCommand implements SubCommand {
         }
     }
 
+    /**
+     * Fornece sugestões de autocompletar para o comando.
+     *
+     * @param sender A entidade que está tentando autocompletar o comando.
+     * @param args Os argumentos atuais digitados pelo remetente.
+     * @return Uma lista de sugestões para o próximo argumento.
+     */
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
         // /scout admin addbadge <jogador> <insignia>

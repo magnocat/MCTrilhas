@@ -28,6 +28,17 @@ import com.magnocat.mctrilhas.badges.BadgeType;
 import com.magnocat.mctrilhas.ranks.Rank;
 import com.magnocat.mctrilhas.utils.ItemFactory;
 
+/**
+ * Gerencia o ciclo de vida dos dados dos jogadores (PlayerData).
+ *
+ * Esta classe é responsável por:
+ * - Carregar os dados de um jogador de seu arquivo .yml para um cache em memória quando ele entra no servidor.
+ * - Fornecer acesso rápido aos dados de jogadores online através do cache.
+ * - Salvar os dados do cache de volta para o arquivo .yml quando o jogador sai.
+ * - Realizar operações de leitura segura para jogadores offline.
+ * - Gerenciar caches de performance para rankings e tokens de API.
+ * - Conter a lógica de migração de dados para atualizar formatos de arquivo antigos.
+ */
 @SuppressWarnings("deprecation")
 public class PlayerDataManager {
     private final MCTrilhasPlugin plugin;

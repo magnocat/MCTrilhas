@@ -14,18 +14,37 @@ import org.bukkit.entity.Player;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 
+/**
+ * Implementa o comando `/tesouro` e seus subcomandos.
+ * <p>
+ * Esta classe atua como um roteador, delegando as ações de iniciar,
+ * obter pistas e cancelar a caça ao tesouro para o {@link com.magnocat.mctrilhas.quests.TreasureHuntManager}.
+ */
 public class TreasureHuntCommand implements CommandExecutor, TabCompleter {
 
     private final MCTrilhasPlugin plugin;
 
+    /**
+     * Construtor do comando da Caça ao Tesouro.
+     * @param plugin A instância principal do plugin.
+     */
     public TreasureHuntCommand(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Executa a lógica do comando `/tesouro`.
+     *
+     * @param sender A entidade que executou o comando.
+     * @param command O comando que foi executado.
+     * @param label O alias do comando que foi usado.
+     * @param args Argumentos do comando (ex: "iniciar", "pista").
+     * @return {@code true} se o comando foi tratado com sucesso.
+     */
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("Este comando só pode ser usado por jogadores.");
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages.player-only-command", "&cEste comando só pode ser usado por jogadores.")));
             return true;
         }
         Player player = (Player) sender;
@@ -47,21 +66,33 @@ public class TreasureHuntCommand implements CommandExecutor, TabCompleter {
                 plugin.getTreasureHuntManager().cancelHunt(player);
                 break;
             default:
-                player.sendMessage(ChatColor.RED + "Comando desconhecido. Use /tesouro para ver a ajuda.");
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages.treasure-command.unknown-subcommand", "&cComando desconhecido. Use /tesouro para ver a ajuda.")));
                 break;
         }
         return true;
     }
 
+    /**
+     * Envia uma mensagem de ajuda com os subcomandos disponíveis para a Caça ao Tesouro.
+     * @param player O jogador que receberá a mensagem.
+     */
     private void sendHelpMessage(Player player) {
-        player.sendMessage(ChatColor.GOLD + "--- Caça ao Tesouro ---");
-        player.sendMessage(ChatColor.AQUA + "/tesouro iniciar" + ChatColor.GRAY + " - Começa uma nova caça ao tesouro.");
-        player.sendMessage(ChatColor.AQUA + "/tesouro pista" + ChatColor.GRAY + " - Recebe uma pista para o próximo local.");
-        player.sendMessage(ChatColor.AQUA + "/tesouro cancelar" + ChatColor.GRAY + " - Abandona a caça ao tesouro atual.");
-        player.sendMessage(ChatColor.DARK_AQUA + "Use /ranque para ver seu progresso escoteiro!");
-        player.sendMessage(ChatColor.GOLD + "-----------------------");
+        List<String> helpLines = plugin.getConfig().getStringList("messages.treasure-command.help");
+        if (helpLines.isEmpty()) {
+            // Fallback para mensagens hardcoded se a configuração estiver ausente.
+            player.sendMessage(ChatColor.GOLD + "--- Caça ao Tesouro ---");
+            player.sendMessage(ChatColor.AQUA + "/tesouro iniciar" + ChatColor.GRAY + " - Começa uma nova caça ao tesouro.");
+            player.sendMessage(ChatColor.AQUA + "/tesouro pista" + ChatColor.GRAY + " - Recebe uma pista para o próximo local.");
+            player.sendMessage(ChatColor.AQUA + "/tesouro cancelar" + ChatColor.GRAY + " - Abandona a caça ao tesouro atual.");
+            player.sendMessage(ChatColor.GOLD + "-----------------------");
+        } else {
+            helpLines.forEach(line -> player.sendMessage(ChatColor.translateAlternateColorCodes('&', line)));
+        }
     }
 
+    /**
+     * Fornece sugestões de autocompletar para o comando `/tesouro`.
+     */
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {

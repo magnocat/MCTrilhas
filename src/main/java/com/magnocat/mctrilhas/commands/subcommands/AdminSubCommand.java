@@ -3,15 +3,22 @@ package com.magnocat.mctrilhas.commands.subcommands;
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import java.util.Collections;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
+/**
+ * Implementa o comando roteador `/scout admin`.
+ * <p>
+ * Esta classe não executa uma ação própria, mas gerencia e delega a execução
+ * para os subcomandos de administração registrados (ex: addbadge, reload).
+ * Ela também lida com a mensagem de ajuda e o autocompletar para os subcomandos.
+ */
 public class AdminSubCommand implements SubCommand {
 
     private final MCTrilhasPlugin plugin;
@@ -19,10 +26,11 @@ public class AdminSubCommand implements SubCommand {
 
     public AdminSubCommand(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
-        // Registra os subcomandos de administração aqui
+        // Registra todos os subcomandos de administração disponíveis.
         registerSubCommand(new AddBadgeSubCommand(plugin));
         registerSubCommand(new RemoveBadgeSubCommand(plugin));
         registerSubCommand(new StatsSubCommand(plugin));
+        registerSubCommand(new ReloadSubCommand(plugin));
     }
 
     private void registerSubCommand(SubCommand subCommand) {
@@ -36,7 +44,7 @@ public class AdminSubCommand implements SubCommand {
 
     @Override
     public String getDescription() {
-        return "Gerencia as insígnias dos jogadores.";
+        return "Gerencia as funções de administração do plugin.";
     }
 
     @Override
@@ -54,6 +62,14 @@ public class AdminSubCommand implements SubCommand {
         return true;
     }
 
+    /**
+     * Executa o roteador de subcomandos de administração.
+     * Identifica o subcomando chamado e delega a execução para a classe correspondente.
+     * Se nenhum subcomando for fornecido, exibe a mensagem de ajuda.
+     *
+     * @param sender A entidade que executou o comando.
+     * @param args Os argumentos fornecidos. O primeiro argumento deve ser o nome do subcomando.
+     */
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (args.length == 0) {
@@ -74,11 +90,15 @@ public class AdminSubCommand implements SubCommand {
         subCommand.execute(sender, subCommandArgs);
     }
 
+    /**
+     * Envia uma mensagem de ajuda listando todos os subcomandos de administração disponíveis.
+     * @param sender A entidade para a qual a mensagem será enviada.
+     */
     private void sendHelpMessage(CommandSender sender) {
         sender.sendMessage(ChatColor.GOLD + "--- Comandos de Administração MCTrilhas ---");
-        for (SubCommand subCommand : subCommands.values()) {
-            sender.sendMessage(ChatColor.AQUA + subCommand.getSyntax() + ChatColor.GRAY + " - " + subCommand.getDescription());
-        }
+        subCommands.values().stream()
+                .sorted(Comparator.comparing(SubCommand::getName))
+                .forEach(subCmd -> sender.sendMessage(ChatColor.AQUA + subCmd.getSyntax() + ChatColor.GRAY + " - " + subCmd.getDescription()));
         sender.sendMessage(ChatColor.GOLD + "-----------------------------------------");
     }
 
@@ -89,6 +109,16 @@ public class AdminSubCommand implements SubCommand {
     public Map<String, SubCommand> getAdminSubCommands() {
         return Collections.unmodifiableMap(subCommands);
     }
+
+    /**
+     * Fornece sugestões de autocompletar para o comando de administração.
+     * Se o usuário estiver digitando o nome do subcomando, sugere os nomes disponíveis.
+     * Caso contrário, delega o autocompletar para o subcomando específico.
+     *
+     * @param sender A entidade que está tentando autocompletar o comando.
+     * @param args Os argumentos atuais digitados pelo remetente.
+     * @return Uma lista de sugestões para o próximo argumento.
+     */
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
         // /scout admin <sub-comando> [argumentos...]

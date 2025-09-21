@@ -8,6 +8,12 @@ import org.bukkit.entity.Player;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Implementa o subcomando de jogador `/scout toggleprogress`.
+ * <p>
+ * Este comando permite que um jogador ative ou desative o recebimento
+ * de mensagens no chat sobre o progresso de suas insígnias.
+ */
 public class ToggleProgressSubCommand implements SubCommand {
 
     private final MCTrilhasPlugin plugin;
@@ -23,7 +29,7 @@ public class ToggleProgressSubCommand implements SubCommand {
 
     @Override
     public String getDescription() {
-        return "Ativa ou desativa as mensagens de progresso.";
+        return "Ativa ou desativa as mensagens de progresso de insígnias.";
     }
 
     @Override
@@ -41,6 +47,12 @@ public class ToggleProgressSubCommand implements SubCommand {
         return false;
     }
 
+    /**
+     * Executa a lógica para alternar a exibição de mensagens de progresso.
+     *
+     * @param sender A entidade que executou o comando (deve ser um jogador).
+     * @param args Argumentos do comando (não utilizados neste subcomando).
+     */
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {

@@ -52,6 +52,37 @@ MCTrilhas/
     3.  **Verificação:** O método `addProgress` verifica se o progresso atingiu o `required-progress` definido no `config.yml`.
     4.  **Concessão:** Se o requisito for atingido, a insígnia é adicionada ao jogador e o método `grantReward()` é chamado.
 
+### 3.1.1. Estrutura de uma Insígnia (`badges/Badge.java`)
+*   **O que é:** É uma classe de dados (Record) imutável que representa a definição de uma única insígnia.
+*   **O que faz:** Armazena as propriedades estáticas de uma insígnia, carregadas a partir do `config.yml` pelo `BadgeManager`.
+*   **Propriedades:**
+    *   `id`: O identificador único da insígnia (ex: "mining").
+    *   `name`: O nome de exibição (ex: "Minerador Mestre").
+    *   `description`: A descrição que aparece na GUI.
+    *   `type`: O `BadgeType` associado, que liga a insígnia a uma ação específica do jogo.
+    *   `requirement`: O valor numérico necessário para conquistar a insígnia.
+    *   `icon`: O material do ícone que representa a insígnia na GUI.
+
+### 3.1.2. Gerenciador de Insígnias (`badges/BadgeManager.java`)
+*   **O que é:** É a classe responsável por carregar e gerenciar todas as definições de insígnias.
+*   **O que faz:**
+    *   **Carregamento:** No início do plugin, o método `loadBadgesFromConfig` lê a seção `badges` do `config.yml`.
+    *   **Criação:** Para cada entrada válida, ele cria um `record` do tipo `Badge` e o armazena em um mapa interno (`Map<String, Badge>`).
+    *   **Acesso:** Fornece métodos para obter uma insígnia específica por seu ID (`getBadge`) ou uma lista de todas as insígnias carregadas (`getAllBadges`).
+*   **Dependências:** `MCTrilhasPlugin`, `BadgeConfigManager`, `Badge`, `BadgeType`.
+
+### 3.1.2.1. Gerenciador de Configuração de Insígnias (`managers/BadgeConfigManager.java`) - [OBSOLETO]
+*   **O que é:** Uma classe legada que foi originalmente criada para gerenciar um arquivo `badges.yml` separado.
+*   **Status Atual:** **OBSOLETA**. Esta classe agora é redundante, pois todas as configurações de insígnias foram movidas para o `config.yml` principal, que é gerenciado diretamente pela classe `MCTrilhasPlugin`.
+*   **Plano de Ação:** A classe foi marcada como `@Deprecated`. Seu uso deve ser evitado. As classes que ainda a utilizam serão refatoradas para usar `plugin.getConfig()` para acesso geral à configuração e `plugin.getBadgeManager()` para obter dados específicos de insígnias, respeitando a arquitetura de "fonte única da verdade". A classe será removida completamente após a refatoração.
+
+### 3.1.3. Tipos de Insígnia (`badges/BadgeType.java`)
+*   **O que é:** Um `enum` que define as categorias de progresso rastreáveis.
+*   **O que faz:** Cada constante do enum (ex: `MINING`) serve como um ID único para um tipo de ação no jogo. Ele atua como a "cola" que liga um evento (capturado por um `Listener`) à sua respectiva insígnia no `config.yml` e ao seu contador de progresso no `PlayerData`.
+*   **Propriedades:**
+    *   **Constante Enum:** O nome da constante (ex: `MINING`) é usado como o ID interno e deve corresponder à chave da insígnia no `config.yml`.
+    *   **`displayName`:** Um nome amigável para a categoria (ex: "Mineração"), usado para exibição em GUIs ou mensagens.
+
 ### 3.2. Sistema de Recompensas
 *   **Descrição:** Entrega recompensas configuráveis quando uma insígnia é conquistada.
 *   **Fluxo de Trabalho:**
@@ -61,11 +92,40 @@ MCTrilhas/
         *   **Itens (`reward-item-data`):** Cria um `ItemStack` com material, nome, lore e encantamentos customizados.
         *   **Mapas-Troféu (`reward-map`):** Chama o `MapRewardManager` para criar um mapa com uma imagem customizada e o nome do jogador.
 
-### 3.3. Integração Web
+### 3.2.1. Sistema de Renderização de Mapas
+*   **Descrição:** Um sistema para criar mapas customizados com imagens estáticas.
+*   **Estrutura:** `maps/MapRewardManager.java`, `maps/ImageMapRenderer.java`.
+*   **Lógica:**
+    1.  O `MapRewardManager` é chamado quando uma recompensa de mapa é concedida.
+    2.  Ele cria uma nova `MapView` no mundo do jogador.
+    3.  Ele instancia o `ImageMapRenderer`, passando o caminho da imagem da insígnia (localizada em `resources/maps/`).
+    4.  O `ImageMapRenderer` carrega a imagem do JAR do plugin.
+    5.  O `ImageMapRenderer` é adicionado à `MapView`. Na primeira vez que o mapa é renderizado para um jogador, o renderer desenha a imagem no `MapCanvas`.
+    6.  Uma otimização garante que a imagem seja desenhada apenas uma vez por mapa, economizando recursos.
+    7.  O `MapRewardManager` então cria um `ItemStack` do tipo `FILLED_MAP`, associa a `MapView` a ele e o entrega ao jogador.
+
 ### 3.3. Sistema de Progressão de Ranques
 *   **Descrição:** Um sistema de progressão passivo que promove jogadores com base em tempo de jogo, insígnias conquistadas e tempo de conta.
 *   **Estrutura:** `ranks/Rank.java` (Enum), `ranks/RankManager.java`.
 *   **Lógica:** O `RankManager` é chamado sempre que um jogador ganha uma insígnia, verificando se ele atende aos requisitos para o próximo ranque definidos no `config.yml`.
+
+### 3.3.1. Definição de Ranques (`ranks/Rank.java`)
+*   **O que é:** Um `enum` que define todos os ranques disponíveis no servidor e sua hierarquia.
+*   **O que faz:**
+    *   **Hierarquia:** A ordem das constantes no enum define a sequência de progressão (de `FILHOTE` a `PIONEIRO`).
+    *   **Propriedades:** Cada ranque armazena um `displayName` (nome formatado) e um `color` (código de cor para o chat).
+    *   **Lógica de Progressão:** Contém o método `getNext()` que retorna o próximo ranque na hierarquia, crucial para o `RankManager` determinar qual é a próxima meta do jogador.
+    *   **Ranques Especiais:** O ranque `CHEFE` é tratado como um ranque especial, geralmente atribuído manualmente, e não faz parte da linha de progressão automática.
+*   **Dependências:** Nenhuma. É uma classe de definição autossuficiente.
+
+### 3.3.2. Gerenciador de Ranques (`ranks/RankManager.java`)
+*   **O que é:** A classe que contém a lógica de promoção de ranques.
+*   **O que faz:**
+    1.  O método `checkAndPromote` é chamado sempre que um jogador completa uma ação significativa (como ganhar uma insígnia).
+    2.  Ele verifica o ranque atual do jogador e os requisitos para o próximo ranque, definidos no `config.yml` (tempo de jogo, número de insígnias, idade da conta).
+    3.  Se o jogador atende a todos os requisitos, ele é promovido.
+    4.  O processo se repete em um loop, permitindo que um jogador seja promovido por múltiplos ranques de uma só vez se ele atender aos requisitos.
+*   **Dependências:** `MCTrilhasPlugin`, `PlayerDataManager`, `Rank`.
 
 ### 3.4. Caça ao Tesouro
 *   **Descrição:** Uma quest repetível e aleatória para jogadores que já conquistaram a insígnia de Explorador.
@@ -77,10 +137,15 @@ MCTrilhas/
 *   **Descrição:** Expõe dados do plugin (como o ranque do jogador) para serem usados em outros plugins (de chat, nametags, scoreboards, etc.).
 *   **Estrutura:** `integrations/MCTrilhasExpansion.java`.
 *   **Placeholders Disponíveis:**
-    *   `%mctrilhas_rank_prefix%`: Exibe o prefixo do ranque (ex: `[Pioneiro]`).
-    *   `%mctrilhas_rank_name%`: Exibe apenas o nome do ranque.
-    *   `%mctrilhas_rank_progress_bar%`: Exibe uma barra de progresso visual para o próximo ranque.
-    *   `%mctrilhas_rank_progress_percentage%`: Exibe a porcentagem de progresso.
+    *   `%mctrilhas_rank%`: Retorna o ID do ranque (ex: `ESCOTEIRO`).
+    *   `%mctrilhas_rank_formatted%`: Retorna o nome formatado do ranque (ex: `Escoteiro`).
+    *   `%mctrilhas_rank_progress%`: Mostra o progresso para o próximo ranque (ex: `15/20 Insígnias`).
+    *   `%mctrilhas_badges_daily%`: Contagem de insígnias ganhas hoje.
+    *   `%mctrilhas_badges_monthly%`: Contagem de insígnias ganhas no mês.
+    *   `%mctrilhas_badges_alltime%`: Contagem total de insígnias.
+    *   `%mctrilhas_rank_pos_daily%`: Posição no ranking diário (ex: `#1`).
+    *   `%mctrilhas_rank_pos_monthly%`: Posição no ranking mensal.
+    *   `%mctrilhas_rank_pos_alltime%`: Posição no ranking geral.
 
 ### 3.6. API Web Integrada
 *   **Descrição:** Inicia um servidor HTTP leve dentro do próprio plugin. Este servidor tem duas funções: servir uma página web estática (localizada em `resources/web`) e fornecer um endpoint de API com dados dinâmicos do servidor.
@@ -97,6 +162,15 @@ MCTrilhas/
     *   **Sessão do Admin:** Após o login, um token JWT é gerado e usado para autenticar requisições a endpoints protegidos (ex: `/api/v1/admin/*`).
     *   **Acesso do Jogador:** O acesso aos dados do jogador é protegido por um token único e secreto gerado em jogo.
 *   **Configuração:** A porta, ativação, URL base, tempo de cache e configurações de segurança (salt, jwt-secret) são controlados pela seção `web-api` no `config.yml`.
+
+### 3.6.1. Servidor de Arquivos Seguro (`web/SecureHttpFileHandler.java`)
+*   **O que é:** Um manipulador de requisições HTTP (`HttpHandler`) especializado em servir arquivos estáticos.
+*   **O que faz:** É responsável por entregar todos os arquivos dos painéis web (HTML, CSS, JS, imagens) ao navegador do usuário.
+*   **Segurança:** Sua principal característica é a proteção contra ataques de "Path Traversal". Ele valida o caminho de cada arquivo solicitado para garantir que ele esteja estritamente dentro do diretório `web/` do plugin, impedindo o acesso a arquivos sensíveis do servidor.
+*   **Lógica Adicional:**
+    *   **MIME Types:** Identifica a extensão do arquivo para enviar o `Content-Type` correto ao navegador (ex: `text/html`, `image/png`).
+    *   **Página 404:** Se um arquivo não é encontrado, ele tenta servir uma página `404.html` personalizada, se existir.
+*   **Dependências:** Utilizado pelo `HttpApiManager` para lidar com todas as requisições que não são para a API.
 
 ### 3.7. Portal da Família (Painel do Jogador)
 *   **Descrição:** Uma página web individual e segura para cada jogador (e sua família) acompanhar seu progresso, estatísticas e tempo de jogo.
@@ -158,17 +232,78 @@ MCTrilhas/
     2.  **Gerenciamento de Jogadores:** Criar uma interface para visualizar e editar dados de jogadores (conceder insígnias, ajustar Totens, etc.) via API.
     3.  **Ações de Moderação:** Adicionar botões na lista de jogadores para executar comandos (kick, ban) remotamente.
 
+### 3.8. Sistema de Capture The Flag (CTF)
+*   **Descrição:** Um minigame competitivo onde duas equipes se enfrentam para capturar a bandeira inimiga.
+*   **Estrutura:** `ctf/CTFManager.java`, `ctf/CTFGame.java`, `ctf/CTFArena.java`, `ctf/CTFTeam.java`.
+*   **Dados:**
+    *   **`ctf_arenas.yml`**: Armazena a configuração de todas as arenas, incluindo nome, número de jogadores e as coordenadas do lobby, spawns e bandeiras.
+    *   **`playerdata/<UUID>.yml`**: As estatísticas de cada jogador (vitórias, abates, capturas) são salvas em uma seção `ctf-stats` dentro do seu arquivo de dados.
+*   **Lógica:**
+    1.  **Fila:** O `CTFManager` gerencia uma fila de jogadores (`/ctf join`).
+    2.  **Início da Partida:** Quando há jogadores suficientes e uma arena livre, uma contagem regressiva é iniciada. Ao final, uma instância de `CTFGame` é criada.
+    3.  **Gerenciamento do Jogo:** A classe `CTFGame` controla toda a lógica da partida: teleporta os jogadores, aplica kits, gerencia o placar, o tempo e as regras de captura e retorno da bandeira.
+    4.  **Fim da Partida:** Ao final, `CTFGame` anuncia o vencedor, salva as estatísticas dos jogadores e os retorna ao lobby. O `CTFManager` então remove o jogo da lista de partidas ativas.
+*   **Comandos:**
+    *   `/ctf join`: Entra na fila.
+    *   `/ctf leave`: Sai da fila ou da partida.
+    *   `/ctf admin create/set/save`: Comandos para administradores criarem novas arenas.
+
+### 3.9. Sistema de HUD (Heads-Up Display)
+*   **Descrição:** Um sistema de exibição de informações na tela do jogador através de uma `BossBar`.
+*   **Estrutura:** `hud/HUDManager.java`.
+*   **Lógica:**
+    1.  O jogador usa o comando `/hud` para ativar ou desativar a exibição.
+    2.  O `HUDManager` cria uma `BossBar` para o jogador e a adiciona a um mapa de HUDs ativos.
+    3.  Uma tarefa assíncrona (`BukkitRunnable`) é executada periodicamente para atualizar as informações.
+    4.  Para cada jogador com HUD ativo, a tarefa busca os dados mais recentes (ranque, Totens, contagem de insígnias) e atualiza o título da `BossBar`.
+    5.  A `BossBar` é removida automaticamente quando o jogador sai do servidor ou quando o plugin é desativado/recarregado.
+
 ---
 
 ## 5. Estrutura de Comandos
+
+### 5.0.1. Arquitetura de Comandos (Interface SubCommand)
+*   **O que é:** A interface `SubCommand.java` é o "molde" para todos os subcomandos do plugin.
+*   **O que faz:** Ela define um contrato padrão que todas as classes de subcomando devem seguir. Isso garante que cada comando tenha um nome, descrição, sintaxe, permissão e um método de execução, além de um método padrão para autocompletar.
+*   **Vantagens:** Esta abordagem torna o sistema de comandos modular e fácil de expandir. Para adicionar um novo subcomando, basta criar uma nova classe que implemente esta interface e registrá-la no roteador de comandos apropriado (como `ScoutCommandExecutor` ou `AdminSubCommand`).
 
 ### 5.1. Comandos Atuais
 | Comando | Executor | Descrição |
 |---|---|---|
 | `/scout <subcomando>` | `ScoutCommandExecutor` | Comando principal que delega para todos os subcomandos de jogador e admin. |
-| `/daily` | `DailyCommand` | Permite que jogadores coletem sua recompensa diária. |
-| `/ranque` | `RankCommand` | Mostra o progresso do jogador para o próximo ranque. |
-| `/tesouro <subcomando>` | `TreasureHuntCommand` | Gerencia a participação na Caça ao Tesouro. |
+| `/daily` | `DailyCommand` | Permite que um jogador colete sua recompensa diária (Totens e/ou itens) após um cooldown configurável. |
+| `/ranque` | `RankCommand` | Exibe o ranque atual do jogador e os requisitos para o próximo. |
+| `/familia token` | `FamilyCommand` | Gera um link de acesso único e seguro para o "Portal da Família" do jogador. |
+| `/hud` | `HUDCommand` | Ativa ou desativa a exibição de informações na tela (HUD). |
+| `/tesouro <subcomando>` | `TreasureHuntCommand` | Gerencia a participação do jogador na Caça ao Tesouro (iniciar, obter pista, cancelar). |
+
+### 5.1.1. Subcomandos de Jogador (`/scout ...`)
+| Subcomando | Classe | Descrição |
+|---|---|---|
+| `badges [jogador]` | `BadgesSubCommand` | Exibe as insígnias conquistadas pelo jogador (em GUI ou chat). |
+| `progress [jogador]` | `ProgressSubCommand` | Mostra o progresso detalhado para as próximas insígnias e ranque. |
+| `getmap <insignia>` | `GetMapSubCommand` | Recupera o mapa-troféu de uma insígnia já conquistada. |
+| `toggleprogress` | `ToggleProgressSubCommand` | Ativa ou desativa as mensagens de progresso de insígnias no chat. |
+| `version` | `VersionSubCommand` | Exibe a versão atual do plugin. |
+
+#### Detalhes do `/scout getmap`
+*   **Fluxo de Trabalho:**
+    1.  Verifica se o jogador que executou o comando já conquistou a insígnia especificada.
+    2.  Verifica se a insígnia em questão possui uma recompensa do tipo `reward-map` no `config.yml`.
+    3.  Verifica se o jogador já possui uma cópia do mapa-troféu em seu inventário para evitar duplicação.
+    4.  Se todas as condições forem atendidas e o jogador não tiver o mapa, o `MapRewardManager` é chamado para criar e entregar uma nova cópia do troféu.
+*   **Autocompletar Inteligente:** O comando sugere apenas as insígnias que o jogador já conquistou e que possuem um mapa-troféu associado.
+
+### 5.1.2. Subcomandos de Administração (`/scout admin ...`)
+O comando `/scout admin` é gerenciado pela classe `AdminSubCommand`, que atua como um roteador, delegando a execução para os seguintes subcomandos específicos:
+
+| Subcomando | Classe | Descrição |
+|---|---|---|
+| `addbadge <jogador> <insignia>` | `AddBadgeSubCommand` | Concede uma insígnia e sua recompensa a um jogador online. |
+| `removebadge <jogador> <insignia>` | `RemoveBadgeSubCommand` | Remove uma insígnia de um jogador (online ou offline) e zera o progresso associado. |
+| `stats <jogador>` | `StatsSubCommand` | Exibe as estatísticas de progresso detalhadas de um jogador (online ou offline). |
+| `reload` | `ReloadSubCommand` | Recarrega os arquivos de configuração (`config.yml`, `treasure_locations.yml`) e os caches dependentes (insígnias, locais de tesouro). |
+
 
 ### 5.2. Comandos Planejados
 | Comando | Descrição |
@@ -199,3 +334,43 @@ MCTrilhas/
     *   **Propósito:** Armazenará os dados de cada clã em um arquivo YAML separado.
     *   **Conteúdo:** Nome do clã, tag, líder, oficiais, membros, nível, banco de Totens, etc.
     *   **Localização:** `plugins/MCTrilhas/clans/`
+
+### 6.1. Gerenciador de Dados do Jogador (`data/PlayerDataManager.java`)
+*   **O que é:** É a classe central para toda a persistência de dados dos jogadores. Ela atua como uma camada de abstração entre o plugin e os arquivos YAML individuais de cada jogador.
+*   **O que faz:**
+    *   **Carregamento e Salvamento:** Gerencia a leitura (`loadPlayerData`) e a escrita (`savePlayerData`) dos dados dos jogadores em arquivos `playerdata/<UUID>.yml`.
+    *   **Cache:** Mantém um cache em memória (`playerDataCache`) com os dados de todos os jogadores online para evitar operações de disco constantes e garantir alta performance.
+    *   **Operações Assíncronas:** Realiza operações pesadas, como o cálculo de rankings (`getAllTimeBadgeCountsAsync`), de forma assíncrona para não travar o servidor.
+    *   **Gerenciamento de Tokens:** Possui um cache otimizado (`tokenToUuidCache`) para validar rapidamente os tokens de acesso do Portal da Família.
+    *   **Lógica de Migração:** Contém a lógica para atualizar automaticamente os arquivos de dados de jogadores de formatos antigos para novos quando eles fazem login.
+*   **Dependências:** `MCTrilhasPlugin`, `PlayerData`, `Rank`, `BadgeType`, `ItemFactory`.
+
+---
+
+## 7. Automação e Build (CI/CD)
+
+### 7.1. Workflow de Build (`.github/workflows/build.yml`)
+*   **O que é:** É um workflow do GitHub Actions que automatiza o processo de compilação e distribuição do plugin.
+*   **O que faz:**
+    *   **Gatilhos:** É acionado automaticamente em duas situações:
+        1.  Quando um novo código é enviado (`push`) para a branch `main`.
+        2.  Quando uma nova tag de versão (ex: `v1.2.3`) é criada.
+    *   **Processo de Build:**
+        1.  Configura um ambiente Linux com Java 17.
+        2.  Valida a sintaxe do arquivo `plugin.yml` para evitar erros de configuração.
+        3.  Usa o Maven para compilar o código-fonte e empacotar o plugin em um arquivo `.jar`. A versão do plugin é definida dinamicamente com base no gatilho (versão de desenvolvimento para a `main`, versão da tag para releases).
+    *   **Distribuição:**
+        *   **Build de Desenvolvimento:** Para pushes na `main`, o `.jar` resultante é salvo como um "artefato" do build, disponível para download e testes.
+        *   **Release Oficial:** Para novas tags, o workflow cria automaticamente um novo "Release" na página do GitHub e anexa o arquivo `.jar` a ele, tornando-o público.
+*   **Dependências:** O workflow depende do ambiente do GitHub Actions, do Maven e de actions da comunidade para tarefas específicas como `actions/checkout`, `actions/setup-java`, e `softprops/action-gh-release`.
+
+---
+
+## 8. Ambiente de Desenvolvimento
+
+### 8.1. Configurações do VSCode (`.vscode/settings.json`)
+*   **O que é:** Um arquivo que define configurações específicas para o editor Visual Studio Code, aplicadas automaticamente quando o projeto é aberto.
+*   **O que faz:**
+    *   **`java.compile.nullAnalysis.mode`:** Ativa a análise de código em tempo real para detectar possíveis erros de `NullPointerException`, aumentando a qualidade e a segurança do código.
+    *   **`java.configuration.updateBuildConfiguration`:** Garante que o VSCode atualize automaticamente sua configuração de build sempre que o arquivo `pom.xml` for modificado, mantendo as dependências e a estrutura do projeto sempre sincronizadas.
+*   **Propósito:** O objetivo deste arquivo é padronizar o ambiente de desenvolvimento para todos os colaboradores que usam o VSCode, garantindo consistência e ajudando a evitar erros comuns. Ele não afeta o resultado final da compilação do plugin.

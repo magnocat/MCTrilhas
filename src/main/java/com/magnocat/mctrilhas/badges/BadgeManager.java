@@ -1,8 +1,5 @@
 package com.magnocat.mctrilhas.badges;
 
-import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import org.bukkit.configuration.file.FileConfiguration;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -10,8 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.configuration.file.FileConfiguration;
+
+import com.magnocat.mctrilhas.MCTrilhasPlugin;
+
 /**
- * Manages the loading and retrieval of badge definitions from badges.yml.
+ * Gerencia o carregamento e a recuperação das definições de insígnias da configuração.
+ * Esta classe lê a seção 'badges' do config.yml, cria objetos Badge,
+ * e os armazena em um cache em memória para acesso rápido em todo o plugin.
  */
 @SuppressWarnings("deprecation")
 public class BadgeManager {
@@ -20,8 +23,8 @@ public class BadgeManager {
     private final Map<String, Badge> badges = new LinkedHashMap<>();
 
     /**
-     * Constructs a new BadgeManager.
-     * @param plugin The main plugin instance.
+     * Constrói um novo BadgeManager.
+     * @param plugin A instância principal do plugin.
      */
     public BadgeManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
@@ -29,7 +32,10 @@ public class BadgeManager {
     }
 
     /**
-     * Carrega ou recarrega todas as definições de insígnias do arquivo badges.yml.
+     * Carrega ou recarrega todas as definições de insígnias do arquivo config.yml.
+     * Este método limpa o cache de insígnias existente e o preenche novamente analisando
+     * a seção 'badges' da configuração. Ele registra avisos para entradas de insígnias
+     * malformadas e erros para problemas inesperados.
      */
     public void loadBadgesFromConfig() {
         badges.clear();
@@ -72,10 +78,23 @@ public class BadgeManager {
         plugin.getLogger().info(badges.size() + " insígnias foram carregadas.");
     }
 
+    /**
+     * Recupera a definição de uma insígnia específica pelo seu ID.
+     * A busca não diferencia maiúsculas de minúsculas.
+     *
+     * @param id O identificador único da insígnia (ex: "mining").
+     * @return O objeto {@link Badge} se encontrado, caso contrário, nulo.
+     */
     public Badge getBadge(String id) {
         return badges.get(id.toLowerCase());
     }
 
+    /**
+     * Recupera uma lista de todas as definições de insígnias carregadas.
+     * A ordem das insígnias é preservada a partir do arquivo de configuração.
+     *
+     * @return Uma {@link List} não modificável de todos os objetos {@link Badge}.
+     */
     public List<Badge> getAllBadges() {
         return Collections.unmodifiableList(new ArrayList<>(badges.values()));
     }
