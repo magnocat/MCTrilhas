@@ -46,7 +46,6 @@ import com.magnocat.mctrilhas.listeners.PlayerJoinListener;
 import com.magnocat.mctrilhas.listeners.PlayerQuitListener;
 import com.magnocat.mctrilhas.listeners.TreasureHuntListener;
 import com.magnocat.mctrilhas.ctf.CTFListener;
-import com.magnocat.mctrilhas.managers.BadgeConfigManager;
 import com.magnocat.mctrilhas.maps.MapRewardManager;
 import com.magnocat.mctrilhas.menus.BadgeMenu;
 import com.magnocat.mctrilhas.quests.TreasureHuntManager;
@@ -64,7 +63,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     // --- Core Managers ---
     private PlayerDataManager playerDataManager;
     private BadgeManager badgeManager;
-    private BadgeConfigManager badgeConfigManager;
     private BlockPersistenceManager blockPersistenceManager;
     private RankManager rankManager;
 
@@ -157,7 +155,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     }
 
     private void loadManagers() {
-        this.badgeConfigManager = new BadgeConfigManager(this);
         this.playerDataManager = new PlayerDataManager(this);
         this.badgeManager = new BadgeManager(this);
         this.blockPersistenceManager = new BlockPersistenceManager(this);
@@ -240,10 +237,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         return badgeManager;
     }
 
-    public BadgeConfigManager getBadgeConfigManager() {
-        return badgeConfigManager;
-    }
-
     public BlockPersistenceManager getBlockPersistenceManager() {
         return blockPersistenceManager;
     }
@@ -304,8 +297,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         reloadConfig();
         // Tenta reestabelecer a conexão com a economia, caso tenha sido adicionada após o boot.
         setupEconomy();
-
-        badgeConfigManager.reloadBadgeConfig();
 
         // Notifica o BadgeManager para recarregar sua lista interna de insígnias
         badgeManager.loadBadgesFromConfig();

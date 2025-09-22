@@ -12,10 +12,39 @@
       <resource>
         <filtering>true</filtering>
         <directory>src/main/resources</directory>
+        <includes>
+          <include>plugin.yml</include>
+          <include>build.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <excludes>
+          <exclude>plugin.yml</exclude>
+          <exclude>build.properties</exclude>
+        </excludes>
       </resource>
     </resources>
     <finalName>${project.name}</finalName>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>timestamp-property</id>
+            <goals>
+              <goal>timestamp-property</goal>
+            </goals>
+            <configuration>
+              <name>build.timestamp</name>
+              <pattern>${maven.build.timestamp.format}</pattern>
+              <timeZone>UTC</timeZone>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.11.0</version>
@@ -39,6 +68,7 @@
           </execution>
         </executions>
         <configuration>
+          <minimizeJar>true</minimizeJar>
           <relocations>
             <relocation>
               <pattern>com.google.gson</pattern>

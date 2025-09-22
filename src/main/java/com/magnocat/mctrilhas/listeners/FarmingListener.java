@@ -30,7 +30,7 @@ public class FarmingListener implements Listener {
      * Loads the list of trackable crop materials from the config.yml.
      */
     private void loadTrackedCrops() {
-        List<String> cropNames = plugin.getBadgeConfigManager().getBadgeConfig().getStringList("farming.tracked-items");
+        List<String> cropNames = plugin.getConfig().getStringList("badges.FARMING.tracked-items");
         for (String name : cropNames) {
             try {
                 trackedCrops.add(Material.valueOf(name.toUpperCase()));

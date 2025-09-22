@@ -1279,14 +1279,8 @@ public class HttpApiManager {
 
         // Adiciona os requisitos de progresso para cada insígnia
         Map<String, Double> badgeRequirements = new HashMap<>();
-        for (com.magnocat.mctrilhas.badges.BadgeType badgeType : com.magnocat.mctrilhas.badges.BadgeType.values()) {
-            String configKey = plugin.getBadgeConfigManager().getBadgeConfigKey(badgeType.name());
-            if (configKey != null) {
-                double required = plugin.getBadgeConfigManager().getBadgeConfig().getDouble("badges." + configKey + ".required-progress", 0.0);
-                if (required > 0) {
-                    badgeRequirements.put(badgeType.name(), required);
-                }
-            }
+        for (com.magnocat.mctrilhas.badges.Badge badge : plugin.getBadgeManager().getAllBadges()) {
+            badgeRequirements.put(badge.type().name(), badge.requirement());
         }
         responseData.put("badgeRequirements", badgeRequirements);
 

@@ -3,12 +3,15 @@ package com.magnocat.mctrilhas.commands.subcommands;
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.badges.Badge;
 import com.magnocat.mctrilhas.badges.BadgeType;
+import com.magnocat.mctrilhas.data.PlayerDataManager;
 import com.magnocat.mctrilhas.data.PlayerData;
+import com.magnocat.mctrilhas.ranks.Rank;
 import com.magnocat.mctrilhas.utils.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
@@ -102,7 +105,32 @@ public class ProgressSubCommand implements SubCommand {
         sender.sendMessage(""); // Spacer
         sender.sendMessage(ChatColor.DARK_AQUA + "» Progresso de Ranque:");
 
-        MessageUtils.displayRankProgress(sender, target, playerData, plugin);
+        // Lógica replicada de MessageUtils para suportar OfflinePlayer diretamente.
+        Rank currentRank = playerData.getRank();
+        Rank nextRank = PlayerDataManager.getNextRank(currentRank);
+
+        if (nextRank == null) {
+            sender.sendMessage(ChatColor.GREEN + "   O jogador já alcançou o ranque máximo!");
+            return;
+        }
+
+        FileConfiguration config = plugin.getConfig();
+        String path = "ranks." + nextRank.name();
+
+        if (!config.isConfigurationSection(path)) {
+            sender.sendMessage(ChatColor.GRAY + "   (Requisitos para o próximo ranque não configurados)");
+            return;
+        }
+
+        sender.sendMessage(ChatColor.YELLOW + "   Próximo Ranque: " + nextRank.getColor() + nextRank.getDisplayName());
+
+        long reqPlaytime = config.getLong(path + ".required-playtime-hours", -1);
+        int reqBadges = config.getInt(path + ".required-badges", -1);
+        long reqAge = config.getLong(path + ".required-account-age-days", -1);
+
+        MessageUtils.displayRequirement(sender, "Horas de Jogo", playerData.getActivePlaytimeTicks() / 72000, reqPlaytime);
+        MessageUtils.displayRequirement(sender, "Insígnias Conquistadas", playerData.getEarnedBadgesMap().size(), reqBadges);
+        MessageUtils.displayRequirement(sender, "Dias de Conta", (System.currentTimeMillis() - target.getFirstPlayed()) / (1000L * 60 * 60 * 24), reqAge);
     }
 
     private OfflinePlayer getTargetPlayer(CommandSender sender, String[] args) {
@@ -118,10 +146,13 @@ public class ProgressSubCommand implements SubCommand {
             }
             return target;
         }
+        // Se nenhum jogador foi especificado como argumento...
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.RED + "Especifique um jogador para ver o progresso.");
+            // ...e o comando foi executado pelo console, é um erro.
+            sender.sendMessage(ChatColor.RED + "O console deve especificar um jogador. Uso: /scout progress <jogador>");
             return null;
         }
+        // ...caso contrário, o alvo é o próprio jogador que executou o comando.
         return (Player) sender;
     }
 

@@ -85,13 +85,13 @@ public class BadgeMenu {
         Material iconMaterial;
         try {
             // Garante que o ícone não seja nulo antes de tentar usá-lo.
-            String iconName = badge.getIcon();
+            String iconName = badge.icon();
             if (iconName == null || iconName.isEmpty()) {
                 throw new IllegalArgumentException("Nome do ícone está vazio.");
             }
             iconMaterial = Material.valueOf(iconName.toUpperCase());
         } catch (IllegalArgumentException | NullPointerException e) {
-            plugin.getLogger().warning("Ícone inválido ou não definido para a insígnia '" + badge.getId() + "'. Usando BARRIER como padrão.");
+            plugin.getLogger().warning("Ícone inválido ou não definido para a insígnia '" + badge.id() + "'. Usando BARRIER como padrão.");
             iconMaterial = Material.BARRIER;
         }
 
@@ -103,20 +103,20 @@ public class BadgeMenu {
             return item;
         }
 
-        boolean hasBadge = playerData.hasBadge(badge.getId());
+        boolean hasBadge = playerData.hasBadge(badge.id());
 
         // Define o nome do item, com cor baseada no status (conquistada ou não).
-        meta.setDisplayName((hasBadge ? ChatColor.GOLD : ChatColor.GRAY) + badge.getName());
+        meta.setDisplayName((hasBadge ? ChatColor.GOLD : ChatColor.GRAY) + badge.name());
 
         List<String> lore = new ArrayList<>();
-        lore.add(ChatColor.DARK_AQUA + badge.getDescription());
+        lore.add(ChatColor.DARK_AQUA + badge.description());
         lore.add(" "); // Linha em branco para espaçamento
 
         if (hasBadge) {
             lore.add(ChatColor.GREEN + "✔ Conquistada!");
         } else {
-            double progress = playerData.getProgress(badge.getType());
-            double required = badge.getRequirement();
+            double progress = playerData.getProgress(badge.type());
+            double required = badge.requirement();
             String progressFormatted = numberFormat.format(progress);
             String requiredFormatted = numberFormat.format(required);
 
@@ -125,7 +125,7 @@ public class BadgeMenu {
         }
 
         lore.add(" ");
-        lore.add(ChatColor.DARK_GRAY + "Tipo: " + badge.getType().getName());
+        lore.add(ChatColor.DARK_GRAY + "Tipo: " + badge.type().getDisplayName());
 
         meta.setLore(lore);
         item.setItemMeta(meta);

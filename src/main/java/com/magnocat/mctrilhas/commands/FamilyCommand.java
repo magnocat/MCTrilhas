@@ -12,7 +12,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class FamilyCommand implements CommandExecutor {
 /**
  * Implementa o comando `/familia token`.
  * <p>
@@ -21,7 +20,6 @@ public class FamilyCommand implements CommandExecutor {
  * A cada uso, um novo token é gerado, invalidando o anterior por segurança.
  */
 public class FamilyCommand implements CommandExecutor {
-
     private final MCTrilhasPlugin plugin;
 
     /**
