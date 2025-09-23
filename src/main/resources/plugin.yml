@@ -64,6 +64,7 @@ permissions:
       mctrilhas.progress.other: true
       mctrilhas.ranque: true
       mctrilhas.scout.use: true
+      mctrilhas.scout.board: true
       mctrilhas.scout.getmap: true
       mctrilhas.scout.admin: true
       mctrilhas.tesouro: true
@@ -74,6 +75,9 @@ permissions:
       mctrilhas.duel.stats.other: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
+    default: true
+  mctrilhas.scout.board:
+    description: Permite ativar ou desativar o painel lateral de estatísticas.
     default: true
   mctrilhas.scout.getmap:
     description: Permite ao jogador recuperar um mapa-troféu perdido.

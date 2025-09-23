@@ -86,6 +86,7 @@ Abaixo está a lista completa de comandos disponíveis.
 | `/scout badges [jogador]` | Exibe as insígnias conquistadas. Pode ver as de outro jogador se tiver permissão. | `mctrilhas.scout.use` |
 | `/scout progress [jogador]` | Mostra o progresso para as próximas insígnias. | `mctrilhas.scout.use` |
 | `/scout getmap <insignia>` | Recupera o mapa-troféu de uma insígnia. | `mctrilhas.scout.getmap` |
+| `/scout board` | Ativa ou desativa o painel lateral de estatísticas. | `mctrilhas.scout.board` |
 | `/scout hud` | Ativa ou desativa o painel de estatísticas na tela. | `mctrilhas.hud` |
 | `/daily` | Coleta a recompensa diária de Totens e itens. | `mctrilhas.daily` |
 | `/ranque` | Mostra seu progresso para o próximo ranque. | `mctrilhas.ranque` |

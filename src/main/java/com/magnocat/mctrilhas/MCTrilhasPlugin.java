@@ -59,6 +59,7 @@ import com.magnocat.mctrilhas.data.ActivityTracker;
 import com.magnocat.mctrilhas.updater.UpdateChecker;
 import com.magnocat.mctrilhas.web.HttpApiManager;
 import com.magnocat.mctrilhas.hud.HUDManager;
+import com.magnocat.mctrilhas.scoreboard.ScoreboardManager;
 
 public final class MCTrilhasPlugin extends JavaPlugin {
 
@@ -77,6 +78,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private CTFManager ctfManager;
     private CTFMilestoneManager ctfMilestoneManager;
     private HUDManager hudManager;
+    private ScoreboardManager scoreboardManager;
     private DuelManager duelManager;
     private HttpApiManager httpApiManager;
 
@@ -172,6 +174,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.ctfManager = new CTFManager(this);
         this.ctfMilestoneManager = new CTFMilestoneManager(this);
         this.hudManager = new HUDManager(this);
+        this.scoreboardManager = new ScoreboardManager(this);
         this.duelManager = new DuelManager(this);
         
         /* Comentado temporariamente para desativar a integração com BlueMap
@@ -281,6 +284,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
     public HUDManager getHudManager() {
         return hudManager;
+    }
+
+    public ScoreboardManager getScoreboardManager() {
+        return scoreboardManager;
     }
 
     public DuelManager getDuelManager() {

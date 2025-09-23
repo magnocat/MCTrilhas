@@ -108,6 +108,16 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
         *   Contagem regressiva e gerenciamento completo da partida.
         *   Estatísticas de Vitórias/Derrotas e um sistema de ranking (ELO).
 
+*   ### 🐾 EM SEGUIDA: Sistema de Pets
+    *   **Descrição:** Um sistema que permite aos jogadores terem um companheiro animal que os segue, ajuda em combate e sobe de nível.
+    *   **Filosofia:** Será desenvolvido internamente, sem depender de plugins como `MyPet`.
+    *   **Funcionalidades Planejadas:**
+        *   **Comando de Invocação:** `/pet invocar <tipo>` (ex: `gato`, `lobo`).
+        *   **Inteligência Artificial Customizada:** O pet seguirá o dono, defenderá contra ataques e atacará os alvos do jogador.
+        *   **Persistência:** Os dados do pet (tipo, nome, nível, XP) serão salvos no arquivo de dados do jogador.
+        *   **Sistema de Níveis:** O pet ganhará XP ao ajudar em combate, aumentando sua vida e dano ao subir de nível.
+        *   **Animações e Sons:** Por serem entidades reais do jogo, os pets terão todas as animações e sons nativos, tornando-os mais vivos.
+
 *   ### Sistema de Comunidade e Segurança (Graylist Híbrido)
     *   **Descrição:** Um sistema para proteger o servidor de jogadores mal-intencionados, mantendo-o acessível para a comunidade escoteira.
     *   **Funcionalidades Planejadas:**
@@ -174,6 +184,10 @@ Esta seção contém as ideias e tarefas discutidas para o futuro do projeto.
 *   **Murder Mystery:** Focado em dedução e trabalho em equipe.
 *   **Lobbies:** Criar um lobby dedicado para cada minigame.
 
+### 7.1.1. Novas Insígnias Planejadas
+*   **`CAÇADOR`**: Concedida por derrotar uma certa quantidade de monstros hostis.
+*   **`DOMADOR`**: Concedida por domar diferentes tipos de animais (lobos, gatos, cavalos, etc.).
+
 ### 7.2. Integração Profunda (Prioridade Máxima)
 *   A tarefa mais importante é conectar os minigames ao sistema de progressão.
 *   As ações dentro dos minigames (vencer, completar objetivos, trabalho em equipe) devem recompensar os jogadores com XP e avanço em novas **Especialidades** (ex: "Liderança", "Esportes").
@@ -235,3 +249,36 @@ Esta seção detalha as ideias discutidas para referência futura.
 
 ### 8.4. Gerador de Cards de Jogador (Ideia)
 *   **Conceito:** Criar um gerador de imagem (JPG/PNG) que crie um "card" (estilo card de jogo colecionável) com a foto da skin do jogador em uma pose e com seus dados (insígnias, conquistas, etc.). O objetivo é criar um item que o jogador possa imprimir ou enviar para amigos.
+
+---
+
+## 9. Monetização e Filosofia do Projeto (Brainstorm)
+
+Esta seção detalha as ideias de monetização e a decisão de desenvolvimento independente.
+
+### 9.1. Filosofia "Build-in-House"
+*   **Decisão:** O projeto evitará o uso de plugins de terceiros para funcionalidades principais.
+*   **Objetivo:** Manter a independência, garantir a qualidade e a integração total do código.
+*   **Exemplos:** Sistemas como Pets, cabeças de jogador, itens cosméticos, etc., serão desenvolvidos como parte do MCTrilhas, em vez de usar plugins como `MyPet` ou `SkinsRestorer`.
+
+### 9.2. Ideias de Monetização (via Tebex)
+O objetivo é oferecer benefícios cosméticos e de conveniência, sem criar um ambiente "pay-to-win".
+
+*   **Pacotes de Assinatura VIP ("Escoteiro de Elite"):**
+    *   **Comandos de Conveniência:** `/hat`, `/workbench`, `/enderchest`.
+    *   **Cosméticos:** Menu para mudar a cor do nome no chat (`/cores`).
+    *   **Benefícios Passivos:** Vaga reservada no servidor, multiplicador de Totens (ex: 1.5x), mais homes (`/sethome`).
+    *   **Kit VIP:** Um kit semanal com itens úteis, mas não superpoderosos.
+
+*   **Itens Cosméticos Avulsos (Compra Única):**
+    *   **Pets Companheiros:** Acesso a pets que seguem o jogador.
+    *   **Partículas e Efeitos:** Trilhas de partículas, auras, etc.
+    *   **Emotes e Danças:** Acesso a um menu de animações para o personagem.
+
+*   **Moeda Virtual (Pacotes de Totens):**
+    *   Venda direta de pacotes de Totens.
+    *   **Loja In-Game:** Uma loja onde os jogadores podem gastar Totens em itens de vaidade (cabeças, banners), itens de conveniência (ferramentas não-OP) e chaves para "Caixas Misteriosas" com recompensas cosméticas aleatórias.
+
+*   **"Passe de Batalha" Escoteiro:**
+    *   Um sistema de temporada com uma trilha de recompensas gratuita e uma "premium" (paga).
+    *   O progresso seria baseado em desafios semanais.

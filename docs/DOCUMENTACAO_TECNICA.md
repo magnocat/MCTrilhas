@@ -279,6 +279,7 @@ MCTrilhas/
 | `badges [jogador]` | `BadgesSubCommand` | Exibe as insígnias conquistadas pelo jogador (em GUI ou chat). |
 | `progress [jogador]` | `ProgressSubCommand` | Mostra o progresso detalhado para as próximas insígnias e ranque. |
 | `getmap <insignia>` | `GetMapSubCommand` | Recupera o mapa-troféu de uma insígnia já conquistada. |
+| `board` | `BoardSubCommand` | Ativa ou desativa o painel lateral de estatísticas (scoreboard). |
 | `hud` | `HUDSubCommand` | Ativa ou desativa a exibição de informações na tela (HUD). |
 | `toggleprogress` | `ToggleProgressSubCommand` | Ativa ou desativa as mensagens de progresso de insígnias no chat. |
 | `version` | `VersionSubCommand` | Exibe a versão atual do plugin. |
