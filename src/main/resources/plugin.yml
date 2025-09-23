@@ -39,7 +39,7 @@ commands:
   hud:
     description: Ativa ou desativa o painel de estatísticas na tela.
     usage: /hud
-duelo:
+  duelo:
     description: Comando principal para o sistema de duelos.
     usage: /<command> <subcomando>
     aliases: [duel]
@@ -144,4 +144,3 @@ permissions:
   mctrilhas.duel.stats.other:
     description: Permite visualizar as estatísticas de duelo de outros jogadores.
     default: op
-  

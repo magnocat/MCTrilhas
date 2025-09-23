@@ -309,6 +309,16 @@ O comando `/scout admin` é gerenciado pela classe `AdminSubCommand`, que atua c
 | `/acampamento <subcomando>` | (Futuro) Permitirá que jogadores com ranque suficiente comprem seu terreno individual. |
 | `/skins` | Permitirá que jogadores alterem sua aparência (requer integração com plugins como SkinsRestorer). |
 
+### 4.6. Gerador de Cards de Jogador (Ideia Futura)
+*   **Descrição:** Um sistema que gera uma imagem (JPG/PNG) no estilo de um card de jogo (ex: Pokémon) para cada jogador.
+*   **Lógica:**
+    1.  Um novo comando (ex: `/scout card`) ou um botão no painel web iniciaria a geração.
+    2.  O sistema usaria uma API externa (como a `cravatar.eu` ou `minotar.net`) para obter uma renderização da skin do jogador em corpo inteiro.
+    3.  No backend, o Java usaria uma biblioteca de manipulação de imagens (como `java.awt.Graphics2D`) para montar o card.
+    4.  Ele combinaria uma imagem de template de fundo, a renderização da skin, o nome do jogador, seu ranque e uma lista de ícones de suas insígnias.
+    5.  A imagem final seria salva temporariamente no servidor e um link para download seria fornecido ao jogador.
+*   **Objetivo:** Criar um item colecionável e compartilhável que os jogadores possam imprimir ou enviar para amigos.
+
 ---
 
 ## 6. Arquivos de Dados e Configuração

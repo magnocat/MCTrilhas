@@ -120,6 +120,8 @@ Abaixo está a lista completa de comandos disponíveis.
   - `/skins`: Para permitir que os jogadores alterem suas aparências.
 - **Infraestrutura:**
   - Implementar um sistema de backup robusto para o servidor, incluindo configurações de plugins.
+- **Itens Colecionáveis:**
+  - **Gerador de Cards de Jogador:** Sistema para criar uma imagem customizada (estilo card de jogo) com a skin e estatísticas do jogador, para que ele possa imprimir ou compartilhar.
 
 ---
 *Desenvolvido com carinho para o **MC Trilhas**! 🌲*

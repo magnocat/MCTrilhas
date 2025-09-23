@@ -232,3 +232,6 @@ Esta seção detalha as ideias discutidas para referência futura.
     2.  A classe `BadgeMenu` seria modificada para `open(viewer, target, pageNumber)`.
     3.  A lógica de exibição calcularia o subconjunto de insígnias a ser exibido para a página atual.
     4.  O `MenuListener` identificaria cliques nos botões de navegação e reabriria o menu na página correta, passando o novo número da página.
+
+### 8.4. Gerador de Cards de Jogador (Ideia)
+*   **Conceito:** Criar um gerador de imagem (JPG/PNG) que crie um "card" (estilo card de jogo colecionável) com a foto da skin do jogador em uma pose e com seus dados (insígnias, conquistas, etc.). O objetivo é criar um item que o jogador possa imprimir ou enviar para amigos.
