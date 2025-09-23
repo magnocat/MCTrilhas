@@ -1,0 +1,17 @@
+# Configuração das arenas para o sistema de Duelos 1v1.
+#
+# Cada chave de primeiro nível é o ID único da arena.
+#   pos1: Coordenadas do ponto de spawn para o primeiro duelista.
+#   pos2: Coordenadas do ponto de spawn para o segundo duelista.
+#   world: O nome do mundo onde a arena está localizada.
+#
+# Formato das coordenadas: 'mundo,x,y,z,yaw,pitch'
+# Exemplo:
+#
+# coliseu:
+#   pos1: 'world_duels,100.5,64.0,200.5,90,0'
+#   pos2: 'world_duels,100.5,64.0,220.5,-90,0'
+#
+# floresta:
+#   pos1: 'world_duels,-50.5,70.0,-150.5,0,0'
+#   pos2: 'world_duels,-70.5,70.0,-150.5,180,0'

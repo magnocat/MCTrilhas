@@ -26,8 +26,8 @@ MCTrilhas/
 │   ├── maps/           # Lógica para criar os mapas-troféu customizados.
 │   ├── menus/          # Lógica para a GUI (interface gráfica) das insígnias.
 │   ├── ranks/          # Lógica para o sistema de progressão de ranques.
-│   ├── quests/         # Lógica para sistemas de missões, como a Caça ao Tesouro.
-│   ├── duels/          # (Futuro) Lógica para o sistema de duelos.
+│   ├── quests/         # Lógica para sistemas de missões, como a Caça ao Tesouro. 
+│   ├── duels/          # (Em desenvolvimento) Lógica para o sistema de duelos 1v1.
 │   ├── clans/          # (Futuro) Lógica para o sistema de clãs.
 │   ├── plots/          # (Futuro) Lógica para gerenciar os terrenos no "Vale dos Pioneiros".
 │   ├── storage/        # Gerenciamento de persistência de dados (ex: blocos colocados por jogadores).
@@ -36,6 +36,7 @@ MCTrilhas/
 │   └── MCTrilhasPlugin.java # Classe principal do plugin, ponto de entrada.
 └── src/main/resources/
     ├── config.yml      # Arquivo principal de configuração (insígnias, recompensas, etc.).
+    ├── duel_arenas.yml # Configuração das arenas de duelo.
     ├── plugin.yml      # Arquivo de definição do plugin para o servidor.
     └── maps/           # Pasta para as imagens (128x128) dos mapas-troféu.
 ```
@@ -266,11 +267,11 @@ MCTrilhas/
 | Comando | Executor | Descrição |
 |---|---|---|
 | `/scout <subcomando>` | `ScoutCommandExecutor` | Comando principal que delega para todos os subcomandos de jogador e admin. |
-| `/daily` | `DailyCommand` | Permite que um jogador colete sua recompensa diária (Totens e/ou itens) após um cooldown configurável. |
+| `/daily` | `DailyCommand` | Coleta a recompensa diária (Totens e/ou itens). |
 | `/ranque` | `RankCommand` | Exibe o ranque atual do jogador e os requisitos para o próximo. |
 | `/familia token` | `FamilyCommand` | Gera um link de acesso único e seguro para o "Portal da Família" do jogador. |
-| `/hud` | `HUDCommand` | Ativa ou desativa a exibição de informações na tela (HUD). |
-| `/tesouro <subcomando>` | `TreasureHuntCommand` | Gerencia a participação do jogador na Caça ao Tesouro (iniciar, obter pista, cancelar). |
+| `/tesouro <subcomando>` | `TreasureHuntCommand` | Gerencia a participação na Caça ao Tesouro. |
+| `/duelo <subcomando>` | `DuelCommand` | (Em desenvolvimento) Gerencia os desafios e a participação em duelos. |
 
 ### 5.1.1. Subcomandos de Jogador (`/scout ...`)
 | Subcomando | Classe | Descrição |
@@ -278,6 +279,7 @@ MCTrilhas/
 | `badges [jogador]` | `BadgesSubCommand` | Exibe as insígnias conquistadas pelo jogador (em GUI ou chat). |
 | `progress [jogador]` | `ProgressSubCommand` | Mostra o progresso detalhado para as próximas insígnias e ranque. |
 | `getmap <insignia>` | `GetMapSubCommand` | Recupera o mapa-troféu de uma insígnia já conquistada. |
+| `hud` | `HUDSubCommand` | Ativa ou desativa a exibição de informações na tela (HUD). |
 | `toggleprogress` | `ToggleProgressSubCommand` | Ativa ou desativa as mensagens de progresso de insígnias no chat. |
 | `version` | `VersionSubCommand` | Exibe a versão atual do plugin. |
 
@@ -303,9 +305,9 @@ O comando `/scout admin` é gerenciado pela classe `AdminSubCommand`, que atua c
 ### 5.2. Comandos Planejados
 | Comando | Descrição |
 |---|---|
-| `/cla <subcomando>` | Gerenciará todas as ações relacionadas a clãs (criar, convidar, etc.). |
-| `/duelo <subcomando>` | Gerenciará os desafios e a participação em duelos. |
-| `/acampamento <subcomando>` | Permitirá que jogadores com ranque suficiente comprem seu terreno individual. |
+| `/cla <subcomando>` | (Futuro) Gerenciará todas as ações relacionadas a clãs (criar, convidar, etc.). |
+| `/acampamento <subcomando>` | (Futuro) Permitirá que jogadores com ranque suficiente comprem seu terreno individual. |
+| `/skins` | Permitirá que jogadores alterem sua aparência (requer integração com plugins como SkinsRestorer). |
 
 ---
 
@@ -314,6 +316,11 @@ O comando `/scout admin` é gerenciado pela classe `AdminSubCommand`, que atua c
 *   **`config.yml`:**
     *   **Propósito:** Arquivo de configuração central. Define todas as insígnias, requisitos, recompensas, mensagens e configurações globais do plugin.
     *   **Localização:** `plugins/MCTrilhas/config.yml`
+
+*   **`duel_arenas.yml`:**
+    *   **Propósito:** Armazenará a configuração de todas as arenas de duelo.
+    *   **Conteúdo:** Coordenadas de spawn, mundo e outras propriedades da arena.
+    *   **Localização:** `plugins/MCTrilhas/duel_arenas.yml`
 
 *   **`playerdata/`:**
     *   **Propósito:** Armazena os dados individuais de cada jogador em um arquivo YAML separado, nomeado com o UUID do jogador.

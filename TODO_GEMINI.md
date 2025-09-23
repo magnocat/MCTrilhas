@@ -160,3 +160,75 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
 Com a refatoração concluída, o projeto está pronto para a próxima grande funcionalidade.
 
 *   **Iniciar Sistema de Duelos 1v1:** Começar a planejar e implementar a arquitetura para o sistema de duelos, conforme definido no roadmap.
+
+---
+
+## 7. Brainstorm e Ideias Futuras (Anotações da Conversa)
+
+Esta seção contém as ideias e tarefas discutidas para o futuro do projeto.
+
+### 7.1. Novos Minigames
+*   **BedWars:** Jogo de equipe clássico.
+*   **Build Battle:** Jogo de construção criativa por tempo.
+*   **Survival Games:** Com forte apelo ao tema de sobrevivência escoteira.
+*   **Murder Mystery:** Focado em dedução e trabalho em equipe.
+*   **Lobbies:** Criar um lobby dedicado para cada minigame.
+
+### 7.2. Integração Profunda (Prioridade Máxima)
+*   A tarefa mais importante é conectar os minigames ao sistema de progressão.
+*   As ações dentro dos minigames (vencer, completar objetivos, trabalho em equipe) devem recompensar os jogadores com XP e avanço em novas **Especialidades** (ex: "Liderança", "Esportes").
+
+### 7.3. Melhorias no Painel Web
+*   Desenvolver um "Dashboard da Chefia" para que a liderança possa visualizar o progresso de toda a seção de jogadores.
+
+### 7.4. Infraestrutura e Comandos
+*   **Backup do Servidor:** Implementar um sistema de backup completo para o servidor, incluindo configurações de plugins.
+*   **Comando `/skins`:** Adicionar um comando para que os jogadores possam alterar suas skins, provavelmente integrando com um plugin como o SkinsRestorer.
+
+---
+
+## 8. Detalhes de Ideias Futuras (Brainstorm)
+
+Esta seção detalha as ideias discutidas para referência futura.
+
+### 8.1. Sistema de Clãs (Detalhado)
+*   **Conceito:** O sistema de "Clãs" seria a implementação das "Patrulhas" ou "Tropas" escoteiras. A progressão do jogador através dos ranques o moveria automaticamente entre os clãs.
+*   **Nomes dos Clãs (ligados aos Ranques):** Filhotes, Lobinhos, Escoteiros, Sêniors, Pioneiros.
+*   **Clãs Especiais:**
+    *   **`Convidados`:** Um clã/grupo para novos jogadores ou visitantes, com permissões limitadas (modo espectador, sem poder construir ou quebrar blocos).
+    *   **`Chefes`:** Um clã para a moderação, com permissões de controle (kick, mute), mas sem ser necessariamente um Admin/OP do servidor.
+*   **Progressão:** Cada clã teria metas de insígnias e recompensas que aumentam de nível conforme o jogador avança.
+*   **Comunicação:**
+    *   Chat privado para o clã (ex: `/c <mensagem>` ou `!<mensagem>`).
+    *   Capacidade de enviar mensagens para o chat geral.
+*   **Estrutura de Dados (Exemplo `clans/lobinhos.yml`):**
+    ```yaml
+    display-name: "&ePatrulha dos Lobinhos"
+    tag: "&e[Lobinhos]"
+    lider: "uuid-do-lider-da-patrulha" # Poderia ser um cargo rotativo ou definido por um Chefe
+    membros:
+      - "uuid-membro-1"
+      - "uuid-membro-2"
+    banco-totens: 5000.0
+    nivel: 2
+    ```
+
+### 8.2. Sistema de Duelos 1v1 (Detalhado)
+*   **Comandos:**
+    *   `/duelo desafiar <jogador> [kit]` - Desafia um jogador para um duelo, opcionalmente especificando um kit.
+    *   `/duelo aceitar <jogador>` - Aceita um desafio pendente.
+    *   `/duelo negar <jogador>` - Recusa um desafio.
+    *   `/duelo kits` - Abre uma GUI para visualizar os kits disponíveis.
+    *   `/duelo stats [jogador]` - Mostra as estatísticas de duelos (vitórias, derrotas, ELO).
+*   **Arenas:**
+    *   Configuradas em um arquivo `duel_arenas.yml`.
+    *   Cada arena teria dois pontos de spawn e seria uma região protegida para evitar interferência.
+    *   O sistema gerenciaria o estado das arenas (livre/ocupada) para permitir múltiplos duelos simultâneos.
+
+### 8.3. Paginação para o Menu de Insígnias
+*   **Problema:** O inventário do Minecraft tem um limite de 54 slots. Se houver mais de 45 insígnias (deixando espaço para itens de navegação), a GUI não consegue exibir todas.
+*   **Solução Proposta:**
+    1.  Adicionar botões de "Próxima Página" e "Página Anterior" em slots fixos do inventário (ex: 45 e 53).
+    2.  A classe `BadgeMenu` seria modificada para `open(viewer, target, pageNumber)`.
+    3.  A lógica de exibição calcularia o subconjunto de insígnias a ser exibido para a página atual.
+    4.  O `MenuListener` identificaria cliques nos botões de navegação e reabriria o menu na página correta, passando o novo número da página.

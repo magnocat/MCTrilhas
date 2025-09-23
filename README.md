@@ -86,11 +86,11 @@ Abaixo está a lista completa de comandos disponíveis.
 | `/scout badges [jogador]` | Exibe as insígnias conquistadas. Pode ver as de outro jogador se tiver permissão. | `mctrilhas.scout.use` |
 | `/scout progress [jogador]` | Mostra o progresso para as próximas insígnias. | `mctrilhas.scout.use` |
 | `/scout getmap <insignia>` | Recupera o mapa-troféu de uma insígnia. | `mctrilhas.scout.getmap` |
+| `/scout hud` | Ativa ou desativa o painel de estatísticas na tela. | `mctrilhas.hud` |
 | `/daily` | Coleta a recompensa diária de Totens e itens. | `mctrilhas.daily` |
 | `/ranque` | Mostra seu progresso para o próximo ranque. | `mctrilhas.ranque` |
 | `/tesouro` | Inicia ou gerencia sua caça ao tesouro. | `mctrilhas.tesouro` |
 | `/familia token` | Gera seu link pessoal para o Painel da Família. | `mctrilhas.familia.use` |
-| `/hud` | Ativa ou desativa o painel de estatísticas na tela. | `mctrilhas.hud` |
 | `/ctf join` | Entra na fila para uma partida de CTF. | `mctrilhas.ctf.join` |
 | `/ctf leave` | Sai da fila ou da partida de CTF. | `mctrilhas.ctf.leave` |
 
@@ -106,11 +106,20 @@ Abaixo está a lista completa de comandos disponíveis.
 
 ## 🗺️ Roadmap
 - **🎯 EM FOCO: Sistema de Duelos 1v1**
-  - Desafios diretos, arenas dedicadas e kits de equipamento padronizados.
-- **Sistema de Clãs**
-  - Organização de jogadores em "patrulhas", com base, banco e chat próprios.
-- **"Vale dos Pioneiros"**
-  - Mundo de construção criativa onde jogadores de ranque elevado podem comprar terrenos.
+  - Desafios, arenas dedicadas, kits padronizados e ranking ELO.
+- **Novos Minigames:**
+  - **Build Battle:** Jogo de construção criativa por tempo.
+  - **BedWars:** O clássico modo de jogo de equipes.
+  - **Survival Games:** Com foco no tema de sobrevivência escoteira.
+  - **Murder Mystery:** Jogo de dedução e trabalho em equipe.
+- **Integração Profunda (Prioridade Máxima):**
+  - Conectar as ações e vitórias nos minigames ao sistema de progresso principal do MCTrilhas, concedendo XP para novas "Especialidades" (ex: Liderança, Esportes).
+- **Melhorias no Painel Web:**
+  - Desenvolver um dashboard para a "Chefia", permitindo visualizar o progresso de toda a seção de jogadores.
+- **Novos Comandos:**
+  - `/skins`: Para permitir que os jogadores alterem suas aparências.
+- **Infraestrutura:**
+  - Implementar um sistema de backup robusto para o servidor, incluindo configurações de plugins.
 
 ---
 *Desenvolvido com carinho para o **MC Trilhas**! 🌲*

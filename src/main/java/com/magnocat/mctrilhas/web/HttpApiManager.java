@@ -1277,12 +1277,19 @@ public class HttpApiManager {
         List<String> earnedBadges = new ArrayList<>(playerData.getEarnedBadgesMap().keySet());
         responseData.put("earnedBadges", earnedBadges);
 
-        // Adiciona os requisitos de progresso para cada insígnia
-        Map<String, Double> badgeRequirements = new HashMap<>();
-        for (com.magnocat.mctrilhas.badges.Badge badge : plugin.getBadgeManager().getAllBadges()) {
-            badgeRequirements.put(badge.type().name(), badge.requirement());
-        }
-        responseData.put("badgeRequirements", badgeRequirements);
+        // Adiciona as definições completas das insígnias, que incluem os requisitos
+        List<Map<String, Object>> badgeDefinitions = plugin.getBadgeManager().getAllBadges().stream()
+                .map(badge -> {
+                    // Usar HashMap em vez de Map.of() para evitar problemas de inferência de tipo
+                    // com tipos mistos (String, double), que podem causar erros de compilação.
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", badge.id());
+                    map.put("name", badge.name());
+                    map.put("requirement", badge.requirement());
+                    map.put("type", badge.type().name());
+                    return map;
+                }).collect(Collectors.toList());
+        responseData.put("badgeDefinitions", badgeDefinitions);
 
         return responseData;
     }

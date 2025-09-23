@@ -39,6 +39,10 @@ commands:
   hud:
     description: Ativa ou desativa o painel de estatísticas na tela.
     usage: /hud
+duelo:
+    description: Comando principal para o sistema de duelos.
+    usage: /<command> <subcomando>
+    aliases: [duel]
 
 permissions:
   mctrilhas.*:
@@ -63,6 +67,11 @@ permissions:
       mctrilhas.scout.getmap: true
       mctrilhas.scout.admin: true
       mctrilhas.tesouro: true
+      mctrilhas.duel.use: true
+      mctrilhas.duel.challenge: true
+      mctrilhas.duel.kits: true
+      mctrilhas.duel.stats: true
+      mctrilhas.duel.stats.other: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
@@ -120,3 +129,19 @@ permissions:
   mctrilhas.admin.bypass:
     description: Permite que o jogador ignore o bloqueador de comandos.
     default: op
+  mctrilhas.duel.use:
+    description: Permite usar os comandos básicos do sistema de duelos.
+    default: true
+  mctrilhas.duel.challenge:
+    description: Permite desafiar outros jogadores para um duelo.
+    default: true
+  mctrilhas.duel.kits:
+    description: Permite visualizar os kits de duelo disponíveis.
+    default: true
+  mctrilhas.duel.stats:
+    description: Permite visualizar as próprias estatísticas de duelo.
+    default: true
+  mctrilhas.duel.stats.other:
+    description: Permite visualizar as estatísticas de duelo de outros jogadores.
+    default: op
+  

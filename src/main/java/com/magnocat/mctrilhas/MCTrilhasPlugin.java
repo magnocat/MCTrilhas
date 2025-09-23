@@ -28,6 +28,8 @@ import com.magnocat.mctrilhas.commands.TreasureHuntCommand;
 import com.magnocat.mctrilhas.ctf.CTFCommand;
 import com.magnocat.mctrilhas.ctf.CTFManager;
 import com.magnocat.mctrilhas.ctf.CTFMilestoneManager;
+import com.magnocat.mctrilhas.duels.DuelCommand;
+import com.magnocat.mctrilhas.duels.DuelManager;
 import com.magnocat.mctrilhas.listeners.AdminPrivacyListener;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
 import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;
@@ -75,6 +77,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private CTFManager ctfManager;
     private CTFMilestoneManager ctfMilestoneManager;
     private HUDManager hudManager;
+    private DuelManager duelManager;
     private HttpApiManager httpApiManager;
 
     // --- Integrations & Tasks ---
@@ -86,6 +89,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
+        saveResource("duel_arenas.yml", false); // Garante que o arquivo de arenas seja criado
         setupEconomy();
         loadManagers();
 
@@ -168,6 +172,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.ctfManager = new CTFManager(this);
         this.ctfMilestoneManager = new CTFMilestoneManager(this);
         this.hudManager = new HUDManager(this);
+        this.duelManager = new DuelManager(this);
         
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
@@ -191,8 +196,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         CTFCommand ctfExecutor = new CTFCommand(this);
         getCommand("ctf").setExecutor(ctfExecutor);
         getCommand("ctf").setTabCompleter(ctfExecutor);
-        getCommand("familia").setExecutor(new FamilyCommand(this));
-        getCommand("hud").setExecutor(new HUDCommand(this));
+        getCommand("familia").setExecutor(new FamilyCommand(this)); // O comando /hud foi movido para /scout hud
+        getCommand("duelo").setExecutor(new DuelCommand(this));
+        // getCommand("duelo").setTabCompleter(new DuelCommand(this)); // Adicionar quando o TabCompleter for implementado
         logInfo("Comandos registrados.");
     }
 
@@ -275,6 +281,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
     public HUDManager getHudManager() {
         return hudManager;
+    }
+
+    public DuelManager getDuelManager() {
+        return duelManager;
     }
 
     public HttpApiManager getHttpApiManager() {

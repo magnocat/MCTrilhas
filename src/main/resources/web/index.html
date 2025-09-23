@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,15 +8,16 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="author" content="MagnoCat Tecnologia https://magno.cat">
-    
+
     <!-- Chart.js e seu adaptador de data (ESSENCIAL para o gráfico funcionar) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
     <title>MC Trilhas - Servidor Minecraft Escoteiro</title>
-    
+
     <link rel="manifest" href="/manifest.json">
-    
+
     <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -25,11 +27,12 @@
     <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
     <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
     <link rel="icon" type="image/png" sizes="70x70" href="/android-icon-70x70.png">
-    
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap"
+        rel="stylesheet">
     <!-- Font Awesome JS -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
     <style>
@@ -38,6 +41,7 @@
             --scout-brown: #744210;
             --scout-light: #f7fafc;
         }
+
         body {
             font-family: 'Roboto', sans-serif;
             background-image: url('/bg.jpg');
@@ -45,18 +49,21 @@
             color: #333;
             margin: 0;
         }
+
         .header {
             background-color: var(--scout-green);
             color: white;
             padding: 2rem;
             text-align: center;
         }
+
         .section-title {
             font-family: 'Montserrat', sans-serif;
             color: var(--scout-green);
             font-size: 2rem;
             margin-bottom: 1rem;
         }
+
         .card {
             background-color: white;
             border-radius: 5px;
@@ -64,6 +71,7 @@
             margin-bottom: 1.5rem;
             border: 1px solid #ddd;
         }
+
         .link-item {
             display: flex;
             align-items: center;
@@ -74,6 +82,7 @@
             border-radius: 5px;
             margin-bottom: 1rem;
         }
+
         .footer {
             background-color: #1a202c;
             color: white;
@@ -81,19 +90,24 @@
             text-align: center;
             margin-top: 2rem;
         }
+
         @media (max-width: 640px) {
             .header {
                 padding: 1.5rem;
             }
+
             .header h1 {
                 font-size: 2rem;
             }
+
             .section-title {
                 font-size: 1.5rem;
             }
+
             .card {
                 padding: 1rem;
             }
+
             .link-item {
                 flex-direction: column;
                 align-items: flex-start;
@@ -101,12 +115,14 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Cabeçalho -->
     <header class="header">
         <h1 class="text-4xl font-bold">MC Trilhas - Servidor Minecraft Escoteiro</h1>
         <p class="mt-2 text-lg">Uma aventura digital inspirada nos valores escoteiros!<br>(EM DESENVOLVIMENTO)</p>
-        <button id="install-pwa-btn" class="hidden mt-4 bg-white text-green-700 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-gray-200 transition-colors">
+        <button id="install-pwa-btn"
+            class="hidden mt-4 bg-white text-green-700 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-gray-200 transition-colors">
             <i class="fas fa-download mr-2"></i> Instalar App
         </button>
     </header>
@@ -117,7 +133,12 @@
         <section class="card">
             <h2 class="section-title">Sobre o MC Trilhas</h2>
             <p class="text-lg">
-                Bem-vindo ao <strong>MC Trilhas</strong>, um servidor Minecraft criado com base nos princípios escoteiros de amizade, respeito e aventura! Nosso servidor oferece uma experiência única para jogadores de Minecraft Java e Bedrock, com mapas interativos, painéis de administração e uma comunidade vibrante no Discord. Inspirado pelo <a href="https://g.co/kgs/idwXxCh" target="_blank" class="text-blue-600 hover:underline">Grupo Escoteiro do Ar Cidade das Flores</a>, o MC Trilhas é um espaço para diversão e aprendizado.
+                Bem-vindo ao <strong>MC Trilhas</strong>, um servidor Minecraft criado com base nos princípios
+                escoteiros de amizade, respeito e aventura! Nosso servidor oferece uma experiência única para jogadores
+                de Minecraft Java e Bedrock, com mapas interativos, painéis de administração e uma comunidade vibrante
+                no Discord. Inspirado pelo <a href="https://g.co/kgs/idwXxCh" target="_blank"
+                    class="text-blue-600 hover:underline">Grupo Escoteiro do Ar Cidade das Flores</a>, o MC Trilhas é um
+                espaço para diversão e aprendizado.
             </p>
         </section>
 
@@ -135,7 +156,83 @@
                 <li><strong>Preservação:</strong> Respeite as construções alheias e o mundo do jogo.</li>
             </ul>
         </section>
+
+        <!-- Hall da Fama do CTF -->
+        <section class="grid md:grid-cols-3 gap-6">
+            <!-- Ranking de Vitórias -->
+            <div class="card">
+                <h3 class="section-title text-2xl">🏆 Maiores Campeões</h3>
+                <p class="mb-4">Jogadores com mais vitórias no CTF.</p>
+                <div id="ctf-wins-loading" class="text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>
+                    Carregando...</div>
+                <ol id="ctf-wins-list" class="list-decimal list-inside space-y-2 hidden"></ol>
+                <div id="ctf-wins-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
+            </div>
+
+            <!-- Ranking de Abates -->
+            <div class="card">
+                <h3 class="section-title text-2xl">⚔️ Maiores Artilheiros</h3>
+                <p class="mb-4">Jogadores com mais abates no CTF.</p>
+                <div id="ctf-kills-loading" class="text-center text-gray-500"><i
+                        class="fas fa-spinner fa-spin mr-2"></i> Carregando...</div>
+                <ol id="ctf-kills-list" class="list-decimal list-inside space-y-2 hidden"></ol>
+                <div id="ctf-kills-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
+            </div>
+
+            <!-- Ranking de Capturas -->
+            <div class="card">
+                <h3 class="section-title text-2xl">🏴 Maiores Ladrões</h3>
+                <p class="mb-4">Jogadores com mais capturas de bandeira.</p>
+                <div id="ctf-captures-loading" class="text-center text-gray-500"><i
+                        class="fas fa-spinner fa-spin mr-2"></i> Carregando...</div>
+                <ol id="ctf-captures-list" class="list-decimal list-inside space-y-2 hidden"></ol>
+                <div id="ctf-captures-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
+            </div>
+        </section>
+
         <!-- Rankings -->
+        <section class="grid md:grid-cols-3 gap-6">
+            <!-- Ranking Diário -->
+            <div class="card">
+                <h3 class="section-title text-2xl">Ranking do Dia</h3>
+                <p class="mb-4">Mais insígnias hoje!</p>
+                <div id="leaderboard-daily-loading" class="text-center text-gray-500"><i
+                        class="fas fa-spinner fa-spin mr-2"></i> Carregando...</div>
+                <ol id="leaderboard-daily-list" class="list-decimal list-inside space-y-2 hidden"></ol>
+                <div id="leaderboard-daily-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
+            </div>
+
+            <!-- Ranking Mensal -->
+            <div class="card">
+                <h3 class="section-title text-2xl">Ranking do Mês</h3>
+                <p class="mb-4">Mais insígnias este mês!</p>
+                <div id="leaderboard-monthly-loading" class="text-center text-gray-500"><i
+                        class="fas fa-spinner fa-spin mr-2"></i> Carregando...</div>
+                <ol id="leaderboard-monthly-list" class="list-decimal list-inside space-y-2 hidden"></ol>
+                <div id="leaderboard-monthly-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
+            </div>
+
+            <!-- Ranking Geral -->
+            <div class="card">
+                <h3 class="section-title text-2xl">Ranking Geral</h3>
+                <p class="mb-4">Os maiores escoteiros!</p>
+                <div id="leaderboard-all-time-loading" class="text-center text-gray-500"><i
+                        class="fas fa-spinner fa-spin mr-2"></i> Carregando...</div>
+                <ol id="leaderboard-all-time-list" class="list-decimal list-inside space-y-2 hidden"></ol>
+                <div id="leaderboard-all-time-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
+            </div>
+        </section>
+        <!-- Atividade do Servidor -->
+        <section class="card">
+            <h2 class="section-title">Atividade do Servidor (Últimas 24h)</h2>
+            <div class="relative h-64 md:h-80">
+                <canvas id="player-activity-chart"></canvas>
+            </div>
+            <div id="chart-loading" class="text-center text-gray-500 mt-4">
+                <i class="fas fa-spinner fa-spin mr-2"></i> Carregando gráfico de atividade...
+            </div>
+        </section>
+
         <!-- Como Jogar -->
         <section class="card">
             <h2 class="section-title">Como Jogar</h2>
@@ -171,38 +268,51 @@
         <section class="card">
             <h2 class="section-title">Capture a Bandeira (CTF)</h2>
             <p class="mb-4 text-lg">
-                Prepare-se para a batalha em nosso modo de jogo competitivo Capture a Bandeira! Duas equipes se enfrentam em uma arena com um único objetivo: invadir a base inimiga, roubar sua bandeira e trazê-la de volta para sua própria base para marcar um ponto.
+                Prepare-se para a batalha em nosso modo de jogo competitivo Capture a Bandeira! Duas equipes se
+                enfrentam em uma arena com um único objetivo: invadir a base inimiga, roubar sua bandeira e trazê-la de
+                volta para sua própria base para marcar um ponto.
             </p>
 
             <h3 class="text-xl font-bold text-gray-800 mb-2">Como Funciona:</h3>
             <ul class="list-disc list-inside space-y-3">
                 <li>
-                    <strong>Objetivo:</strong> O primeiro time a marcar <strong>3 pontos</strong> vence a partida. Se o tempo acabar, o time com a maior pontuação ganha.
+                    <strong>Objetivo:</strong> O primeiro time a marcar <strong>3 pontos</strong> vence a partida. Se o
+                    tempo acabar, o time com a maior pontuação ganha.
                 </li>
                 <li>
-                    <strong>Tempo de Partida:</strong> Cada partida dura <strong>10 minutos</strong>. Fique de olho no cronômetro!
+                    <strong>Tempo de Partida:</strong> Cada partida dura <strong>10 minutos</strong>. Fique de olho no
+                    cronômetro!
                 </li>
                 <li>
-                    <strong>Equipes Aleatórias:</strong> No início de cada partida, os jogadores são divididos em duas equipes com cores aleatórias (Vermelho, Azul, Verde, etc.).
+                    <strong>Equipes Aleatórias:</strong> No início de cada partida, os jogadores são divididos em duas
+                    equipes com cores aleatórias (Vermelho, Azul, Verde, etc.).
                 </li>
                 <li>
-                    <strong>Kit Padrão:</strong> Todos os jogadores recebem o mesmo conjunto de equipamentos, garantindo uma luta justa onde a estratégia de equipe é o que mais importa.
+                    <strong>Kit Padrão:</strong> Todos os jogadores recebem o mesmo conjunto de equipamentos, garantindo
+                    uma luta justa onde a estratégia de equipe é o que mais importa.
                 </li>
                 <li>
                     <strong>Carregando a Bandeira:</strong> Ao pegar a bandeira inimiga, você se torna o alvo!
                     <ul class="list-disc list-inside ml-6 mt-2 space-y-1">
-                        <li><i class="fas fa-eye text-yellow-500 mr-1"></i> Você ficará com um <strong>efeito de brilho</strong>, tornando-se visível para todos, até mesmo através das paredes.</li>
-                        <li><i class="fas fa-flag text-blue-500 mr-1"></i> A bandeira inimiga aparecerá na sua cabeça no lugar do capacete.</li>
+                        <li><i class="fas fa-eye text-yellow-500 mr-1"></i> Você ficará com um <strong>efeito de
+                                brilho</strong>, tornando-se visível para todos, até mesmo através das paredes.</li>
+                        <li><i class="fas fa-flag text-blue-500 mr-1"></i> A bandeira inimiga aparecerá na sua cabeça no
+                            lugar do capacete.</li>
                     </ul>
                 </li>
                 <li>
-                    <strong>Bandeira Caída:</strong> Se você morrer enquanto carrega a bandeira, ela cairá no chão. Sua equipe tem <strong>30 segundos</strong> para recuperá-la. Se ninguém a pegar, ela retornará automaticamente para a base inimiga.
+                    <strong>Bandeira Caída:</strong> Se você morrer enquanto carrega a bandeira, ela cairá no chão. Sua
+                    equipe tem <strong>30 segundos</strong> para recuperá-la. Se ninguém a pegar, ela retornará
+                    automaticamente para a base inimiga.
                 </li>
                 <li>
-                    <strong>Como Pontuar:</strong> Para marcar um ponto, você deve levar a bandeira inimiga até a sua base. Mas atenção: você só pode pontuar se a <strong>sua própria bandeira</strong> também estiver na sua base!
+                    <strong>Como Pontuar:</strong> Para marcar um ponto, você deve levar a bandeira inimiga até a sua
+                    base. Mas atenção: você só pode pontuar se a <strong>sua própria bandeira</strong> também estiver na
+                    sua base!
                 </li>
                 <li>
-                    <strong>Chat de Equipe:</strong> Para conversar apenas com seus colegas de time, comece sua mensagem no chat com um ponto de exclamação (<code>!sua mensagem</code>).
+                    <strong>Chat de Equipe:</strong> Para conversar apenas com seus colegas de time, comece sua mensagem
+                    no chat com um ponto de exclamação (<code>!sua mensagem</code>).
                 </li>
             </ul>
             <p class="mt-4">
@@ -214,34 +324,48 @@
         <section class="card">
             <h2 class="section-title">Como Criar sua Própria Arena de CTF (Guia para Admins)</h2>
             <p class="mb-4 text-lg">
-                Administradores podem expandir a diversão adicionando novas arenas ao servidor! O processo é simples e usa plugins comuns como <a href="https://dev.bukkit.org/projects/multiverse-core" target="_blank" class="text-blue-600 hover:underline">Multiverse-Core</a> e <a href="https://dev.bukkit.org/projects/worldedit" target="_blank" class="text-blue-600 hover:underline">WorldEdit</a>. Recomendamos criar as arenas em um mundo separado e vazio para melhor organização e performance.
+                Administradores podem expandir a diversão adicionando novas arenas ao servidor! O processo é simples e
+                usa plugins comuns como <a href="https://dev.bukkit.org/projects/multiverse-core" target="_blank"
+                    class="text-blue-600 hover:underline">Multiverse-Core</a> e <a
+                    href="https://dev.bukkit.org/projects/worldedit" target="_blank"
+                    class="text-blue-600 hover:underline">WorldEdit</a>. Recomendamos criar as arenas em um mundo
+                separado e vazio para melhor organização e performance.
             </p>
 
             <div class="space-y-6">
                 <div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Passo 1: Criar um Mundo Vazio (Void)</h3>
-                    <p class="mb-2">Primeiro, crie um mundo limpo que servirá como contêiner para suas arenas. Use o seguinte comando do Multiverse:</p>
+                    <p class="mb-2">Primeiro, crie um mundo limpo que servirá como contêiner para suas arenas. Use o
+                        seguinte comando do Multiverse:</p>
                     <code class="block bg-gray-100 p-2 rounded">/mv create arenas_ctf normal -g VoidGenerator</code>
-                    <p class="mt-2 text-sm text-gray-600">Este comando cria um mundo chamado <strong>arenas_ctf</strong> que é completamente vazio. Depois, teleporte-se para ele com <code>/mv tp arenas_ctf</code>.</p>
+                    <p class="mt-2 text-sm text-gray-600">Este comando cria um mundo chamado <strong>arenas_ctf</strong>
+                        que é completamente vazio. Depois, teleporte-se para ele com <code>/mv tp arenas_ctf</code>.</p>
                 </div>
 
                 <div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Passo 2: Importar sua Arena (Schematic)</h3>
-                    <p class="mb-2">Com sua arena já salva como um arquivo <code>.schematic</code> ou <code>.schem</code>, siga estes passos:</p>
+                    <p class="mb-2">Com sua arena já salva como um arquivo <code>.schematic</code> ou
+                        <code>.schem</code>, siga estes passos:</p>
                     <ol class="list-decimal list-inside space-y-2">
                         <li>Coloque o arquivo da sua arena na pasta <code>plugins/WorldEdit/schematics/</code>.</li>
-                        <li>No jogo, dentro do mundo vazio, carregue o arquivo com: <code class="bg-gray-100 p-1 rounded">//schem load nome_do_seu_arquivo</code></li>
-                        <li>Posicione-se onde deseja que a arena apareça e cole-a com: <code class="bg-gray-100 p-1 rounded">//paste</code></li>
-                        <li class="text-sm text-gray-600">Dica: Se a posição não ficou boa, use <code>//undo</code> para desfazer e tente novamente.</li>
+                        <li>No jogo, dentro do mundo vazio, carregue o arquivo com: <code
+                                class="bg-gray-100 p-1 rounded">//schem load nome_do_seu_arquivo</code></li>
+                        <li>Posicione-se onde deseja que a arena apareça e cole-a com: <code
+                                class="bg-gray-100 p-1 rounded">//paste</code></li>
+                        <li class="text-sm text-gray-600">Dica: Se a posição não ficou boa, use <code>//undo</code> para
+                            desfazer e tente novamente.</li>
                     </ol>
                 </div>
 
                 <div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Passo 3: Registrar a Arena no MCTrilhas</h3>
-                    <p class="mb-2">Agora que a construção está no mundo, você precisa dizer ao plugin onde ficam os pontos importantes. Use os comandos de administrador do CTF:</p>
+                    <p class="mb-2">Agora que a construção está no mundo, você precisa dizer ao plugin onde ficam os
+                        pontos importantes. Use os comandos de administrador do CTF:</p>
                     <ol class="list-decimal list-inside space-y-2">
-                        <li>Inicie o processo: <code>/ctf admin create id_da_sua_arena</code> (ex: <code>castelo</code>, <code>floresta</code>).</li>
-                        <li>Voe até cada local importante e defina os pontos (lobby, redspawn, bluespawn, redflag, blueflag) usando <code>/ctf admin set &lt;tipo&gt;</code>.</li>
+                        <li>Inicie o processo: <code>/ctf admin create id_da_sua_arena</code> (ex: <code>castelo</code>,
+                            <code>floresta</code>).</li>
+                        <li>Voe até cada local importante e defina os pontos (lobby, redspawn, bluespawn, redflag,
+                            blueflag) usando <code>/ctf admin set &lt;tipo&gt;</code>.</li>
                         <li>Verifique se todos os pontos foram definidos com <code>/ctf admin status</code>.</li>
                         <li>Finalize e salve a arena com: <code>/ctf admin save</code></li>
                     </ol>
@@ -253,7 +377,8 @@
         <!-- Comandos do Servidor -->
         <section class="card">
             <h2 class="section-title">Comandos do Servidor</h2>
-            <p class="mb-6">Aqui estão os principais comandos que você pode usar no servidor para interagir com nossos sistemas.</p>
+            <p class="mb-6">Aqui estão os principais comandos que você pode usar no servidor para interagir com nossos
+                sistemas.</p>
 
             <!-- Comandos para Jogadores -->
             <h3 class="text-2xl font-bold text-gray-800 mb-2">Comandos para Jogadores</h3>
@@ -266,15 +391,42 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                        <tr><td class="py-3 px-4"><code>/scout badges [jogador]</code></td><td class="py-3 px-4">Exibe as insígnias que você (ou outro jogador) conquistou.</td></tr>
-                        <tr><td class="py-3 px-4"><code>/scout progress</code></td><td class="py-3 px-4">Mostra seu progresso para as próximas insígnias.</td></tr>
-                        <tr><td class="py-3 px-4"><code>/scout getmap &lt;insignia&gt;</code></td><td class="py-3 px-4">Recupera o mapa-troféu de uma insígnia já conquistada.</td></tr>
-                        <tr><td class="py-3 px-4"><code>/daily</code></td><td class="py-3 px-4">Coleta sua recompensa diária.</td></tr>
-                        <tr><td class="py-3 px-4"><code>/ranque</code></td><td class="py-3 px-4">Mostra seu progresso para o próximo ranque escoteiro.</td></tr>
-                        <tr><td class="py-3 px-4"><code>/tesouro</code></td><td class="py-3 px-4">Inicia ou verifica o status da sua caça ao tesouro.</td></tr>
-                        <tr class="bg-green-50"><td class="py-3 px-4"><code>/ctf join</code></td><td class="py-3 px-4">Entra na fila para uma partida de Capture a Bandeira.</td></tr>
-                        <tr class="bg-green-50"><td class="py-3 px-4"><code>/ctf leave</code></td><td class="py-3 px-4">Sai da fila ou da partida atual de CTF.</td></tr>
-                        <tr class="bg-green-50"><td class="py-3 px-4"><code>/ctf list</code></td><td class="py-3 px-4">Lista as arenas de CTF disponíveis.</td></tr>
+                        <tr>
+                            <td class="py-3 px-4"><code>/scout badges [jogador]</code></td>
+                            <td class="py-3 px-4">Exibe as insígnias que você (ou outro jogador) conquistou.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4"><code>/scout progress</code></td>
+                            <td class="py-3 px-4">Mostra seu progresso para as próximas insígnias.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4"><code>/scout getmap &lt;insignia&gt;</code></td>
+                            <td class="py-3 px-4">Recupera o mapa-troféu de uma insígnia já conquistada.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4"><code>/daily</code></td>
+                            <td class="py-3 px-4">Coleta sua recompensa diária.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4"><code>/ranque</code></td>
+                            <td class="py-3 px-4">Mostra seu progresso para o próximo ranque escoteiro.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4"><code>/tesouro</code></td>
+                            <td class="py-3 px-4">Inicia ou verifica o status da sua caça ao tesouro.</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="py-3 px-4"><code>/ctf join</code></td>
+                            <td class="py-3 px-4">Entra na fila para uma partida de Capture a Bandeira.</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="py-3 px-4"><code>/ctf leave</code></td>
+                            <td class="py-3 px-4">Sai da fila ou da partida atual de CTF.</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="py-3 px-4"><code>/ctf list</code></td>
+                            <td class="py-3 px-4">Lista as arenas de CTF disponíveis.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -291,86 +443,42 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                        <tr><td class="py-3 px-4"><code>/scout reload</code></td><td class="py-3 px-4">Recarrega as configurações do plugin.</td></tr>
-                        <tr><td class="py-3 px-4"><code>/scout admin addbadge &lt;jogador&gt; &lt;insignia&gt;</code></td><td class="py-3 px-4">Concede uma insígnia a um jogador.</td></tr>
-                        <tr><td class="py-3 px-4"><code>/scout admin removebadge &lt;jogador&gt; &lt;insignia&gt;</code></td><td class="py-3 px-4">Remove uma insígnia de um jogador.</td></tr>
-                        <tr class="bg-green-50"><td class="py-3 px-4"><code>/ctf admin create &lt;id&gt;</code></td><td class="py-3 px-4">Inicia a criação de uma nova arena.</td></tr>
-                        <tr class="bg-green-50"><td class="py-3 px-4"><code>/ctf admin set &lt;tipo&gt;</code></td><td class="py-3 px-4">Define um local (lobby, redspawn, etc.) na sua posição atual.</td></tr>
-                        <tr class="bg-green-50"><td class="py-3 px-4"><code>/ctf admin status</code></td><td class="py-3 px-4">Mostra o progresso da criação da arena atual.</td></tr>
-                        <tr class="bg-green-50"><td class="py-3 px-4"><code>/ctf admin save</code></td><td class="py-3 px-4">Salva a arena que está sendo criada.</td></tr>
-                        <tr class="bg-green-50"><td class="py-3 px-4"><code>/ctf admin cancel</code></td><td class="py-3 px-4">Cancela a criação da arena atual.</td></tr>
+                        <tr>
+                            <td class="py-3 px-4"><code>/scout reload</code></td>
+                            <td class="py-3 px-4">Recarrega as configurações do plugin.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4"><code>/scout admin addbadge &lt;jogador&gt; &lt;insignia&gt;</code>
+                            </td>
+                            <td class="py-3 px-4">Concede uma insígnia a um jogador.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4"><code>/scout admin removebadge &lt;jogador&gt; &lt;insignia&gt;</code>
+                            </td>
+                            <td class="py-3 px-4">Remove uma insígnia de um jogador.</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="py-3 px-4"><code>/ctf admin create &lt;id&gt;</code></td>
+                            <td class="py-3 px-4">Inicia a criação de uma nova arena.</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="py-3 px-4"><code>/ctf admin set &lt;tipo&gt;</code></td>
+                            <td class="py-3 px-4">Define um local (lobby, redspawn, etc.) na sua posição atual.</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="py-3 px-4"><code>/ctf admin status</code></td>
+                            <td class="py-3 px-4">Mostra o progresso da criação da arena atual.</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="py-3 px-4"><code>/ctf admin save</code></td>
+                            <td class="py-3 px-4">Salva a arena que está sendo criada.</td>
+                        </tr>
+                        <tr class="bg-green-50">
+                            <td class="py-3 px-4"><code>/ctf admin cancel</code></td>
+                            <td class="py-3 px-4">Cancela a criação da arena atual.</td>
+                        </tr>
                     </tbody>
                 </table>
-            </div>
-        </section>
-
-        <!-- Hall da Fama do CTF -->
-        <section class="grid md:grid-cols-3 gap-6">
-            <!-- Ranking de Vitórias -->
-            <div class="card">
-                <h3 class="section-title text-2xl">🏆 Maiores Campeões</h3>
-                <p class="mb-4">Jogadores com mais vitórias no CTF.</p>
-                <div id="ctf-wins-loading" class="text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando...</div>
-                <ol id="ctf-wins-list" class="list-decimal list-inside space-y-2 hidden"></ol>
-                <div id="ctf-wins-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
-            </div>
-
-            <!-- Ranking de Abates -->
-            <div class="card">
-                <h3 class="section-title text-2xl">⚔️ Maiores Artilheiros</h3>
-                <p class="mb-4">Jogadores com mais abates no CTF.</p>
-                <div id="ctf-kills-loading" class="text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando...</div>
-                <ol id="ctf-kills-list" class="list-decimal list-inside space-y-2 hidden"></ol>
-                <div id="ctf-kills-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
-            </div>
-
-            <!-- Ranking de Capturas -->
-            <div class="card">
-                <h3 class="section-title text-2xl">🏴 Maiores Ladrões</h3>
-                <p class="mb-4">Jogadores com mais capturas de bandeira.</p>
-                <div id="ctf-captures-loading" class="text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando...</div>
-                <ol id="ctf-captures-list" class="list-decimal list-inside space-y-2 hidden"></ol>
-                <div id="ctf-captures-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
-            </div>
-        </section>
-
-        <!-- Rankings -->
-        <section class="grid md:grid-cols-3 gap-6">
-            <!-- Ranking Diário -->
-            <div class="card">
-                <h3 class="section-title text-2xl">Ranking do Dia</h3>
-                <p class="mb-4">Mais insígnias hoje!</p>
-                <div id="leaderboard-daily-loading" class="text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando...</div>
-                <ol id="leaderboard-daily-list" class="list-decimal list-inside space-y-2 hidden"></ol>
-                <div id="leaderboard-daily-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
-            </div>
-
-            <!-- Ranking Mensal -->
-            <div class="card">
-                <h3 class="section-title text-2xl">Ranking do Mês</h3>
-                <p class="mb-4">Mais insígnias este mês!</p>
-                <div id="leaderboard-monthly-loading" class="text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando...</div>
-                <ol id="leaderboard-monthly-list" class="list-decimal list-inside space-y-2 hidden"></ol>
-                <div id="leaderboard-monthly-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
-            </div>
-
-            <!-- Ranking Geral -->
-            <div class="card">
-                <h3 class="section-title text-2xl">Ranking Geral</h3>
-                <p class="mb-4">Os maiores escoteiros!</p>
-                <div id="leaderboard-all-time-loading" class="text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando...</div>
-                <ol id="leaderboard-all-time-list" class="list-decimal list-inside space-y-2 hidden"></ol>
-                <div id="leaderboard-all-time-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
-            </div>
-        </section>
-        <!-- Atividade do Servidor -->
-        <section class="card">
-            <h2 class="section-title">Atividade do Servidor (Últimas 24h)</h2>
-            <div class="relative h-64 md:h-80">
-                <canvas id="player-activity-chart"></canvas>
-            </div>
-            <div id="chart-loading" class="text-center text-gray-500 mt-4">
-                <i class="fas fa-spinner fa-spin mr-2"></i> Carregando gráfico de atividade...
             </div>
         </section>
 
@@ -381,21 +489,25 @@
                 <div class="link-item">
                     <i class="fas fa-map text-2xl text-green-600" aria-label="Ícone de mapa"></i>
                     <div>
-                        <a href="http://mapa.magnocat.net:8100" target="_blank" class="text-blue-600 hover:underline font-semibold">mapa.magnocat.net</a>
+                        <a href="http://mapa.magnocat.net:8100" target="_blank"
+                            class="text-blue-600 hover:underline font-semibold">mapa.magnocat.net</a>
                         <p>Mapa interativo do servidor para explorar o mundo do jogo.</p>
                     </div>
                 </div>
                 <div class="link-item">
                     <i class="fab fa-discord text-2xl text-green-600" aria-label="Ícone do Discord"></i>
                     <div>
-                        <a href="http://discord.magnocat.net" target="_blank" class="text-blue-600 hover:underline font-semibold">discord.magnocat.net</a>
-                        <p>Precisa de ajuda, quer sugerir algo ou apenas conversar? Junte-se à nossa comunidade no Discord! É o nosso principal canal para suporte, novidades e interação.</p>
+                        <a href="http://discord.magnocat.net" target="_blank"
+                            class="text-blue-600 hover:underline font-semibold">discord.magnocat.net</a>
+                        <p>Precisa de ajuda, quer sugerir algo ou apenas conversar? Junte-se à nossa comunidade no
+                            Discord! É o nosso principal canal para suporte, novidades e interação.</p>
                     </div>
                 </div>
                 <div class="link-item">
                     <i class="fas fa-tachometer-alt text-2xl text-green-600" aria-label="Ícone de painel"></i>
                     <div>
-                        <a href="http://amp.magnocat.net:8080" target="_blank" class="text-blue-600 hover:underline font-semibold">amp.magnocat.net</a>
+                        <a href="http://amp.magnocat.net:8080" target="_blank"
+                            class="text-blue-600 hover:underline font-semibold">amp.magnocat.net</a>
                         <p>Painel de administração para gerenciar o servidor.</p>
                     </div>
                 </div>
@@ -406,7 +518,10 @@
         <section class="card">
             <h2 class="section-title">Grupo Escoteiro do Ar Cidade das Flores</h2>
             <p class="text-lg">
-                O MC Trilhas foi inspirado pelos valores do <a href="https://g.co/kgs/idwXxCh" target="_blank" class="text-blue-600 hover:underline">Grupo Escoteiro do Ar Cidade das Flores</a>, fundado em Joinville, SC. Este grupo escoteiro promove o desenvolvimento de jovens através de atividades ao ar livre, trabalho em equipe e valores éticos, que refletimos em nossa comunidade virtual.
+                O MC Trilhas foi inspirado pelos valores do <a href="https://g.co/kgs/idwXxCh" target="_blank"
+                    class="text-blue-600 hover:underline">Grupo Escoteiro do Ar Cidade das Flores</a>, fundado em
+                Joinville, SC. Este grupo escoteiro promove o desenvolvimento de jovens através de atividades ao ar
+                livre, trabalho em equipe e valores éticos, que refletimos em nossa comunidade virtual.
             </p>
         </section>
     </main>
@@ -414,266 +529,270 @@
     <!-- Rodapé -->
     <footer class="footer">
         <p>
-            <a href="/admin/login.html" title="Painel de Administração" style="text-decoration: none; color: inherit;">© <span id="copyright-year">2024</span></a> MagnoCat Tecnologia. Todos os direitos reservados.
+            <a href="/admin/login.html" title="Painel de Administração" style="text-decoration: none; color: inherit;">©
+                <span id="copyright-year">2024</span></a> MagnoCat Tecnologia. Todos os direitos reservados.
         </p>
-        <p>Inspirado pelo <a href="https://g.co/kgs/idwXxCh" target="_blank" class="text-green-400 hover:underline">Grupo Escoteiro do Ar Cidade das Flores</a>.</p>
+        <p>Inspirado pelo <a href="https://g.co/kgs/idwXxCh" target="_blank"
+                class="text-green-400 hover:underline">Grupo Escoteiro do Ar Cidade das Flores</a>.</p>
     </footer>
 
     <!-- Banner de Consentimento de Cookies -->
-    <div id="cookie-consent-banner" class="hidden fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 shadow-lg z-50 flex items-center justify-between flex-wrap">
+    <div id="cookie-consent-banner"
+        class="hidden fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 shadow-lg z-50 flex items-center justify-between flex-wrap">
         <p class="flex-grow mb-2 md:mb-0 mr-4">
-            Este site usa um cookie essencial para salvar suas preferências. Ao continuar, você concorda com nossa 
+            Este site usa um cookie essencial para salvar suas preferências. Ao continuar, você concorda com nossa
             <a href="/privacy.html" class="text-green-400 underline hover:text-green-300">Política de Privacidade</a>.
         </p>
         <button id="accept-cookies" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">
             Entendi
         </button>
     </div>
-    
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Lógica do PWA: Botão de Instalação ---
-    const installButton = document.getElementById('install-pwa-btn');
-    let deferredPrompt;
 
-    // --- Lógica do PWA: Registra o Service Worker ---
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js').then(registration => {
-                console.log('ServiceWorker registrado com sucesso:', registration.scope);
-            }, err => {
-                console.error('Falha ao registrar o ServiceWorker:', err);
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Lógica do PWA: Botão de Instalação ---
+            const installButton = document.getElementById('install-pwa-btn');
+            let deferredPrompt;
+
+            // --- Lógica do PWA: Registra o Service Worker ---
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js').then(registration => {
+                        console.log('ServiceWorker registrado com sucesso:', registration.scope);
+                    }, err => {
+                        console.error('Falha ao registrar o ServiceWorker:', err);
+                    });
+                });
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Previne que o mini-infobar apareça no Chrome mobile
+                e.preventDefault();
+                // Guarda o evento para que possa ser disparado depois
+                deferredPrompt = e;
+                // Mostra nosso botão customizado de instalação
+                if (installButton) installButton.classList.remove('hidden');
             });
-        });
-    }
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-        // Previne que o mini-infobar apareça no Chrome mobile
-        e.preventDefault();
-        // Guarda o evento para que possa ser disparado depois
-        deferredPrompt = e;
-        // Mostra nosso botão customizado de instalação
-        if (installButton) installButton.classList.remove('hidden');
-    });
-
-    if (installButton) {
-        installButton.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                // Mostra o prompt de instalação
-                deferredPrompt.prompt();
-                // Espera o usuário responder ao prompt
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`Resposta do usuário ao prompt de instalação: ${outcome}`);
-                // Só podemos usar o prompt uma vez.
-                deferredPrompt = null;
-                // Esconde o botão após o uso
-                installButton.classList.add('hidden');
+            if (installButton) {
+                installButton.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        // Mostra o prompt de instalação
+                        deferredPrompt.prompt();
+                        // Espera o usuário responder ao prompt
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`Resposta do usuário ao prompt de instalação: ${outcome}`);
+                        // Só podemos usar o prompt uma vez.
+                        deferredPrompt = null;
+                        // Esconde o botão após o uso
+                        installButton.classList.add('hidden');
+                    }
+                });
             }
-        });
-    }
 
-    // --- Lógica de Consentimento de Cookies (LGPD) ---
-    const cookieBanner = document.getElementById('cookie-consent-banner');
-    const acceptCookiesBtn = document.getElementById('accept-cookies');
+            // --- Lógica de Consentimento de Cookies (LGPD) ---
+            const cookieBanner = document.getElementById('cookie-consent-banner');
+            const acceptCookiesBtn = document.getElementById('accept-cookies');
 
-    function hasCookieConsent() {
-        return document.cookie.split(';').some((item) => item.trim().startsWith('mctrilhas_cookie_consent='));
-    }
+            function hasCookieConsent() {
+                return document.cookie.split(';').some((item) => item.trim().startsWith('mctrilhas_cookie_consent='));
+            }
 
-    function giveCookieConsent() {
-        if (cookieBanner) cookieBanner.classList.add('hidden');
-        const expiryDate = new Date();
-        expiryDate.setFullYear(expiryDate.getFullYear() + 1); // Cookie válido por 1 ano
-        document.cookie = `mctrilhas_cookie_consent=true; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
-    }
+            function giveCookieConsent() {
+                if (cookieBanner) cookieBanner.classList.add('hidden');
+                const expiryDate = new Date();
+                expiryDate.setFullYear(expiryDate.getFullYear() + 1); // Cookie válido por 1 ano
+                document.cookie = `mctrilhas_cookie_consent=true; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
+            }
 
-    if (!hasCookieConsent()) {
-        if (cookieBanner) cookieBanner.classList.remove('hidden');
-        if (acceptCookiesBtn) acceptCookiesBtn.addEventListener('click', giveCookieConsent);
-
-        // Auto-aceite após 15 segundos, como solicitado
-        setTimeout(() => {
             if (!hasCookieConsent()) {
-                giveCookieConsent();
+                if (cookieBanner) cookieBanner.classList.remove('hidden');
+                if (acceptCookiesBtn) acceptCookiesBtn.addEventListener('click', giveCookieConsent);
+
+                // Auto-aceite após 15 segundos, como solicitado
+                setTimeout(() => {
+                    if (!hasCookieConsent()) {
+                        giveCookieConsent();
+                    }
+                }, 15000);
             }
-        }, 15000);
-    }
 
-    // --- Lógica do Rodapé: Atualiza o ano do copyright ---
-    const startYear = 2024;
-    const currentYear = new Date().getFullYear();
-    const yearEl = document.getElementById('copyright-year');
-    yearEl.textContent = (currentYear > startYear) ? `${startYear} - ${currentYear}` : startYear;
+            // --- Lógica do Rodapé: Atualiza o ano do copyright ---
+            const startYear = 2024;
+            const currentYear = new Date().getFullYear();
+            const yearEl = document.getElementById('copyright-year');
+            yearEl.textContent = (currentYear > startYear) ? `${startYear} - ${currentYear}` : startYear;
 
-    // --- Lógica da API: Busca e renderiza os dados do servidor ---
-    const API_KEY = ''; // Ex: 'sua-chave-secreta-aqui'
-    const API_ENDPOINT = '/api/v1/data';
+            // --- Lógica da API: Busca e renderiza os dados do servidor ---
+            const API_KEY = ''; // Ex: 'sua-chave-secreta-aqui'
+            const API_ENDPOINT = '/api/v1/data';
 
-    // Função principal para buscar e renderizar todos os dados da API
-    async function fetchAndRenderData() {
-        const headers = {};
-        if (API_KEY) {
-            headers['X-API-Key'] = API_KEY;
-        }
+            // Função principal para buscar e renderizar todos os dados da API
+            async function fetchAndRenderData() {
+                const headers = {};
+                if (API_KEY) {
+                    headers['X-API-Key'] = API_KEY;
+                }
 
-        try {
-            const response = await fetch(`${API_ENDPOINT}?t=${new Date().getTime()}`, { headers });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                try {
+                    const response = await fetch(`${API_ENDPOINT}?t=${new Date().getTime()}`, { headers });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+
+                    renderLeaderboards(data.leaderboards);
+                    renderPlayerChart(data.activityHistory);
+                    renderCtfLeaderboards(data.ctfLeaderboards);
+
+                } catch (error) {
+                    console.error('Falha ao buscar dados da API:', error);
+                    // Exibe erro em todos os componentes que dependem da API
+                    ['daily', 'monthly', 'all-time'].forEach(showLeaderboardError);
+                    const chartLoadingEl = document.getElementById('chart-loading');
+                    if (chartLoadingEl) chartLoadingEl.innerText = 'Não foi possível carregar os dados de atividade.';
+                }
             }
-            const data = await response.json();
 
-            renderLeaderboards(data.leaderboards);
-            renderPlayerChart(data.activityHistory);
-            renderCtfLeaderboards(data.ctfLeaderboards);
+            function showLeaderboardError(type) {
+                document.getElementById(`leaderboard-${type}-loading`)?.classList.add('hidden');
+                document.getElementById(`leaderboard-${type}-error`)?.classList.remove('hidden');
+                document.getElementById(`ctf-${type}-error`)?.classList.remove('hidden');
+            }
 
-        } catch (error) {
-            console.error('Falha ao buscar dados da API:', error);
-            // Exibe erro em todos os componentes que dependem da API
-            ['daily', 'monthly', 'all-time'].forEach(showLeaderboardError);
-            const chartLoadingEl = document.getElementById('chart-loading');
-            if (chartLoadingEl) chartLoadingEl.innerText = 'Não foi possível carregar os dados de atividade.';
-        }
-    }
+            // Renderiza os 3 rankings (diário, mensal, geral)
+            function renderLeaderboards(leaderboards) {
+                if (!leaderboards) return;
+                populateLeaderboard('daily', leaderboards.daily);
+                populateLeaderboard('monthly', leaderboards.monthly);
+                populateLeaderboard('all-time', leaderboards.allTime);
+            }
 
-    function showLeaderboardError(type) {
-        document.getElementById(`leaderboard-${type}-loading`)?.classList.add('hidden');
-        document.getElementById(`leaderboard-${type}-error`)?.classList.remove('hidden');
-        document.getElementById(`ctf-${type}-error`)?.classList.remove('hidden');
-    }
+            // Renderiza os 3 rankings do CTF
+            function renderCtfLeaderboards(leaderboards) {
+                if (!leaderboards) return;
+                populateCtfLeaderboard('wins', leaderboards.wins, 'vitórias');
+                populateCtfLeaderboard('kills', leaderboards.kills, 'abates');
+                populateCtfLeaderboard('captures', leaderboards.captures, 'capturas');
+            }
 
-    // Renderiza os 3 rankings (diário, mensal, geral)
-    function renderLeaderboards(leaderboards) {
-        if (!leaderboards) return;
-        populateLeaderboard('daily', leaderboards.daily);
-        populateLeaderboard('monthly', leaderboards.monthly);
-        populateLeaderboard('all-time', leaderboards.allTime);
-    }
-    
-    // Renderiza os 3 rankings do CTF
-    function renderCtfLeaderboards(leaderboards) {
-        if (!leaderboards) return;
-        populateCtfLeaderboard('wins', leaderboards.wins, 'vitórias');
-        populateCtfLeaderboard('kills', leaderboards.kills, 'abates');
-        populateCtfLeaderboard('captures', leaderboards.captures, 'capturas');
-    }
+            // Preenche uma lista de ranking específica no HTML
+            function populateLeaderboard(type, data) {
+                const listEl = document.getElementById(`leaderboard-${type}-list`);
+                if (!listEl || !data) return;
 
-    // Preenche uma lista de ranking específica no HTML
-    function populateLeaderboard(type, data) {
-        const listEl = document.getElementById(`leaderboard-${type}-list`);
-        if (!listEl || !data) return;
+                // A API retorna um objeto {nome: pontuação}. Transformamos em um array de objetos.
+                const players = Object.entries(data).map(([name, badges]) => ({ name, badges }));
 
-        // A API retorna um objeto {nome: pontuação}. Transformamos em um array de objetos.
-        const players = Object.entries(data).map(([name, badges]) => ({ name, badges }));
+                listEl.innerHTML = ''; // Limpa a lista
 
-        listEl.innerHTML = ''; // Limpa a lista
-
-        if (players.length === 0) {
-            listEl.innerHTML = '<li class="text-gray-500">Ninguém no ranking ainda.</li>';
-        } else {
-            players.forEach(player => {
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `
+                if (players.length === 0) {
+                    listEl.innerHTML = '<li class="text-gray-500">Ninguém no ranking ainda.</li>';
+                } else {
+                    players.forEach(player => {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `
                     <span class="font-semibold text-gray-800">${player.name}</span> - 
                     <span class="font-bold text-green-700">${player.badges}</span> insígnias
                 `;
-                listEl.appendChild(listItem);
-            });
-        }
-        
-        document.getElementById(`leaderboard-${type}-loading`)?.classList.add('hidden');
-        listEl.classList.remove('hidden');
-    }
+                        listEl.appendChild(listItem);
+                    });
+                }
 
-    // Preenche uma lista de ranking do CTF
-    function populateCtfLeaderboard(type, data, unit) {
-        const listEl = document.getElementById(`ctf-${type}-list`);
-        if (!listEl || !data) return;
+                document.getElementById(`leaderboard-${type}-loading`)?.classList.add('hidden');
+                listEl.classList.remove('hidden');
+            }
 
-        const players = Object.entries(data).map(([name, value]) => ({ name, value }));
+            // Preenche uma lista de ranking do CTF
+            function populateCtfLeaderboard(type, data, unit) {
+                const listEl = document.getElementById(`ctf-${type}-list`);
+                if (!listEl || !data) return;
 
-        listEl.innerHTML = '';
+                const players = Object.entries(data).map(([name, value]) => ({ name, value }));
 
-        if (players.length === 0) {
-            listEl.innerHTML = '<li class="text-gray-500">Ninguém no ranking ainda.</li>';
-        } else {
-            players.forEach(player => {
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `
+                listEl.innerHTML = '';
+
+                if (players.length === 0) {
+                    listEl.innerHTML = '<li class="text-gray-500">Ninguém no ranking ainda.</li>';
+                } else {
+                    players.forEach(player => {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `
                     <span class="font-semibold text-gray-800">${player.name}</span> - 
                     <span class="font-bold text-green-700">${player.value}</span> ${unit}
                 `;
-                listEl.appendChild(listItem);
-            });
-        }
-        
-        document.getElementById(`ctf-${type}-loading`)?.classList.add('hidden');
-        listEl.classList.remove('hidden');
-    }
-
-    // Renderiza o gráfico de atividade dos jogadores
-    function renderPlayerChart(activityHistory) {
-        const loadingEl = document.getElementById('chart-loading');
-        const canvasEl = document.getElementById('player-activity-chart');
-        if (!canvasEl || !loadingEl || !activityHistory) return;
-        
-        const ctx = canvasEl.getContext('2d');
-
-        try {
-            if (activityHistory.length === 0) {
-                 throw new Error('Nenhum dado de atividade disponível.');
-            }
-            
-            // A API já fornece os dados no formato correto (timestamp e contagem de players)
-            const labels = activityHistory.map(entry => new Date(entry.timestamp));
-            const dataPoints = activityHistory.map(entry => entry.players);
-
-            loadingEl.classList.add('hidden');
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Jogadores Online',
-                        data: dataPoints,
-                        borderColor: 'rgba(47, 133, 90, 1)',
-                        backgroundColor: 'rgba(47, 133, 90, 0.2)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 0,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: { unit: 'hour', tooltipFormat: 'dd/MM HH:mm', displayFormats: { hour: 'HH:mm' } },
-                            grid: { display: false }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1, callback: (value) => Number.isInteger(value) ? value : null }
-                        }
-                    },
-                    plugins: { legend: { display: false } },
-                    interaction: { mode: 'index', intersect: false },
+                        listEl.appendChild(listItem);
+                    });
                 }
-            });
 
-        } catch (error) {
-            console.error('Erro ao renderizar o gráfico de atividade:', error);
-            loadingEl.innerText = 'Não foi possível carregar o gráfico de atividade.';
-        }
-    }
+                document.getElementById(`ctf-${type}-loading`)?.classList.add('hidden');
+                listEl.classList.remove('hidden');
+            }
 
-    // Inicia o processo de busca e renderização dos dados
-    fetchAndRenderData();
-});
-</script>
+            // Renderiza o gráfico de atividade dos jogadores
+            function renderPlayerChart(activityHistory) {
+                const loadingEl = document.getElementById('chart-loading');
+                const canvasEl = document.getElementById('player-activity-chart');
+                if (!canvasEl || !loadingEl || !activityHistory) return;
+
+                const ctx = canvasEl.getContext('2d');
+
+                try {
+                    if (activityHistory.length === 0) {
+                        throw new Error('Nenhum dado de atividade disponível.');
+                    }
+
+                    // A API já fornece os dados no formato correto (timestamp e contagem de players)
+                    const labels = activityHistory.map(entry => new Date(entry.timestamp));
+                    const dataPoints = activityHistory.map(entry => entry.players);
+
+                    loadingEl.classList.add('hidden');
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Jogadores Online',
+                                data: dataPoints,
+                                borderColor: 'rgba(47, 133, 90, 1)',
+                                backgroundColor: 'rgba(47, 133, 90, 0.2)',
+                                fill: true,
+                                tension: 0.3,
+                                pointRadius: 0,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: { unit: 'hour', tooltipFormat: 'dd/MM HH:mm', displayFormats: { hour: 'HH:mm' } },
+                                    grid: { display: false }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { stepSize: 1, callback: (value) => Number.isInteger(value) ? value : null }
+                                }
+                            },
+                            plugins: { legend: { display: false } },
+                            interaction: { mode: 'index', intersect: false },
+                        }
+                    });
+
+                } catch (error) {
+                    console.error('Erro ao renderizar o gráfico de atividade:', error);
+                    loadingEl.innerText = 'Não foi possível carregar o gráfico de atividade.';
+                }
+            }
+
+            // Inicia o processo de busca e renderização dos dados
+            fetchAndRenderData();
+        });
+    </script>
 
 
 </body>
+
 </html>

@@ -1,633 +1,614 @@
 <!doctype html>
 <html lang="pt-BR">
-  <!--begin::Head-->
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>MCTrilhas | Painel do Jogador</title>
-    <!--begin::Accessibility Meta Tags-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
-    <!--end::Accessibility Meta Tags-->
-    <!--begin::Primary Meta Tags-->
-    <meta name="title" content="MCTrilhas | Painel do Jogador" />
-    <meta name="author" content="MagnoCat" />
-    <meta
-      name="description"
-      content="Painel de acompanhamento de progresso para jogadores do servidor MCTrilhas."
-    />
-    <!--end::Primary Meta Tags-->
-    <!--begin::Fonts-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
-      integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q="
-      crossorigin="anonymous"
-      media="print"
-      onload="this.media='all'"
-    />
-    <!--end::Fonts-->
-    <!--begin::Third Party Plugin(OverlayScrollbars)-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css"
-      crossorigin="anonymous"
-    />
-    <!--end::Third Party Plugin(OverlayScrollbars)-->
-    <!--begin::Third Party Plugin(Bootstrap Icons)-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-      crossorigin="anonymous"
-    />
-    <!--end::Third Party Plugin(Bootstrap Icons)-->
-    <!--begin::Required Plugin(AdminLTE)-->
-    <link rel="stylesheet" href="./css/adminlte.css" />
-    <!--end::Required Plugin(AdminLTE)-->
-    <!-- apexcharts -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.css"
-      integrity="sha256-4MX+61mt9NVvvuPjUWdUdyfZfxSB1/Rf9WtqRHgG5S0="
-      crossorigin="anonymous"
-    />
-  </head>
-  <body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
-    <!--begin::App Wrapper-->
-    <div class="app-wrapper">
-      <!--begin::Header-->
-      <nav class="app-header navbar navbar-expand bg-body">
+<!--begin::Head-->
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>MCTrilhas | Painel do Jogador</title>
+  <!--begin::Accessibility Meta Tags-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+  <!--end::Accessibility Meta Tags-->
+  <!--begin::Primary Meta Tags-->
+  <meta name="title" content="MCTrilhas | Painel do Jogador" />
+  <meta name="author" content="MagnoCat" />
+  <meta name="description" content="Painel de acompanhamento de progresso para jogadores do servidor MCTrilhas." />
+  <!--end::Primary Meta Tags-->
+  <!--begin::Fonts-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
+    integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q=" crossorigin="anonymous" media="print"
+    onload="this.media='all'" />
+  <!--end::Fonts-->
+  <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css"
+    crossorigin="anonymous" />
+  <!--end::Third Party Plugin(OverlayScrollbars)-->
+  <!--begin::Third Party Plugin(Bootstrap Icons)-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    crossorigin="anonymous" />
+  <!--end::Third Party Plugin(Bootstrap Icons)-->
+  <!--begin::Required Plugin(AdminLTE)-->
+  <link rel="stylesheet" href="./css/adminlte.css" />
+  <!--end::Required Plugin(AdminLTE)-->
+  <!-- apexcharts -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.css"
+    integrity="sha256-4MX+61mt9NVvvuPjUWdUdyfZfxSB1/Rf9WtqRHgG5S0=" crossorigin="anonymous" />
+</head>
+
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+  <!--begin::App Wrapper-->
+  <div class="app-wrapper">
+    <!--begin::Header-->
+    <nav class="app-header navbar navbar-expand bg-body">
+      <!--begin::Container-->
+      <div class="container-fluid">
+        <!--begin::Start Navbar Links-->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+              <i class="bi bi-list"></i>
+            </a>
+          </li>
+        </ul>
+        <!--end::Start Navbar Links-->
+        <!--begin::End Navbar Links-->
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item" id="theme-toggle">
+            <a class="nav-link" href="#" role="button">
+              <i class="bi bi-moon-fill" id="theme-icon-dark"></i>
+              <i class="bi bi-sun-fill" id="theme-icon-light" style="display: none;"></i>
+            </a>
+          </li>
+          <!--begin::Fullscreen Toggle-->
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-lte-toggle="fullscreen">
+              <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
+              <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
+            </a>
+          </li>
+          <!--end::Fullscreen Toggle-->
+          <!--begin::User Menu Dropdown-->
+          <li class="nav-item dropdown user-menu">
+            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+              <img id="player-avatar-header" src="https://cravatar.eu/helmavatar/MHF_Steve/64.png"
+                class="user-image rounded-circle shadow" alt="User Image" />
+              <span id="player-name-header" class="d-none d-md-inline">Carregando...</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+              <!--begin::User Image-->
+              <li class="user-header text-bg-primary">
+                <img id="player-avatar-menu" src="https://cravatar.eu/helmavatar/MHF_Steve/160.png"
+                  class="rounded-circle shadow" alt="User Image" />
+                <p id="player-name-menu">
+                  Carregando...
+                  <small id="player-rank-menu">Ranque: Carregando...</small>
+                </p>
+              </li>
+              <!--end::User Image-->
+              <!--begin::Menu Footer-->
+              <li class="user-footer">
+                <a href="#" id="logout-button" class="btn btn-default btn-flat float-end">Sair</a>
+              </li>
+              <!--end::Menu Footer-->
+            </ul>
+          </li>
+          <!--end::User Menu Dropdown-->
+        </ul>
+        <!--end::End Navbar Links-->
+      </div>
+      <!--end::Container-->
+    </nav>
+    <!--end::Header-->
+    <!--begin::Sidebar-->
+    <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+      <!--begin::Sidebar Brand-->
+      <div class="sidebar-brand">
+        <!--begin::Brand Link-->
+        <a href="/" class="brand-link">
+          <!--begin::Brand Image-->
+          <img src="./assets/img/AdminLTELogo.png" alt="MCTrilhas Logo" class="brand-image opacity-75 shadow" />
+          <!--end::Brand Image-->
+          <!--begin::Brand Text-->
+          <span class="brand-text fw-light">MCTrilhas</span>
+          <!--end::Brand Text-->
+        </a>
+        <!--end::Brand Link-->
+      </div>
+      <!--end::Sidebar Brand-->
+      <!--begin::Sidebar Wrapper-->
+      <div class="sidebar-wrapper">
+        <nav class="mt-2">
+          <!--begin::Sidebar Menu-->
+          <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation"
+            aria-label="Main navigation">
+            <li class="nav-header">PAINEL DO JOGADOR</li>
+            <li class="nav-item">
+              <a href="#" class="nav-link active">
+                <i class="nav-icon bi bi-speedometer2"></i>
+                <p>Visão Geral</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-bar-chart-line-fill"></i>
+                <p>Estatísticas Detalhadas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-shield-check"></i>
+                <p>Conquistas</p>
+              </a>
+            </li>
+          </ul>
+          <!--end::Sidebar Menu-->
+        </nav>
+      </div>
+      <!--end::Sidebar Wrapper-->
+    </aside>
+    <!--end::Sidebar-->
+    <!--begin::App Main-->
+    <main class="app-main">
+      <!--begin::App Content Header-->
+      <div class="app-content-header">
         <!--begin::Container-->
         <div class="container-fluid">
-          <!--begin::Start Navbar Links-->
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
-                <i class="bi bi-list"></i>
-              </a>
-            </li>
-          </ul>
-          <!--end::Start Navbar Links-->
-          <!--begin::End Navbar Links-->
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item" id="theme-toggle">
-              <a class="nav-link" href="#" role="button">
-                <i class="bi bi-moon-fill" id="theme-icon-dark"></i>
-                <i class="bi bi-sun-fill" id="theme-icon-light" style="display: none;"></i>
-              </a>
-            </li>
-            <!--begin::Fullscreen Toggle-->
-            <li class="nav-item">
-              <a class="nav-link" href="#" data-lte-toggle="fullscreen">
-                <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
-                <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
-              </a>
-            </li>
-            <!--end::Fullscreen Toggle-->
-            <!--begin::User Menu Dropdown-->
-            <li class="nav-item dropdown user-menu">
-              <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                <img
-                  id="player-avatar-header"
-                  src="https://cravatar.eu/helmavatar/MHF_Steve/64.png"
-                  class="user-image rounded-circle shadow"
-                  alt="User Image"
-                />
-                <span id="player-name-header" class="d-none d-md-inline">Carregando...</span>
-              </a>
-              <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                <!--begin::User Image-->
-                <li class="user-header text-bg-primary">
-                  <img
-                    id="player-avatar-menu"
-                    src="https://cravatar.eu/helmavatar/MHF_Steve/160.png"
-                    class="rounded-circle shadow"
-                    alt="User Image"
-                  />
-                  <p id="player-name-menu">
-                    Carregando...
-                    <small id="player-rank-menu">Ranque: Carregando...</small>
-                  </p>
-                </li>
-                <!--end::User Image-->
-                <!--begin::Menu Footer-->
-                <li class="user-footer">
-                  <a href="#" id="logout-button" class="btn btn-default btn-flat float-end">Sair</a>
-                </li>
-                <!--end::Menu Footer-->
-              </ul>
-            </li>
-            <!--end::User Menu Dropdown-->
-          </ul>
-          <!--end::End Navbar Links-->
+          <!--begin::Row-->
+          <div class="row">
+            <div class="col-sm-6">
+              <h3 class="mb-0">Painel do Jogador</h3>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-end">
+                <li class="breadcrumb-item"><a href="#">Início</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Painel do Jogador</li>
+              </ol>
+            </div>
+          </div>
+          <!--end::Row-->
         </div>
         <!--end::Container-->
-      </nav>
-      <!--end::Header-->
-      <!--begin::Sidebar-->
-      <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
-        <!--begin::Sidebar Brand-->
-        <div class="sidebar-brand">
-          <!--begin::Brand Link-->
-          <a href="./index.html" class="brand-link">
-            <!--begin::Brand Image-->
-            <img
-              src="./assets/img/AdminLTELogo.png"
-              alt="MCTrilhas Logo"
-              class="brand-image opacity-75 shadow"
-            />
-            <!--end::Brand Image-->
-            <!--begin::Brand Text-->
-            <span class="brand-text fw-light">MCTrilhas</span>
-            <!--end::Brand Text-->
-          </a>
-          <!--end::Brand Link-->
-        </div>
-        <!--end::Sidebar Brand-->
-        <!--begin::Sidebar Wrapper-->
-        <div class="sidebar-wrapper">
-          <nav class="mt-2">
-            <!--begin::Sidebar Menu-->
-            <ul
-              class="nav sidebar-menu flex-column"
-              data-lte-toggle="treeview"
-              role="navigation"
-              aria-label="Main navigation"
-            >
-              <li class="nav-header">PAINEL DO JOGADOR</li>
-              <li class="nav-item">
-                <a href="#" class="nav-link active">
-                  <i class="nav-icon bi bi-speedometer2"></i>
-                  <p>Visão Geral</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-bar-chart-line-fill"></i>
-                  <p>Estatísticas Detalhadas</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-shield-check"></i>
-                  <p>Conquistas</p>
-                </a>
-              </li>
-            </ul>
-            <!--end::Sidebar Menu-->
-          </nav>
-        </div>
-        <!--end::Sidebar Wrapper-->
-      </aside>
-      <!--end::Sidebar-->
-      <!--begin::App Main-->
-      <main class="app-main">
-        <!--begin::App Content Header-->
-        <div class="app-content-header">
-          <!--begin::Container-->
-          <div class="container-fluid">
-            <!--begin::Row-->
-            <div class="row">
-              <div class="col-sm-6">
-                <h3 class="mb-0">Painel do Jogador</h3>
+      </div>
+      <div class="app-content">
+        <!--begin::Container-->
+        <div class="container-fluid">
+          <!-- Info boxes -->
+          <div class="row">
+            <div class="col-12 col-sm-6 col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon text-bg-primary shadow-sm">
+                  <i class="bi bi-shield-shaded"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Seu Ranque</span>
+                  <span id="info-player-rank" class="info-box-number">...</span>
+                </div>
+                <!-- /.info-box-content -->
               </div>
-              <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-end">
-                  <li class="breadcrumb-item"><a href="#">Início</a></li>
-                  <li class="breadcrumb-item active" aria-current="page">Painel do Jogador</li>
-                </ol>
+              <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+            <div class="col-12 col-sm-6 col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon text-bg-warning shadow-sm">
+                  <i class="bi bi-coin"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Seus Totens</span>
+                  <span id="info-player-totems" class="info-box-number">...</span>
+                </div>
+                <!-- /.info-box-content -->
+              </div>
+              <!-- /.info-box -->
+            </div>
+            <!-- /.col -->
+            <div class="col-12 col-sm-6 col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon text-bg-info shadow-sm">
+                  <i class="bi bi-clock-history"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Horas de Jogo</span>
+                  <span id="info-player-playtime" class="info-box-number">...</span>
+                </div>
               </div>
             </div>
-            <!--end::Row-->
+            <div class="col-12 col-sm-6 col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon text-bg-danger shadow-sm">
+                  <i class="bi bi-trophy-fill"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Vitórias CTF</span>
+                  <span id="info-player-ctf-wins" class="info-box-number">...</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <!--end::Container-->
-        </div>
-        <div class="app-content">
-          <!--begin::Container-->
-          <div class="container-fluid">
-            <!-- Info boxes -->
-            <div class="row">
-              <div class="col-12 col-sm-6 col-md-6">
-                <div class="info-box">
-                  <span class="info-box-icon text-bg-success shadow-sm">
-                    <i class="bi bi-server"></i>
-                  </span>
-                  <div class="info-box-content">
-                    <span class="info-box-text">Status do Servidor</span>
-                    <span id="info-server-status" class="info-box-number">Carregando...</span>
+          <!-- /.row -->
+          <!--begin::Row-->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card mb-4">
+                <div class="card-header">
+                  <h5 class="card-title">Relatório de Atividade</h5>
+                  <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+                      <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                      <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                    </button>
                   </div>
-                  <!-- /.info-box-content -->
                 </div>
-                <!-- /.info-box -->
-              </div>
-              <!-- /.col -->
-              <div class="col-12 col-sm-6 col-md-6">
-                <div class="info-box">
-                  <span class="info-box-icon text-bg-warning shadow-sm">
-                    <i class="bi bi-coin"></i>
-                  </span>
-                  <div class="info-box-content">
-                    <span class="info-box-text">Seus Totens</span>
-                    <span id="info-player-totems" class="info-box-number">...</span>
+                <!-- /.card-header -->
+                <div class="card-body">
+                  <!--begin::Row-->
+                  <div class="row">
+                    <div class="col-md-8">
+                      <p class="text-center">
+                        <strong>Progresso para as Próximas Insígnias</strong>
+                      </p>
+                      <div id="badge-progress-chart" style="height: 250px;"></div>
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-md-4">
+                      <p class="text-center"><strong>Tempo de Jogo</strong></p>
+                      <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                        <h2 id="playtime-total" class="display-4 fw-bold">...</h2>
+                        <p class="text-muted">Horas de Aventura</p>
+                      </div>
+                    </div>
+                    <!-- /.col -->
                   </div>
-                  <!-- /.info-box-content -->
+                  <!--end::Row-->
                 </div>
-                <!-- /.info-box -->
+                <!-- ./card-body -->
+                <div class="card-footer">
+                  <!--begin::Row-->
+                  <div class="row">
+                    <div class="col-md-3 col-6">
+                      <div class="text-center border-end">
+                        <h5 id="stat-rank" class="fw-bold mb-0">...</h5>
+                        <span class="text-uppercase">Seu Ranque</span>
+                      </div>
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-md-3 col-6">
+                      <div class="text-center border-end">
+                        <h5 id="stat-ctf-wins" class="fw-bold mb-0">...</h5>
+                        <span class="text-uppercase">Vitórias CTF</span>
+                      </div>
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-md-3 col-6">
+                      <div class="text-center border-end">
+                        <h5 id="stat-clan" class="fw-bold mb-0">Nenhuma</h5>
+                        <span class="text-uppercase">Sua Patrulha</span>
+                      </div>
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-md-3 col-6">
+                      <div class="text-center">
+                        <h5 id="stat-totems" class="fw-bold mb-0">...</h5>
+                        <span class="text-uppercase">Total de Totens</span>
+                      </div>
+                    </div>
+                  </div>
+                  <!--end::Row-->
+                </div>
+                <!-- /.card-footer -->
               </div>
-              <!-- /.col -->
+              <!-- /.card -->
             </div>
-            <!-- /.row -->
-            <!--begin::Row-->
-            <div class="row">
-              <div class="col-md-12">
-                <div class="card mb-4">
-                  <div class="card-header">
-                    <h5 class="card-title">Relatório de Atividade</h5>
-                    <div class="card-tools">
-                      <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
-                        <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
-                        <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
-                      </button>
-                    </div>
+            <!-- /.col -->
+          </div>
+          <!--end::Row-->
+          <!--begin::Row-->
+          <div class="row">
+            <!-- Coluna da Esquerda (Jogadores Recentes) -->
+            <div class="col-lg-7">
+              <!-- USERS LIST -->
+              <div class="card h-100">
+                <div class="card-header">
+                  <h3 class="card-title">Jogadores Recentes</h3>
+                  <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+                      <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                      <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                    </button>
                   </div>
-                  <!-- /.card-header -->
-                  <div class="card-body">
-                    <!--begin::Row-->
-                    <div class="row">
-                      <div class="col-md-8">
-                        <p class="text-center">
-                          <strong>Progresso para as Próximas Insígnias</strong>
-                        </p>
-                        <div id="badge-progress-chart" style="height: 250px;"></div>
-                      </div>
-                      <!-- /.col -->
-                      <div class="col-md-4">
-                        <p class="text-center"><strong>Tempo de Jogo</strong></p>
-                        <div class="d-flex flex-column align-items-center justify-content-center h-100">
-                            <h2 id="playtime-total" class="display-4 fw-bold">...</h2>
-                            <p class="text-muted">Horas de Aventura</p>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                    </div>
-                    <!--end::Row-->
-                  </div>
-                  <!-- ./card-body -->
-                  <div class="card-footer">
-                    <!--begin::Row-->
-                    <div class="row">
-                      <div class="col-md-3 col-6">
-                        <div class="text-center border-end">
-                          <h5 id="stat-rank" class="fw-bold mb-0">...</h5>
-                          <span class="text-uppercase">Seu Ranque</span>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <div class="col-md-3 col-6">
-                        <div class="text-center border-end">
-                          <h5 id="stat-ctf-wins" class="fw-bold mb-0">...</h5>
-                          <span class="text-uppercase">Vitórias CTF</span>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <div class="col-md-3 col-6">
-                        <div class="text-center border-end">
-                          <h5 id="stat-clan" class="fw-bold mb-0">Nenhuma</h5>
-                          <span class="text-uppercase">Sua Patrulha</span>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                      <div class="col-md-3 col-6">
-                        <div class="text-center">
-                          <h5 id="stat-totems" class="fw-bold mb-0">...</h5>
-                          <span class="text-uppercase">Total de Totens</span>
-                        </div>
-                      </div>
-                    </div>
-                    <!--end::Row-->
-                  </div>
-                  <!-- /.card-footer -->
                 </div>
-                <!-- /.card -->
+                <!-- /.card-header -->
+                <div class="card-body p-0" style="min-height: 450px;">
+                  <div id="recent-players-list" class="row text-center m-1">
+                    <!-- Conteúdo será preenchido pelo JavaScript -->
+                  </div>
+                  <!-- /.users-list -->
+                </div>
+                <!-- /.card-body -->
               </div>
-              <!-- /.col -->
+              <!-- /.card -->
             </div>
-            <!--end::Row-->
-            <!--begin::Row-->
-            <div class="row">
-              <!-- Coluna da Esquerda (Jogadores Recentes) -->
-              <div class="col-lg-7">
-                <!-- USERS LIST -->
-                <div class="card h-100">
-                  <div class="card-header">
-                    <h3 class="card-title">Jogadores Recentes</h3>
-                    <div class="card-tools">
-                      <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
-                        <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
-                        <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <!-- /.card-header -->
-                  <div class="card-body p-0" style="min-height: 450px;">
-                    <div id="recent-players-list" class="row text-center m-1">
-                      <!-- Conteúdo será preenchido pelo JavaScript -->
-                    </div>
-                    <!-- /.users-list -->
-                  </div>
-                  <!-- /.card-body -->
-                </div>
-                <!-- /.card -->
-              </div>
-              <!-- /.col -->
+            <!-- /.col -->
 
-              <!-- Coluna da Direita (Chat do Discord) -->
-              <div class="col-lg-5">
-                <div class="card direct-chat direct-chat-primary h-100">
-                  <div class="card-header">
-                    <h3 class="card-title">Chat do Discord</h3>
-                    <div class="card-tools">
-                      <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
-                        <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
-                        <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
-                      </button>
-                    </div>
+            <!-- Coluna da Direita (Chat do Discord) -->
+            <div class="col-lg-5">
+              <div class="card direct-chat direct-chat-primary h-100">
+                <div class="card-header">
+                  <h3 class="card-title">Chat do Discord</h3>
+                  <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+                      <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                      <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                    </button>
                   </div>
-                  <div class="card-body p-0" style="position: relative;">
-                    <widgetbot-embed server="1368661284090019880" channel="1368661536641384498" style="width: 100%; height: 100%; position: absolute;"></widgetbot-embed>
+                </div>
+                <div class="card-body p-0" style="position: relative;">
+                  <widgetbot-embed server="1368661284090019880" channel="1368661536641384498"
+                    style="width: 100%; height: 100%; position: absolute;"></widgetbot-embed>
+                </div>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!--end::Row-->
+          <!--begin::Row-->
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <div class="card bg-info-subtle">
+                <div class="card-body d-flex align-items-center">
+                  <i class="bi bi-map-fill fs-1 text-info me-3"></i>
+                  <div>
+                    <h5 class="card-title fw-bold">Explore o Mapa 3D!</h5>
+                    <p class="card-text">Acompanhe a aventura em tempo real! Veja as construções e a localização dos
+                      jogadores em nosso mapa interativo.</p>
+                    <a href="http://mapa.magnocat.net:8100" target="_blank" class="btn btn-info">Abrir BlueMap</a>
                   </div>
                 </div>
               </div>
-              <!-- /.col -->
             </div>
-            <!--end::Row-->
-            <!--begin::Row-->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="card bg-info-subtle">
-                        <div class="card-body d-flex align-items-center">
-                            <i class="bi bi-map-fill fs-1 text-info me-3"></i>
-                            <div>
-                                <h5 class="card-title fw-bold">Explore o Mapa 3D!</h5>
-                                <p class="card-text">Acompanhe a aventura em tempo real! Veja as construções e a localização dos jogadores em nosso mapa interativo.</p>
-                                <a href="http://mapa.magnocat.net:8100" target="_blank" class="btn btn-info">Abrir BlueMap</a>
-                            </div>
-                        </div>
-                    </div>
+            <div class="col-md-6">
+              <div class="card bg-secondary-subtle">
+                <div class="card-body d-flex align-items-center">
+                  <i class="bi bi-discord fs-1 text-secondary me-3"></i>
+                  <div>
+                    <h5 class="card-title fw-bold">Converse com a Comunidade</h5>
+                    <p class="card-text">O chat ao lado é do nosso Discord! Participe da conversa, tire dúvidas e faça
+                      parte da nossa comunidade escoteira.</p>
+                    <a href="http://discord.magnocat.net" target="_blank" class="btn btn-secondary">Entrar no
+                      Discord</a>
+                  </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="card bg-secondary-subtle">
-                        <div class="card-body d-flex align-items-center">
-                            <i class="bi bi-discord fs-1 text-secondary me-3"></i>
-                            <div>
-                                <h5 class="card-title fw-bold">Converse com a Comunidade</h5>
-                                <p class="card-text">O chat ao lado é do nosso Discord! Participe da conversa, tire dúvidas e faça parte da nossa comunidade escoteira.</p>
-                                <a href="http://discord.magnocat.net" target="_blank" class="btn btn-secondary">Entrar no Discord</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              </div>
             </div>
-            <!--end::Row-->
           </div>
-          <!--end::Container-->
+          <!--end::Row-->
         </div>
-        <!--end::App Content-->
-      </main>
-      <!--end::App Main-->
-      <!--begin::Footer-->
-      <footer class="app-footer">
-        <!--begin::To the end-->
-        <div class="float-end d-none d-sm-inline">MCTrilhas - Uma Aventura Digital</div>
-        <!--end::To the end-->
-        <!--begin::Copyright-->
-        <strong>
-          Copyright &copy; 2024&nbsp;
-          <a href="https://magnocat.net" class="text-decoration-none">MagnoCat</a>.
-        </strong>
-        All rights reserved.
-        <!--end::Copyright-->
-      </footer>
-      <!--end::Footer-->
-    </div>
-    <!--end::App Wrapper-->
-    <!--begin::Script-->
-    <!--begin::Third Party Plugin(OverlayScrollbars)-->
-    <script
-      src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
-      crossorigin="anonymous"
-    ></script>
-    <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-      crossorigin="anonymous"
-    ></script>
-    <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js"
-      crossorigin="anonymous"
-    ></script>
-    <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
-    <script src="./js/adminlte.js"></script>
-    <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
-    <script>
-      const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
-      const Default = {
-        scrollbarTheme: 'os-theme-light',
-        scrollbarAutoHide: 'leave',
-        scrollbarClickScroll: true,
+        <!--end::Container-->
+      </div>
+      <!--end::App Content-->
+    </main>
+    <!--end::App Main-->
+    <!--begin::Footer-->
+    <footer class="app-footer">
+      <!--begin::To the end-->
+      <div class="float-end d-none d-sm-inline">MCTrilhas - Uma Aventura Digital</div>
+      <!--end::To the end-->
+      <!--begin::Copyright-->
+      <strong>
+        Copyright &copy; 2024&nbsp;
+        <a href="https://magnocat.net" class="text-decoration-none">MagnoCat</a>.
+      </strong>
+      All rights reserved.
+      <!--end::Copyright-->
+    </footer>
+    <!--end::Footer-->
+  </div>
+  <!--end::App Wrapper-->
+  <!--begin::Script-->
+  <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
+    crossorigin="anonymous"></script>
+  <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    crossorigin="anonymous"></script>
+  <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+  <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
+  <script src="./js/adminlte.js"></script>
+  <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
+  <script>
+    const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+    const Default = {
+      scrollbarTheme: 'os-theme-light',
+      scrollbarAutoHide: 'leave',
+      scrollbarClickScroll: true,
+    };
+    document.addEventListener('DOMContentLoaded', function () {
+      const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+      if (sidebarWrapper && OverlayScrollbarsGlobal?.OverlayScrollbars !== undefined) {
+        OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+          scrollbars: {
+            theme: Default.scrollbarTheme,
+            autoHide: Default.scrollbarAutoHide,
+            clickScroll: Default.scrollbarClickScroll,
+          },
+        });
+      }
+    });
+  </script>
+  <!--end::OverlayScrollbars Configure-->
+  <!-- OPTIONAL SCRIPTS -->
+  <!-- apexcharts -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"
+    integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8=" crossorigin="anonymous"></script>
+
+  <!-- WidgetBot -->
+  <script src="https://cdn.jsdelivr.net/npm/@widgetbot/html-embed"></script>
+
+  <!--begin::Custom Dashboard Script-->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- Lógica do Seletor de Tema (Dark/Light Mode) ---
+      const getStoredTheme = () => localStorage.getItem('theme');
+      const getPreferredTheme = () => {
+        const storedTheme = getStoredTheme();
+        if (storedTheme) return storedTheme;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       };
-      document.addEventListener('DOMContentLoaded', function () {
-        const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
-        if (sidebarWrapper && OverlayScrollbarsGlobal?.OverlayScrollbars !== undefined) {
-          OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
-            scrollbars: {
-              theme: Default.scrollbarTheme,
-              autoHide: Default.scrollbarAutoHide,
-              clickScroll: Default.scrollbarClickScroll,
-            },
+
+      const setTheme = (theme) => {
+        document.documentElement.setAttribute('data-bs-theme', theme);
+        const darkIcon = document.getElementById('theme-icon-dark');
+        const lightIcon = document.getElementById('theme-icon-light');
+        if (darkIcon && lightIcon) {
+          darkIcon.style.display = theme === 'dark' ? 'none' : 'inline-block';
+          lightIcon.style.display = theme === 'dark' ? 'inline-block' : 'none';
+        }
+      };
+
+      // Aplica o tema ao carregar
+      setTheme(getPreferredTheme());
+
+      // Adiciona o evento de clique no botão
+      const themeToggler = document.getElementById('theme-toggle');
+      if (themeToggler) {
+        themeToggler.addEventListener('click', (e) => {
+          e.preventDefault();
+          const currentTheme = getStoredTheme() || getPreferredTheme();
+          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+          localStorage.setItem('theme', newTheme);
+          setTheme(newTheme);
+        });
+      }
+
+      // Adiciona funcionalidade ao botão de logout.
+      // Como este painel não tem uma "sessão" para encerrar, o botão simplesmente
+      // redireciona o usuário para a página inicial do site.
+      const logoutBtn = document.getElementById('logout-button');
+      if (logoutBtn) logoutBtn.addEventListener('click', () => window.location.href = '/');
+
+      // 1. Obter o token do jogador da URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const playerToken = urlParams.get('token');
+
+      if (!playerToken) {
+        document.body.innerHTML = '<div class="alert alert-danger m-5"><h1>Erro: Token de acesso não fornecido.</h1><p>Este painel requer um token de acesso único. Gere o seu dentro do jogo com o comando /familia token.</p></div>';
+        return;
+      }
+
+      // 2. Função para buscar os dados do jogador na API
+      async function fetchPlayerData(token) {
+        try {
+          const response = await fetch(`/api/v1/player?token=${token}`);
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Erro na API: ${response.statusText}`);
+          }
+          return await response.json();
+        } catch (error) {
+          console.error("Falha ao buscar dados do jogador:", error);
+          // Tratar erro na UI
+          document.body.innerHTML = `<div class="alert alert-danger m-5"><h1>Erro ao carregar dados.</h1><p>Não foi possível conectar ao servidor ou o token é inválido. Tente novamente mais tarde.</p><p><small>${error.message}</small></p></div>`;
+          return null;
+        }
+      }
+
+      // 3. Funções para popular o dashboard com os dados
+      function updateDashboard(data) {
+        if (!data) return;
+
+        // Atualiza o cabeçalho e menu
+        document.getElementById('player-name-header').textContent = data.name;
+        document.getElementById('player-name-menu').innerHTML = `${data.name}<small id="player-rank-menu">Ranque: ${data.rank}</small>`;
+        document.getElementById('player-avatar-header').src = `https://cravatar.eu/helmavatar/${data.uuid}/64.png`;
+        document.getElementById('player-avatar-menu').src = `https://cravatar.eu/helmavatar/${data.uuid}/160.png`;
+
+        // Atualiza os Info Boxes
+        document.getElementById('info-player-rank').textContent = data.rank;
+        document.getElementById('info-player-totems').textContent = data.totems.toLocaleString('pt-BR');
+        document.getElementById('info-player-playtime').textContent = data.playtimeHours;
+        document.getElementById('info-player-ctf-wins').textContent = data.ctfStats.wins;
+
+        // Atualiza o Relatório de Atividade
+        document.getElementById('playtime-total').textContent = data.playtimeHours;
+        document.getElementById('stat-rank').textContent = data.rank;
+        document.getElementById('stat-ctf-wins').textContent = data.ctfStats.wins;
+        document.getElementById('stat-totems').textContent = data.totems.toLocaleString('pt-BR');
+
+        // Renderiza o gráfico de progresso das insígnias dinamicamente
+        const progressPercentages = {};
+        if (data.badgeDefinitions) {
+          data.badgeDefinitions.forEach(badgeDef => {
+            const required = badgeDef.requirement;
+            // O progresso é mapeado pelo 'type', que corresponde ao ID da insígnia
+            const progress = data.badgeProgress[badgeDef.type] || 0;
+
+            const percentage = required > 0 ? Math.min(100, (progress / required) * 100) : 0;
+            // Usa o nome da insígnia vindo diretamente da API
+            progressPercentages[badgeDef.name] = Math.round(percentage);
           });
         }
+        renderBadgeProgressChart(progressPercentages);
+
+        // A lista de jogadores recentes não está disponível neste painel individual.
+        const recentPlayersList = document.getElementById('recent-players-list');
+        if (recentPlayersList) {
+          recentPlayersList.innerHTML = '<div class="p-4 text-muted">Informação de outros jogadores não disponível neste painel.</div>';
+        }
+      }
+
+      function renderBadgeProgressChart(progressData) {
+        const chartEl = document.querySelector("#badge-progress-chart");
+        if (!chartEl) return;
+
+        const options = {
+          series: [{
+            name: 'Progresso',
+            data: Object.values(progressData),
+          }],
+          chart: {
+            height: 250,
+            type: 'radar',
+            toolbar: { show: false }
+          },
+          xaxis: {
+            categories: Object.keys(progressData),
+          },
+          yaxis: {
+            min: 0,
+            max: 100,
+            tickAmount: 5,
+            labels: {
+              formatter: function (val) {
+                return val + "%"
+              }
+            }
+          },
+          stroke: {
+            width: 2
+          },
+          fill: {
+            opacity: 0.1
+          },
+          markers: {
+            size: 0
+          }
+        };
+
+        const chart = new ApexCharts(chartEl, options);
+        chart.render();
+      }
+
+      // 4. Inicia o processo
+      fetchPlayerData(playerToken).then(data => {
+        updateDashboard(data);
       });
-    </script>
-    <!--end::OverlayScrollbars Configure-->
-    <!-- OPTIONAL SCRIPTS -->
-    <!-- apexcharts -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"
-      integrity="sha256-+vh8GkaU7C9/wbSLIcwq82tQ2wTf44aOHA8HlBMwRI8="
-      crossorigin="anonymous"
-    ></script>
+    });
+  </script>
+  <!--end::Custom Dashboard Script-->
+</body>
+<!--end::Body-->
 
-    <!-- WidgetBot -->
-    <script src="https://cdn.jsdelivr.net/npm/@widgetbot/html-embed"></script>
-    
-    <!--begin::Custom Dashboard Script-->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Lógica do Seletor de Tema (Dark/Light Mode) ---
-            const getStoredTheme = () => localStorage.getItem('theme');
-            const getPreferredTheme = () => {
-                const storedTheme = getStoredTheme();
-                if (storedTheme) return storedTheme;
-                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            };
-
-            const setTheme = (theme) => {
-                document.documentElement.setAttribute('data-bs-theme', theme);
-                const darkIcon = document.getElementById('theme-icon-dark');
-                const lightIcon = document.getElementById('theme-icon-light');
-                if (darkIcon && lightIcon) {
-                    darkIcon.style.display = theme === 'dark' ? 'none' : 'inline-block';
-                    lightIcon.style.display = theme === 'dark' ? 'inline-block' : 'none';
-                }
-            };
-
-            // Aplica o tema ao carregar
-            setTheme(getPreferredTheme());
-
-            // Adiciona o evento de clique no botão
-            const themeToggler = document.getElementById('theme-toggle');
-            if (themeToggler) {
-                themeToggler.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const currentTheme = getStoredTheme() || getPreferredTheme();
-                    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                    localStorage.setItem('theme', newTheme);
-                    setTheme(newTheme);
-                });
-            }
-
-            // Adiciona funcionalidade ao botão de logout.
-            // Como este painel não tem uma "sessão" para encerrar, o botão simplesmente
-            // redireciona o usuário para a página inicial do site.
-            const logoutBtn = document.getElementById('logout-button');
-            if(logoutBtn) logoutBtn.addEventListener('click', () => window.location.href = '/');
-
-            // 1. Obter o token do jogador da URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const playerToken = urlParams.get('token');
-
-            if (!playerToken) {
-                document.body.innerHTML = '<div class="alert alert-danger m-5"><h1>Erro: Token de acesso não fornecido.</h1><p>Este painel requer um token de acesso único. Gere o seu dentro do jogo com o comando /familia token.</p></div>';
-                return;
-            }
-
-            // 2. Função para buscar os dados do jogador na API
-            async function fetchPlayerData(token) {
-                try {
-                    const response = await fetch(`/api/v1/player?token=${token}`);
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `Erro na API: ${response.statusText}`);
-                    }
-                    return await response.json();
-                } catch (error) {
-                    console.error("Falha ao buscar dados do jogador:", error);
-                    // Tratar erro na UI
-                    document.body.innerHTML = `<div class="alert alert-danger m-5"><h1>Erro ao carregar dados.</h1><p>Não foi possível conectar ao servidor ou o token é inválido. Tente novamente mais tarde.</p><p><small>${error.message}</small></p></div>`;
-                    return null;
-                }
-            }
-
-            // 3. Funções para popular o dashboard com os dados
-            function updateDashboard(data) {
-                if (!data) return;
-
-                // Atualiza o cabeçalho e menu
-                document.getElementById('player-name-header').textContent = data.name;
-                document.getElementById('player-name-menu').innerHTML = `${data.name}<small id="player-rank-menu">Ranque: ${data.rank}</small>`;
-                document.getElementById('player-avatar-header').src = `https://cravatar.eu/helmavatar/${data.uuid}/64.png`;
-                document.getElementById('player-avatar-menu').src = `https://cravatar.eu/helmavatar/${data.uuid}/160.png`;
-
-                // Atualiza os Info Boxes
-                document.getElementById('info-server-status').textContent = "Online"; // Se a API respondeu, o servidor está online.
-                document.getElementById('info-player-totems').textContent = data.totems.toLocaleString('pt-BR');
-
-                // Atualiza o Relatório de Atividade
-                document.getElementById('playtime-total').textContent = data.playtimeHours;
-                document.getElementById('stat-rank').textContent = data.rank;
-                document.getElementById('stat-ctf-wins').textContent = data.ctfStats.wins;
-                document.getElementById('stat-totems').textContent = data.totems.toLocaleString('pt-BR');
-
-                // Renderiza o gráfico de progresso das insígnias
-                // Os nomes das insígnias ainda estão hardcoded, mas os valores vêm da API.
-                const badgeNames = {
-                    'MINING': 'Minerador', 'LUMBERJACK': 'Lenhador', 'BUILDER': 'Construtor',
-                    'FARMING': 'Fazendeiro', 'FISHING': 'Pescador', 'COOKING': 'Cozinheiro',
-                    'CRAFTING': 'Artesão', 'EXPLORER': 'Explorador'
-                };
-
-                const progressPercentages = {};
-                // Itera sobre os requisitos recebidos da API para construir o gráfico
-                for (const badgeId in data.badgeRequirements) {
-                    const required = data.badgeRequirements[badgeId];
-                    const progress = data.badgeProgress[badgeId] || 0; // Pega o progresso atual ou 0 se não houver
-
-                    // Garante que não haverá divisão por zero se o requisito for 0
-                    const percentage = required > 0 ? Math.min(100, (progress / required) * 100) : 0;
-                    const displayName = badgeNames[badgeId] || badgeId; // Usa o nome amigável ou o ID
-                    progressPercentages[displayName] = Math.round(percentage);
-                }
-                renderBadgeProgressChart(progressPercentages);
-
-                // A lista de jogadores recentes não está disponível neste painel individual.
-                const recentPlayersList = document.getElementById('recent-players-list');
-                if (recentPlayersList) {
-                    recentPlayersList.innerHTML = '<div class="p-4 text-muted">Informação de outros jogadores não disponível neste painel.</div>';
-                }
-            }
-
-            function renderBadgeProgressChart(progressData) {
-                const chartEl = document.querySelector("#badge-progress-chart");
-                if (!chartEl) return;
-
-                const options = {
-                    series: [{
-                        name: 'Progresso',
-                        data: Object.values(progressData),
-                    }],
-                    chart: {
-                        height: 250,
-                        type: 'radar',
-                        toolbar: { show: false }
-                    },
-                    xaxis: {
-                        categories: Object.keys(progressData),
-                    },
-                    yaxis: {
-                        min: 0,
-                        max: 100,
-                        tickAmount: 5,
-                        labels: {
-                            formatter: function (val) {
-                                return val + "%"
-                            }
-                        }
-                    },
-                    stroke: {
-                        width: 2
-                    },
-                    fill: {
-                        opacity: 0.1
-                    },
-                    markers: {
-                        size: 0
-                    }
-                };
-
-                const chart = new ApexCharts(chartEl, options);
-                chart.render();
-            }
-
-            // 4. Inicia o processo
-            fetchPlayerData(playerToken).then(data => {
-                updateDashboard(data);
-            });
-        });
-    </script>
-    <!--end::Custom Dashboard Script-->
-  </body>
-  <!--end::Body-->
 </html>
