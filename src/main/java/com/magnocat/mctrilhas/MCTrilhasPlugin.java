@@ -107,6 +107,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         // Carrega as arenas do CTF
         ctfManager.loadArenas();
 
+        // Carrega as arenas de Duelo
+        duelManager.loadArenas();
+
         // Inicia o novo servidor de API web.
         httpApiManager.start();
 
@@ -200,8 +203,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         getCommand("ctf").setExecutor(ctfExecutor);
         getCommand("ctf").setTabCompleter(ctfExecutor);
         getCommand("familia").setExecutor(new FamilyCommand(this)); // O comando /hud foi movido para /scout hud
-        getCommand("duelo").setExecutor(new DuelCommand(this));
-        // getCommand("duelo").setTabCompleter(new DuelCommand(this)); // Adicionar quando o TabCompleter for implementado
+        DuelCommand duelExecutor = new DuelCommand(this);
+        getCommand("duelo").setExecutor(duelExecutor);
+        getCommand("duelo").setTabCompleter(duelExecutor);
         logInfo("Comandos registrados.");
     }
 
@@ -323,6 +327,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
         // Recarrega as arenas de CTF
         ctfManager.loadArenas();
+
+        // Recarrega as arenas de Duelo
+        duelManager.loadArenas();
 
         logInfo("As configurações (config.yml) do MCTrilhas foram recarregadas.");
     }

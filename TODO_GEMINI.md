@@ -282,3 +282,50 @@ O objetivo é oferecer benefícios cosméticos e de conveniência, sem criar um 
 *   **"Passe de Batalha" Escoteiro:**
     *   Um sistema de temporada com uma trilha de recompensas gratuita e uma "premium" (paga).
     *   O progresso seria baseado em desafios semanais.
+
+---
+
+## 10. Minigame Externo: Caça-Palavras Escoteiro (Ideia Futura)
+
+Esta seção detalha a ideia de um minigame web para engajamento da comunidade.
+
+### 10.1. Resumo
+*   **Projeto:** Minigame de Caça-Palavras com tema escoteiro e estética Minecraft.
+*   **Plataforma:** Aplicação web estática (client-side), rodando inteiramente no navegador.
+*   **Objetivo:** Engajar a comunidade com uma atividade externa que pode, opcionalmente, conceder recompensas dentro do jogo.
+*   **Visão Futura:** Criar uma versão do minigame que funcione também dentro do próprio Minecraft.
+
+### 10.2. Funcionalidades Essenciais
+*   **Geração do Jogo:**
+    *   **Grid:** Tabuleiro dinâmico de 15x15.
+    *   **Palavras:** Seleção aleatória de 8 a 12 palavras de uma lista temática (FOGUEIRA, BÚSSOLA, PROMESSA, ALCATÉIA, etc.).
+    *   **Posicionamento:** Palavras na horizontal, vertical e diagonal, em ambos os sentidos.
+    *   **Preenchimento:** Células restantes preenchidas com letras aleatórias.
+*   **Jogabilidade:**
+    *   **Interface:** Seleção de palavras via clique e arrastar (desktop e mobile).
+    *   **Validação:** Verificação em tempo real ao soltar o mouse/dedo.
+    *   **Feedback Visual:** Palavras corretas são destacadas permanentemente no grid e riscadas da lista.
+*   **Autenticação e Persistência (Firebase):**
+    *   **Login:** Exclusivamente via "Login com Google" (Firebase Authentication).
+    *   **Perfil:** Criação de perfil no Firestore no primeiro login (uid, displayName, score).
+    *   **Sessão:** O jogador permanece logado ao recarregar a página.
+*   **Pontuação e Placar:**
+    *   **Pontos:** +50 pontos por tabuleiro concluído.
+    *   **Salvamento:** Pontuação atualizada automaticamente no Firestore.
+    *   **Placar:** Exibição em tempo real dos 10 melhores jogadores.
+
+### 10.3. Requisitos Técnicos e Estética
+*   **Arquitetura:** Aplicação web estática (HTML, CSS, JS).
+*   **Backend as a Service (BaaS):** Firebase (Authentication e Firestore).
+*   **Hospedagem:** Qualquer serviço de hospedagem estática (ex: GitHub Pages).
+*   **Estética Minecraft:**
+    *   **Fonte:** Pixelada (ex: "Minecraftia").
+    *   **Cores:** Paleta inspirada nos blocos do jogo.
+    *   **UI:** Botões e menus com estilo "blocky" e 8-bit.
+*   **Integração (Visão Futura):**
+    *   Um comando `/site` no jogo poderia fornecer o link.
+    *   O plugin MCTrilhas poderia, via API, consultar a pontuação de um jogador no Firebase e entregar recompensas dentro do jogo, criando um ciclo de engajamento completo.
+
+### 10.4. Visão de Longo Prazo (Versão In-Game)
+*   **Conceito:** Explorar a viabilidade de recriar uma versão simplificada do Caça-Palavras diretamente dentro do servidor de Minecraft, usando o plugin como interface.
+*   **Arquitetura:** Manter a lógica de geração e validação de palavras modular para que possa ser reaproveitada na versão in-game.
