@@ -66,13 +66,17 @@ import com.magnocat.mctrilhas.utils.SecurityUtils;
  * <p>
  * Esta classe é responsável por:
  * <ul>
- *     <li>Iniciar e parar um servidor HTTP leve.</li>
- *     <li>Servir arquivos estáticos (HTML, CSS, JS) para os painéis web.</li>
- *     <li>Extrair e atualizar automaticamente os recursos da web a cada nova versão do plugin.</li>
- *     <li>Fornecer endpoints de API públicos e protegidos para dados do servidor e de jogadores.</li>
- *     <li>Gerenciar a autenticação de administradores via JWT (JSON Web Tokens).</li>
- *     <li>Manter caches de dados para rankings e estatísticas para garantir respostas rápidas da API.</li>
- *     <li>Agendar tarefas assíncronas para atualizar os caches periodicamente.</li>
+ * <li>Iniciar e parar um servidor HTTP leve.</li>
+ * <li>Servir arquivos estáticos (HTML, CSS, JS) para os painéis web.</li>
+ * <li>Extrair e atualizar automaticamente os recursos da web a cada nova versão
+ * do plugin.</li>
+ * <li>Fornecer endpoints de API públicos e protegidos para dados do servidor e
+ * de jogadores.</li>
+ * <li>Gerenciar a autenticação de administradores via JWT (JSON Web
+ * Tokens).</li>
+ * <li>Manter caches de dados para rankings e estatísticas para garantir
+ * respostas rápidas da API.</li>
+ * <li>Agendar tarefas assíncronas para atualizar os caches periodicamente.</li>
  * </ul>
  */
 public class HttpApiManager {
@@ -105,8 +109,8 @@ public class HttpApiManager {
     }
 
     /**
-     * Inicia o servidor web e configura todos os seus componentes.
-     * A inicialização só ocorre se a API estiver habilitada no `config.yml`.
+     * Inicia o servidor web e configura todos os seus componentes. A
+     * inicialização só ocorre se a API estiver habilitada no `config.yml`.
      */
     public void start() {
         if (!plugin.getConfig().getBoolean("web-api.enabled", false)) {
@@ -168,9 +172,10 @@ public class HttpApiManager {
     }
 
     /**
-     * Extrai todos os recursos da pasta 'web' do JAR para a pasta de dados do plugin.
-     * Isso garante que todos os arquivos do site (HTML, CSS, JS, imagens) estejam disponíveis no disco.
-     * A extração não sobrescreve arquivos existentes, permitindo personalização.
+     * Extrai todos os recursos da pasta 'web' do JAR para a pasta de dados do
+     * plugin. Isso garante que todos os arquivos do site (HTML, CSS, JS,
+     * imagens) estejam disponíveis no disco. A extração não sobrescreve
+     * arquivos existentes, permitindo personalização.
      */
     private void extractWebResources() {
         String currentBuildTimestamp = getBuildTimestampFromJar();
@@ -232,8 +237,10 @@ public class HttpApiManager {
         }
         return null;
     }
+
     /**
      * Deleta um diretório e todo o seu conteúdo de forma recursiva.
+     *
      * @param directory O diretório a ser deletado.
      */
     private void deleteDirectory(File directory) {
@@ -251,8 +258,7 @@ public class HttpApiManager {
         if (!timestampFile.exists()) {
             return null;
         }
-        try (FileInputStream fis = new FileInputStream(timestampFile);
-             java.util.Scanner scanner = new java.util.Scanner(fis)) {
+        try (FileInputStream fis = new FileInputStream(timestampFile); java.util.Scanner scanner = new java.util.Scanner(fis)) {
             return scanner.hasNext() ? scanner.next() : null;
         } catch (IOException e) {
             plugin.logWarn("Não foi possível ler o arquivo de timestamp da web: " + e.getMessage());
@@ -261,7 +267,9 @@ public class HttpApiManager {
     }
 
     private void saveBuildTimestamp(String timestamp) {
-        if (timestamp == null) return;
+        if (timestamp == null) {
+            return;
+        }
         File timestampFile = new File(plugin.getDataFolder(), "web_build.info");
         try (FileWriter writer = new FileWriter(timestampFile, false)) {
             writer.write(timestamp);
@@ -269,10 +277,11 @@ public class HttpApiManager {
             plugin.logSevere("Não foi possível salvar o arquivo de timestamp da web: " + e.getMessage());
         }
     }
+
     /**
-     * Verifica as credenciais de administrador no config.yml.
-     * Se a senha estiver em texto plano (identificado pela ausência de um 'salt'),
-     * ela é criptografada com hash e um novo 'salt' é gerado e salvo.
+     * Verifica as credenciais de administrador no config.yml. Se a senha
+     * estiver em texto plano (identificado pela ausência de um 'salt'), ela é
+     * criptografada com hash e um novo 'salt' é gerado e salvo.
      */
     private void setupAdminCredentials() {
         String passwordPath = "web-api.admin-credentials.password";
@@ -294,8 +303,8 @@ public class HttpApiManager {
     }
 
     /**
-     * Configura o segredo para a assinatura de tokens JWT.
-     * Se o segredo não estiver definido no config.yml, um novo é gerado e salvo.
+     * Configura o segredo para a assinatura de tokens JWT. Se o segredo não
+     * estiver definido no config.yml, um novo é gerado e salvo.
      */
     private void setupJwt() {
         String secretPath = "web-api.jwt-secret";
@@ -465,7 +474,9 @@ public class HttpApiManager {
             return;
         }
 
-        if (verifyAdminToken(exchange) == null) { return; }
+        if (verifyAdminToken(exchange) == null) {
+            return;
+        }
 
         Map<String, String> params = queryToMap(exchange.getRequestURI().getQuery());
         final int page = Integer.parseInt(params.getOrDefault("page", "1"));
@@ -493,7 +504,8 @@ public class HttpApiManager {
                                     playerData.put("lastPlayed", String.valueOf(offlinePlayer.getLastPlayed()));
                                     offlinePlayers.add(playerData);
                                 }
-                            } catch (IllegalArgumentException ignored) {}
+                            } catch (IllegalArgumentException ignored) {
+                            }
                         }
                     }
                     // Ordena por data de último login, do mais recente para o mais antigo
@@ -650,7 +662,8 @@ public class HttpApiManager {
                                         } else {
                                             plugin.getEconomy().withdrawPlayer(targetPlayer, amount);
                                         }
-                                    } catch (NumberFormatException ignored) {}
+                                    } catch (NumberFormatException ignored) {
+                                    }
                                 }
                             }
 
@@ -714,7 +727,8 @@ public class HttpApiManager {
                 } catch (IllegalArgumentException e) {
                     try {
                         sendJsonResponse(exchange, 400, "{\"error\":\"UUID fornecido é inválido.\"}");
-                    } catch (IOException ignored) {}
+                    } catch (IOException ignored) {
+                    }
                 } catch (IOException e) {
                     plugin.logSevere("Erro de IO ao enviar detalhes do jogador via API: " + e.getMessage());
                     // Não podemos enviar uma resposta aqui, pois a conexão pode já ter sido fechada.
@@ -734,7 +748,9 @@ public class HttpApiManager {
             return;
         }
 
-        if (verifyAdminToken(exchange) == null) { return; }
+        if (verifyAdminToken(exchange) == null) {
+            return;
+        }
 
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use POST.\"}");
@@ -803,7 +819,9 @@ public class HttpApiManager {
             return;
         }
 
-        if (verifyAdminToken(exchange) == null) { return; }
+        if (verifyAdminToken(exchange) == null) {
+            return;
+        }
 
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use POST.\"}");
@@ -862,7 +880,9 @@ public class HttpApiManager {
             return;
         }
 
-        if (verifyAdminToken(exchange) == null) { return; }
+        if (verifyAdminToken(exchange) == null) {
+            return;
+        }
 
         if (!"GET".equals(exchange.getRequestMethod())) {
             sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use GET.\"}");
@@ -906,7 +926,9 @@ public class HttpApiManager {
         List<Map<String, Object>> serializedItems = new ArrayList<>();
         for (int i = 0; i < contents.length; i++) {
             ItemStack item = contents[i];
-            if (item == null || item.getType() == Material.AIR) continue;
+            if (item == null || item.getType() == Material.AIR) {
+                continue;
+            }
 
             Map<String, Object> itemData = new HashMap<>();
             itemData.put("slot", i);
@@ -915,9 +937,15 @@ public class HttpApiManager {
 
             if (item.hasItemMeta()) {
                 ItemMeta meta = item.getItemMeta();
-                if (meta.hasDisplayName()) itemData.put("displayName", meta.getDisplayName());
-                if (meta.hasLore()) itemData.put("lore", meta.getLore());
-                if (meta.hasEnchants()) itemData.put("enchantments", meta.getEnchants().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getKey().toString(), Map.Entry::getValue)));
+                if (meta.hasDisplayName()) {
+                    itemData.put("displayName", meta.getDisplayName());
+                }
+                if (meta.hasLore()) {
+                    itemData.put("lore", meta.getLore());
+                }
+                if (meta.hasEnchants()) {
+                    itemData.put("enchantments", meta.getEnchants().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getKey().toString(), Map.Entry::getValue)));
+                }
             }
             serializedItems.add(itemData);
         }
@@ -935,7 +963,9 @@ public class HttpApiManager {
             return;
         }
 
-        if (verifyAdminToken(exchange) == null) { return; }
+        if (verifyAdminToken(exchange) == null) {
+            return;
+        }
 
         if (!"POST".equals(exchange.getRequestMethod())) {
             sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use POST.\"}");
@@ -980,7 +1010,9 @@ public class HttpApiManager {
             return;
         }
 
-        if (verifyAdminToken(exchange) == null) { return; }
+        if (verifyAdminToken(exchange) == null) {
+            return;
+        }
 
         if (plugin.getEconomy() == null) {
             sendJsonResponse(exchange, 503, "{\"error\":\"Vault ou um plugin de economia não está instalado.\"}");
@@ -1004,26 +1036,28 @@ public class HttpApiManager {
                 double totalEconomy = 0;
 
                 for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-                    if (player.getName() == null) continue;
+                    if (player.getName() == null) {
+                        continue;
+                    }
                     double balance = plugin.getEconomy().getBalance(player);
                     if (balance > 0) {
                         totalEconomy += balance;
                         richestPlayers.add(Map.of(
-                            "name", player.getName(),
-                            "uuid", player.getUniqueId().toString(),
-                            "balance", balance
+                                "name", player.getName(),
+                                "uuid", player.getUniqueId().toString(),
+                                "balance", balance
                         ));
                     }
                 }
 
                 // Ordena e limita a lista
-                richestPlayers.sort((p1, p2) -> Double.compare((double)p2.get("balance"), (double)p1.get("balance")));
+                richestPlayers.sort((p1, p2) -> Double.compare((double) p2.get("balance"), (double) p1.get("balance")));
                 List<Map<String, Object>> topPlayers = richestPlayers.stream().limit(5).collect(Collectors.toList());
 
                 economyStatsCache.put("totalTotems", totalEconomy);
                 economyStatsCache.put("richestPlayers", topPlayers);
                 economyStatsCache.put("lastUpdated", System.currentTimeMillis());
-                
+
                 plugin.logInfo("Cache de estatísticas da economia atualizado.");
             }
         }.runTaskTimerAsynchronously(plugin, 20L * 60, 20L * 60 * 60); // 1 min de atraso, atualiza a cada hora
@@ -1040,7 +1074,9 @@ public class HttpApiManager {
             return;
         }
 
-        if (verifyAdminToken(exchange) == null) { return; }
+        if (verifyAdminToken(exchange) == null) {
+            return;
+        }
 
         if (!"GET".equals(exchange.getRequestMethod())) {
             sendJsonResponse(exchange, 405, "{\"error\":\"Método não permitido. Use GET.\"}");
@@ -1128,8 +1164,10 @@ public class HttpApiManager {
 
     /**
      * Verifica o token JWT do cabeçalho de autorização.
+     *
      * @param exchange O objeto da requisição HTTP.
-     * @return O token decodificado se for válido, ou null caso contrário. Envia a resposta de erro diretamente.
+     * @return O token decodificado se for válido, ou null caso contrário. Envia
+     * a resposta de erro diretamente.
      */
     private DecodedJWT verifyAdminToken(HttpExchange exchange) throws IOException {
         String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
@@ -1218,7 +1256,9 @@ public class HttpApiManager {
             return;
         }
 
-        if (verifyAdminToken(exchange) == null) { return; }
+        if (verifyAdminToken(exchange) == null) {
+            return;
+        }
 
         new BukkitRunnable() {
             @Override
@@ -1258,6 +1298,7 @@ public class HttpApiManager {
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
         PlayerCTFStats ctfStats = plugin.getPlayerDataManager().getPlayerCTFStats(playerUUID);
+        PlayerDuelStats duelStats = plugin.getPlayerDataManager().getPlayerDuelStats(playerUUID);
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("name", offlinePlayer.getName());
@@ -1266,6 +1307,7 @@ public class HttpApiManager {
         responseData.put("playtimeHours", playerData.getActivePlaytimeTicks() / 72000);
         responseData.put("totems", plugin.getEconomy() != null ? plugin.getEconomy().getBalance(offlinePlayer) : 0);
         responseData.put("ctfStats", ctfStats); // O objeto já é serializável pelo Gson
+        responseData.put("duelStats", duelStats); // Adiciona as estatísticas de duelo
 
         // Adiciona o progresso atual das insígnias
         Map<String, Double> badgeProgress = new HashMap<>();
@@ -1428,6 +1470,7 @@ public class HttpApiManager {
      * Classe interna para armazenar a resposta JSON em cache com um timestamp.
      */
     private static class CachedPlayerResponse {
+
         final String jsonResponse;
         final long timestamp;
 

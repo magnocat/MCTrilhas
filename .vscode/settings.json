@@ -1,5 +1,17 @@
 {
+    // Configurações específicas para Java que já podem existir
     "java.compile.nullAnalysis.mode": "automatic",
     "java.configuration.updateBuildConfiguration": "automatic",
-    "editor.formatOnSave": true
+    // --- NOVAS CONFIGURAÇÕES PARA QUALIDADE DE CÓDIGO ---
+    // Remove espaços em branco no final da linha ao salvar qualquer arquivo
+    "files.trimTrailingWhitespace": true,
+    // Formata o arquivo ao salvar
+    "[yaml]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    // Configura o linter de YAML para seguir as regras do nosso build
+    "yaml.format.singleQuote": false, // Usa aspas duplas por padrão
+    "yaml.format.printWidth": 80,
+    "yaml.format.proseWrap": "preserve"
 }

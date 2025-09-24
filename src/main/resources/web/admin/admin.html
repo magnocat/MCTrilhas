@@ -877,6 +877,12 @@
                                 <li class="list-group-item d-flex justify-content-between align-items-center">Abates <span class="badge bg-danger rounded-pill">${data.ctfStats.kills}</span></li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">Capturas <span class="badge bg-info rounded-pill">${data.ctfStats.flagCaptures}</span></li>
                             </ul>
+                            <h5 class="mt-4">Estatísticas de Duelo</h5>
+                            <ul class="list-group list-group-flush text-start">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">ELO <span class="badge bg-primary rounded-pill">${data.duelStats?.elo || 1000}</span></li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">Vitórias <span class="badge bg-success rounded-pill">${data.duelStats?.wins || 0}</span></li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">Derrotas <span class="badge bg-danger rounded-pill">${data.duelStats?.losses || 0}</span></li>
+                            </ul>
                         </div>
                         <div class="col-md-8">
                             <h4>Progresso das Insígnias</h4>
