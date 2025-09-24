@@ -1,0 +1,56 @@
+# Arquivo de configuração para os kits de duelo.
+# Cada chave de primeiro nível é o ID de um kit (use apenas letras minúsculas e sem espaços).
+kits:
+  default:
+    display-name: "&7Kit Padrão"
+    icon: "IRON_SWORD"
+    description:
+      - "&fO kit de duelo balanceado."
+    armor:
+      helmet:
+        material: "IRON_HELMET"
+      chestplate:
+        material: "IRON_CHESTPLATE"
+      leggings:
+        material: "IRON_LEGGINGS"
+      boots:
+        material: "IRON_BOOTS"
+    items:
+      '0':
+        material: "IRON_SWORD"
+        amount: 1
+      '1':
+        material: "BOW"
+        amount: 1
+      '2':
+        material: "GOLDEN_APPLE"
+        amount: 2
+      '8':
+        material: "ARROW"
+        amount: 16
+  archer:
+    display-name: "&aKit Arqueiro"
+    icon: "BOW"
+    description:
+      - "&fFoco em combate à distância."
+    armor:
+      helmet:
+        material: "LEATHER_HELMET"
+      chestplate:
+        material: "LEATHER_CHESTPLATE"
+      leggings:
+        material: "LEATHER_LEGGINGS"
+      boots:
+        material: "LEATHER_BOOTS"
+    items:
+      '0':
+        material: "STONE_SWORD"
+        amount: 1
+      '1':
+        material: "BOW"
+        amount: 1
+        enchantments:
+          - "power:1"
+      '8':
+        material: "ARROW"
+        amount: 32

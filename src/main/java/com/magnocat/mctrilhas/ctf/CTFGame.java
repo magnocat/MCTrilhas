@@ -1,6 +1,7 @@
 package com.magnocat.mctrilhas.ctf;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.data.PlayerState;
 import com.magnocat.mctrilhas.utils.ItemFactory;
 import com.magnocat.mctrilhas.data.PlayerCTFStats;
 import net.milkbowl.vault.economy.Economy;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
@@ -30,7 +32,7 @@ public class CTFGame {
     private final Map<TeamColor, CTFTeam> teams = new HashMap<>();
     private final Map<UUID, TeamColor> playerTeams = new HashMap<>();
     private final Map<TeamColor, CTFFlag> flags = new HashMap<>();
-    private final Map<UUID, PlayerState> originalPlayerStates = new HashMap<>();
+    private final Map<UUID, com.magnocat.mctrilhas.data.PlayerState> originalPlayerStates = new HashMap<>();
     private final Map<UUID, ItemStack> temporaryHelmets = new HashMap<>();
     private final Map<UUID, CTFPlayerStats> playerStats = new HashMap<>();
 
@@ -55,7 +57,9 @@ public class CTFGame {
     }
 
     /**
-     * Configura os times com cores aleatórias, distribui os jogadores e prepara as bandeiras.
+     * Configura os times com cores aleatórias, distribui os jogadores e prepara
+     * as bandeiras.
+     *
      * @param players A lista de jogadores que participarão da partida.
      */
     private void setupGame(List<Player> players) {
@@ -83,12 +87,15 @@ public class CTFGame {
     }
 
     /**
-     * Prepara os jogadores para a partida, teleportando-os e salvando seu estado.
+     * Prepara os jogadores para a partida, teleportando-os e salvando seu
+     * estado.
      */
     private void preparePlayers() {
         for (Map.Entry<UUID, TeamColor> entry : playerTeams.entrySet()) {
             Player player = Bukkit.getPlayer(entry.getKey());
-            if (player == null) continue;
+            if (player == null) {
+                continue;
+            }
 
             savePlayerState(player);
             clearPlayer(player);
@@ -146,10 +153,10 @@ public class CTFGame {
                 applyKit(player);
             }
         }
-        
+
         // Atualiza o scoreboard para todos após a configuração inicial
         scoreboard.updateForAllPlayers();
-        
+
         // Inicia o timer da partida
         this.gameTimer = new org.bukkit.scheduler.BukkitRunnable() {
             @Override
@@ -174,9 +181,13 @@ public class CTFGame {
     }
 
     public void endGame(TeamColor winner, boolean isForfeit) {
-        if (gameState == GameState.ENDING) return; // Evita chamadas duplas
-        this.gameState = GameState.ENDING;
-        if (gameTimer != null) gameTimer.cancel();
+        if (gameState == GameState.ENDING) {
+            return; // Evita chamadas duplas
+
+                }this.gameState = GameState.ENDING;
+        if (gameTimer != null) {
+            gameTimer.cancel();
+        }
 
         // Limpa os blocos de bandeira do mundo
         for (CTFFlag flag : flags.values()) {
@@ -195,11 +206,11 @@ public class CTFGame {
             rewardAmount = fullReward * (forfeitPercentage / 100.0);
 
             String rewardMessageTemplate = plugin.getConfig().getString("ctf-settings.forfeit-win-message", "&6Sua equipe venceu por desistência e recebeu &e{amount} Totens&6.");
-            formattedRewardMessage = ChatColor.translateAlternateColorCodes('&', rewardMessageTemplate.replace("{amount}", String.valueOf((int)rewardAmount)));
+            formattedRewardMessage = ChatColor.translateAlternateColorCodes('&', rewardMessageTemplate.replace("{amount}", String.valueOf((int) rewardAmount)));
         } else {
             rewardAmount = plugin.getConfig().getDouble("ctf-settings.win-reward-totems", 0);
             String rewardMessageTemplate = plugin.getConfig().getString("ctf-settings.win-reward-message", "&6Você recebeu &e{amount} Totens&6 pela vitória!");
-            formattedRewardMessage = ChatColor.translateAlternateColorCodes('&', rewardMessageTemplate.replace("{amount}", String.valueOf((int)rewardAmount)));
+            formattedRewardMessage = ChatColor.translateAlternateColorCodes('&', rewardMessageTemplate.replace("{amount}", String.valueOf((int) rewardAmount)));
         }
 
         if (winner == null) {
@@ -227,30 +238,39 @@ public class CTFGame {
 
         updateAndSavePlayerStats(winner);
 
-        // Restaura o estado de todos os jogadores e os teleporta para o hub
-        for (UUID playerUUID : playerTeams.keySet()) {
-            Player player = Bukkit.getPlayer(playerUUID);
-            if (player != null) {
-                removeGlow(player); // Garante que ninguém saia da partida brilhando
-                scoreboard.destroyPlayerScoreboard(player);
-                restorePlayerState(player);
-                plugin.teleportToHub(player);
-                if (winner != null && teams.get(winner).getPlayers().contains(player.getUniqueId())) {
-                    if (rewardAmount > 0) {
-                        player.sendMessage(formattedRewardMessage);
+        // Restaura o estado de todos os jogadores e os teleporta para suas localizações originais
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (UUID playerUUID : playerTeams.keySet()) {
+                    Player player = Bukkit.getPlayer(playerUUID);
+                    if (player == null || !player.isOnline()) {
+                        continue;
                     }
-                } else if (winner != null) { // Jogador do time perdedor
-                    player.sendMessage(ChatColor.GRAY + "O time adversário venceu. Mais sorte na próxima vez!");
-                }
-            }
-        }
 
-        // Notifica o manager que o jogo acabou para limpeza
-        plugin.getCtfManager().endGame(this);
+                    removeGlow(player); // Garante que ninguém saia da partida brilhando
+                    scoreboard.destroyPlayerScoreboard(player);
+                    restorePlayerState(player); // Isso já teleporta o jogador de volta
+
+                    if (winner != null && teams.get(winner).getPlayers().contains(player.getUniqueId())) {
+                        if (rewardAmount > 0) {
+                            player.sendMessage(formattedRewardMessage);
+                        }
+                    } else if (winner != null) { // Jogador do time perdedor
+                        player.sendMessage(ChatColor.GRAY + "O time adversário venceu. Mais sorte na próxima vez!");
+                    }
+                }
+
+                // Notifica o manager que o jogo acabou para limpeza
+                plugin.getCtfManager().endGame(CTFGame.this);
+            }
+        }.runTaskLater(plugin, 60L); // Atraso de 3 segundos para os jogadores lerem as mensagens finais.
     }
 
     /**
-     * Atualiza e salva as estatísticas permanentes de cada jogador no final da partida.
+     * Atualiza e salva as estatísticas permanentes de cada jogador no final da
+     * partida.
+     *
      * @param winner A cor do time vencedor, ou null se for empate.
      */
     private void updateAndSavePlayerStats(TeamColor winner) {
@@ -277,7 +297,8 @@ public class CTFGame {
     }
 
     /**
-     * Finaliza o jogo quando o tempo acaba, determinando o vencedor pela pontuação.
+     * Finaliza o jogo quando o tempo acaba, determinando o vencedor pela
+     * pontuação.
      */
     private void endGameByTime() {
         broadcastMessage(ChatColor.GOLD + "O tempo acabou!");
@@ -295,8 +316,10 @@ public class CTFGame {
     }
 
     public void handlePlayerQuit(Player player) {
-        scoreboard.destroyPlayerScoreboard(player);
-        restorePlayerState(player);
+        if (player.isOnline()) {
+            scoreboard.destroyPlayerScoreboard(player);
+            restorePlayerState(player); // Restaura inventário, etc.
+        }
 
         TeamColor teamColor = playerTeams.remove(player.getUniqueId());
         if (teamColor != null) {
@@ -326,8 +349,10 @@ public class CTFGame {
 
     public void handlePlayerDeath(Player player, PlayerDeathEvent event) {
         TeamColor teamColor = playerTeams.get(player.getUniqueId());
-        if (teamColor == null) return;
-        
+        if (teamColor == null) {
+            return;
+        }
+
         playerStats.get(player.getUniqueId()).incrementDeaths();
 
         // Mensagem de morte customizada
@@ -368,7 +393,9 @@ public class CTFGame {
 
     public void handlePlayerRespawn(Player player, PlayerRespawnEvent event) {
         TeamColor teamColor = playerTeams.get(player.getUniqueId());
-        if (teamColor == null) return;
+        if (teamColor == null) {
+            return;
+        }
 
         // Teleporta o jogador para o local de spawn do seu time.
         Location respawnLocation = (teamColor == teamOne) ? arena.getRedSpawn() : arena.getBlueSpawn();
@@ -386,10 +413,14 @@ public class CTFGame {
     }
 
     public void handlePlayerMove(Player player) {
-        if (gameState != GameState.IN_PROGRESS) return;
+        if (gameState != GameState.IN_PROGRESS) {
+            return;
+        }
 
         TeamColor playerTeamColor = playerTeams.get(player.getUniqueId());
-        if (playerTeamColor == null) return;
+        if (playerTeamColor == null) {
+            return;
+        }
 
         Location playerLocation = player.getLocation();
 
@@ -450,7 +481,7 @@ public class CTFGame {
                     scoreboard.updateForAllPlayers();
                     playSoundForAll(Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
                     broadcastMessage(playerTeamColor.getChatColor() + player.getName() + ChatColor.GOLD + " marcou um ponto para o time " + playerTeamColor.getDisplayName() + "!");
-                    
+
                     // Verifica se o time atingiu a pontuação para vencer
                     if (playerTeam.getScore() >= arena.getScoreToWin()) {
                         endGame(playerTeamColor, false);
@@ -526,6 +557,7 @@ public class CTFGame {
 
     /**
      * Toca um som para todos os jogadores na partida.
+     *
      * @param sound O som a ser tocado.
      * @param volume O volume do som.
      * @param pitch A afinação do som.
@@ -541,6 +573,7 @@ public class CTFGame {
 
     /**
      * Envia um título (title) para todos os jogadores na partida.
+     *
      * @param title O título principal.
      * @param subtitle O subtítulo.
      */
@@ -555,15 +588,20 @@ public class CTFGame {
 
     /**
      * Envia uma mensagem para todos os membros do time de um jogador.
+     *
      * @param sender O jogador que enviou a mensagem.
      * @param message A mensagem a ser enviada.
      */
     public void sendTeamMessage(Player sender, String message) {
         TeamColor teamColor = getPlayerTeamColor(sender.getUniqueId());
-        if (teamColor == null) return;
+        if (teamColor == null) {
+            return;
+        }
 
         CTFTeam team = getTeams().get(teamColor);
-        if (team == null) return;
+        if (team == null) {
+            return;
+        }
 
         String format = teamColor.getChatColor() + "[Time] " + sender.getName() + ": " + ChatColor.WHITE + message;
         team.broadcastMessage(format);
@@ -581,7 +619,9 @@ public class CTFGame {
     }
 
     private void restorePlayerHelmet(Player player) {
-        if (player == null) return;
+        if (player == null) {
+            return;
+        }
         PlayerInventory inv = player.getInventory();
         // Pega o capacete que guardamos
         ItemStack originalHelmet = temporaryHelmets.remove(player.getUniqueId());
@@ -594,11 +634,10 @@ public class CTFGame {
         }
     }
 
-
     // --- Métodos de Efeitos Visuais ---
-
     /**
      * Aplica o efeito de brilho a um jogador.
+     *
      * @param player O jogador que receberá o efeito.
      */
     private void applyGlow(Player player) {
@@ -609,6 +648,7 @@ public class CTFGame {
 
     /**
      * Remove o efeito de brilho de um jogador.
+     *
      * @param player O jogador do qual o efeito será removido.
      */
     private void removeGlow(Player player) {
@@ -618,15 +658,16 @@ public class CTFGame {
     }
 
     // --- Métodos de Gerenciamento de Estado e Kit ---
-
     private void savePlayerState(Player player) {
-        originalPlayerStates.put(player.getUniqueId(), new PlayerState(player));
+        originalPlayerStates.put(player.getUniqueId(), new com.magnocat.mctrilhas.data.PlayerState(player));
     }
 
     private void restorePlayerState(Player player) {
-        PlayerState state = originalPlayerStates.remove(player.getUniqueId());
+        com.magnocat.mctrilhas.data.PlayerState state = originalPlayerStates.remove(player.getUniqueId());
         if (state != null) {
             state.restore(player);
+            // Teleporta o jogador de volta para sua localização original
+            player.teleport(state.getLocation());
         }
     }
 
@@ -641,11 +682,14 @@ public class CTFGame {
 
     /**
      * Aplica o kit de itens configurado no config.yml ao jogador.
+     *
      * @param player O jogador que receberá o kit.
      */
     private void applyKit(Player player) {
         TeamColor teamColor = playerTeams.get(player.getUniqueId());
-        if (teamColor == null) return;
+        if (teamColor == null) {
+            return;
+        }
 
         PlayerInventory inv = player.getInventory();
         inv.clear();
@@ -673,7 +717,9 @@ public class CTFGame {
                     int slot = Integer.parseInt(slotStr);
                     ConfigurationSection itemConfig = itemsSection.getConfigurationSection(slotStr);
                     ItemStack item = ItemFactory.createFromConfig(itemConfig);
-                    if (item != null) inv.setItem(slot, item);
+                    if (item != null) {
+                        inv.setItem(slot, item);
+                    }
                 } catch (NumberFormatException e) {
                     plugin.logWarn("Slot inválido '" + slotStr + "' na configuração do kit CTF.");
                 }
@@ -693,7 +739,9 @@ public class CTFGame {
     }
 
     private ItemStack createTeamArmor(ConfigurationSection armorConfig, TeamColor teamColor) {
-        if (armorConfig == null) return null;
+        if (armorConfig == null) {
+            return null;
+        }
         ItemStack armorPiece = ItemFactory.createFromConfig(armorConfig);
         // Se a peça de armadura for de couro, colore com a cor do time.
         if (armorPiece != null && armorPiece.getItemMeta() instanceof LeatherArmorMeta) {
@@ -705,16 +753,45 @@ public class CTFGame {
     }
 
     // --- Getters ---
-    public MCTrilhasPlugin getPlugin() { return plugin; }
-    public CTFArena getArena() { return arena; }
-    public GameState getGameState() { return gameState; }
-    public Map<TeamColor, CTFTeam> getTeams() { return teams; }
-    public Map<TeamColor, CTFFlag> getFlags() { return flags; }
-    public TeamColor getTeamOne() { return teamOne; }
-    public TeamColor getTeamTwo() { return teamTwo; }
-    public int getTimeRemaining() { return timeRemaining; }
-    public Map<UUID, CTFPlayerStats> getPlayerStats() { return playerStats; }
-    public CTFScoreboard getScoreboard() { return scoreboard; }
+    public MCTrilhasPlugin getPlugin() {
+        return plugin;
+    }
+
+    public CTFArena getArena() {
+        return arena;
+    }
+
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public Map<TeamColor, CTFTeam> getTeams() {
+        return teams;
+    }
+
+    public Map<TeamColor, CTFFlag> getFlags() {
+        return flags;
+    }
+
+    public TeamColor getTeamOne() {
+        return teamOne;
+    }
+
+    public TeamColor getTeamTwo() {
+        return teamTwo;
+    }
+
+    public int getTimeRemaining() {
+        return timeRemaining;
+    }
+
+    public Map<UUID, CTFPlayerStats> getPlayerStats() {
+        return playerStats;
+    }
+
+    public CTFScoreboard getScoreboard() {
+        return scoreboard;
+    }
 
     public TeamColor getPlayerTeamColor(UUID playerUUID) {
         return playerTeams.get(playerUUID);
@@ -722,6 +799,7 @@ public class CTFGame {
 
     /**
      * Retorna uma lista de todos os jogadores online que estão nesta partida.
+     *
      * @return A lista de jogadores.
      */
     public List<Player> getOnlinePlayers() {

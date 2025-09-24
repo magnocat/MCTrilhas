@@ -57,6 +57,7 @@ import net.kyori.adventure.text.Component;
 // Project-specific Classes
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerCTFStats;
+import com.magnocat.mctrilhas.duels.PlayerDuelStats;
 import com.magnocat.mctrilhas.data.PlayerData;
 import com.magnocat.mctrilhas.utils.SecurityUtils;
 
@@ -94,6 +95,7 @@ public class HttpApiManager {
     private final Map<String, Integer> ctfWinsLeaderboardCache = new ConcurrentHashMap<>();
     private final Map<String, Integer> ctfKillsLeaderboardCache = new ConcurrentHashMap<>();
     private final Map<String, Integer> ctfCapturesLeaderboardCache = new ConcurrentHashMap<>();
+    private final Map<String, Integer> eloLeaderboardCache = new ConcurrentHashMap<>();
     private final Map<String, CachedPlayerResponse> playerResponseCache = new ConcurrentHashMap<>();
     private final Map<String, Object> economyStatsCache = new ConcurrentHashMap<>();
     private final List<Map<String, Object>> chatHistory = new CopyOnWriteArrayList<>();
@@ -1332,6 +1334,7 @@ public class HttpApiManager {
         plugin.getPlayerDataManager().getAllTimeBadgeCountsAsync().thenAccept(counts -> allTimeLeaderboardCache.putAll(formatLeaderboard(counts)));
         // Atualiza rankings de CTF
         updateCtfLeaderboardCaches();
+        updateEloLeaderboardCaches();
     }
 
     private void updateCtfLeaderboardCaches() {
@@ -1347,11 +1350,20 @@ public class HttpApiManager {
         });
     }
 
+    private void updateEloLeaderboardCaches() {
+        plugin.getPlayerDataManager().getAllPlayerDuelStatsAsync().thenAccept(allStats -> {
+            eloLeaderboardCache.clear();
+            eloLeaderboardCache.putAll(sortAndLimitElo(allStats));
+            plugin.logInfo("Cache de ranking de ELO atualizado.");
+        });
+    }
+
     private Map<String, Object> generateApiDataFromCache() {
         Map<String, Object> apiData = new HashMap<>();
         apiData.put("serverStatus", Map.of("onlinePlayers", Bukkit.getOnlinePlayers().size(), "maxPlayers", Bukkit.getMaxPlayers()));
         apiData.put("leaderboards", Map.of("allTime", allTimeLeaderboardCache, "monthly", monthlyLeaderboardCache, "daily", dailyLeaderboardCache));
         apiData.put("ctfLeaderboards", Map.of("wins", ctfWinsLeaderboardCache, "kills", ctfKillsLeaderboardCache, "captures", ctfCapturesLeaderboardCache));
+        apiData.put("eloLeaderboard", eloLeaderboardCache);
         apiData.put("activityHistory", activityHistory);
         apiData.put("lastUpdated", System.currentTimeMillis());
         return apiData;
@@ -1378,6 +1390,23 @@ public class HttpApiManager {
                             return name != null ? name : entry.getKey().toString().substring(0, 8);
                         },
                         entry -> valueExtractor.apply(entry.getValue()),
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+    }
+
+    private Map<String, Integer> sortAndLimitElo(Map<UUID, PlayerDuelStats> statsMap) {
+        List<String> hiddenUuids = plugin.getConfig().getStringList("privacy-settings.hide-from-leaderboards");
+        return statsMap.entrySet().stream()
+                .filter(entry -> !hiddenUuids.contains(entry.getKey().toString()))
+                .sorted(Map.Entry.comparingByValue(Comparator.comparing(PlayerDuelStats::getElo).reversed()))
+                .limit(10)
+                .collect(Collectors.toMap(
+                        entry -> {
+                            String name = Bukkit.getOfflinePlayer(entry.getKey()).getName();
+                            return name != null ? name : entry.getKey().toString().substring(0, 8);
+                        },
+                        entry -> entry.getValue().getElo(),
                         (e1, e2) -> e1,
                         LinkedHashMap::new
                 ));

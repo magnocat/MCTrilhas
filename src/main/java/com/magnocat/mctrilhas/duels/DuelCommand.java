@@ -2,7 +2,9 @@ package com.magnocat.mctrilhas.duels;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
+import com.magnocat.mctrilhas.duels.AcceptSubCommand;
 import com.magnocat.mctrilhas.duels.ChallengeSubCommand;
+import com.magnocat.mctrilhas.duels.DenySubCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -32,7 +34,21 @@ public class DuelCommand implements CommandExecutor, TabCompleter {
 
     private void registerSubCommands() {
         subCommands.put("desafiar", new ChallengeSubCommand(plugin));
-        // Futuros subcomandos (aceitar, negar, etc.) serão registrados aqui.
+        subCommands.put("aceitar", new AcceptSubCommand(plugin));
+        subCommands.put("negar", new DenySubCommand(plugin));
+        subCommands.put("desistir", new ForfeitSubCommand(plugin));
+        subCommands.put("kits", new KitsSubCommand(plugin));
+        subCommands.put("stats", new StatsSubCommand(plugin));
+        subCommands.put("top", new TopSubCommand(plugin));
+        subCommands.put("assistir", new SpectateSubCommand(plugin));
+        subCommands.put("sair", new LeaveSpectateSubCommand(plugin));
+        subCommands.put("sairfila", new LeaveQueueSubCommand(plugin));
+        // Comandos de Administração
+        subCommands.put("createarena", new CreateArenaSubCommand(plugin));
+        subCommands.put("setpos", new SetArenaPosSubCommand(plugin));
+        subCommands.put("setspec", new SetSpecSubCommand(plugin));
+        subCommands.put("savearena", new SaveArenaSubCommand(plugin));
+        subCommands.put("cancelarena", new CancelArenaSubCommand(plugin));
     }
 
     @Override

@@ -324,6 +324,40 @@ ctf-settings:
         material: "ARROW"
         amount: 32
 
+# Configurações para o sistema de Duelos 1v1
+duel-settings:
+  # Duração da contagem regressiva em segundos.
+  countdown-seconds: 5
+  # Duração máxima da partida em minutos. 0 para sem limite.
+  match-duration-minutes: 5
+  messages:
+    # Placeholders: {time}
+    countdown: "&aO duelo começa em &e{time}&a..."
+    # Mensagem de início da luta.
+    fight: "&c&lLutem!"
+    # Placeholders: {player} (quem desistiu/desconectou)
+    forfeit: "&e{player} &7desistiu do duelo. A partida terminou em empate."
+    # Mensagem para empate por tempo.
+    draw: "&eO tempo acabou! O duelo terminou em empate."
+    # Placeholders: {winner}, {loser}
+    win: "&aVocê venceu o duelo contra &e{loser}&a!"
+    loss: "&cVocê foi derrotado por &e{winner}&c."
+    broadcast-end: "&e{winner} &7venceu o duelo contra &e{loser}&7."
+  # Recompensas semanais para o ranking de ELO.
+  weekly-rewards:
+    enabled: true
+    # Dia da semana para a recompensa (1=Domingo, 2=Segunda, ..., 7=Sábado).
+    reward-day-of-week: 1 # Domingo
+    # Hora do dia (formato 24h) para a recompensa.
+    reward-hour: 20 # 20:00 (8 PM)
+    # Mensagem de anúncio global. Placeholders: {player}, {position}, {reward}
+    broadcast-message: "&6&l[DUELOS] &e{player} &7ficou em &e{position}º &7no ranking ELO e recebeu &b{reward} Totens&7!"
+    # Recompensas para o Top 3.
+    rewards:
+      '1': 300  # Recompensa para o 1º lugar
+      '2': 200  # Recompensa para o 2º lugar
+      '3': 150  # Recompensa para o 3º lugar
+
 
 # Configurações Gerais do Servidor
 server-settings:
@@ -418,7 +452,7 @@ hud-settings:
   # Intervalo de atualização em ticks (20 ticks = 1 segundo). 40 ticks = 2 segundos.
   update-interval-ticks: 40
   # Formato do texto. Placeholders: {rank}, {totems}, {badges}
-  format: "&bRanque: &e{rank} &8| &bTotens: &e{totems} &8| &bInsígnias: &e{badges}"
+  format: "&bRanque: &e{rank} &8| &bELO: &e{elo} &8| &bTotens: &e{totems} &8| &bInsígnias: &e{badges}"
   messages:
     enabled: "&aHUD de estatísticas ativado."
     disabled: "&aHUD de estatísticas desativado."

@@ -30,6 +30,7 @@ import com.magnocat.mctrilhas.ctf.CTFManager;
 import com.magnocat.mctrilhas.ctf.CTFMilestoneManager;
 import com.magnocat.mctrilhas.duels.DuelCommand;
 import com.magnocat.mctrilhas.duels.DuelManager;
+import com.magnocat.mctrilhas.duels.DuelRewardManager;
 import com.magnocat.mctrilhas.listeners.AdminPrivacyListener;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
 import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;
@@ -80,6 +81,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private HUDManager hudManager;
     private ScoreboardManager scoreboardManager;
     private DuelManager duelManager;
+    private DuelRewardManager duelRewardManager;
     private HttpApiManager httpApiManager;
 
     // --- Integrations & Tasks ---
@@ -91,6 +93,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
+        saveResource("duel_kits.yml", false);
         saveResource("duel_arenas.yml", false); // Garante que o arquivo de arenas seja criado
         setupEconomy();
         loadManagers();
@@ -103,12 +106,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         registerCommands();
         registerListeners();
         setupPlaceholders();
-
-        // Carrega as arenas do CTF
-        ctfManager.loadArenas();
-
-        // Carrega as arenas de Duelo
-        duelManager.loadArenas();
 
         // Inicia o novo servidor de API web.
         httpApiManager.start();
@@ -142,6 +139,11 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         // Para o gerenciador de HUD
         if (hudManager != null) {
             hudManager.stop();
+        }
+
+        // Para as tarefas do DuelManager
+        if (duelManager != null) {
+            duelManager.stopTasks();
         }
 
         logInfo("MCTrilhas foi desativado.");
@@ -179,6 +181,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.hudManager = new HUDManager(this);
         this.scoreboardManager = new ScoreboardManager(this);
         this.duelManager = new DuelManager(this);
+        this.duelRewardManager = new DuelRewardManager(this);
         
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
@@ -298,6 +301,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         return duelManager;
     }
 
+    public DuelRewardManager getDuelRewardManager() {
+        return duelRewardManager;
+    }
+
     public HttpApiManager getHttpApiManager() {
         return httpApiManager;
     }
@@ -330,6 +337,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
         // Recarrega as arenas de Duelo
         duelManager.loadArenas();
+
+        // Recarrega os kits de Duelo
+        duelManager.loadKits();
 
         logInfo("As configurações (config.yml) do MCTrilhas foram recarregadas.");
     }

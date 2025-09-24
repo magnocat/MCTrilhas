@@ -70,6 +70,12 @@ permissions:
       mctrilhas.tesouro: true
       mctrilhas.duel.use: true
       mctrilhas.duel.challenge: true
+      mctrilhas.duel.accept: true
+      mctrilhas.duel.deny: true
+      mctrilhas.duel.forfeit: true
+      mctrilhas.duel.admin: true
+      mctrilhas.duel.top: true
+      mctrilhas.duel.spectate: true
       mctrilhas.duel.kits: true
       mctrilhas.duel.stats: true
       mctrilhas.duel.stats.other: true
@@ -139,6 +145,18 @@ permissions:
   mctrilhas.duel.challenge:
     description: Permite desafiar outros jogadores para um duelo.
     default: true
+  mctrilhas.duel.accept:
+    description: Permite aceitar um desafio de duelo.
+    default: true
+  mctrilhas.duel.deny:
+    description: Permite negar um desafio de duelo.
+    default: true
+  mctrilhas.duel.forfeit:
+    description: Permite desistir de um duelo em andamento.
+    default: true
+  mctrilhas.duel.admin:
+    description: Permite criar e gerenciar arenas de duelo.
+    default: op
   mctrilhas.duel.kits:
     description: Permite visualizar os kits de duelo disponíveis.
     default: true
@@ -148,3 +166,9 @@ permissions:
   mctrilhas.duel.stats.other:
     description: Permite visualizar as estatísticas de duelo de outros jogadores.
     default: op
+  mctrilhas.duel.top:
+    description: Permite visualizar o ranking de ELO dos duelistas.
+    default: true
+  mctrilhas.duel.spectate:
+    description: Permite assistir a duelos em andamento.
+    default: true

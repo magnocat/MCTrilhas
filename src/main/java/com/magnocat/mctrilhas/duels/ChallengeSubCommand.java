@@ -62,19 +62,20 @@ public class ChallengeSubCommand implements SubCommand {
             challenger.sendMessage(ChatColor.RED + "O jogador '" + args[0] + "' não está online.");
             return;
         }
-        plugin.getDuelManager().sendChallenge(challenger, target);
+
+        plugin.getDuelManager().startChallengeProcess(challenger, target);
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
         if (args.length == 1) {
             String partialName = args[0].toLowerCase();
-            return Bukkit.getOnlinePlayers().stream()
+            return Bukkit.getOnlinePlayers().stream() // Sugere jogadores
                     .filter(p -> !p.equals(sender)) // Não pode se desafiar
                     .map(Player::getName)
                     .filter(name -> name.toLowerCase().startsWith(partialName))
                     .collect(Collectors.toList());
         }
-        return null;
+        return List.of();
     }
 }

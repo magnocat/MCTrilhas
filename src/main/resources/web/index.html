@@ -190,6 +190,18 @@
             </div>
         </section>
 
+        <!-- Ranking de Habilidade (ELO) -->
+        <section class="card col-span-1 md:col-span-3">
+            <h2 class="section-title">⚔️ Ranking de Habilidade (ELO)</h2>
+            <p class="mb-4">Os duelistas mais habilidosos do servidor, medidos pelo sistema ELO.</p>
+            <div id="leaderboard-elo-loading" class="text-center text-gray-500">
+                <i class="fas fa-spinner fa-spin mr-2"></i> Carregando...
+            </div>
+            <ol id="leaderboard-elo-list" class="list-decimal list-inside space-y-2 hidden"></ol>
+            <div id="leaderboard-elo-error" class="text-center text-red-500 hidden">Falha ao carregar.</div>
+        </section>
+
+
         <!-- Rankings -->
         <section class="grid md:grid-cols-3 gap-6">
             <!-- Ranking Diário -->
@@ -345,7 +357,8 @@
                 <div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Passo 2: Importar sua Arena (Schematic)</h3>
                     <p class="mb-2">Com sua arena já salva como um arquivo <code>.schematic</code> ou
-                        <code>.schem</code>, siga estes passos:</p>
+                        <code>.schem</code>, siga estes passos:
+                    </p>
                     <ol class="list-decimal list-inside space-y-2">
                         <li>Coloque o arquivo da sua arena na pasta <code>plugins/WorldEdit/schematics/</code>.</li>
                         <li>No jogo, dentro do mundo vazio, carregue o arquivo com: <code
@@ -363,7 +376,8 @@
                         pontos importantes. Use os comandos de administrador do CTF:</p>
                     <ol class="list-decimal list-inside space-y-2">
                         <li>Inicie o processo: <code>/ctf admin create id_da_sua_arena</code> (ex: <code>castelo</code>,
-                            <code>floresta</code>).</li>
+                            <code>floresta</code>).
+                        </li>
                         <li>Voe até cada local importante e defina os pontos (lobby, redspawn, bluespawn, redflag,
                             blueflag) usando <code>/ctf admin set &lt;tipo&gt;</code>.</li>
                         <li>Verifique se todos os pontos foram definidos com <code>/ctf admin status</code>.</li>
@@ -644,11 +658,12 @@
                     renderLeaderboards(data.leaderboards);
                     renderPlayerChart(data.activityHistory);
                     renderCtfLeaderboards(data.ctfLeaderboards);
+                    renderEloLeaderboard(data.eloLeaderboard);
 
                 } catch (error) {
                     console.error('Falha ao buscar dados da API:', error);
                     // Exibe erro em todos os componentes que dependem da API
-                    ['daily', 'monthly', 'all-time'].forEach(showLeaderboardError);
+                    ['daily', 'monthly', 'all-time', 'wins', 'kills', 'captures', 'elo'].forEach(showLeaderboardError);
                     const chartLoadingEl = document.getElementById('chart-loading');
                     if (chartLoadingEl) chartLoadingEl.innerText = 'Não foi possível carregar os dados de atividade.';
                 }
@@ -657,7 +672,7 @@
             function showLeaderboardError(type) {
                 document.getElementById(`leaderboard-${type}-loading`)?.classList.add('hidden');
                 document.getElementById(`leaderboard-${type}-error`)?.classList.remove('hidden');
-                document.getElementById(`ctf-${type}-error`)?.classList.remove('hidden');
+                document.getElementById(`ctf-${type}-error`)?.classList.remove('hidden'); // Para os rankings de CTF
             }
 
             // Renderiza os 3 rankings (diário, mensal, geral)
@@ -726,6 +741,35 @@
                 }
 
                 document.getElementById(`ctf-${type}-loading`)?.classList.add('hidden');
+                listEl.classList.remove('hidden');
+            }
+
+            // Preenche a lista de ranking de ELO
+            function renderEloLeaderboard(data) {
+                const listEl = document.getElementById('leaderboard-elo-list');
+                const loadingEl = document.getElementById('leaderboard-elo-loading');
+                const errorEl = document.getElementById('leaderboard-elo-error');
+                if (!listEl || !loadingEl || !errorEl) return;
+
+                if (!data) {
+                    loadingEl.classList.add('hidden');
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                const players = Object.entries(data).map(([name, elo]) => ({ name, elo }));
+                listEl.innerHTML = '';
+
+                if (players.length === 0) {
+                    listEl.innerHTML = '<li class="text-gray-500">Ninguém no ranking ainda.</li>';
+                } else {
+                    players.forEach(player => {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `<span class="font-semibold text-gray-800">${player.name}</span> - <span class="font-bold text-yellow-600">${player.elo}</span> ELO`;
+                        listEl.appendChild(listItem);
+                    });
+                }
+                loadingEl.classList.add('hidden');
                 listEl.classList.remove('hidden');
             }
 

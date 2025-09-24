@@ -8,11 +8,13 @@ import org.bukkit.entity.Player;
 public class Challenge {
     private final Player challenger;
     private final Player target;
+    private final String kitId;
     private final long timestamp;
 
-    public Challenge(Player challenger, Player target) {
+    public Challenge(Player challenger, Player target, String kitId) {
         this.challenger = challenger;
         this.target = target;
+        this.kitId = kitId;
         this.timestamp = System.currentTimeMillis();
     }
 
@@ -22,6 +24,10 @@ public class Challenge {
 
     public Player getTarget() {
         return target;
+    }
+
+    public String getKitId() {
+        return kitId;
     }
 
     public long getTimestamp() {

@@ -107,6 +107,8 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
         *   Kits de equipamento padronizados e selecionáveis (`duel_kits.yml`).
         *   Contagem regressiva e gerenciamento completo da partida.
         *   Estatísticas de Vitórias/Derrotas e um sistema de ranking (ELO).
+        *   Modo Espectador (`/duelo assistir <jogador>`).
+        *   Recompensas semanais para o Top 3 do ranking ELO.
 
 *   ### 🐾 EM SEGUIDA: Sistema de Pets
     *   **Descrição:** Um sistema que permite aos jogadores terem um companheiro animal que os segue, ajuda em combate e sobe de nível.

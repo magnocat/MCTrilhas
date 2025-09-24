@@ -1,6 +1,7 @@
 package com.magnocat.mctrilhas.hud;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.duels.PlayerDuelStats;
 import com.magnocat.mctrilhas.data.PlayerData;
 import com.magnocat.mctrilhas.ranks.Rank;
 import org.bukkit.Bukkit;
@@ -117,6 +118,9 @@ public class HUDManager {
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
         if (playerData == null) return;
 
+        PlayerDuelStats duelStats = plugin.getPlayerDataManager().getPlayerDuelStats(player.getUniqueId());
+        int elo = (duelStats != null) ? duelStats.getElo() : PlayerDuelStats.DEFAULT_ELO;
+
         Rank rank = playerData.getRank();
         double balance = (plugin.getEconomy() != null) ? plugin.getEconomy().getBalance(player) : 0;
         int badges = playerData.getEarnedBadgesMap().size();
@@ -125,6 +129,7 @@ public class HUDManager {
 
         String hudText = hudFormat
                 .replace("{rank}", rank.getDisplayName())
+                .replace("{elo}", String.valueOf(elo))
                 .replace("{totems}", String.format("%,.0f", balance))
                 .replace("{badges}", String.valueOf(badges));
 

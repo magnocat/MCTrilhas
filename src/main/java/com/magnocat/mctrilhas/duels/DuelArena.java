@@ -13,16 +13,19 @@ public class DuelArena {
     private final String id;
     private final Location pos1;
     private final Location pos2;
+    private final Location spectatorSpawn;
 
-    public DuelArena(String id, Location pos1, Location pos2) {
+    public DuelArena(String id, Location pos1, Location pos2, Location spectatorSpawn) {
         this.id = id;
         this.pos1 = pos1;
         this.pos2 = pos2;
+        this.spectatorSpawn = spectatorSpawn;
     }
 
     public String getId() { return id; }
     public Location getPos1() { return pos1; }
     public Location getPos2() { return pos2; }
+    public Location getSpectatorSpawn() { return spectatorSpawn; }
 
     /**
      * Cria uma DuelArena a partir de uma ConfigurationSection.
@@ -35,12 +38,13 @@ public class DuelArena {
 
         Location pos1 = parseLocation(section.getString("pos1"));
         Location pos2 = parseLocation(section.getString("pos2"));
+        Location spec = parseLocation(section.getString("spectator-spawn"));
 
-        if (pos1 == null || pos2 == null) {
+        if (pos1 == null || pos2 == null || spec == null) {
             Bukkit.getLogger().warning("[Duels] Arena '" + id + "' tem configurações de localização inválidas e não foi carregada.");
             return null;
         }
-        return new DuelArena(id, pos1, pos2);
+        return new DuelArena(id, pos1, pos2, spec);
     }
 
     public static Location parseLocation(String locString) {

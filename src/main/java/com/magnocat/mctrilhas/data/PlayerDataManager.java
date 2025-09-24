@@ -27,6 +27,7 @@ import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.badges.Badge;
 import com.magnocat.mctrilhas.badges.BadgeType;
 import com.magnocat.mctrilhas.ranks.Rank;
+import com.magnocat.mctrilhas.duels.PlayerDuelStats;
 import com.magnocat.mctrilhas.utils.ItemFactory;
 
 /**
@@ -860,5 +861,68 @@ public class PlayerDataManager {
             }
             return allStats;
         });
+    }
+
+    /**
+     * Obtém as estatísticas de Duelo de todos os jogadores de forma assíncrona.
+     * @return Um CompletableFuture com o mapa de UUID para PlayerDuelStats.
+     */
+    public CompletableFuture<Map<UUID, PlayerDuelStats>> getAllPlayerDuelStatsAsync() {
+        return CompletableFuture.supplyAsync(() -> {
+            Map<UUID, PlayerDuelStats> allStats = new HashMap<>();
+            List<String> hiddenUuids = plugin.getConfig().getStringList("privacy-settings.hide-from-leaderboards");
+            File[] playerFiles = playerDataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+
+            if (playerFiles != null) {
+                for (File playerFile : playerFiles) {
+                    try {
+                        UUID uuid = UUID.fromString(playerFile.getName().replace(".yml", ""));
+                        if (hiddenUuids.contains(uuid.toString())) {
+                            continue;
+                        }
+                        FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+                        allStats.put(uuid, PlayerDuelStats.fromConfig(config.getConfigurationSection("duel-stats")));
+                    } catch (Exception e) {
+                        plugin.logWarn("Arquivo de jogador com nome inválido ou erro de leitura ignorado: " + playerFile.getName());
+                    }
+                }
+            }
+            return allStats;
+        });
+    }
+    // --- Métodos para o Sistema de Estatísticas de Duelos ---
+
+    public PlayerDuelStats getPlayerDuelStats(UUID playerUUID) {
+        File playerFile = new File(playerDataFolder, playerUUID.toString() + ".yml");
+        if (!playerFile.exists()) {
+            return new PlayerDuelStats(); // Retorna estatísticas zeradas para um novo jogador
+        }
+        FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+        return PlayerDuelStats.fromConfig(config.getConfigurationSection("duel-stats"));
+    }
+
+    public void savePlayerDuelStats(UUID playerUUID, PlayerDuelStats stats) {
+        File playerFile = new File(playerDataFolder, playerUUID.toString() + ".yml");
+        FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
+        stats.saveToConfig(config.createSection("duel-stats"));
+        try {
+            config.save(playerFile);
+        } catch (IOException e) {
+            plugin.getLogger().severe("Não foi possível salvar as estatísticas de Duelo para " + playerUUID);
+        }
+    }
+
+    public void incrementDuelWin(UUID playerUUID) {
+        // Este método lê, modifica e salva, o que é ineficiente mas consistente com o resto do código.
+        // Idealmente, para jogadores online, isso deveria ser feito no objeto PlayerData em cache.
+        PlayerDuelStats stats = getPlayerDuelStats(playerUUID);
+        stats.incrementWins();
+        savePlayerDuelStats(playerUUID, stats);
+    }
+
+    public void incrementDuelLoss(UUID playerUUID) {
+        PlayerDuelStats stats = getPlayerDuelStats(playerUUID);
+        stats.incrementLosses();
+        savePlayerDuelStats(playerUUID, stats);
     }
 }

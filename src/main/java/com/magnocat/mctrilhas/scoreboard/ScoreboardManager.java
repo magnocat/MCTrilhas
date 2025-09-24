@@ -2,6 +2,7 @@ package com.magnocat.mctrilhas.scoreboard;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerData;
+import com.magnocat.mctrilhas.duels.PlayerDuelStats;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
 import com.magnocat.mctrilhas.ranks.Rank;
 import org.bukkit.Bukkit;
@@ -20,7 +21,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Gerencia a criação e atualização do painel lateral (scoreboard) de estatísticas.
+ * Gerencia a criação e atualização do painel lateral (scoreboard) de
+ * estatísticas.
  */
 public class ScoreboardManager implements Listener {
 
@@ -62,13 +64,15 @@ public class ScoreboardManager implements Listener {
 
     private void updateScoreboard(Player player) {
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
-        if (playerData == null) return;
+        if (playerData == null) {
+            return;
+        }
 
         Scoreboard board = Bukkit.getScoreboardManager().getNewScoreboard();
         Objective objective = board.registerNewObjective("mctrilhas_sb", "dummy", ChatColor.GOLD + "⚜ " + ChatColor.BOLD + "MC Trilhas" + ChatColor.GOLD + " ⚜");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        int score = 10; // Começa do topo
+        int score = 15; // Começa do topo
 
         objective.getScore(" ").setScore(score--); // Espaçador
 
@@ -82,14 +86,28 @@ public class ScoreboardManager implements Listener {
             long reqPlaytime = plugin.getConfig().getLong("ranks." + nextRank.name() + ".required-playtime-hours", -1);
             int reqBadges = plugin.getConfig().getInt("ranks." + nextRank.name() + ".required-badges", -1);
 
-            if (reqPlaytime > 0) objective.getScore("§bHoras: §f" + (playerData.getActivePlaytimeTicks() / 72000) + "/" + reqPlaytime).setScore(score--);
-            if (reqBadges > 0) objective.getScore("§bInsígnias: §f" + playerData.getEarnedBadgesMap().size() + "/" + reqBadges).setScore(score--);
+            if (reqPlaytime > 0) {
+                objective.getScore("§bHoras: §f" + (playerData.getActivePlaytimeTicks() / 72000) + "/" + reqPlaytime).setScore(score--);
+            }
+            if (reqBadges > 0) {
+                objective.getScore("§bInsígnias: §f" + playerData.getEarnedBadgesMap().size() + "/" + reqBadges).setScore(score--);
+            }
         } else {
             objective.getScore(ChatColor.GREEN + "Ranque Máximo!").setScore(score--);
         }
 
-        objective.getScore("  ").setScore(score--); // Espaçador
-        objective.getScore(ChatColor.DARK_AQUA + "mc.magnocat.net").setScore(score--);
+        objective.getScore("  ").setScore(score--); // Espaçador 2
+
+        // --- Seção de Duelos ---
+        PlayerDuelStats duelStats = plugin.getPlayerDataManager().getPlayerDuelStats(player.getUniqueId());
+        if (duelStats != null) {
+            objective.getScore(ChatColor.RED + "§lDuelos:").setScore(score--);
+            objective.getScore("§bELO: §f" + duelStats.getElo()).setScore(score--);
+            objective.getScore("§bVitórias: §f" + duelStats.getWins()).setScore(score--);
+        }
+
+        objective.getScore("   ").setScore(score--); // Espaçador 3
+        objective.getScore(ChatColor.DARK_AQUA + "mc.magnocat.net").setScore(score);
 
         player.setScoreboard(board);
     }
