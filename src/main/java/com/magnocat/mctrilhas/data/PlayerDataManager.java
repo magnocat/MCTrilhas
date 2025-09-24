@@ -27,6 +27,7 @@ import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.badges.Badge;
 import com.magnocat.mctrilhas.badges.BadgeType;
 import com.magnocat.mctrilhas.ranks.Rank;
+import com.magnocat.mctrilhas.pet.PetData;
 import com.magnocat.mctrilhas.duels.PlayerDuelStats;
 import com.magnocat.mctrilhas.utils.ItemFactory;
 
@@ -88,7 +89,7 @@ public class PlayerDataManager {
         if (!playerFile.exists()) {
             // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
             // O ranque inicial é sempre FILHOTE. O token é nulo até ser gerado.
-            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null));
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null, null));
             return;
         }
 
@@ -151,7 +152,7 @@ public class PlayerDataManager {
      */
     private PlayerData createPlayerDataFromConfig(UUID uuid, FileConfiguration config) {
         // A estrutura de insígnias agora é um Map<String, Long> (badgeId -> timestamp).
-        Map<String, Long> earnedBadges = new HashMap<>(); 
+        Map<String, Long> earnedBadges = new HashMap<>();
         // Lógica de migração: se o formato antigo (lista) existir, converte para o novo (mapa).
         if (config.isList("earned-badges")) {
             plugin.logInfo("Migrando dados de insígnias para o novo formato para o jogador " + uuid);
@@ -188,6 +189,9 @@ public class PlayerDataManager {
         // Carrega o token de acesso web, se existir.
         String webAccessToken = config.getString("web-access-token", null);
 
+        // Carrega os dados do pet, se existirem.
+        PetData petData = PetData.fromConfig(config.getConfigurationSection("pet-data"));
+
         // Lógica de migração única para jogadores existentes sem tempo de jogo ativo.
         if (activePlaytimeTicks == 0 && !config.contains("playtime-migrated")) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
@@ -211,7 +215,7 @@ public class PlayerDataManager {
             }
         }
 
-        return new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedGrandPrize, new HashSet<>(claimedCtfMilestones), webAccessToken);
+        return new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedTreasureGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken);
     }
 
     /**
@@ -252,6 +256,18 @@ public class PlayerDataManager {
         config.set("treasure-hunt.completions", playerData.getTreasureHuntsCompleted());
         config.set("treasure-hunt.grand-prize-received", playerData.hasReceivedTreasureGrandPrize());
         config.set("claimed-ctf-milestones", new ArrayList<>(playerData.getClaimedCtfMilestones()));
+
+        // Salva os dados do pet
+        PetData petData = playerData.getPetData();
+        if (petData != null) {
+            config.set("pet-data.type", petData.getType());
+            config.set("pet-data.name", petData.getName());
+            config.set("pet-data.level", petData.getLevel());
+            config.set("pet-data.experience", petData.getExperience());
+            config.set("pet-data.has-custom-name", petData.hasCustomName());
+            config.set("pet-data.is-owned", petData.isOwned());
+        }
+
         config.set("web-access-token", playerData.getWebAccessToken());
 
         // Salva o mapa de progresso
@@ -478,7 +494,7 @@ public class PlayerDataManager {
         if (data == null || data.hasBadge(badgeId)) {
             return false; // Jogador não está online ou já possui a insígnia.
         }
-        
+
         Badge badge = plugin.getBadgeManager().getBadge(badgeId);
         if (badge == null) {
             return false; // Insígnia não encontrada.

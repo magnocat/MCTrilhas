@@ -48,6 +48,7 @@ import com.magnocat.mctrilhas.listeners.PlayerJoinListener;
 import com.magnocat.mctrilhas.listeners.PlayerQuitListener;
 import com.magnocat.mctrilhas.listeners.TreasureHuntListener;
 import com.magnocat.mctrilhas.ctf.CTFListener;
+import com.magnocat.mctrilhas.pet.PetManager;
 import com.magnocat.mctrilhas.maps.MapRewardManager;
 import com.magnocat.mctrilhas.menus.BadgeMenu;
 import com.magnocat.mctrilhas.quests.TreasureHuntManager;
@@ -81,6 +82,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private ScoreboardManager scoreboardManager;
     private DuelManager duelManager;
     private DuelRewardManager duelRewardManager;
+    private PetManager petManager;
     private HttpApiManager httpApiManager;
 
     // --- Integrations & Tasks ---
@@ -181,6 +183,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.scoreboardManager = new ScoreboardManager(this);
         this.duelManager = new DuelManager(this);
         this.duelRewardManager = new DuelRewardManager(this);
+        this.petManager = new PetManager(this);
 
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
@@ -302,6 +305,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
     public DuelRewardManager getDuelRewardManager() {
         return duelRewardManager;
+    }
+
+    public PetManager getPetManager() {
+        return petManager;
     }
 
     public HttpApiManager getHttpApiManager() {

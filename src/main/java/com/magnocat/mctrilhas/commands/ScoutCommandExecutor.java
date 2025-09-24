@@ -18,6 +18,7 @@ import com.magnocat.mctrilhas.commands.subcommands.AdminSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.BoardSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.BadgesSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.GetMapSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.PetSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.ProgressSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.HUDSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
@@ -52,6 +53,7 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
         registerSubCommand(new ToggleProgressSubCommand(plugin));
         registerSubCommand(new BoardSubCommand(plugin));
         registerSubCommand(new HUDSubCommand(plugin));
+        registerSubCommand(new PetSubCommand(plugin));
         registerSubCommand(new VersionSubCommand(plugin));
         registerSubCommand(new AdminSubCommand(plugin));
     }

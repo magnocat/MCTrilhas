@@ -113,12 +113,20 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
 *   ### 🐾 EM SEGUIDA: Sistema de Pets
     *   **Descrição:** Um sistema que permite aos jogadores terem um companheiro animal que os segue, ajuda em combate e sobe de nível.
     *   **Filosofia:** Será desenvolvido internamente, sem depender de plugins como `MyPet`.
-    *   **Funcionalidades Planejadas:**
-        *   **Comando de Invocação:** `/pet invocar <tipo>` (ex: `gato`, `lobo`).
-        *   **Inteligência Artificial Customizada:** O pet seguirá o dono, defenderá contra ataques e atacará os alvos do jogador.
-        *   **Persistência:** Os dados do pet (tipo, nome, nível, XP) serão salvos no arquivo de dados do jogador.
-        *   **Sistema de Níveis:** O pet ganhará XP ao ajudar em combate, aumentando sua vida e dano ao subir de nível.
-        *   **Animações e Sons:** Por serem entidades reais do jogo, os pets terão todas as animações e sons nativos, tornando-os mais vivos.
+    *   **Funcionalidades Planejadas (Detalhado):**
+        *   **Aquisição:** Requerer ranque `ESCOTEIRO` e um custo inicial em Totens.
+        *   **Comandos:** `/scout pet invocar`, `/scout pet liberar`, `/scout pet nome`.
+        *   **Customização:** Primeira nomeação gratuita, renomear terá um custo.
+        *   **GUI de Compra:** Uma interface gráfica para adquirir novos tipos de pets.
+        *   **Sistema de Níveis:** Pets ganharão XP e subirão de nível, com um limite máximo de evolução.
+        *   **Habilidades Únicas por Tipo:**
+            *   **Lobo:** Foco em combate, com dano que escala com o nível.
+            *   **Gato:** Habilidade de "alerta", localizando monstros próximos.
+            *   **Porco:** Habilidade de utilidade, coletando itens do chão para o dono.
+        *   **Skins:** Variantes aleatórias (cor da coleira do lobo, tipo do gato) e, futuramente, skins totalmente customizadas via Resource Pack.
+        *   **Comandos de Admin:** Ferramentas para gerenciar os pets dos jogadores (resetar, modificar, etc.).
+        *   **Persistência:** Todos os dados (tipo, nome, nível, XP) serão salvos no arquivo do jogador.
+        *   **Nota Especial:** Criar uma gata preta, item único e super OP para o Admin. 😼
 
 *   ### Sistema de Comunidade e Segurança (Graylist Híbrido)
     *   **Descrição:** Um sistema para proteger o servidor de jogadores mal-intencionados, mantendo-o acessível para a comunidade escoteira.

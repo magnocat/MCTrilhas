@@ -1,7 +1,7 @@
 name: MCTrilhas
-version: '${project.version}'
+version: "${project.version}"
 main: com.magnocat.mctrilhas.MCTrilhasPlugin
-api-version: '1.20'
+api-version: "1.20"
 author: MagnoCat
 description: Plugin de trilhas e insígnias com temática escoteira para o servidor MC Trilhas.
 website: https://github.com/magnocat/MCTrilhas
@@ -40,6 +40,10 @@ commands:
     description: Comando principal para o sistema de duelos.
     usage: /<command> <subcomando>
     aliases: [duel]
+  pet:
+    description: Comando principal para o sistema de pets.
+    usage: /<command> <subcomando>
+    aliases: []
 
 permissions:
   mctrilhas.*:
@@ -76,6 +80,13 @@ permissions:
       mctrilhas.duel.kits: true
       mctrilhas.duel.stats: true
       mctrilhas.duel.stats.other: true
+      mctrilhas.pet.use: true
+      mctrilhas.pet.summon: true
+      mctrilhas.pet.release: true
+      mctrilhas.pet.name: true
+      mctrilhas.admin.pet: true
+      mctrilhas.pet.shop: true
+      mctrilhas.admin.pet.reset: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
@@ -169,3 +180,24 @@ permissions:
   mctrilhas.duel.spectate:
     description: Permite assistir a duelos em andamento.
     default: true
+  mctrilhas.pet.use:
+    description: Permite usar os comandos básicos do sistema de pets.
+    default: true
+  mctrilhas.pet.summon:
+    description: Permite invocar um pet.
+    default: true
+  mctrilhas.pet.release:
+    description: Permite guardar (liberar) seu pet.
+    default: true
+  mctrilhas.pet.name:
+    description: Permite nomear seu pet.
+    default: true
+  mctrilhas.pet.shop:
+    description: Permite abrir a loja para adquirir um pet.
+    default: true
+  mctrilhas.admin.pet:
+    description: Permite acesso aos comandos de administração de pets.
+    default: op
+  mctrilhas.admin.pet.reset:
+    description: Permite resetar os dados de pet de um jogador.
+    default: op
