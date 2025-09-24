@@ -11,8 +11,8 @@ import java.util.List;
 /**
  * Implementa o subcomando `/scout hud`.
  * <p>
- * Este comando ativa ou desativa a exibição da BossBar de estatísticas (HUD)
- * para o jogador que o executa.
+ * Este comando permite que um jogador ative ou desative a exibição de
+ * informações na tela (Heads-Up Display) via BossBar.
  */
 public class HUDSubCommand implements SubCommand {
 
@@ -23,30 +23,37 @@ public class HUDSubCommand implements SubCommand {
     }
 
     @Override
-    public String getName() { return "hud"; }
+    public String getName() {
+        return "hud";
+    }
 
     @Override
-    public String getDescription() { return "Ativa ou desativa o painel de estatísticas na tela (HUD)."; }
+    public String getDescription() {
+        return "Ativa ou desativa a barra de informações na tela.";
+    }
 
     @Override
-    public String getSyntax() { return "/scout hud"; }
+    public String getSyntax() {
+        return "/scout hud";
+    }
 
     @Override
-    public String getPermission() { return "mctrilhas.hud"; }
+    public String getPermission() {
+        return "mctrilhas.hud";
+    }
 
     @Override
-    public boolean isAdminCommand() { return false; }
+    public boolean isAdminCommand() {
+        return false;
+    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages.player-only-command", "&cEste comando só pode ser usado por jogadores.")));
+            sender.sendMessage(ChatColor.RED + "Este comando só pode ser usado por jogadores.");
             return;
         }
-        Player player = (Player) sender;
-        // CORREÇÃO: O nome do método para alternar o HUD é 'toggleHUD',
-        // seguindo a convenção de nomenclatura para acrônimos.
-        plugin.getHudManager().toggleHUD(player);
+        plugin.getHudManager().toggleHUD((Player) sender);
     }
 
     @Override

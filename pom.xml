@@ -14,7 +14,7 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- A versão completa é injetada pelo GitHub Actions. Este valor é um fallback para desenvolvimento local. -->
-        <project.version.full>1.0.21</project.version.full>
+        <project.version.full>1.0.25</project.version.full>
         <!-- Define o formato do timestamp que será gerado durante o build -->
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
         <!-- Centralized dependency versions for easy updates -->

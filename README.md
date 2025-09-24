@@ -33,7 +33,9 @@ O **MCTrilhas** é um plugin customizado para servidores Minecraft (Paper/Spigot
 ## ✨ Funcionalidades
 - **Sistema de Insígnias e Ranques**: Progresso baseado em atividades (mineração, construção, etc.) que recompensa jogadores com insígnias e os promove em um sistema de ranques escoteiros.
 - **Recompensas Configuráveis**: Cada insígnia concede itens customizados, dinheiro (via Vault) e mapas-troféu únicos.
-- **Modos de Jogo Competitivos**: Sistema completo de **Capture a Bandeira (CTF)** com arenas, times, placar e estatísticas.
+- **Modos de Jogo Competitivos**:
+  - **Duelos 1v1**: Sistema completo com desafios, arenas, kits, ranking ELO e modo espectador.
+  - **Capture a Bandeira (CTF)**: Jogo em equipe com arenas, placar e estatísticas.
 - **Quests e Recompensas Diárias**: Sistema de Caça ao Tesouro e recompensas diárias para manter os jogadores engajados.
 - **Alta Performance**: O sistema de dados dos jogadores é otimizado com cache e operações assíncronas para evitar sobrecarga no servidor.
 - **Integração com PlaceholderAPI**: Expõe dados como ranque e progresso para outros plugins (TAB, scoreboards, etc.).
@@ -62,6 +64,12 @@ Um modo de jogo competitivo onde duas equipes se enfrentam para invadir a base i
 - **Equipamento Justo**: Todos recebem o mesmo kit de itens.
 - **Estratégia**: A comunicação é chave! Use o chat de equipe (`!sua mensagem`) para coordenar ataques e defesas.
 - **Comando**: Use `/ctf join` para entrar na fila.
+
+### ⚔️ Duelos 1v1
+Desafie outros jogadores para um combate justo em arenas dedicadas.
+- **Competitivo**: Sistema de ranking ELO que ajusta sua pontuação a cada vitória ou derrota.
+- **Kits Padronizados**: Lute com equipamentos iguais para garantir que a habilidade prevaleça.
+- **Comandos**: Use `/duelo desafiar <jogador>` para iniciar um desafio.
 
 ## ⚜️ Lista de Insígnias
 Abaixo estão as insígnias disponíveis e seus IDs para uso em comandos.
@@ -94,6 +102,12 @@ Abaixo está a lista completa de comandos disponíveis.
 | `/familia token` | Gera seu link pessoal para o Painel da Família. | `mctrilhas.familia.use` |
 | `/ctf join` | Entra na fila para uma partida de CTF. | `mctrilhas.ctf.join` |
 | `/ctf leave` | Sai da fila ou da partida de CTF. | `mctrilhas.ctf.leave` |
+| `/duelo desafiar <jogador>` | Desafia um jogador para um duelo. | `mctrilhas.duel.challenge` |
+| `/duelo aceitar <jogador>` | Aceita um desafio de duelo. | `mctrilhas.duel.accept` |
+| `/duelo top` | Mostra o ranking de ELO dos melhores jogadores. | `mctrilhas.duel.top` |
+| `/duelo stats` | Mostra suas estatísticas de duelo. | `mctrilhas.duel.stats` |
+| `/duelo assistir <jogador>` | Assiste a um duelo em andamento. | `mctrilhas.duel.spectate` |
+
 
 ### Comandos de Administração
 | Comando | Descrição | Permissão |
@@ -105,10 +119,12 @@ Abaixo está a lista completa de comandos disponíveis.
 | `/ctf admin set <tipo>` | Define um local (lobby, spawn, etc.) para a arena. | `mctrilhas.ctf.admin` |
 | `/ctf admin save` | Salva a arena de CTF que está sendo criada. | `mctrilhas.ctf.admin` |
 
+
 ## 🗺️ Roadmap
-- **🎯 EM FOCO: Sistema de Duelos 1v1**
-  - Desafios, arenas dedicadas, kits padronizados e ranking ELO.
-- **Novos Minigames:**
+- **🎯 EM FOCO: Sistema de Pets**
+  - Companheiros animais que seguem o jogador, ajudam em combate e sobem de nível.
+  - Será desenvolvido internamente, sem depender de outros plugins.
+- **Próximos Minigames:**
   - **Build Battle:** Jogo de construção criativa por tempo.
   - **BedWars:** O clássico modo de jogo de equipes.
   - **Survival Games:** Com foco no tema de sobrevivência escoteira.

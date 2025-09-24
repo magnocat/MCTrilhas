@@ -35,10 +35,7 @@ commands:
   familia:
     description: Comandos relacionados ao Portal da Família.
     usage: /<command> <subcomando>
-    aliases: [family]
-  hud:
-    description: Ativa ou desativa o painel de estatísticas na tela.
-    usage: /hud
+    aliases: [family]  
   duelo:
     description: Comando principal para o sistema de duelos.
     usage: /<command> <subcomando>

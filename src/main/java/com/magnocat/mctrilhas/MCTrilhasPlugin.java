@@ -19,7 +19,6 @@ import net.milkbowl.vault.economy.Economy;
 
 // Project-specific Classes
 import com.magnocat.mctrilhas.badges.BadgeManager;
-import com.magnocat.mctrilhas.commands.HUDCommand;
 import com.magnocat.mctrilhas.commands.DailyCommand;
 import com.magnocat.mctrilhas.commands.FamilyCommand;
 import com.magnocat.mctrilhas.commands.RankCommand;
@@ -182,7 +181,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.scoreboardManager = new ScoreboardManager(this);
         this.duelManager = new DuelManager(this);
         this.duelRewardManager = new DuelRewardManager(this);
-        
+
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
         if (getServer().getPluginManager().isPluginEnabled("BlueMap")) {
@@ -313,7 +312,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     public BlueMapManager getBlueMapManager() {
         return blueMapManager;
     }
-    */
+     */
     public Economy getEconomy() {
         return econ;
     }
@@ -346,6 +345,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
     /**
      * Teleporta um jogador para o local do hub definido no config.yml.
+     *
      * @param player O jogador a ser teleportado.
      */
     public void teleportToHub(Player player) {
@@ -360,13 +360,13 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     }
 
     /**
-     * Inicia as tarefas agendadas para atualizar os caches de ranking.
-     * Esta função é chamada quando o primeiro jogador entra no servidor.
+     * Inicia as tarefas agendadas para atualizar os caches de ranking. Esta
+     * função é chamada quando o primeiro jogador entra no servidor.
      */
     public void startCacheUpdateTasks() {
         // Verifica se as tarefas já estão em execução para evitar duplicação.
-        if ((placeholderApiCacheUpdater != null && !placeholderApiCacheUpdater.isCancelled()) ||
-            (webApiCacheUpdater != null && !webApiCacheUpdater.isCancelled())) {
+        if ((placeholderApiCacheUpdater != null && !placeholderApiCacheUpdater.isCancelled())
+                || (webApiCacheUpdater != null && !webApiCacheUpdater.isCancelled())) {
             return; // Tarefas já estão ativas.
         }
 
@@ -395,8 +395,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     }
 
     /**
-     * Para as tarefas agendadas de atualização de cache.
-     * Esta função é chamada quando o último jogador sai do servidor.
+     * Para as tarefas agendadas de atualização de cache. Esta função é chamada
+     * quando o último jogador sai do servidor.
      */
     public void stopCacheUpdateTasks() {
         logInfo("Último jogador saiu. Parando tarefas de atualização de cache de rankings.");

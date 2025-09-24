@@ -10,6 +10,9 @@ import java.util.List;
 
 /**
  * Implementa o subcomando `/scout board`.
+ * <p>
+ * Este comando permite que um jogador ative ou desative o painel lateral de
+ * estatísticas (scoreboard).
  */
 public class BoardSubCommand implements SubCommand {
 
@@ -20,24 +23,34 @@ public class BoardSubCommand implements SubCommand {
     }
 
     @Override
-    public String getName() { return "board"; }
+    public String getName() {
+        return "board";
+    }
 
     @Override
-    public String getDescription() { return "Ativa ou desativa o painel lateral de estatísticas."; }
+    public String getDescription() {
+        return "Ativa ou desativa o painel de estatísticas.";
+    }
 
     @Override
-    public String getSyntax() { return "/scout board"; }
+    public String getSyntax() {
+        return "/scout board";
+    }
 
     @Override
-    public String getPermission() { return "mctrilhas.scout.board"; }
+    public String getPermission() {
+        return "mctrilhas.scout.board";
+    }
 
     @Override
-    public boolean isAdminCommand() { return false; }
+    public boolean isAdminCommand() {
+        return false;
+    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages.player-only-command", "&cEste comando só pode ser usado por jogadores.")));
+            sender.sendMessage(ChatColor.RED + "Este comando só pode ser usado por jogadores.");
             return;
         }
         plugin.getScoreboardManager().toggleBoard((Player) sender);

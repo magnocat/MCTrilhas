@@ -35,16 +35,35 @@ public class ScoreboardManager implements Listener {
         startUpdater();
     }
 
+    /**
+     * Alterna a visibilidade do painel para um jogador e envia uma mensagem.
+     *
+     * @param player O jogador.
+     */
     public void toggleBoard(Player player) {
+        toggleBoard(player, false);
+    }
+
+    /**
+     * Alterna a visibilidade do painel para um jogador.
+     *
+     * @param player O jogador.
+     * @param silent Se true, não envia mensagem de feedback para o jogador.
+     */
+    public void toggleBoard(Player player, boolean silent) {
         UUID uuid = player.getUniqueId();
         if (activeBoards.contains(uuid)) {
             activeBoards.remove(uuid);
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-            player.sendMessage(ChatColor.RED + "Painel de estatísticas desativado.");
+            if (!silent) {
+                player.sendMessage(ChatColor.RED + "Painel de estatísticas desativado.");
+            }
         } else {
             activeBoards.add(uuid);
             updateScoreboard(player);
-            player.sendMessage(ChatColor.GREEN + "Painel de estatísticas ativado.");
+            if (!silent) {
+                player.sendMessage(ChatColor.GREEN + "Painel de estatísticas ativado.");
+            }
         }
     }
 
@@ -115,5 +134,9 @@ public class ScoreboardManager implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         activeBoards.remove(event.getPlayer().getUniqueId());
+    }
+
+    public boolean isBoardActive(UUID playerUUID) {
+        return activeBoards.contains(playerUUID);
     }
 }

@@ -15,9 +15,11 @@ import org.bukkit.command.TabCompleter;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.commands.subcommands.AdminSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.BoardSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.BadgesSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.GetMapSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.ProgressSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.HUDSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.ToggleProgressSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.VersionSubCommand;
@@ -25,10 +27,10 @@ import com.magnocat.mctrilhas.commands.subcommands.VersionSubCommand;
 /**
  * Executor principal e roteador para o comando `/scout`.
  * <p>
- * Esta classe gerencia todos os subcomandos associados ao `/scout`,
- * delegando a execução para a classe `SubCommand` apropriada.
- * Ela também lida com a verificação de permissões, a geração de mensagens
- * de ajuda dinâmicas e o autocompletar (tab completion).
+ * Esta classe gerencia todos os subcomandos associados ao `/scout`, delegando a
+ * execução para a classe `SubCommand` apropriada. Ela também lida com a
+ * verificação de permissões, a geração de mensagens de ajuda dinâmicas e o
+ * autocompletar (tab completion).
  */
 public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
 
@@ -36,8 +38,9 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
     private final Map<String, SubCommand> subCommands = new LinkedHashMap<>();
 
     /**
-     * Construtor do executor de comandos.
-     * Registra todos os subcomandos disponíveis.
+     * Construtor do executor de comandos. Registra todos os subcomandos
+     * disponíveis.
+     *
      * @param plugin A instância principal do plugin.
      */
     public ScoutCommandExecutor(MCTrilhasPlugin plugin) {
@@ -47,6 +50,8 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
         registerSubCommand(new ProgressSubCommand(plugin));
         registerSubCommand(new GetMapSubCommand(plugin));
         registerSubCommand(new ToggleProgressSubCommand(plugin));
+        registerSubCommand(new BoardSubCommand(plugin));
+        registerSubCommand(new HUDSubCommand(plugin));
         registerSubCommand(new VersionSubCommand(plugin));
         registerSubCommand(new AdminSubCommand(plugin));
     }
@@ -62,7 +67,8 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
      * @param sender A entidade que executou o comando.
      * @param command O comando que foi executado.
      * @param label O alias do comando que foi usado.
-     * @param args Os argumentos fornecidos, onde o primeiro é o nome do subcomando.
+     * @param args Os argumentos fornecidos, onde o primeiro é o nome do
+     * subcomando.
      * @return {@code true} se o comando foi tratado com sucesso.
      */
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -90,8 +96,9 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Envia uma mensagem de ajuda contextualizada para o remetente.
-     * A mensagem lista apenas os comandos que o remetente tem permissão para usar.
+     * Envia uma mensagem de ajuda contextualizada para o remetente. A mensagem
+     * lista apenas os comandos que o remetente tem permissão para usar.
+     *
      * @param sender A entidade para a qual a mensagem será enviada.
      */
     private void sendHelpMessage(CommandSender sender) {

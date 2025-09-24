@@ -49,10 +49,19 @@ public class PlayerJoinListener implements Listener {
 
         // 5. Agenda a verificação de promoção de ranque.
         scheduleRankPromotionCheck(player);
+
+        // 6. Ativa o Scoreboard e o HUD por padrão para o jogador.
+        // A verificação é feita com um pequeno atraso para garantir que tudo esteja carregado.
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) { // Garante que o jogador não desconectou nesse meio tempo
+                plugin.getScoreboardManager().toggleBoard(player, true); // O 'true' ativa silenciosamente
+            }
+        }, 40L); // Atraso de 2 segundos
     }
 
     /**
      * Envia uma mensagem de boas-vindas personalizada para o jogador.
+     *
      * @param player O jogador que entrou no servidor.
      */
     @SuppressWarnings("deprecation")
@@ -72,7 +81,9 @@ public class PlayerJoinListener implements Listener {
     }
 
     /**
-     * Agenda uma tarefa para notificar o jogador sobre a recompensa diária, se disponível.
+     * Agenda uma tarefa para notificar o jogador sobre a recompensa diária, se
+     * disponível.
+     *
      * @param player O jogador para notificar.
      */
     @SuppressWarnings("deprecation")
@@ -97,6 +108,7 @@ public class PlayerJoinListener implements Listener {
 
     /**
      * Agenda uma tarefa para verificar se o jogador pode ser promovido.
+     *
      * @param player O jogador a ser verificado.
      */
     private void scheduleRankPromotionCheck(Player player) {

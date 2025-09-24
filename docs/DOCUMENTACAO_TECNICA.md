@@ -179,18 +179,57 @@ MCTrilhas/
 
 ---
 
-## 4. Sistemas Futuros e em Desenvolvimento
+### 3.8. Sistema de Capture The Flag (CTF)
+*   **Descrição:** Um minigame competitivo onde duas equipes se enfrentam para capturar a bandeira inimiga.
+*   **Estrutura:** `ctf/CTFManager.java`, `ctf/CTFGame.java`, `ctf/CTFArena.java`, `ctf/CTFTeam.java`.
+*   **Dados:**
+    *   **`ctf_arenas.yml`**: Armazena a configuração de todas as arenas, incluindo nome, número de jogadores e as coordenadas do lobby, spawns e bandeiras.
+    *   **`playerdata/<UUID>.yml`**: As estatísticas de cada jogador (vitórias, abates, capturas) são salvas em uma seção `ctf-stats` dentro do seu arquivo de dados.
+*   **Lógica:**
+    1.  **Fila:** O `CTFManager` gerencia uma fila de jogadores (`/ctf join`).
+    2.  **Início da Partida:** Quando há jogadores suficientes e uma arena livre, uma contagem regressiva é iniciada. Ao final, uma instância de `CTFGame` é criada.
+    3.  **Gerenciamento do Jogo:** A classe `CTFGame` controla toda a lógica da partida: teleporta os jogadores, aplica kits, gerencia o placar, o tempo e as regras de captura e retorno da bandeira.
+    4.  **Fim da Partida:** Ao final, `CTFGame` anuncia o vencedor, salva as estatísticas dos jogadores e os retorna ao lobby. O `CTFManager` então remove o jogo da lista de partidas ativas.
+*   **Comandos:**
+    *   `/ctf join`: Entra na fila.
+    *   `/ctf leave`: Sai da fila ou da partida.
+    *   `/ctf admin create/set/save`: Comandos para administradores criarem novas arenas.
 
-### 4.1. Sistema de Duelos 1v1 (EM FOCO)
+### 3.9. Sistema de HUD (Heads-Up Display)
+*   **Descrição:** Um sistema de exibição de informações na tela do jogador através de uma `BossBar`.
+*   **Estrutura:** `hud/HUDManager.java`.
+*   **Lógica:**
+    1.  O jogador usa o comando `/hud` para ativar ou desativar a exibição.
+    2.  O `HUDManager` cria uma `BossBar` para o jogador e a adiciona a um mapa de HUDs ativos.
+    3.  Uma tarefa assíncrona (`BukkitRunnable`) é executada periodicamente para atualizar as informações.
+    4.  Para cada jogador com HUD ativo, a tarefa busca os dados mais recentes (ranque, Totens, contagem de insígnias) e atualiza o título da `BossBar`.
+    5.  A `BossBar` é removida automaticamente quando o jogador sai do servidor ou quando o plugin é desativado/recarregado.
+
+---
+### 3.10. Sistema de Duelos 1v1
 *   **Descrição:** Um sistema de combate justo e competitivo.
 *   **Estrutura:** `duels/DuelManager.java`, `duels/DuelArena.java`, `duels/DuelGame.java`, `duels/DuelKit.java`.
-*   **Dados:** Novos arquivos `duel_arenas.yml` e `duel_kits.yml` serão criados. As estatísticas (vitórias, derrotas, ELO) serão adicionadas ao arquivo de dados de cada jogador.
+*   **Dados:** Novos arquivos `duel_arenas.yml` e `duel_kits.yml`. As estatísticas (vitórias, derrotas, ELO) são salvas no arquivo de dados de cada jogador.
 *   **Lógica:**
-    1.  Um jogador usa `/duelo desafiar <jogador>`.
+    1.  Um jogador usa `/duelo desafiar <jogador>`, o que abre uma GUI para seleção de kit.
     2.  O `DuelManager` registra o desafio e notifica o alvo.
-    3.  Se aceito, o `DuelManager` encontra uma `DuelArena` livre.
+    3.  Se aceito, o `DuelManager` encontra uma `DuelArena` livre ou coloca os jogadores na fila.
     4.  Uma nova instância de `DuelGame` é criada, que teleporta os jogadores, aplica o kit, inicia a contagem regressiva e gerencia o combate.
-    5.  Ao final, o `DuelGame` restaura o estado dos jogadores e os teleporta de volta, registrando o resultado.
+    5.  Ao final, o `DuelGame` calcula o novo ELO, restaura o estado dos jogadores (incluindo localização original) e os teleporta de volta, registrando o resultado.
+    6.  O sistema também inclui modo espectador (`/duelo assistir`) e recompensas semanais para o Top 3 do ranking.
+
+---
+
+## 4. Sistemas Futuros e em Desenvolvimento
+
+### 4.1. Sistema de Pets (EM FOCO)
+*   **Descrição:** Um sistema que permite aos jogadores terem um companheiro animal que os segue, ajuda em combate e sobe de nível.
+*   **Filosofia:** Será desenvolvido internamente, sem depender de plugins como `MyPet`.
+*   **Funcionalidades Planejadas:**
+    *   **Comando de Invocação:** `/pet invocar <tipo>` (ex: `gato`, `lobo`).
+    *   **Inteligência Artificial Customizada:** O pet seguirá o dono, defenderá contra ataques e atacará os alvos do jogador.
+    *   **Persistência:** Os dados do pet (tipo, nome, nível, XP) serão salvos no arquivo de dados do jogador.
+    *   **Sistema de Níveis:** O pet ganhará XP ao ajudar em combate, aumentando sua vida e dano ao subir de nível.
 
 ### 4.2. Sistema de Clãs
 *   **Descrição:** Permitirá que jogadores se organizem em grupos formais.
@@ -228,34 +267,6 @@ MCTrilhas/
     2.  **Gerenciamento de Jogadores:** Criar uma interface para visualizar e editar dados de jogadores (conceder insígnias, ajustar Totens, etc.) via API.
     3.  **Ações de Moderação:** Adicionar botões na lista de jogadores para executar comandos (kick, ban) remotamente.
 
-### 3.8. Sistema de Capture The Flag (CTF)
-*   **Descrição:** Um minigame competitivo onde duas equipes se enfrentam para capturar a bandeira inimiga.
-*   **Estrutura:** `ctf/CTFManager.java`, `ctf/CTFGame.java`, `ctf/CTFArena.java`, `ctf/CTFTeam.java`.
-*   **Dados:**
-    *   **`ctf_arenas.yml`**: Armazena a configuração de todas as arenas, incluindo nome, número de jogadores e as coordenadas do lobby, spawns e bandeiras.
-    *   **`playerdata/<UUID>.yml`**: As estatísticas de cada jogador (vitórias, abates, capturas) são salvas em uma seção `ctf-stats` dentro do seu arquivo de dados.
-*   **Lógica:**
-    1.  **Fila:** O `CTFManager` gerencia uma fila de jogadores (`/ctf join`).
-    2.  **Início da Partida:** Quando há jogadores suficientes e uma arena livre, uma contagem regressiva é iniciada. Ao final, uma instância de `CTFGame` é criada.
-    3.  **Gerenciamento do Jogo:** A classe `CTFGame` controla toda a lógica da partida: teleporta os jogadores, aplica kits, gerencia o placar, o tempo e as regras de captura e retorno da bandeira.
-    4.  **Fim da Partida:** Ao final, `CTFGame` anuncia o vencedor, salva as estatísticas dos jogadores e os retorna ao lobby. O `CTFManager` então remove o jogo da lista de partidas ativas.
-*   **Comandos:**
-    *   `/ctf join`: Entra na fila.
-    *   `/ctf leave`: Sai da fila ou da partida.
-    *   `/ctf admin create/set/save`: Comandos para administradores criarem novas arenas.
-
-### 3.9. Sistema de HUD (Heads-Up Display)
-*   **Descrição:** Um sistema de exibição de informações na tela do jogador através de uma `BossBar`.
-*   **Estrutura:** `hud/HUDManager.java`.
-*   **Lógica:**
-    1.  O jogador usa o comando `/hud` para ativar ou desativar a exibição.
-    2.  O `HUDManager` cria uma `BossBar` para o jogador e a adiciona a um mapa de HUDs ativos.
-    3.  Uma tarefa assíncrona (`BukkitRunnable`) é executada periodicamente para atualizar as informações.
-    4.  Para cada jogador com HUD ativo, a tarefa busca os dados mais recentes (ranque, Totens, contagem de insígnias) e atualiza o título da `BossBar`.
-    5.  A `BossBar` é removida automaticamente quando o jogador sai do servidor ou quando o plugin é desativado/recarregado.
-
----
-
 ## 5. Estrutura de Comandos
 
 ### 5.0.1. Arquitetura de Comandos (Interface SubCommand)
@@ -273,17 +284,6 @@ MCTrilhas/
 | `/tesouro <subcomando>` | `TreasureHuntCommand` | Gerencia a participação na Caça ao Tesouro. |
 | `/duelo <subcomando>` | `DuelCommand` | (Em desenvolvimento) Gerencia os desafios e a participação em duelos. |
 
-### 5.1.1. Subcomandos de Jogador (`/scout ...`)
-| Subcomando | Classe | Descrição |
-|---|---|---|
-| `badges [jogador]` | `BadgesSubCommand` | Exibe as insígnias conquistadas pelo jogador (em GUI ou chat). |
-| `progress [jogador]` | `ProgressSubCommand` | Mostra o progresso detalhado para as próximas insígnias e ranque. |
-| `getmap <insignia>` | `GetMapSubCommand` | Recupera o mapa-troféu de uma insígnia já conquistada. |
-| `board` | `BoardSubCommand` | Ativa ou desativa o painel lateral de estatísticas (scoreboard). |
-| `hud` | `HUDSubCommand` | Ativa ou desativa a exibição de informações na tela (HUD). |
-| `toggleprogress` | `ToggleProgressSubCommand` | Ativa ou desativa as mensagens de progresso de insígnias no chat. |
-| `version` | `VersionSubCommand` | Exibe a versão atual do plugin. |
-
 #### Detalhes do `/scout getmap`
 *   **Fluxo de Trabalho:**
     1.  Verifica se o jogador que executou o comando já conquistou a insígnia especificada.
@@ -292,16 +292,6 @@ MCTrilhas/
     4.  Se todas as condições forem atendidas e o jogador não tiver o mapa, o `MapRewardManager` é chamado para criar e entregar uma nova cópia do troféu.
 *   **Autocompletar Inteligente:** O comando sugere apenas as insígnias que o jogador já conquistou e que possuem um mapa-troféu associado.
 
-### 5.1.2. Subcomandos de Administração (`/scout admin ...`)
-O comando `/scout admin` é gerenciado pela classe `AdminSubCommand`, que atua como um roteador, delegando a execução para os seguintes subcomandos específicos:
-
-| Subcomando | Classe | Descrição |
-|---|---|---|
-| `addbadge <jogador> <insignia>` | `AddBadgeSubCommand` | Concede uma insígnia e sua recompensa a um jogador online. |
-| `removebadge <jogador> <insignia>` | `RemoveBadgeSubCommand` | Remove uma insígnia de um jogador (online ou offline) e zera o progresso associado. |
-| `stats <jogador>` | `StatsSubCommand` | Exibe as estatísticas de progresso detalhadas de um jogador (online ou offline). |
-| `reload` | `ReloadSubCommand` | Recarrega os arquivos de configuração (`config.yml`, `treasure_locations.yml`) e os caches dependentes (insígnias, locais de tesouro). |
-
 
 ### 5.2. Comandos Planejados
 | Comando | Descrição |
@@ -309,16 +299,6 @@ O comando `/scout admin` é gerenciado pela classe `AdminSubCommand`, que atua c
 | `/cla <subcomando>` | (Futuro) Gerenciará todas as ações relacionadas a clãs (criar, convidar, etc.). |
 | `/acampamento <subcomando>` | (Futuro) Permitirá que jogadores com ranque suficiente comprem seu terreno individual. |
 | `/skins` | Permitirá que jogadores alterem sua aparência (requer integração com plugins como SkinsRestorer). |
-
-### 4.6. Gerador de Cards de Jogador (Ideia Futura)
-*   **Descrição:** Um sistema que gera uma imagem (JPG/PNG) no estilo de um card de jogo (ex: Pokémon) para cada jogador.
-*   **Lógica:**
-    1.  Um novo comando (ex: `/scout card`) ou um botão no painel web iniciaria a geração.
-    2.  O sistema usaria uma API externa (como a `cravatar.eu` ou `minotar.net`) para obter uma renderização da skin do jogador em corpo inteiro.
-    3.  No backend, o Java usaria uma biblioteca de manipulação de imagens (como `java.awt.Graphics2D`) para montar o card.
-    4.  Ele combinaria uma imagem de template de fundo, a renderização da skin, o nome do jogador, seu ranque e uma lista de ícones de suas insígnias.
-    5.  A imagem final seria salva temporariamente no servidor e um link para download seria fornecido ao jogador.
-*   **Objetivo:** Criar um item colecionável e compartilhável que os jogadores possam imprimir ou enviar para amigos.
 
 ---
 
