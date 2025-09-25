@@ -242,7 +242,39 @@ public class PetManager implements Listener {
             case "lobo": return Material.BONE;
             case "gato": return Material.COD;
             case "porco": return Material.CARROT;
+            case "papagaio": return Material.WHEAT_SEEDS;
             default: return null;
+        }
+    }
+
+    @EventHandler
+    public void onPetInteractionMenuClick(InventoryClickEvent event) {
+        if (!event.getView().getTitle().startsWith(PetInteractionMenu.INVENTORY_TITLE_PREFIX)) {
+            return;
+        }
+
+        event.setCancelled(true);
+        Player player = (Player) event.getWhoClicked();
+        ItemStack clickedItem = event.getCurrentItem();
+
+        if (clickedItem == null || !clickedItem.hasItemMeta()) return;
+
+        NamespacedKey key = new NamespacedKey(plugin, "pet_action");
+        String action = clickedItem.getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING);
+
+        if (action != null) {
+            player.closeInventory();
+            switch (action) {
+                case "rename": player.sendMessage(ChatColor.YELLOW + "Para renomear seu pet, use o comando: /scout pet nome <novo nome>"); break;
+                case "release": releasePet(player); break;
+                case "toggle_shoulder":
+                    Pet pet = getActivePet(player);
+                    if (pet instanceof ParrotPet) {
+                        ((ParrotPet) pet).toggleSitOnShoulder();
+                        player.sendMessage(ChatColor.GREEN + "Você deu uma ordem ao seu papagaio!");
+                    }
+                    break;
+            }
         }
     }
 
@@ -342,6 +374,8 @@ public class PetManager implements Listener {
                 return new PigPet(owner, petData, plugin);
             case "gato":
                 return new CatPet(owner, petData, plugin);
+            case "papagaio":
+                return new ParrotPet(owner, petData, plugin);
             default:
                 return null;
         }

@@ -6,12 +6,16 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 /**
  * Ouve eventos do jogo relacionados aos pets, como ganho de experiência.
@@ -111,6 +115,33 @@ public class PetListener implements Listener {
             // Abre o menu de interação
             PetInteractionMenu menu = new PetInteractionMenu(plugin, pet);
             menu.open(player);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
+        Player player = event.getPlayer();
+        PetManager petManager = plugin.getPetManager();
+
+        // Verifica se o jogador está começando a se agachar
+        if (event.isSneaking()) {
+            Entity leftShoulder = player.getShoulderEntityLeft();
+            Entity rightShoulder = player.getShoulderEntityRight();
+
+            // Verifica se há um papagaio em um dos ombros
+            if ((leftShoulder instanceof Parrot && petManager.getPetByEntity(leftShoulder) != null) ||
+                (rightShoulder instanceof Parrot && petManager.getPetByEntity(rightShoulder) != null)) {
+
+                // Aplica o efeito de "super zoom" (lentidão com amplificador alto)
+                // A duração é longa, pois será removido quando o jogador parar de se agachar.
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 4, false, false, false));
+            }
+        } else {
+            // Se o jogador parar de se agachar, remove o efeito de zoom.
+            // Verificamos se ele tem o efeito antes de remover para evitar erros.
+            if (player.hasPotionEffect(PotionEffectType.SLOW)) {
+                player.removePotionEffect(PotionEffectType.SLOW);
+            }
         }
     }
 }

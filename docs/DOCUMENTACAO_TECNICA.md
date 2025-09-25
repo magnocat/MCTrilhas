@@ -1,6 +1,6 @@
 # Documentação Técnica: Plugin MCTrilhas
 
-**Versão do Documento:** 1.0
+**Versão do Documento:** 1.2
 **Data:** 2024-08-01
 
 ## 1. Visão Geral
@@ -19,24 +19,21 @@ MCTrilhas/
 │   └── build.yml       # Automação de build (CI) e release (CD) no GitHub.
 ├── src/main/java/com/magnocat/mctrilhas/
 │   ├── badges/         # Lógica relacionada às insígnias (definições, tipos).
-│   ├── commands/       # Classes que gerenciam os comandos e subcomandos.
+│   ├── commands/       # Classes que gerenciam os comandos e seus subcomandos.
 │   ├── data/           # Classes de gerenciamento de dados dos jogadores (PlayerData, PlayerDataManager).
 │   ├── integrations/   # Classes para integração com outros plugins (PlaceholderAPI, BlueMap, etc.).
 │   ├── listeners/      # "Ouvintes" de eventos do jogo (quebrar blocos, pescar, etc.).
 │   ├── maps/           # Lógica para criar os mapas-troféu customizados.
 │   ├── menus/          # Lógica para a GUI (interface gráfica) das insígnias.
 │   ├── ranks/          # Lógica para o sistema de progressão de ranques.
-│   ├── quests/         # Lógica para sistemas de missões, como a Caça ao Tesouro. 
+│   ├── quests/         # Lógica para sistemas de missões, como a Caça ao Tesouro.
+│   ├── pet/            # (Concluído) Lógica para o sistema de pets companheiros.
 │   ├── duels/          # (Em desenvolvimento) Lógica para o sistema de duelos 1v1.
 │   ├── clans/          # (Futuro) Lógica para o sistema de clãs.
-│   ├── plots/          # (Futuro) Lógica para gerenciar os terrenos no "Vale dos Pioneiros".
-│   ├── storage/        # Gerenciamento de persistência de dados (ex: blocos colocados por jogadores).
-│   ├── updater/        # Sistema de verificação e download automático de atualizações.
 │   ├── web/            # Lógica para a API web integrada (servidor HTTP).
 │   └── MCTrilhasPlugin.java # Classe principal do plugin, ponto de entrada.
 └── src/main/resources/
-    ├── config.yml      # Arquivo principal de configuração (insígnias, recompensas, etc.).
-    ├── duel_arenas.yml # Configuração das arenas de duelo.
+    ├── config.yml      # Arquivo principal de configuração.
     ├── plugin.yml      # Arquivo de definição do plugin para o servidor.
     └── maps/           # Pasta para as imagens (128x128) dos mapas-troféu.
 ```
@@ -201,35 +198,44 @@ MCTrilhas/
 *   **Lógica:**
     1.  O jogador usa o comando `/hud` para ativar ou desativar a exibição.
     2.  O `HUDManager` cria uma `BossBar` para o jogador e a adiciona a um mapa de HUDs ativos.
-    3.  Uma tarefa assíncrona (`BukkitRunnable`) é executada periodicamente para atualizar as informações.
-    4.  Para cada jogador com HUD ativo, a tarefa busca os dados mais recentes (ranque, Totens, contagem de insígnias) e atualiza o título da `BossBar`.
+    3.  Uma tarefa assíncrona (`BukkitRunnable`) é executada periodicamente para buscar os dados mais recentes (ranque, ELO, Totens, informações do pet).
+    4.  Os dados são usados para atualizar o título e o progresso da `BossBar`. A barra de progresso da HUD reflete a barra de XP do pet ativo.
     5.  A `BossBar` é removida automaticamente quando o jogador sai do servidor ou quando o plugin é desativado/recarregado.
 
 ---
-### 3.10. Sistema de Duelos 1v1
-*   **Descrição:** Um sistema de combate justo e competitivo.
-*   **Estrutura:** `duels/DuelManager.java`, `duels/DuelArena.java`, `duels/DuelGame.java`, `duels/DuelKit.java`.
-*   **Dados:** Novos arquivos `duel_arenas.yml` e `duel_kits.yml`. As estatísticas (vitórias, derrotas, ELO) são salvas no arquivo de dados de cada jogador.
-*   **Lógica:**
-    1.  Um jogador usa `/duelo desafiar <jogador>`, o que abre uma GUI para seleção de kit.
-    2.  O `DuelManager` registra o desafio e notifica o alvo.
-    3.  Se aceito, o `DuelManager` encontra uma `DuelArena` livre ou coloca os jogadores na fila.
-    4.  Uma nova instância de `DuelGame` é criada, que teleporta os jogadores, aplica o kit, inicia a contagem regressiva e gerencia o combate.
-    5.  Ao final, o `DuelGame` calcula o novo ELO, restaura o estado dos jogadores (incluindo localização original) e os teleporta de volta, registrando o resultado.
-    6.  O sistema também inclui modo espectador (`/duelo assistir`) e recompensas semanais para o Top 3 do ranking.
+### 3.10. Sistema de Pets
+*   **Descrição:** Um sistema que permite aos jogadores terem um companheiro animal que os segue, ajuda em combate, sobe de nível e possui habilidades únicas.
+*   **Estrutura:** `pet/Pet.java` (abstrata), `pet/PetData.java`, `pet/PetManager.java` e classes específicas para cada tipo de pet (ex: `WolfPet.java`).
+*   **Dados:** Os dados de cada pet (tipo, nome, nível, XP, felicidade) são salvos na seção `pet-data` do arquivo de dados do jogador.
+*   **Funcionalidades Implementadas (Fase 1):**
+    *   **Aquisição:** Requer ranque `ESCOTEIRO` e um custo em Totens. A compra é feita via GUI (`/scout pet loja`).
+    *   **Comandos:** `/scout pet invocar`, `liberar`, `nome`, `info`, `alimentar`.
+    *   **GUI da Loja:** Interface gráfica que exibe todos os pets planejados (disponíveis, "Em Breve" e "VIPs") usando cabeças customizadas.
+    *   **GUI de Interação:** Ao clicar com o botão direito no pet, um menu é aberto com opções (Guardar, Mudar Nome, Habilidade Especial).
+    *   **Sistema de Níveis e XP:** Pets ganham XP ao derrotar monstros e sobem de nível, melhorando seus atributos.
+    *   **Sistema de Felicidade:** A felicidade do pet decai com o tempo e pode ser restaurada com o comando `/scout pet alimentar`. Baixa felicidade reduz a velocidade do pet.
+    *   **Pets Implementados e Habilidades:**
+        *   **Lobo:** Foco em combate, ataca alvos do jogador e defende o jogador.
+        *   **Gato:** Habilidade de "Alerta Felino", emitindo sons e partículas quando monstros estão próximos.
+        *   **Porco:** Habilidade de "Faro Fino", coletando itens caídos no chão.
+        *   **Papagaio:** Pode sentar no ombro do jogador e concede uma habilidade de "super zoom" ao se agachar.
 
 ---
 
 ## 4. Sistemas Futuros e em Desenvolvimento
 
-### 4.1. Sistema de Pets (EM FOCO)
-*   **Descrição:** Um sistema que permite aos jogadores terem um companheiro animal que os segue, ajuda em combate e sobe de nível.
-*   **Filosofia:** Será desenvolvido internamente, sem depender de plugins como `MyPet`.
-*   **Funcionalidades Planejadas:**
-    *   **Comando de Invocação:** `/pet invocar <tipo>` (ex: `gato`, `lobo`).
-    *   **Inteligência Artificial Customizada:** O pet seguirá o dono, defenderá contra ataques e atacará os alvos do jogador.
-    *   **Persistência:** Os dados do pet (tipo, nome, nível, XP) serão salvos no arquivo de dados do jogador.
-    *   **Sistema de Níveis:** O pet ganhará XP ao ajudar em combate, aumentando sua vida e dano ao subir de nível.
+### 4.1. Sistema de Duelos 1v1 (EM FOCO)
+> **[NOTA]** A base deste sistema está pronta (armazenamento de estatísticas, integração com HUD e placar, registro de comandos), mas a **lógica de jogo ainda não foi implementada**.
+
+*   **Descrição:** Um sistema de combate justo e competitivo.
+*   **Estrutura:** `duels/DuelManager.java`, `duels/DuelArena.java`, `duels/DuelGame.java`, `duels/DuelKit.java`.
+*   **Dados:** Novos arquivos `duel_arenas.yml` e `duel_kits.yml`. As estatísticas (vitórias, derrotas, ELO) são salvas no arquivo de dados de cada jogador.
+*   **Lógica a ser Implementada:**
+    1.  **`DuelManager`**: Gerenciamento de desafios, filas e arenas.
+    2.  **`DuelGame`**: Controle do ciclo de vida de uma partida (contagem, luta, fim).
+    3.  **`DuelArena` e `DuelKit`**: Carregamento das configurações dos arquivos `.yml`.
+    4.  **Cálculo de ELO:** Implementação da fórmula para ganho/perda de pontos.
+    5.  **Modo Espectador e Recompensas:** Funcionalidades de assistir a duelos e prêmios semanais.
 
 ### 4.2. Sistema de Clãs
 *   **Descrição:** Permitirá que jogadores se organizem em grupos formais.
@@ -255,10 +261,6 @@ MCTrilhas/
 *   **Integração:**
     *   **Multiverse:** Para criar e gerenciar o mundo "Vale dos Pioneiros".
     *   **WorldGuard:** Para criar e gerenciar as regiões protegidas de cada terreno.
-    *   **BlueMap:** Para adicionar marcadores 3D customizados no mapa web, indicando a localização e o dono de cada terreno/base.
-
-### 4.5. Painel de Administração (Web)
-*   **Descrição:** Uma expansão da API Web para criar um painel de gerenciamento completo para administradores, usando o template AdminLTE. O sistema de login, sessão JWT e um dashboard básico com a lista de jogadores online já foram implementados.
 *   **Estrutura:**
     *   Arquivos na pasta `resources/web/admin/`.
     *   Novos endpoints na classe `HttpApiManager` para lidar com autenticação e requisições de dados/ações.
@@ -284,14 +286,6 @@ MCTrilhas/
 | `/tesouro <subcomando>` | `TreasureHuntCommand` | Gerencia a participação na Caça ao Tesouro. |
 | `/duelo <subcomando>` | `DuelCommand` | (Em desenvolvimento) Gerencia os desafios e a participação em duelos. |
 
-#### Detalhes do `/scout getmap`
-*   **Fluxo de Trabalho:**
-    1.  Verifica se o jogador que executou o comando já conquistou a insígnia especificada.
-    2.  Verifica se a insígnia em questão possui uma recompensa do tipo `reward-map` no `config.yml`.
-    3.  Verifica se o jogador já possui uma cópia do mapa-troféu em seu inventário para evitar duplicação.
-    4.  Se todas as condições forem atendidas e o jogador não tiver o mapa, o `MapRewardManager` é chamado para criar e entregar uma nova cópia do troféu.
-*   **Autocompletar Inteligente:** O comando sugere apenas as insígnias que o jogador já conquistou e que possuem um mapa-troféu associado.
-
 
 ### 5.2. Comandos Planejados
 | Comando | Descrição |
@@ -307,11 +301,6 @@ MCTrilhas/
 *   **`config.yml`:**
     *   **Propósito:** Arquivo de configuração central. Define todas as insígnias, requisitos, recompensas, mensagens e configurações globais do plugin.
     *   **Localização:** `plugins/MCTrilhas/config.yml`
-
-*   **`duel_arenas.yml`:**
-    *   **Propósito:** Armazenará a configuração de todas as arenas de duelo.
-    *   **Conteúdo:** Coordenadas de spawn, mundo e outras propriedades da arena.
-    *   **Localização:** `plugins/MCTrilhas/duel_arenas.yml`
 
 *   **`playerdata/`:**
     *   **Propósito:** Armazena os dados individuais de cada jogador em um arquivo YAML separado, nomeado com o UUID do jogador.

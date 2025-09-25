@@ -1,8 +1,14 @@
 # Resumo do Projeto e Próximos Passos (TODO Gemini)
 
-**Data:** 21-09-2025 (Revisão Concluída)
+**Data:** 22-09-2025 (Revisão Concluída)
 
 Este documento serve como um resumo completo do estado do projeto MCTrilhas, suas tecnologias, histórico de desenvolvimento e o roadmap de funcionalidades futuras. Ele foi criado para servir como um lembrete para nós quando retomarmos o projeto.
+
+---
+
+## 0. Nota para Gemini
+
+> **Lembre-se:** Todas as respostas e interações devem ser em **Português do Brasil (PT-BR)**. O projeto já possui um workflow de CI (`build.yml`) que verifica erros de compilação automaticamente a cada `push`, então não é necessário se preocupar com a verificação manual de erros de compilação, a menos que seja solicitado.
 
 ---
 
@@ -81,6 +87,11 @@ Revisão das principais funcionalidades implementadas e decisões tomadas:
     *   Corrigimos o bug do "token fantasma" no comando `/familia token`, garantindo o salvamento imediato.
 9.  **Melhorias em Placeholders:**
     *   Adicionamos o placeholder `%mctrilhas_rank_formatted%` para exibir o nome do ranque com a capitalização correta (ex: `Escoteiro`).
+10. **Sistema de Pets (Base):**
+    *   Implementamos a base do sistema, incluindo as classes `Pet`, `PetData`, e o `PetManager`.
+    *   Criamos os primeiros pets (Lobo, Gato, Porco, Papagaio) com suas habilidades básicas e sistema de XP/nível.
+    *   A GUI da loja foi implementada, mostrando todos os pets planejados (disponíveis, em breve e VIPs) com cabeças customizadas.
+    *   O sistema de felicidade, alimentação e o menu de interação ao clicar no pet também foram concluídos.
     *   Adicionamos placeholders de posição no ranking (ex: `%mctrilhas_rank_pos_daily%`) para mostrar a colocação do jogador.
     *   Adicionamos o placeholder `%mctrilhas_rank_progress%` para mostrar o requisito mais próximo para o próximo ranque.
 10. **HUD de Estatísticas:**
@@ -99,18 +110,18 @@ Revisão das principais funcionalidades implementadas e decisões tomadas:
 
 Este é o plano de longo prazo para as próximas grandes funcionalidades, conforme discutido e documentado em `docs/DOCUMENTACAO_TECNICA.md`.
 
-*   ### 🎯 EM FOCO: Sistema de Duelos 1v1
-    *   **Descrição:** Um sistema de combate justo e competitivo em arenas designadas.
+*   ### 🎯 EM FOCO: Sistema de Duelos 1v1 (Implementação da Lógica)
+    *   **Estado Atual:** A base está pronta. Já temos o armazenamento de estatísticas (ELO, vitórias), a integração com a HUD e o placar, e os comandos registrados.
+    *   **O que Falta:** Implementar a lógica de jogo.
     *   **Funcionalidades Planejadas:**
-        *   Sistema de desafios diretos (`/duelo desafiar <jogador>`).
-        *   Arenas configuráveis em `duel_arenas.yml`.
-        *   Kits de equipamento padronizados e selecionáveis (`duel_kits.yml`).
-        *   Contagem regressiva e gerenciamento completo da partida.
-        *   Estatísticas de Vitórias/Derrotas e um sistema de ranking (ELO).
-        *   Modo Espectador (`/duelo assistir <jogador>`).
-        *   Recompensas semanais para o Top 3 do ranking ELO.
+        *   **`DuelManager`**: Classe para gerenciar desafios, filas e arenas.
+        *   **`DuelGame`**: Classe para controlar o ciclo de vida de uma partida (contagem, luta, fim).
+        *   **`DuelArena` e `DuelKit`**: Classes para representar arenas e kits carregados dos arquivos de configuração.
+        *   **Arquivos de Configuração:** Criar `duel_arenas.yml` e `duel_kits.yml`.
+        *   **Lógica de ELO:** Implementar o cálculo de ganho/perda de ELO após cada partida.
+        *   **Modo Espectador e Recompensas:** Adicionar a funcionalidade de assistir a duelos e o sistema de prêmios semanais.
 
-*   ### 🐾 EM SEGUIDA: Sistema de Pets
+*   ### 🐾 CONCLUÍDO (FASE 1): Sistema de Pets
     *   **Descrição:** Um sistema que permite aos jogadores terem um companheiro animal que os segue, ajuda em combate e sobe de nível.
     *   **Filosofia:** Será desenvolvido internamente, sem depender de plugins como `MyPet`.
     *   **Funcionalidades Planejadas (Detalhado):**
@@ -120,14 +131,14 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
         *   **GUI de Compra:** Uma interface gráfica para adquirir novos tipos de pets.
         *   **Sistema de Níveis:** Pets ganharão XP e subirão de nível, com um limite máximo de evolução.
         *   **Habilidades Únicas por Tipo:**
-            *   **Lobo:** Foco em combate, com dano que escala com o nível.
-            *   **Gato:** Habilidade de "alerta", localizando monstros próximos.
-            *   **Porco:** Habilidade de utilidade, coletando itens do chão para o dono.
-        *   **Outros Pets Planejados:**
+            *   **Lobo:** Foco em combate. (Concluído)
+            *   **Gato:** Habilidade de "alerta". (Concluído)
+            *   **Porco:** Habilidade de coletar itens. (Concluído)
+            *   **Papagaio:** Senta no ombro e melhora o zoom. (Concluído)
+        *   **Próximos Pets (Fase 2):**
             *   **Perfeitos:** Papagaio, Allay, Ovelha, Vaca, Galinha, Tatu.
             *   **Possíveis (com desafios):** Urso Polar, Aranha, Tartaruga, Abelha.
         *   **Skins:** Variantes aleatórias (cor da coleira do lobo, tipo do gato) e, futuramente, skins totalmente customizadas via Resource Pack.
-        *   **Comandos de Admin:** Ferramentas para gerenciar os pets dos jogadores (resetar, modificar, etc.).
         *   **Persistência:** Todos os dados (tipo, nome, nível, XP) serão salvos no arquivo do jogador.
         *   **Nota Especial:** Criar uma gata preta, item único e super OP para o Admin. 😼
 

@@ -44,7 +44,7 @@ public class PetSummonSubCommand implements SubCommand {
         }
         if (args.length < 1) {
             sender.sendMessage(ChatColor.RED + "Uso: " + getSyntax());
-            sender.sendMessage(ChatColor.GRAY + "Tipos disponíveis: lobo, gato, porco");
+            sender.sendMessage(ChatColor.GRAY + "Tipos disponíveis: lobo, gato, porco, papagaio");
             return;
         }
 
@@ -57,7 +57,7 @@ public class PetSummonSubCommand implements SubCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
         if (args.length == 1) {
-            return Stream.of("lobo", "gato", "porco").filter(s -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
+            return Stream.of("lobo", "gato", "porco", "papagaio").filter(s -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
         }
         return List.of();
     }

@@ -1,17 +1,19 @@
 # ⚜️ MCTrilhas ⚜️
 
 <p align="center">
-  <a href="https://github.com/magnocat/MCTrilhas/actions/workflows/build.yml" title="Build Status">
-    <img src="https://img.shields.io/github/actions/workflow/status/magnocat/MCTrilhas/build.yml?branch=main&style=for-the-badge&logo=github" alt="Build Status">
+  <a href="https://github.com/magnocat/MCTrilhas/actions/workflows/build.yml" title="Status do Build">
+    <img src="https://img.shields.io/github/actions/workflow/status/magnocat/MCTrilhas/build.yml?branch=main&style=flat-square&logo=github" alt="Status do Build">
   </a>
-  <a href="https://github.com/magnocat/MCTrilhas/releases" title="Latest Release">
-    <img src="https://img.shields.io/github/v/release/magnocat/MCTrilhas?style=for-the-badge&label=Versão" alt="Versão do Release">
+  <a href="https://github.com/magnocat/MCTrilhas/releases" title="Última Versão">
+    <img src="https://img.shields.io/github/v/release/magnocat/MCTrilhas?style=flat-square&label=Vers%C3%A3o&color=green" alt="Última Versão">
+  </a>
+  <a href="https://github.com/magnocat/MCTrilhas/graphs/commit-activity" title="Último Commit">
+    <img src="https://img.shields.io/github/last-commit/magnocat/MCTrilhas?style=flat-square&label=Último%20Commit" alt="Último Commit">
   </a>
 </p>
 <p align="center">
-  <img src="https://img.shields.io/badge/Java-17-orange?style=for-the-badge&logo=openjdk" alt="Java 17" />
-  <img src="https://img.shields.io/badge/Paper-API-lightgrey?style=for-the-badge&logo=papermc" alt="Paper API" />
-  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript" />
+  <img src="https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=openjdk" alt="Java 17" />
+  <img src="https://img.shields.io/badge/Paper%20API-1.20.4-lightgrey?style=flat-square&logo=papermc" alt="Paper API" />
 </p>
 **MCTrilhas** é um plugin customizado para servidores Paper/Spigot com temática escoteira, que implementa um sistema de insígnias, progresso e recompensas para engajar os jogadores.
 
@@ -29,6 +31,8 @@
 
 ## 📖 Sobre o Projeto
 O **MCTrilhas** é um plugin customizado para servidores Minecraft (Paper/Spigot) com temática escoteira. Seu núcleo é um sistema de progresso que recompensa jogadores com insígnias e itens por realizarem atividades no jogo. O projeto também inclui um site (PWA) integrado para exibir estatísticas e informações do servidor.
+
+Para uma visão detalhada da arquitetura e dos sistemas do plugin, consulte nossa [**Documentação Técnica**](docs/DOCUMENTACAO_TECNICA.md).
 
 ## ✨ Funcionalidades
 - **Sistema de Insígnias e Ranques**: Progresso baseado em atividades (mineração, construção, etc.) que recompensa jogadores com insígnias e os promove em um sistema de ranques escoteiros.

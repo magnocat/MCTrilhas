@@ -40,10 +40,6 @@ commands:
     description: Comando principal para o sistema de duelos.
     usage: /<command> <subcomando>
     aliases: [duel]
-  pet:
-    description: Comando principal para o sistema de pets.
-    usage: /<command> <subcomando>
-    aliases: []
 
 permissions:
   mctrilhas.*:

@@ -50,9 +50,13 @@ public class PetInteractionMenu {
 
         // Botões de Ação
         gui.setItem(4, infoItem);
-        gui.setItem(11, createActionButton(Material.BONE, "Alimentar", "Aumenta a felicidade do seu pet.", "feed"));
-        gui.setItem(13, createActionButton(Material.NAME_TAG, "Mudar Nome", "Custa 5.000 Totens para renomear.", "rename"));
-        gui.setItem(15, createActionButton(Material.BARRIER, "Guardar Pet", "Guarda seu pet com segurança.", "release"));
+        gui.setItem(11, createActionButton(Material.NAME_TAG, "Mudar Nome", "Custa 5.000 Totens para renomear.", "rename"));
+        gui.setItem(13, createActionButton(Material.BARRIER, "Guardar Pet", "Guarda seu pet com segurança.", "release"));
+
+        // Botão condicional para o papagaio
+        if (pet instanceof ParrotPet) {
+            gui.setItem(15, createActionButton(Material.FEATHER, "Sentar/Sair do Ombro", "Dá a ordem para o papagaio sentar ou levantar.", "toggle_shoulder"));
+        }
 
         player.openInventory(gui);
     }
