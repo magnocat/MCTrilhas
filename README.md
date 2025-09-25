@@ -7,9 +7,6 @@
   <a href="https://github.com/magnocat/MCTrilhas/releases" title="Última Versão">
     <img src="https://img.shields.io/github/v/release/magnocat/MCTrilhas?style=flat-square&label=Vers%C3%A3o&color=green" alt="Última Versão">
   </a>
-  <a href="https://github.com/magnocat/MCTrilhas/graphs/commit-activity" title="Último Commit">
-    <img src="https://img.shields.io/github/last-commit/magnocat/MCTrilhas?style=flat-square&label=Último%20Commit" alt="Último Commit">
-  </a>
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=openjdk" alt="Java 17" />
