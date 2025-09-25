@@ -215,7 +215,7 @@ public class PlayerDataManager {
             }
         }
 
-        return new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedTreasureGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken);
+        return new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken);
     }
 
     /**

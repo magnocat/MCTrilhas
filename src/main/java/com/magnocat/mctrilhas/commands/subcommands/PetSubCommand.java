@@ -4,6 +4,7 @@ import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.pet.PetSummonSubCommand;
 import com.magnocat.mctrilhas.pet.PetReleaseSubCommand;
 import com.magnocat.mctrilhas.pet.PetShopSubCommand;
+import com.magnocat.mctrilhas.pet.PetInfoSubCommand;
 import com.magnocat.mctrilhas.pet.PetNameSubCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -32,6 +33,7 @@ public class PetSubCommand implements SubCommand {
         subCommands.put("liberar", new PetReleaseSubCommand(plugin));
         subCommands.put("nome", new PetNameSubCommand(plugin));
         subCommands.put("loja", new PetShopSubCommand(plugin));
+        subCommands.put("info", new PetInfoSubCommand(plugin));
     }
 
     @Override

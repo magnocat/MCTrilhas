@@ -3,6 +3,7 @@ package com.magnocat.mctrilhas.hud;
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.duels.PlayerDuelStats;
 import com.magnocat.mctrilhas.data.PlayerData;
+import com.magnocat.mctrilhas.pet.PetData;
 import com.magnocat.mctrilhas.ranks.Rank;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -121,23 +122,42 @@ public class HUDManager {
         PlayerDuelStats duelStats = plugin.getPlayerDataManager().getPlayerDuelStats(player.getUniqueId());
         int elo = (duelStats != null) ? duelStats.getElo() : PlayerDuelStats.DEFAULT_ELO;
 
+        // --- Lógica do Pet ---
+        PetData petData = playerData.getPetData();
+        String petInfo;
+        double petXpProgress = 0.0;
+
+        if (petData != null && petData.isOwned()) {
+            int currentXp = (int) petData.getExperience();
+            int nextLevelXp = petData.getExperienceToNextLevel();
+            petInfo = String.format("%s Lvl %d", petData.getName(), petData.getLevel());
+            if (petData.getLevel() < PetData.MAX_LEVEL && nextLevelXp > 0) {
+                petXpProgress = Math.max(0.0, Math.min(1.0, (double) currentXp / nextLevelXp));
+            } else {
+                petXpProgress = 1.0; // Barra cheia no nível máximo
+            }
+        } else {
+            petInfo = "Nenhum";
+        }
+
         Rank rank = playerData.getRank();
         double balance = (plugin.getEconomy() != null) ? plugin.getEconomy().getBalance(player) : 0;
-        int badges = playerData.getEarnedBadgesMap().size();
 
-        String hudFormat = plugin.getConfig().getString("hud-settings.format", "&bRanque: &e{rank} &8| &bTotens: &e{totems} &8| &bInsígnias: &e{badges}");
+        final String hudFormat = plugin.getConfig().getString("hud-settings.format", "&bRanque: &e{rank} &8| &bELO: &e{elo} &8| &bTotens: &e{totems} &8| &dPet: &e{pet_info}");
 
-        String hudText = hudFormat
+        final String hudText = hudFormat
                 .replace("{rank}", rank.getDisplayName())
                 .replace("{elo}", String.valueOf(elo))
                 .replace("{totems}", String.format("%,.0f", balance))
-                .replace("{badges}", String.valueOf(badges));
+                .replace("{pet_info}", petInfo);
 
+        final double finalPetXpProgress = petXpProgress;
         // Usa runTask para garantir que a modificação da BossBar ocorra na thread principal
         new BukkitRunnable() {
             @Override
             public void run() {
                 bossBar.setTitle(ChatColor.translateAlternateColorCodes('&', hudText));
+                bossBar.setProgress(finalPetXpProgress);
             }
         }.runTask(plugin);
     }

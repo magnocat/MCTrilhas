@@ -48,6 +48,7 @@ import com.magnocat.mctrilhas.listeners.PlayerJoinListener;
 import com.magnocat.mctrilhas.listeners.PlayerQuitListener;
 import com.magnocat.mctrilhas.listeners.TreasureHuntListener;
 import com.magnocat.mctrilhas.ctf.CTFListener;
+import com.magnocat.mctrilhas.pet.PetListener;
 import com.magnocat.mctrilhas.pet.PetManager;
 import com.magnocat.mctrilhas.maps.MapRewardManager;
 import com.magnocat.mctrilhas.menus.BadgeMenu;
@@ -231,7 +232,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new CTFListener(this),
                 new CommandBlockerListener(this),
                 new AdminPrivacyListener(this),
-                new GameChatListener(this)
+                new GameChatListener(this),
+                new PetListener(this)
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));

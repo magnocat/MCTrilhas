@@ -71,7 +71,7 @@ badges:
     required-progress: 50000
     # Lista de materiais ou tags que contam para o progresso.
     tracked-items:
-      - "TAG:STONE_ORE_REPLACEABLES"  # Cobre Stone, Deepslate, Andesite, etc.
+      - "TAG:STONE_ORE_REPLACEABLES" # Cobre Stone, Deepslate, Andesite, etc.
       - "TAG:COAL_ORES"
       - "TAG:IRON_ORES"
       - "TAG:COPPER_ORES"
@@ -106,7 +106,7 @@ badges:
       name: "&6Defumador do Chef"
       lore:
         - "&7Cozinhe seus alimentos duas vezes mais rápido."
-      enchantments: []  # Adicionado para consistência
+      enchantments: [] # Adicionado para consistência
     reward-map:
       image: "maps/cooking_badge.png"
       name: "&6Troféu de {player}: {badgeName}"
@@ -122,7 +122,7 @@ badges:
       name: "&dCaixa do Construtor"
       lore:
         - "&7Para guardar todos os seus materiais."
-      enchantments: []  # Adicionado para consistência
+      enchantments: [] # Adicionado para consistência
     reward-map:
       image: "maps/builder_badge.png"
       name: "&6Troféu de {player}: {badgeName}"
@@ -218,7 +218,7 @@ daily-reward:
     name: "&6Maçã Dourada Diária"
     lore:
       - "&7Um presente por sua dedicação!"
-    enchantments: []  # Sem encantamentos para a maçã
+    enchantments: [] # Sem encantamentos para a maçã
   messages:
     claim-success: "&aVocê coletou sua recompensa diária! Volte amanhã para mais."
     cooldown: "&cVocê já coletou sua recompensa. Tente novamente em &e{time}&c."
@@ -235,20 +235,20 @@ ranks:
   LOBINHO:
     required-playtime-hours: 10
     required-badges: 2
-    required-account-age-days: 30  # 1 mês
+    required-account-age-days: 30 # 1 mês
   ESCOTEIRO:
     required-playtime-hours: 30
     required-badges: 4
-    required-account-age-days: 60  # 2 meses
+    required-account-age-days: 60 # 2 meses
   SENIOR:
     required-playtime-hours: 80
     required-badges: 6
-    required-account-age-days: 90  # 3 meses
+    required-account-age-days: 90 # 3 meses
   PIONEIRO:
     required-playtime-hours: 150
     # Requer todas as 8 insígnias.
     required-badges: 8
-    required-account-age-days: 120  # 4 meses
+    required-account-age-days: 120 # 4 meses
 
 # Seção de configuração para a Caça ao Tesouro do Explorador
 treasure-hunt:
@@ -266,10 +266,10 @@ treasure-hunt:
         - "&7Um fragmento de poder obtido"
         - "&7em suas aventuras."
       enchantments:
-        - "unbreaking:1"  # Apenas para o efeito de brilho
+        - "unbreaking:1" # Apenas para o efeito de brilho
   # O grande prêmio, concedido apenas UMA VEZ após um certo número de conclusões.
   grand-prize:
-    completions-required: 3  # Quantas vezes a caça precisa ser completada.
+    completions-required: 3 # Quantas vezes a caça precisa ser completada.
     reward-item-data:
       material: "COMPASS"
       amount: 1
@@ -308,19 +308,19 @@ ctf-settings:
         material: "LEATHER_BOOTS"
     # Os números representam o "slot" do inventário (0-8 é a hotbar).
     items:
-      '0':
+      "0":
         material: "IRON_SWORD"
         amount: 1
-      '1':
+      "1":
         material: "BOW"
         amount: 1
-      '2':
+      "2":
         material: "GOLDEN_APPLE"
         amount: 2
-      '3':
+      "3":
         material: "COOKED_BEEF"
         amount: 16
-      '8':
+      "8":
         material: "ARROW"
         amount: 32
 
@@ -354,10 +354,9 @@ duel-settings:
     broadcast-message: "&6&l[DUELOS] &e{player} &7ficou em &e{position}º &7no ranking ELO e recebeu &b{reward} Totens&7!"
     # Recompensas para o Top 3.
     rewards:
-      '1': 300  # Recompensa para o 1º lugar
-      '2': 200  # Recompensa para o 2º lugar
-      '3': 150  # Recompensa para o 3º lugar
-
+      "1": 300 # Recompensa para o 1º lugar
+      "2": 200 # Recompensa para o 2º lugar
+      "3": 150 # Recompensa para o 3º lugar
 
 # Configurações Gerais do Servidor
 server-settings:
@@ -452,7 +451,7 @@ hud-settings:
   # Intervalo de atualização em ticks (20 ticks = 1 segundo). 40 ticks = 2 segundos.
   update-interval-ticks: 40
   # Formato do texto. Placeholders: {rank}, {totems}, {badges}
-  format: "&bRanque: &e{rank} &8| &bELO: &e{elo} &8| &bTotens: &e{totems} &8| &bInsígnias: &e{badges}"
+  format: "&bRanque: &e{rank} &8| &bELO: &e{elo} &8| &bTotens: &e{totems} &8| &dPet: &e{pet_info}"
   messages:
     enabled: "&aHUD de estatísticas ativado."
     disabled: "&aHUD de estatísticas desativado."

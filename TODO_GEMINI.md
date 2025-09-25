@@ -123,6 +123,9 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
             *   **Lobo:** Foco em combate, com dano que escala com o nível.
             *   **Gato:** Habilidade de "alerta", localizando monstros próximos.
             *   **Porco:** Habilidade de utilidade, coletando itens do chão para o dono.
+        *   **Outros Pets Planejados:**
+            *   **Perfeitos:** Papagaio, Allay, Ovelha, Vaca, Galinha, Tatu.
+            *   **Possíveis (com desafios):** Urso Polar, Aranha, Tartaruga, Abelha.
         *   **Skins:** Variantes aleatórias (cor da coleira do lobo, tipo do gato) e, futuramente, skins totalmente customizadas via Resource Pack.
         *   **Comandos de Admin:** Ferramentas para gerenciar os pets dos jogadores (resetar, modificar, etc.).
         *   **Persistência:** Todos os dados (tipo, nome, nível, XP) serão salvos no arquivo do jogador.

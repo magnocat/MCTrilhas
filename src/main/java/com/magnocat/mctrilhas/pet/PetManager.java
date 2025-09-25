@@ -192,7 +192,7 @@ public class PetManager implements Listener {
         // Se o pet estiver ativo, atualiza o nome da entidade em tempo real
         Pet activePet = activePets.get(player.getUniqueId());
         if (activePet != null && activePet.getEntity() != null) {
-            activePet.getEntity().setCustomName(ChatColor.translateAlternateColorCodes('&', newName));
+            activePet.getEntity().setCustomName(activePet.getFormattedName());
         }
     }
 
@@ -225,16 +225,64 @@ public class PetManager implements Listener {
     }
 
     /**
+     * Concede experiência ao pet de um jogador e verifica se ele subiu de nível.
+     * @param owner O dono do pet.
+     * @param amount A quantidade de experiência a ser concedida.
+     */
+    public void grantExperience(Player owner, double amount) {
+        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(owner.getUniqueId());
+        if (playerData == null || playerData.getPetData() == null) return;
+
+        PetData petData = playerData.getPetData();
+        if (petData.getLevel() >= PetData.MAX_LEVEL) return; // Não ganha mais XP no nível máximo.
+
+        petData.setExperience(petData.getExperience() + amount);
+        owner.sendMessage(ChatColor.DARK_AQUA + "+ " + (int)amount + " XP para seu pet!");
+
+        // Verifica se o pet subiu de nível
+        int xpToNextLevel = petData.getExperienceToNextLevel();
+        if (petData.getExperience() >= xpToNextLevel) {
+            levelUp(owner, petData);
+        }
+    }
+
+    /**
+     * Processa o level up de um pet.
+     * @param owner O dono do pet.
+     * @param petData Os dados do pet.
+     */
+    private void levelUp(Player owner, PetData petData) {
+        petData.setLevel(petData.getLevel() + 1);
+        petData.setExperience(petData.getExperience() - petData.getExperienceToNextLevel()); // Mantém o XP excedente
+
+        owner.sendMessage(ChatColor.GOLD + "Parabéns! Seu pet subiu para o nível " + petData.getLevel() + "!");
+
+        // Aplica os novos atributos ao pet se ele estiver ativo
+        Pet activePet = activePets.get(owner.getUniqueId());
+        if (activePet != null) {
+            activePet.onLevelUp();
+        }
+    }
+
+    public boolean hasActivePet(Player player) {
+        return activePets.containsKey(player.getUniqueId());
+    }
+
+    public Pet getActivePet(Player player) {
+        return activePets.get(player.getUniqueId());
+    }
+
+    /**
      * Cria a instância correta do pet com base no tipo.
      */
     private Pet createPetInstance(Player owner, PetData petData) {
         switch (petData.getType().toLowerCase()) {
             case "lobo":
-                return new WolfPet(owner, petData);
-            // case "gato":
-            //     return new CatPet(owner, petData); // Futuro
-            // case "porco":
-            //     return new PigPet(owner, petData); // Futuro
+                return new WolfPet(owner, petData, plugin);
+            case "porco":
+                return new PigPet(owner, petData, plugin);
+            case "gato":
+                return new CatPet(owner, petData, plugin);
             default:
                 return null;
         }

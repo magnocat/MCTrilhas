@@ -86,6 +86,7 @@ permissions:
       mctrilhas.pet.name: true
       mctrilhas.admin.pet: true
       mctrilhas.pet.shop: true
+      mctrilhas.pet.info: true
       mctrilhas.admin.pet.reset: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
@@ -194,6 +195,9 @@ permissions:
     default: true
   mctrilhas.pet.shop:
     description: Permite abrir a loja para adquirir um pet.
+    default: true
+  mctrilhas.pet.info:
+    description: Permite ver as estatísticas do seu pet.
     default: true
   mctrilhas.admin.pet:
     description: Permite acesso aos comandos de administração de pets.

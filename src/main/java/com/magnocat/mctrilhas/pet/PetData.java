@@ -7,6 +7,8 @@ import org.bukkit.configuration.ConfigurationSection;
  */
 public class PetData {
 
+    public static final int MAX_LEVEL = 50;
+
     private String type;
     private String name;
     private int level;
@@ -38,6 +40,14 @@ public class PetData {
     public void setExperience(double experience) { this.experience = experience; }
     public void setHasCustomName(boolean hasCustomName) { this.hasCustomName = hasCustomName; }
     public void setOwned(boolean owned) { isOwned = owned; }
+
+    /**
+     * Calcula a quantidade de experiência necessária para o próximo nível.
+     * @return A experiência necessária.
+     */
+    public int getExperienceToNextLevel() {
+        return 100 * level;
+    }
 
     /**
      * Cria um objeto PetData a partir de uma seção de configuração.
