@@ -125,6 +125,7 @@ public class HUDManager {
         // --- Lógica do Pet ---
         PetData petData = playerData.getPetData();
         String petInfo;
+        String petHappinessInfo;
         double petXpProgress = 0.0;
 
         if (petData != null && petData.isOwned()) {
@@ -136,20 +137,23 @@ public class HUDManager {
             } else {
                 petXpProgress = 1.0; // Barra cheia no nível máximo
             }
+            petHappinessInfo = String.format("%.0f%%", petData.getHappiness());
         } else {
             petInfo = "Nenhum";
+            petHappinessInfo = "N/A";
         }
 
         Rank rank = playerData.getRank();
         double balance = (plugin.getEconomy() != null) ? plugin.getEconomy().getBalance(player) : 0;
 
-        final String hudFormat = plugin.getConfig().getString("hud-settings.format", "&bRanque: &e{rank} &8| &bELO: &e{elo} &8| &bTotens: &e{totems} &8| &dPet: &e{pet_info}");
+        final String hudFormat = plugin.getConfig().getString("hud-settings.format", "&bRanque: &e{rank} &8| &bELO: &e{elo} &8| &bTotens: &e{totems} &8| &dPet: &e{pet_info} &7- &dFelicidade: &e{pet_felicidade}");
 
         final String hudText = hudFormat
                 .replace("{rank}", rank.getDisplayName())
                 .replace("{elo}", String.valueOf(elo))
                 .replace("{totems}", String.format("%,.0f", balance))
-                .replace("{pet_info}", petInfo);
+                .replace("{pet_info}", petInfo)
+                .replace("{pet_felicidade}", petHappinessInfo);
 
         final double finalPetXpProgress = petXpProgress;
         // Usa runTask para garantir que a modificação da BossBar ocorra na thread principal

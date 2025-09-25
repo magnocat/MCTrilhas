@@ -7,15 +7,18 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.NamespacedKey;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.persistence.PersistentDataType;
 
 /**
@@ -30,6 +33,7 @@ public class PetManager implements Listener {
     public PetManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        startHappinessDecayTask();
     }
 
     /**
@@ -118,7 +122,7 @@ public class PetManager implements Listener {
 
         // 4. Cria ou atualiza os dados do pet
         if (petData == null) {
-            petData = new PetData(petType, petType, 1, 0, false, true);
+            petData = new PetData(petType, petType, 1, 0, false, true, 100.0);
             playerData.setPetData(petData);
         } else {
             petData.setOwned(true);
@@ -196,9 +200,55 @@ public class PetManager implements Listener {
         }
     }
 
+    /**
+     * Alimenta o pet ativo de um jogador.
+     * @param player O jogador que está alimentando o pet.
+     */
+    public void feedPet(Player player) {
+        Pet activePet = activePets.get(player.getUniqueId());
+        if (activePet == null) {
+            player.sendMessage(ChatColor.RED + "Você precisa ter seu pet invocado para alimentá-lo.");
+            return;
+        }
+
+        PetData petData = activePet.petData;
+        Material requiredFood = getFoodForPet(petData.getType());
+
+        if (requiredFood == null) {
+            player.sendMessage(ChatColor.GRAY + "Este tipo de pet não parece comer nada especial.");
+            return;
+        }
+
+        ItemStack itemInHand = player.getInventory().getItemInMainHand();
+        if (itemInHand.getType() != requiredFood) {
+            player.sendMessage(ChatColor.RED + "Você precisa estar segurando " + requiredFood.name().toLowerCase().replace('_', ' ') + " para alimentar seu " + petData.getType() + ".");
+            return;
+        }
+
+        if (petData.getHappiness() >= 100) {
+            player.sendMessage(ChatColor.GREEN + "Seu pet já está perfeitamente feliz!");
+            return;
+        }
+
+        itemInHand.setAmount(itemInHand.getAmount() - 1);
+        petData.setHappiness(petData.getHappiness() + 25); // Increase happiness by 25
+
+        player.sendMessage(ChatColor.GREEN + "Você alimentou seu pet! A felicidade dele aumentou.");
+        activePet.showAffection();
+    }
+
+    private Material getFoodForPet(String petType) {
+        switch (petType.toLowerCase()) {
+            case "lobo": return Material.BONE;
+            case "gato": return Material.COD;
+            case "porco": return Material.CARROT;
+            default: return null;
+        }
+    }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!event.getView().getTitle().equals(PetShopMenu.INVENTORY_TITLE)) {
+        if (!event.getView().getTitle().equals(PetShopMenu.INVENTORY_TITLE)) { // Este é o listener da LOJA
             return;
         }
 
@@ -272,6 +322,15 @@ public class PetManager implements Listener {
         return activePets.get(player.getUniqueId());
     }
 
+    public Pet getPetByEntity(org.bukkit.entity.Entity entity) {
+        for (Pet pet : activePets.values()) {
+            if (pet.getEntity().equals(entity)) {
+                return pet;
+            }
+        }
+        return null;
+    }
+
     /**
      * Cria a instância correta do pet com base no tipo.
      */
@@ -296,5 +355,26 @@ public class PetManager implements Listener {
         if (pet != null) {
             pet.despawn();
         }
+    }
+
+    /**
+     * Inicia uma tarefa que diminui periodicamente a felicidade de todos os pets ativos.
+     */
+    private void startHappinessDecayTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (activePets.isEmpty()) return;
+
+                for (Pet pet : activePets.values()) {
+                    PetData data = pet.petData;
+                    // Decrease happiness by a small amount, but not below 20 from natural decay.
+                    if (data.getHappiness() > 20) {
+                        data.setHappiness(data.getHappiness() - 0.5);
+                        pet.updateSpeed(); // Atualiza a velocidade com base na nova felicidade
+                    }
+                }
+            }
+        }.runTaskTimerAsynchronously(plugin, 20L * 60, 20L * 60); // Every minute
     }
 }

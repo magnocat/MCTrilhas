@@ -58,6 +58,7 @@ public class PetInfoSubCommand implements SubCommand {
         sender.sendMessage(ChatColor.GOLD + "--- Estatísticas de " + petData.getName() + " ---");
         sender.sendMessage(ChatColor.AQUA + "Tipo: " + ChatColor.WHITE + petData.getType());
         sender.sendMessage(ChatColor.AQUA + "Nível: " + ChatColor.WHITE + petData.getLevel());
+        sender.sendMessage(ChatColor.AQUA + "Felicidade: " + ChatColor.WHITE + String.format("%.0f%%", petData.getHappiness()));
 
         if (petData.getLevel() < PetData.MAX_LEVEL) {
             sender.sendMessage(ChatColor.AQUA + "XP: " + ChatColor.WHITE + currentXp + " / " + nextLevelXp);

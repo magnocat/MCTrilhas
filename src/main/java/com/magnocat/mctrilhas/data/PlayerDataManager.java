@@ -266,6 +266,7 @@ public class PlayerDataManager {
             config.set("pet-data.experience", petData.getExperience());
             config.set("pet-data.has-custom-name", petData.hasCustomName());
             config.set("pet-data.is-owned", petData.isOwned());
+            config.set("pet-data.happiness", petData.getHappiness());
         }
 
         config.set("web-access-token", playerData.getWebAccessToken());

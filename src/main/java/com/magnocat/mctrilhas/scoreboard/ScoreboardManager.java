@@ -82,7 +82,7 @@ public class ScoreboardManager implements Listener {
                     }
                 }
             }
-        }.runTaskTimerAsynchronously(plugin, 0L, 20L * 5); // Atualiza a cada 5 segundos
+        }.runTaskTimer(plugin, 0L, 20L * 5); // Atualiza a cada 5 segundos
     }
 
     private void updateScoreboard(Player player) {

@@ -15,14 +15,16 @@ public class PetData {
     private double experience;
     private boolean hasCustomName;
     private boolean isOwned; // Novo campo para indicar se o pet foi adquirido
+    private double happiness;
 
-    public PetData(String type, String name, int level, double experience, boolean hasCustomName, boolean isOwned) {
+    public PetData(String type, String name, int level, double experience, boolean hasCustomName, boolean isOwned, double happiness) {
         this.type = type;
         this.name = name;
         this.level = level;
         this.experience = experience;
         this.hasCustomName = hasCustomName;
         this.isOwned = isOwned;
+        this.happiness = happiness;
     }
 
     // Getters
@@ -32,6 +34,7 @@ public class PetData {
     public double getExperience() { return experience; }
     public boolean hasCustomName() { return hasCustomName; }
     public boolean isOwned() { return isOwned; }
+    public double getHappiness() { return happiness; }
 
     // Setters
     public void setType(String type) { this.type = type; }
@@ -40,6 +43,7 @@ public class PetData {
     public void setExperience(double experience) { this.experience = experience; }
     public void setHasCustomName(boolean hasCustomName) { this.hasCustomName = hasCustomName; }
     public void setOwned(boolean owned) { isOwned = owned; }
+    public void setHappiness(double happiness) { this.happiness = Math.max(0, Math.min(100, happiness)); }
 
     /**
      * Calcula a quantidade de experiência necessária para o próximo nível.
@@ -65,7 +69,8 @@ public class PetData {
                 section.getInt("level", 1),
                 section.getDouble("experience", 0.0),
                 section.getBoolean("has-custom-name", false),
-                section.getBoolean("is-owned", false)
+                section.getBoolean("is-owned", false),
+                section.getDouble("happiness", 100.0)
         );
     }
 }

@@ -1,6 +1,8 @@
 package com.magnocat.mctrilhas.pet;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -9,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 /**
  * Ouve eventos do jogo relacionados aos pets, como ganho de experiência.
@@ -23,19 +26,22 @@ public class PetListener implements Listener {
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
+        LivingEntity deadEntity = event.getEntity();
+        Player killer = deadEntity.getKiller();
+
         // Verifica se a entidade morta é um monstro e se o assassino é um jogador.
-        if (!(event.getEntity() instanceof Monster) || event.getEntity().getKiller() == null) {
+        if (!(deadEntity instanceof Monster) || killer == null) {
             return;
         }
 
-        Player killer = event.getEntity().getKiller();
         PetManager petManager = plugin.getPetManager();
 
         // Verifica se o jogador tem um pet ativo.
         if (petManager.hasActivePet(killer)) {
-            // Concede uma quantidade fixa de experiência por monstro derrotado.
-            // Isso pode ser expandido para dar XP com base no tipo de monstro.
-            int experienceGained = 15;
+            // A XP ganha é baseada na vida máxima do monstro (mínimo de 5 XP).
+            double maxHealth = deadEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+            int experienceGained = Math.max(5, (int) (maxHealth / 2.0));
+
             petManager.grantExperience(killer, experienceGained);
         }
     }
@@ -86,6 +92,25 @@ public class PetListener implements Listener {
                 // Comanda o pet a atacar o mesmo alvo do dono.
                 petEntity.setTarget(target);
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteractWithPet(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
+        Entity clickedEntity = event.getRightClicked();
+
+        PetManager petManager = plugin.getPetManager();
+        Pet pet = petManager.getPetByEntity(clickedEntity);
+
+        // Verifica se a entidade clicada é um pet e se o jogador é o dono
+        if (pet != null && pet.getOwner().equals(player)) {
+            // Cancela o evento padrão (como fazer o lobo sentar)
+            event.setCancelled(true);
+
+            // Abre o menu de interação
+            PetInteractionMenu menu = new PetInteractionMenu(plugin, pet);
+            menu.open(player);
         }
     }
 }

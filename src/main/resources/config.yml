@@ -451,7 +451,7 @@ hud-settings:
   # Intervalo de atualização em ticks (20 ticks = 1 segundo). 40 ticks = 2 segundos.
   update-interval-ticks: 40
   # Formato do texto. Placeholders: {rank}, {totems}, {badges}
-  format: "&bRanque: &e{rank} &8| &bELO: &e{elo} &8| &bTotens: &e{totems} &8| &dPet: &e{pet_info}"
+  format: "&bRanque: &e{rank} &8| &bELO: &e{elo} &8| &bTotens: &e{totems} &8| &dPet: &e{pet_info} &7- &dFelicidade: &e{pet_felicidade}"
   messages:
     enabled: "&aHUD de estatísticas ativado."
     disabled: "&aHUD de estatísticas desativado."
