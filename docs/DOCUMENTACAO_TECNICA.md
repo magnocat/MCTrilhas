@@ -226,18 +226,6 @@ MCTrilhas/
 
 ### 4.1. Sistema de Duelos 1v1 (EM FOCO)
 > **[NOTA]** A base deste sistema está pronta (armazenamento de estatísticas, integração com HUD e placar, registro de comandos), mas a **lógica de jogo ainda não foi implementada**.
-
-*   **Descrição:** Um sistema de combate justo e competitivo.
-*   **Estrutura:** `duels/DuelManager.java`, `duels/DuelArena.java`, `duels/DuelGame.java`, `duels/DuelKit.java`.
-*   **Dados:** Novos arquivos `duel_arenas.yml` e `duel_kits.yml`. As estatísticas (vitórias, derrotas, ELO) são salvas no arquivo de dados de cada jogador.
-*   **Lógica a ser Implementada:**
-    1.  **`DuelManager`**: Gerenciamento de desafios, filas e arenas.
-    2.  **`DuelGame`**: Controle do ciclo de vida de uma partida (contagem, luta, fim).
-    3.  **`DuelArena` e `DuelKit`**: Carregamento das configurações dos arquivos `.yml`.
-    4.  **Cálculo de ELO:** Implementação da fórmula para ganho/perda de pontos.
-    5.  **Modo Espectador e Recompensas:** Funcionalidades de assistir a duelos e prêmios semanais.
-
-### 4.2. Sistema de Clãs
 *   **Descrição:** Permitirá que jogadores se organizem em grupos formais.
 *   **Estrutura:** `clans/Clan.java`, `clans/ClanManager.java`.
 *   **Dados:** Nova pasta `plugins/MCTrilhas/clans/` com um arquivo `.yml` para cada clã.
@@ -245,7 +233,7 @@ MCTrilhas/
 
 ### 4.3. Sistema de Comunidade e Segurança (Graylist Híbrido)
 *   **Descrição:** Uma abordagem em camadas para proteger o servidor, combinando automação e interação da comunidade.
-*   **Estrutura:** `community/PromotionManager.java`, `listeners/PlayerProtectionListener.java`.
+*   **Estrutura:** `community/PromotionManager.java`, `listeners/PlayerProtectionListener.java`. (Nomes sugeridos)
 *   **Lógica:**
     1.  **Graylist:** O `PlayerProtectionListener` cancela eventos (quebrar blocos, abrir baús) para jogadores com o ranque "Visitante" (a ser criado).
     2.  **Apadrinhamento:** O comando `/apadrinhar <jogador>` verifica se o autor é um membro e se o alvo é um "Visitante". Se sim, promove o alvo e registra o padrinho nos dados do novo membro. Um sistema de penalidades será acionado se o afilhado for banido.

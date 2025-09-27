@@ -1,10 +1,11 @@
-package com.magnocat.mctrilhas.ctf;
+package com.magnocat.mctrilhas.duels;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,16 +13,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class AdminSubCommand implements SubCommand {
+/**
+ * Roteador para os subcomandos de administração de duelos, como /scout admin duel <subcomando>.
+ */
+public class AdminDuelSubCommand implements SubCommand {
 
     private final Map<String, SubCommand> subCommands = new HashMap<>();
 
-    public AdminSubCommand(MCTrilhasPlugin plugin) {
-        registerSubCommand(new CreateCTFAdminSubCommand(plugin));
-        registerSubCommand(new SetCTFAdminSubCommand(plugin));
-        registerSubCommand(new SaveCTFAdminSubCommand(plugin));
-        registerSubCommand(new CancelCTFAdminSubCommand(plugin));
-        registerSubCommand(new StatusCTFAdminSubCommand(plugin));
+    public AdminDuelSubCommand(MCTrilhasPlugin plugin) {
+        // Registra todos os subcomandos de admin de duelo aqui
+        registerSubCommand(new CreateArenaSubCommand(plugin));
+        registerSubCommand(new SetSpawnSubCommand(plugin, 1));
+        registerSubCommand(new SetSpawnSubCommand(plugin, 2));
+        registerSubCommand(new SetSpectatorSubCommand(plugin));
+        registerSubCommand(new SaveArenaSubCommand(plugin));
+        registerSubCommand(new CancelArenaSubCommand(plugin));
+        registerSubCommand(new ReloadKitsSubCommand(plugin)); // Nosso novo comando
     }
 
     private void registerSubCommand(SubCommand subCommand) {
@@ -29,19 +36,24 @@ public class AdminSubCommand implements SubCommand {
     }
 
     @Override
-    public String getName() { return "admin"; }
+    public String getName() {
+        return "duel";
+    }
 
     @Override
-    public String getDescription() { return "Gerencia as arenas de CTF."; }
+    public String getDescription() {
+        return "Gerencia o sistema de duelos.";
+    }
 
     @Override
-    public String getSyntax() { return "/ctf admin <create|set|save|cancel|status>"; }
+    public String getSyntax() {
+        return "/scout admin duel <subcomando>";
+    }
 
     @Override
-    public String getPermission() { return "mctrilhas.ctf.admin"; }
-
-    @Override
-    public boolean isAdminCommand() { return true; }
+    public String getPermission() {
+        return "mctrilhas.scout.admin";
+    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -54,7 +66,7 @@ public class AdminSubCommand implements SubCommand {
         SubCommand subCommand = subCommands.get(subCommandName);
 
         if (subCommand == null) {
-            sender.sendMessage(ChatColor.RED + "Subcomando de admin do CTF desconhecido: " + subCommandName);
+            sender.sendMessage(ChatColor.RED + "Subcomando de duelo desconhecido: " + subCommandName);
             return;
         }
 

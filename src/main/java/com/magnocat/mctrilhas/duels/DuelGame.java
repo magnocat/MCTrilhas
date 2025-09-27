@@ -1,275 +1,311 @@
 package com.magnocat.mctrilhas.duels;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.data.PlayerState;
+import com.magnocat.mctrilhas.data.PlayerData;
+import com.magnocat.mctrilhas.utils.PlayerStateManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.GameMode;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
- * Gerencia uma única partida de duelo entre dois jogadores.
+ * Representa uma única partida de duelo em andamento.
  */
-public class DuelGame implements Listener {
+public class DuelGame {
 
     private final MCTrilhasPlugin plugin;
     private final DuelArena arena;
     private final Player player1;
     private final Player player2;
-    private final DuelManager duelManager;
     private final DuelKit kit;
-    private PlayerState player1State;
-    private PlayerState player2State;
-    private final List<UUID> spectators = new ArrayList<>();
-    private final Map<UUID, PlayerState> spectatorStates = new HashMap<>();
+    private final List<Player> spectators = new ArrayList<>();
+
+    private final PlayerStateManager stateManager;
+    private GameState state = GameState.STARTING;
+    private BukkitTask countdownTask;
     private BukkitTask matchTimerTask;
-
-    private enum GameState {
-        STARTING,
-        FIGHTING,
-        ENDING
-    }
-
-    private GameState gameState;
+    private BossBar timerBossBar;
+    private int remainingTimeSeconds;
 
     public DuelGame(MCTrilhasPlugin plugin, DuelArena arena, Player player1, Player player2, DuelKit kit) {
         this.plugin = plugin;
         this.arena = arena;
         this.player1 = player1;
         this.player2 = player2;
-        this.duelManager = plugin.getDuelManager();
         this.kit = kit;
-        this.gameState = GameState.STARTING;
-
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
-        startCountdown();
+        this.stateManager = new PlayerStateManager();
+        start();
     }
 
-    private void startCountdown() {
-        // Salva o estado atual dos jogadores antes de modificar qualquer coisa.
-        this.player1State = new PlayerState(player1);
-        this.player2State = new PlayerState(player2);
+    private void start() {
+        // 1. Salvar estado dos jogadores
+        stateManager.saveState(player1);
+        stateManager.saveState(player2);
 
-        // Limpa o inventário e aplica o kit de duelo.
+        // 2. Preparar jogadores
+        preparePlayer(player1);
+        preparePlayer(player2);
 
-        kit.apply(player1);
-        kit.apply(player2);
-
+        // 3. Teleportar para a arena
         player1.teleport(arena.getSpawn1());
         player2.teleport(arena.getSpawn2());
 
-        FileConfiguration config = plugin.getConfig();
-        int countdownSeconds = config.getInt("duel-settings.countdown-seconds", 5);
-        String countdownMessage = ChatColor.translateAlternateColorCodes('&', config.getString("duel-settings.messages.countdown", "&aO duelo começa em &e{time}&a..."));
-        String fightMessage = ChatColor.translateAlternateColorCodes('&', config.getString("duel-settings.messages.fight", "&c&lLutem!"));
-        int matchDurationMinutes = config.getInt("duel-settings.match-duration-minutes", 5);
+        // 4. Iniciar contagem regressiva
+        startCountdown();
+    }
 
-        new BukkitRunnable() {
-            int countdown = countdownSeconds;
+    private void preparePlayer(Player player) {
+        player.getInventory().clear();
+        player.getInventory().setArmorContents(null);
+        player.setHealth(player.getMaxHealth());
+        player.setFoodLevel(20);
+        player.setExp(0);
+        player.setLevel(0);
+        player.setGameMode(GameMode.ADVENTURE); // Previne que quebrem a arena
+        player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
+    }
+
+    private void startCountdown() {
+        int countdownSeconds = plugin.getConfig().getInt("duel-settings.countdown-seconds", 5);
+        String countdownMessage = plugin.getConfig().getString("duel-settings.messages.countdown", "&aO duelo começa em &e{time}&a...");
+
+        this.countdownTask = new BukkitRunnable() {
+            private int time = countdownSeconds;
+
             @Override
             public void run() {
-                if (countdown > 0) {
-                    String message = countdownMessage.replace("{time}", String.valueOf(countdown));
-                    player1.sendTitle(message, "", 0, 22, 0);
-                    player2.sendTitle(message, "", 0, 22, 0);
-                    countdown--;
+                if (time > 0) {
+                    String message = ChatColor.translateAlternateColorCodes('&', countdownMessage.replace("{time}", String.valueOf(time)));
+                    player1.sendTitle(message, "", 0, 25, 0);
+                    player2.sendTitle(message, "", 0, 25, 0);
+                    time--;
                 } else {
+                    // A luta começa!
+                    state = GameState.FIGHTING;
+                    String fightMessage = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("duel-settings.messages.fight", "&c&lLutem!"));
                     player1.sendTitle(fightMessage, "", 0, 40, 10);
                     player2.sendTitle(fightMessage, "", 0, 40, 10);
-                    gameState = GameState.FIGHTING;
 
-                    // Inicia o timer da partida, se houver um
-                    if (matchDurationMinutes > 0) {
-                        matchTimerTask = new BukkitRunnable() {
-                            @Override
-                            public void run() {
-                                endAsDraw(config.getString("duel-settings.messages.draw", "&eO tempo acabou! O duelo terminou em empate."), null);
-                            }
-                        }.runTaskLater(plugin, matchDurationMinutes * 60 * 20L);
-                    }
+                    // Aplica o kit e permite o combate
+                    kit.applyTo(player1);
+                    kit.applyTo(player2);
+                    player1.setGameMode(GameMode.SURVIVAL);
+                    player2.setGameMode(GameMode.SURVIVAL);
+
+                    // Inicia o timer da partida, se configurado
+                    startMatchTimer();
+
                     this.cancel();
                 }
             }
         }.runTaskTimer(plugin, 0L, 20L);
     }
 
-    private void endGame(Player winner, Player loser) {
-        if (gameState == GameState.ENDING) return;
-        gameState = GameState.ENDING;
-        cancelMatchTimer();
+    public void end(Player winner, Player loser) {
+        if (state != GameState.FIGHTING) return;
+        state = GameState.ENDING;
 
-        // Registra que houve uma partida de duelo válida (com vencedor) nesta semana.
+        if (matchTimerTask != null) matchTimerTask.cancel();
+        if (countdownTask != null) countdownTask.cancel();
+
+        // Notificações
+        String winMessage = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("duel-settings.messages.win", "&aVocê venceu o duelo contra &e{loser}&a!"));
+        String lossMessage = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("duel-settings.messages.loss", "&cVocê foi derrotado por &e{winner}&c."));
+        String broadcastMessage = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("duel-settings.messages.broadcast-end", "&e{winner} &7venceu o duelo contra &e{loser}&7."));
+
+        winner.sendMessage(winMessage.replace("{loser}", loser.getName()));
+        loser.sendMessage(lossMessage.replace("{winner}", winner.getName()));
+
+        Bukkit.broadcastMessage(broadcastMessage.replace("{winner}", winner.getName()).replace("{loser}", loser.getName()));
+
+        // Lógica de ELO
+        updateElo(winner, loser);
+
+        // Registra que houve uma atividade de duelo para as recompensas semanais
         plugin.getDuelRewardManager().recordDuelActivity();
 
-        // --- LÓGICA DE ELO ---
-        PlayerDuelStats winnerStats = plugin.getPlayerDataManager().getPlayerDuelStats(winner.getUniqueId());
-        PlayerDuelStats loserStats = plugin.getPlayerDataManager().getPlayerDuelStats(loser.getUniqueId());
-
-        int oldWinnerElo = winnerStats.getElo();
-        int oldLoserElo = loserStats.getElo();
-
-        int[] newRatings = EloCalculator.calculateNewRatings(oldWinnerElo, oldLoserElo);
-        winnerStats.setElo(newRatings[0]);
-        loserStats.setElo(newRatings[1]);
-
-        winnerStats.incrementWins();
-        loserStats.incrementLosses();
-
-        plugin.getPlayerDataManager().savePlayerDuelStats(winner.getUniqueId(), winnerStats);
-        plugin.getPlayerDataManager().savePlayerDuelStats(loser.getUniqueId(), loserStats);
-
-        int winnerEloChange = winnerStats.getElo() - oldWinnerElo;
-        int loserEloChange = loserStats.getElo() - oldLoserElo;
-
-        FileConfiguration config = plugin.getConfig();
-        String winMessage = ChatColor.translateAlternateColorCodes('&', config.getString("duel-settings.messages.win", "&aVocê venceu o duelo contra &e{loser}&a!").replace("{loser}", loser.getName()))
-                + String.format(" %s(ELO: %d %s%d)", ChatColor.GRAY, winnerStats.getElo(), (winnerEloChange >= 0 ? ChatColor.GREEN + "+" : ChatColor.RED), winnerEloChange);
-        String lossMessage = ChatColor.translateAlternateColorCodes('&', config.getString("duel-settings.messages.loss", "&cVocê foi derrotado por &e{winner}&c.").replace("{winner}", winner.getName()))
-                + String.format(" %s(ELO: %d %s%d)", ChatColor.GRAY, loserStats.getElo(), (loserEloChange >= 0 ? ChatColor.GREEN + "+" : ChatColor.RED), loserEloChange);
-
-        winner.sendMessage(winMessage);
-        loser.sendMessage(lossMessage);
-
-        cleanupGame();
-    }
-
-    /**
-     * Termina o jogo como um empate, sem registrar vitória ou derrota.
-     * @param reason A razão do empate (ex: tempo esgotado, desistência).
-     * @param forfeiter O jogador que desistiu, ou null se for por tempo.
-     */
-    public void endAsDraw(String reason, Player forfeiter) {
-        if (gameState == GameState.ENDING) return;
-        gameState = GameState.ENDING;
-        cancelMatchTimer();
-
-        String finalReason = ChatColor.translateAlternateColorCodes('&', reason);
-        if (forfeiter != null) {
-            finalReason = finalReason.replace("{player}", forfeiter.getName());
-        }
-
-        if (player1 != null && player1.isOnline()) player1.sendMessage(finalReason);
-        if (player2 != null && player2.isOnline()) player2.sendMessage(finalReason);
-
-        cleanupGame();
-    }
-
-    private void cleanupGame() {
-        // Atraso para o jogador ver a mensagem de morte antes de ser teleportado
+        // Atraso para o jogador poder ver a tela de morte antes de ser teleportado
         new BukkitRunnable() {
             @Override
             public void run() {
-                // Restaura o estado original dos jogadores e os teleporta para o hub central.
-                restorePlayer(player1, player1State);
-                restorePlayer(player2, player2State);
-
-                // Restaura o estado de todos os espectadores e os teleporta para o hub.
-                for (UUID spectatorUUID : new ArrayList<>(spectators)) {
-                    restorePlayer(Bukkit.getPlayer(spectatorUUID), spectatorStates.get(spectatorUUID));
-                }
-
-                duelManager.endDuel(DuelGame.this);
-                HandlerList.unregisterAll(DuelGame.this); // De-registra os listeners deste jogo.
+                cleanup();
             }
         }.runTaskLater(plugin, 60L); // 3 segundos de atraso
     }
 
-    private void restorePlayer(Player player, PlayerState state) {
-        if (player != null && player.isOnline() && state != null) {
-            state.restore(player);
-            // Teleporta o jogador de volta para sua localização original, antes do duelo, conforme solicitado.
-            player.teleport(state.getLocation());
-        }
+    public void endAsDraw(String reason, Player initiator) {
+        if (state == GameState.ENDING) return;
+        state = GameState.ENDING;
+
+        if (matchTimerTask != null) matchTimerTask.cancel();
+        if (countdownTask != null) countdownTask.cancel();
+
+        String formattedReason = ChatColor.translateAlternateColorCodes('&', reason.replace("{player}", initiator.getName()));
+        player1.sendMessage(formattedReason);
+        player2.sendMessage(formattedReason);
+
+        cleanup();
     }
 
+    private void updateElo(Player winner, Player loser) {
+        PlayerData winnerData = plugin.getPlayerDataManager().getPlayerData(winner.getUniqueId());
+        PlayerData loserData = plugin.getPlayerDataManager().getPlayerData(loser.getUniqueId());
 
+        if (winnerData == null || loserData == null) return;
 
-    private void cancelMatchTimer() {
-        if (matchTimerTask != null && !matchTimerTask.isCancelled()) {
-            matchTimerTask.cancel();
+        PlayerDuelStats winnerStats = winnerData.getDuelStats();
+        PlayerDuelStats loserStats = loserData.getDuelStats();
+
+        int eloChange = EloCalculator.calculateEloChange(winnerStats.getElo(), loserStats.getElo());
+
+        winnerStats.incrementWins();
+        winnerStats.addElo(eloChange);
+
+        loserStats.incrementLosses();
+        loserStats.addElo(-eloChange);
+
+        winner.sendMessage(ChatColor.GREEN + "ELO: " + winnerStats.getElo() + " (+" + eloChange + ")");
+        loser.sendMessage(ChatColor.RED + "ELO: " + loserStats.getElo() + " (-" + eloChange + ")");
+
+        // Adiciona a recompensa de 5 Totens para o vencedor
+        if (plugin.getEconomy() != null) {
+            double winReward = 5.0; // Valor fixo como discutido
+            plugin.getEconomy().depositPlayer(winner, winReward);
+            winner.sendMessage(ChatColor.GOLD + "+ " + (int)winReward + " Totens pela vitória!");
+        } else {
+            plugin.logWarn("Vault não encontrado. Recompensa de duelo para " + winner.getName() + " não pôde ser entregue.");
         }
+
+        // Salva os dados
+        plugin.getPlayerDataManager().savePlayerData(winnerData);
+        plugin.getPlayerDataManager().savePlayerData(loserData);
     }
 
-    @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent event) {
-        if (event.getEntity().equals(player1) || event.getEntity().equals(player2)) {
-            Player loser = event.getEntity();
-            Player winner = loser.equals(player1) ? player2 : player1;
-            String broadcastMessage = ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("duel-settings.messages.broadcast-end", "&e{winner} &7venceu o duelo contra &e{loser}&7."))
-                    .replace("{winner}", winner.getName()).replace("{loser}", loser.getName());
-            event.setDeathMessage(broadcastMessage);
-            endGame(winner, loser);
+    private void cleanup() {
+        // Restaura estado dos jogadores
+        stateManager.restoreState(player1);
+        stateManager.restoreState(player2);
+
+        // Restaura a HUD geral para os jogadores, se eles a tinham ativa.
+        plugin.getHudManager().restoreHUD(player1);
+        plugin.getHudManager().restoreHUD(player2);
+
+        // Remove espectadores
+        new ArrayList<>(spectators).forEach(this::removeSpectator);
+
+        // Remove a BossBar do timer
+        if (timerBossBar != null) {
+            timerBossBar.removeAll();
+            timerBossBar = null;
         }
+
+        // Notifica o DuelManager para limpar o jogo
+        plugin.getDuelManager().endDuel(this);
     }
 
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        if (gameState == GameState.ENDING) return;
+    // --- Getters e Métodos de Utilidade ---
+    public boolean isParticipant(Player player) {
+        return player.equals(player1) || player.equals(player2);
+    }
 
-        // Se um dos duelistas desconecta
-        if (event.getPlayer().equals(player1) || event.getPlayer().equals(player2)) {
-            Player loser = event.getPlayer();
-            Player winner = loser.equals(player1) ? player2 : player1;
-            String forfeitMessage = plugin.getConfig().getString("duel-settings.messages.forfeit", "&e{player} &7desistiu do duelo. A partida terminou em empate.");
-            // Um quit é tratado como um empate por desistência.
-            endAsDraw(forfeitMessage, loser);
-            return;
-        }
-
-        // Se um espectador desconecta
-        UUID quitterUUID = event.getPlayer().getUniqueId();
-        if (spectators.contains(quitterUUID)) {
-            spectators.remove(quitterUUID);
-            spectatorStates.remove(quitterUUID);
-            duelManager.removeSpectatorFromMap(quitterUUID);
-        }
+    public Player getOpponent(Player player) {
+        if (player.equals(player1)) return player2;
+        if (player.equals(player2)) return player1;
+        return null;
     }
 
     public void addSpectator(Player spectator) {
-        if (isParticipant(spectator) || spectators.contains(spectator.getUniqueId())) {
+        if (isParticipant(spectator) || spectators.contains(spectator)) {
             spectator.sendMessage(ChatColor.RED + "Você já está envolvido neste duelo.");
             return;
         }
 
-        spectatorStates.put(spectator.getUniqueId(), new PlayerState(spectator));
-        spectators.add(spectator.getUniqueId());
-        duelManager.addSpectatorToMap(spectator.getUniqueId(), this);
+        stateManager.saveState(spectator);
+        spectators.add(spectator);
+        plugin.getDuelManager().addSpectatorToMap(spectator.getUniqueId(), this);
 
         spectator.setGameMode(GameMode.SPECTATOR);
         spectator.teleport(arena.getSpectatorSpawn());
         spectator.sendMessage(ChatColor.GREEN + "Você está assistindo ao duelo entre " + player1.getName() + " e " + player2.getName() + ".");
-        spectator.sendMessage(ChatColor.YELLOW + "Use /duelo sair para parar de assistir.");
+        spectator.sendMessage(ChatColor.GRAY + "Use /duelo sair para parar de assistir.");
     }
 
     public void removeSpectator(Player spectator) {
-        UUID spectatorUUID = spectator.getUniqueId();
-        PlayerState state = spectatorStates.remove(spectatorUUID);
-        if (state != null) {
-            state.restore(spectator);
-            spectators.remove(spectatorUUID);
-            duelManager.removeSpectatorFromMap(spectatorUUID);
-            // Teleporta o espectador de volta para sua localização original, antes de assistir.
-            spectator.teleport(state.getLocation());
-            spectator.sendMessage(ChatColor.YELLOW + "Você parou de assistir ao duelo.");
+        if (!spectators.remove(spectator)) {
+            return; // Não era um espectador deste jogo
         }
+
+        stateManager.restoreState(spectator);
+        plugin.getDuelManager().removeSpectatorFromMap(spectator.getUniqueId());
+
+        spectator.sendMessage(ChatColor.YELLOW + "Você parou de assistir ao duelo.");
+        // O restoreState já lida com o teleporte de volta.
     }
 
-    public boolean isParticipant(Player player) { return player.equals(player1) || player.equals(player2); }
-    public DuelArena getArena() { return arena; }
+    private void startMatchTimer() {
+        int matchDurationMinutes = plugin.getConfig().getInt("duel-settings.match-duration-minutes", 5);
+        if (matchDurationMinutes <= 0) {
+            return; // Timer desativado
+        }
+
+        this.remainingTimeSeconds = matchDurationMinutes * 60;
+        this.timerBossBar = Bukkit.createBossBar("Tempo Restante: " + formatTime(remainingTimeSeconds), BarColor.BLUE, BarStyle.SOLID);
+        this.timerBossBar.addPlayer(player1);
+        this.timerBossBar.addPlayer(player2);
+
+        // Esconde a HUD geral dos jogadores para evitar sobreposição de BossBars.
+        // Ela será restaurada no método cleanup().
+        plugin.getHudManager().hideHUD(player1);
+        plugin.getHudManager().hideHUD(player2);
+
+        this.matchTimerTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (remainingTimeSeconds > 0) {
+                    remainingTimeSeconds--;
+                    timerBossBar.setTitle("Tempo Restante: " + formatTime(remainingTimeSeconds));
+                    timerBossBar.setProgress((double) remainingTimeSeconds / (matchDurationMinutes * 60));
+
+                    // Muda a cor da barra nos últimos segundos para criar tensão
+                    if (remainingTimeSeconds <= 10) {
+                        timerBossBar.setColor(BarColor.RED);
+                    } else if (remainingTimeSeconds <= 30) {
+                        timerBossBar.setColor(BarColor.YELLOW);
+                    }
+                } else {
+                    // O tempo acabou!
+                    String drawMessage = plugin.getConfig().getString("duel-settings.messages.draw", "&eO tempo acabou! O duelo terminou em empate.");
+                    endAsDraw(drawMessage, player1); // O iniciador aqui é irrelevante
+                    this.cancel();
+                }
+            }
+        }.runTaskTimer(plugin, 0L, 20L);
+    }
+
+    private String formatTime(int totalSeconds) {
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
     public Player getPlayer1() { return player1; }
     public Player getPlayer2() { return player2; }
+    public DuelArena getArena() { return arena; }
+    public GameState getState() { return state; }
+
+    public enum GameState {
+        STARTING,
+        FIGHTING,
+        ENDING
+    }
 }

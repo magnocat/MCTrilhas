@@ -29,6 +29,7 @@ import com.magnocat.mctrilhas.ctf.CTFManager;
 import com.magnocat.mctrilhas.ctf.CTFMilestoneManager;
 import com.magnocat.mctrilhas.duels.DuelCommand;
 import com.magnocat.mctrilhas.duels.DuelManager; // Garante que estamos usando o manager correto
+import com.magnocat.mctrilhas.duels.GameListener;
 import com.magnocat.mctrilhas.duels.DuelListener;
 import com.magnocat.mctrilhas.duels.DuelRewardManager;
 import com.magnocat.mctrilhas.listeners.AdminPrivacyListener;
@@ -235,7 +236,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new AdminPrivacyListener(this),
                 new GameChatListener(this),
                 new PetListener(this),
-                new DuelListener(this)
+                new DuelListener(this),
+                new GameListener(this)
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));

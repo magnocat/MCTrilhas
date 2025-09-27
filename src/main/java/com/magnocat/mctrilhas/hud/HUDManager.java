@@ -83,6 +83,29 @@ public class HUDManager {
     }
 
     /**
+     * Esconde temporariamente o HUD de um jogador sem removê-lo da lista de HUDs ativos.
+     * Útil para quando outro sistema precisa usar a BossBar temporariamente.
+     * @param player O jogador cujo HUD será escondido.
+     */
+    public void hideHUD(Player player) {
+        BossBar bossBar = activeHUDs.get(player.getUniqueId());
+        if (bossBar != null) {
+            bossBar.removePlayer(player);
+        }
+    }
+
+    /**
+     * Restaura a visibilidade do HUD para um jogador que o tinha ativo.
+     * @param player O jogador cujo HUD será restaurado.
+     */
+    public void restoreHUD(Player player) {
+        BossBar bossBar = activeHUDs.get(player.getUniqueId());
+        if (bossBar != null && !bossBar.getPlayers().contains(player)) {
+            bossBar.addPlayer(player);
+        }
+    }
+
+    /**
      * Limpa o HUD de um jogador quando ele sai do servidor para evitar memory leaks.
      * @param player O jogador que saiu.
      */

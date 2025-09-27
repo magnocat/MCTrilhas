@@ -502,4 +502,8 @@ public class DuelManager {
     public Optional<DuelArena> findFreeArena() {
         return arenas.values().stream().filter(a -> activeDuels.stream().noneMatch(g -> g.getArena().equals(a))).findFirst();
     }
+
+    public DuelGame getGameForPlayer(UUID uniqueId) {
+        return playerToGameMap.get(uniqueId);
+    }
 }
