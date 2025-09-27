@@ -9,9 +9,6 @@ import org.bukkit.entity.Player;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Implementa o subcomando `/duelo savearena`.
- */
 public class SaveArenaSubCommand implements SubCommand {
 
     private final MCTrilhasPlugin plugin;
@@ -21,19 +18,29 @@ public class SaveArenaSubCommand implements SubCommand {
     }
 
     @Override
-    public String getName() { return "savearena"; }
+    public String getName() {
+        return "save";
+    }
 
     @Override
-    public String getDescription() { return "Salva a arena de duelo em criação."; }
+    public String getDescription() {
+        return "Salva a arena de duelo que está sendo criada.";
+    }
 
     @Override
-    public String getSyntax() { return "/duelo savearena"; }
+    public String getSyntax() {
+        return "/scout admin duel save";
+    }
 
     @Override
-    public String getPermission() { return "mctrilhas.duel.admin"; }
+    public String getPermission() {
+        return "mctrilhas.scout.admin.duel.save";
+    }
 
     @Override
-    public boolean isAdminCommand() { return true; }
+    public boolean isAdminCommand() {
+        return true;
+    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -41,8 +48,7 @@ public class SaveArenaSubCommand implements SubCommand {
             sender.sendMessage(ChatColor.RED + "Este comando só pode ser usado por jogadores.");
             return;
         }
-        Player admin = (Player) sender;
-        plugin.getDuelManager().saveArena(admin);
+        plugin.getDuelManager().saveArena((Player) sender);
     }
 
     @Override

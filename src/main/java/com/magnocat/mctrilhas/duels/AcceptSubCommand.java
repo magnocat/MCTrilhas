@@ -1,15 +1,15 @@
 package com.magnocat.mctrilhas.duels;
 
-import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
-import com.magnocat.mctrilhas.duels.Challenge;
+import java.util.Collections;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
-import java.util.List;
+import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
 
 /**
  * Implementa o subcomando `/duelo aceitar <jogador>`.
@@ -62,9 +62,10 @@ public class AcceptSubCommand implements SubCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
         if (args.length == 1 && sender instanceof Player) {
-            Challenge challenge = plugin.getDuelManager().getChallengeFor(((Player) sender).getUniqueId());
-            if (challenge != null && challenge.getChallenger().getName().toLowerCase().startsWith(args[0].toLowerCase())) {
-                return List.of(challenge.getChallenger().getName());
+            Challenge challenge = plugin.getDuelManager().getChallengeFor(((Player) sender).getUniqueId()); // Busca o desafio pendente para o jogador
+            // Se houver um desafio, sugere o nome do desafiante. Usa o accessor de record 'challenger()'.
+            if (challenge != null && challenge.challenger().getName().toLowerCase().startsWith(args[0].toLowerCase())) {
+                return List.of(challenge.challenger().getName());
             }
         }
         return Collections.emptyList();

@@ -69,8 +69,8 @@ public class DuelGame implements Listener {
         kit.apply(player1);
         kit.apply(player2);
 
-        player1.teleport(arena.getPos1());
-        player2.teleport(arena.getPos2());
+        player1.teleport(arena.getSpawn1());
+        player2.teleport(arena.getSpawn2());
 
         FileConfiguration config = plugin.getConfig();
         int countdownSeconds = config.getInt("duel-settings.countdown-seconds", 5);
@@ -173,27 +173,13 @@ public class DuelGame implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                // Restaura o estado original dos jogadores e os teleporta para o hub.
-                if (player1 != null && player1.isOnline()) {
-                    player1State.restore(player1);
-                    player1.teleport(player1State.getLocation());
-                }
-                if (player2 != null && player2.isOnline()) {
-                    player2State.restore(player2);
-                    player2.teleport(player2State.getLocation());
-                }
+                // Restaura o estado original dos jogadores e os teleporta para o hub central.
+                restorePlayer(player1, player1State);
+                restorePlayer(player2, player2State);
 
                 // Restaura o estado de todos os espectadores e os teleporta para o hub.
-                // Itera sobre uma cópia para evitar ConcurrentModificationException.
                 for (UUID spectatorUUID : new ArrayList<>(spectators)) {
-                    Player spectator = Bukkit.getPlayer(spectatorUUID);
-                    if (spectator != null && spectator.isOnline()) {
-                        PlayerState spectatorState = spectatorStates.get(spectatorUUID);
-                        if (spectatorState != null) {
-                            spectatorState.restore(spectator);
-                        }
-                        spectator.teleport(spectatorState.getLocation());
-                    }
+                    restorePlayer(Bukkit.getPlayer(spectatorUUID), spectatorStates.get(spectatorUUID));
                 }
 
                 duelManager.endDuel(DuelGame.this);
@@ -201,6 +187,16 @@ public class DuelGame implements Listener {
             }
         }.runTaskLater(plugin, 60L); // 3 segundos de atraso
     }
+
+    private void restorePlayer(Player player, PlayerState state) {
+        if (player != null && player.isOnline() && state != null) {
+            state.restore(player);
+            // Teleporta o jogador de volta para sua localização original, antes do duelo, conforme solicitado.
+            player.teleport(state.getLocation());
+        }
+    }
+
+
 
     private void cancelMatchTimer() {
         if (matchTimerTask != null && !matchTimerTask.isCancelled()) {
@@ -266,7 +262,8 @@ public class DuelGame implements Listener {
             state.restore(spectator);
             spectators.remove(spectatorUUID);
             duelManager.removeSpectatorFromMap(spectatorUUID);
-            plugin.teleportToHub(spectator);
+            // Teleporta o espectador de volta para sua localização original, antes de assistir.
+            spectator.teleport(state.getLocation());
             spectator.sendMessage(ChatColor.YELLOW + "Você parou de assistir ao duelo.");
         }
     }

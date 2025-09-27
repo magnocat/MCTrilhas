@@ -4,38 +4,20 @@ import org.bukkit.entity.Player;
 
 /**
  * Representa um desafio de duelo pendente entre dois jogadores.
+ * Usamos um 'record' para uma classe de dados imutável e concisa.
  */
-public class Challenge {
-    private final Player challenger;
-    private final Player target;
-    private final String kitId;
-    private final long timestamp;
+public record Challenge(Player challenger, Player target, String kitId, long timestamp) {
 
+    /**
+     * Construtor de conveniência que define o timestamp automaticamente.
+     */
     public Challenge(Player challenger, Player target, String kitId) {
-        this.challenger = challenger;
-        this.target = target;
-        this.kitId = kitId;
-        this.timestamp = System.currentTimeMillis();
-    }
-
-    public Player getChallenger() {
-        return challenger;
-    }
-
-    public Player getTarget() {
-        return target;
-    }
-
-    public String getKitId() {
-        return kitId;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
+        this(challenger, target, kitId, System.currentTimeMillis());
     }
 
     /**
      * Verifica se o desafio expirou com base em um timeout.
+     *
      * @param timeoutMillis O tempo de expiração em milissegundos.
      * @return true se o desafio expirou, false caso contrário.
      */

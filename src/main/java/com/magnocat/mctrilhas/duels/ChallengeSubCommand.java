@@ -70,8 +70,9 @@ public class ChallengeSubCommand implements SubCommand {
     public List<String> onTabComplete(CommandSender sender, String[] args) {
         if (args.length == 1) {
             String partialName = args[0].toLowerCase();
-            return Bukkit.getOnlinePlayers().stream() // Sugere jogadores
-                    .filter(p -> !p.equals(sender)) // Não pode se desafiar
+            // Sugere apenas jogadores que estão disponíveis para um duelo.
+            return plugin.getDuelManager().getChallengeablePlayers().stream()
+                    .filter(p -> !p.equals(sender)) // Garante que o jogador não possa se desafiar.
                     .map(Player::getName)
                     .filter(name -> name.toLowerCase().startsWith(partialName))
                     .collect(Collectors.toList());

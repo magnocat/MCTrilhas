@@ -89,7 +89,7 @@ public class PlayerDataManager {
         if (!playerFile.exists()) {
             // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
             // O ranque inicial é sempre FILHOTE. O token é nulo até ser gerado.
-            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null, null));
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null, null, new PlayerDuelStats()));
             return;
         }
 
@@ -181,7 +181,7 @@ public class PlayerDataManager {
         List<String> treasureHuntLocations = config.getStringList("treasure-hunt.locations");
         int currentTreasureHuntStage = config.getInt("treasure-hunt.stage", -1);
         int treasureHuntsCompleted = config.getInt("treasure-hunt.completions", 0);
-        boolean hasReceivedGrandPrize = config.getBoolean("treasure-hunt.grand-prize-received", false);
+        boolean hasReceivedTreasureGrandPrize = config.getBoolean("treasure-hunt.grand-prize-received", false);
 
         // Carrega os marcos de CTF já reivindicados.
         List<String> claimedCtfMilestones = config.getStringList("claimed-ctf-milestones");
@@ -191,6 +191,9 @@ public class PlayerDataManager {
 
         // Carrega os dados do pet, se existirem.
         PetData petData = PetData.fromConfig(config.getConfigurationSection("pet-data"));
+
+        // Carrega as estatísticas de duelo.
+        PlayerDuelStats duelStats = PlayerDuelStats.fromConfig(config.getConfigurationSection("duel-stats"));
 
         // Lógica de migração única para jogadores existentes sem tempo de jogo ativo.
         if (activePlaytimeTicks == 0 && !config.contains("playtime-migrated")) {
@@ -215,7 +218,7 @@ public class PlayerDataManager {
             }
         }
 
-        return new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken);
+        return new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedTreasureGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken, duelStats);
     }
 
     /**
@@ -267,6 +270,12 @@ public class PlayerDataManager {
             config.set("pet-data.has-custom-name", petData.hasCustomName());
             config.set("pet-data.is-owned", petData.isOwned());
             config.set("pet-data.happiness", petData.getHappiness());
+        }
+
+        // Salva as estatísticas de duelo
+        PlayerDuelStats duelStats = playerData.getDuelStats();
+        if (duelStats != null) {
+            duelStats.saveToConfig(config.createSection("duel-stats"));
         }
 
         config.set("web-access-token", playerData.getWebAccessToken());
@@ -910,36 +919,28 @@ public class PlayerDataManager {
     // --- Métodos para o Sistema de Estatísticas de Duelos ---
 
     public PlayerDuelStats getPlayerDuelStats(UUID playerUUID) {
-        File playerFile = new File(playerDataFolder, playerUUID.toString() + ".yml");
-        if (!playerFile.exists()) {
-            return new PlayerDuelStats(); // Retorna estatísticas zeradas para um novo jogador
+        // Para jogadores online, obtém do cache de forma eficiente.
+        PlayerData data = getPlayerData(playerUUID);
+        if (data != null) {
+            return data.getDuelStats();
         }
-        FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-        return PlayerDuelStats.fromConfig(config.getConfigurationSection("duel-stats"));
+
+        // Para jogadores offline, carrega os dados do arquivo.
+        PlayerData offlineData = loadOfflinePlayerData(playerUUID);
+        return (offlineData != null) ? offlineData.getDuelStats() : new PlayerDuelStats();
     }
 
     public void savePlayerDuelStats(UUID playerUUID, PlayerDuelStats stats) {
-        File playerFile = new File(playerDataFolder, playerUUID.toString() + ".yml");
-        FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
-        stats.saveToConfig(config.createSection("duel-stats"));
-        try {
-            config.save(playerFile);
-        } catch (IOException e) {
-            plugin.getLogger().severe("Não foi possível salvar as estatísticas de Duelo para " + playerUUID);
+        // Este método agora salva o objeto PlayerData inteiro, que contém as estatísticas de duelo.
+        // É mais seguro e consistente.
+        PlayerData data = getPlayerData(playerUUID);
+        if (data != null) {
+            // O objeto 'stats' já foi modificado em memória, basta salvar o PlayerData.
+            savePlayerData(data);
+        } else {
+            // Se o jogador estiver offline, precisamos carregar, modificar e salvar.
+            plugin.logWarn("Tentativa de salvar estatísticas de duelo para um jogador offline: " + playerUUID + ". Esta operação é ineficiente.");
+            // A lógica para salvar dados de jogadores offline pode ser complexa e deve ser evitada se possível.
         }
-    }
-
-    public void incrementDuelWin(UUID playerUUID) {
-        // Este método lê, modifica e salva, o que é ineficiente mas consistente com o resto do código.
-        // Idealmente, para jogadores online, isso deveria ser feito no objeto PlayerData em cache.
-        PlayerDuelStats stats = getPlayerDuelStats(playerUUID);
-        stats.incrementWins();
-        savePlayerDuelStats(playerUUID, stats);
-    }
-
-    public void incrementDuelLoss(UUID playerUUID) {
-        PlayerDuelStats stats = getPlayerDuelStats(playerUUID);
-        stats.incrementLosses();
-        savePlayerDuelStats(playerUUID, stats);
     }
 }

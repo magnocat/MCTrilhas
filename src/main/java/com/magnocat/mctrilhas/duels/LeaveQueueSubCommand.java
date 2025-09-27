@@ -30,7 +30,7 @@ public class LeaveQueueSubCommand implements SubCommand {
     public String getSyntax() { return "/duelo sairfila"; }
 
     @Override
-    public String getPermission() { return "mctrilhas.duel.use"; }
+    public String getPermission() { return "mctrilhas.duel.queue"; }
 
     @Override
     public boolean isAdminCommand() { return false; }

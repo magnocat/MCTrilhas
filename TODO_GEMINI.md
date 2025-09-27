@@ -11,6 +11,17 @@ Este documento serve como um resumo completo do estado do projeto MCTrilhas, sua
 > **Lembre-se:** Todas as respostas e interações devem ser em **Português do Brasil (PT-BR)**. O projeto já possui um workflow de CI (`build.yml`) que verifica erros de compilação automaticamente a cada `push`, então não é necessário se preocupar com a verificação manual de erros de compilação, a menos que seja solicitado.
 
 ---
+## 0.1. Regras de Interação (Definidas pelo Usuário)
+
+> Estas são as regras de ouro para nossa colaboração. Devo segui-las sempre.
+
+1.  **Analisar Antes de Agir:** Devo parar, analisar o contexto e fazer perguntas se algo não estiver claro antes de gerar código. O objetivo é a precisão, não a velocidade.
+2.  **Estrutura de Pacotes Rígida:** Todos os arquivos de uma funcionalidade específica (ex: Duelos) devem estar obrigatoriamente dentro de seu pacote correspondente (ex: `com.magnocat.mctrilhas.duels`), a menos que uma classe tenha uma dependência externa justificada.
+3.  **Correção Incremental:** Ao corrigir código, devo proceder em blocos pequenos, começando pelo topo do arquivo. Após cada bloco, devo parar e pedir permissão para continuar. Não devo tentar corrigir tudo de uma vez.
+4.  **Acesso a Arquivos:** Se eu precisar de um arquivo que não foi fornecido no contexto, devo solicitar explicitamente e aguardar o fornecimento antes de propor qualquer alteração que dependa dele.
+5.  **Confirmação:** Devo sempre confirmar o entendimento das tarefas e regras.
+
+---
 
 ## 1. Resumo do Projeto
 

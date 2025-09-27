@@ -1,13 +1,9 @@
 package com.magnocat.mctrilhas.duels;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.utils.ItemFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -37,26 +33,20 @@ public class KitSelectionMenu {
 
         Inventory gui = Bukkit.createInventory(null, inventorySize, INVENTORY_TITLE);
 
-        FileConfiguration kitConfig = plugin.getDuelManager().getKitConfig();
-
         for (DuelKit kit : kits.values()) {
-            ConfigurationSection kitSection = kitConfig.getConfigurationSection("kits." + kit.getId());
-            if (kitSection == null) continue;
-
-            Material iconMaterial = Material.getMaterial(kitSection.getString("icon", "BARRIER"));
-            ItemStack item = new ItemStack(iconMaterial != null ? iconMaterial : Material.BARRIER);
+            ItemStack item = new ItemStack(kit.getIcon());
             ItemMeta meta = item.getItemMeta();
 
             if (meta != null) {
                 meta.setDisplayName(kit.getDisplayName());
 
                 List<String> lore = new ArrayList<>();
-                kitSection.getStringList("description").forEach(line -> lore.add(ChatColor.translateAlternateColorCodes('&', line)));
+                // Usa a descrição já processada do objeto DuelKit
+                lore.addAll(kit.getDescription());
                 lore.add(" ");
                 lore.add(ChatColor.YELLOW + "Clique para selecionar este kit.");
                 meta.setLore(lore);
 
-                // Armazena o ID do kit no item de forma invisível para o jogador.
                 NamespacedKey key = new NamespacedKey(plugin, "duel_kit_id");
                 meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, kit.getId());
 

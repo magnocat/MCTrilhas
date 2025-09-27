@@ -1,491 +1,441 @@
 package com.magnocat.mctrilhas.duels;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
-import java.io.IOException;
+import org.bukkit.scheduler.BukkitRunnable;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
+import java.util.Optional;
 import java.util.UUID;
-import org.bukkit.inventory.ItemStack;
 import java.util.concurrent.ConcurrentHashMap;
+import net.md_5.bungee.api.chat.TextComponent;
 
 /**
- * Gerencia todo o sistema de duelos 1v1.
+ * Gerencia todo o sistema de Duelos 1v1.
  * <p>
  * Responsabilidades:
- * <ul>
- *     <li>Carregar e gerenciar as arenas de duelo.</li>
- *     <li>Processar desafios entre jogadores.</li>
- *     <li>Iniciar e finalizar partidas de duelo.</li>
- *     <li>Manter uma lista de jogos ativos.</li>
- * </ul>
+ * - Carregar e salvar arenas do arquivo `duel_arenas.yml`.
+ * - Gerenciar sessões de criação de arenas para administradores.
+ * - Controlar filas de jogadores para os duelos.
+ * - Gerenciar as partidas de duelo ativas.
  */
-public class DuelManager implements Listener {
-    private final MCTrilhasPlugin plugin;
-    private final List<DuelArena> loadedArenas = new ArrayList<>();
-    private final List<DuelArena> availableArenas = Collections.synchronizedList(new ArrayList<>());
-    private final List<DuelGame> activeGames = new ArrayList<>();
-    private final Map<UUID, DuelGame> playerGameMap = new HashMap<>();
-    private final Map<UUID, DuelGame> spectatorGameMap = new HashMap<>();
-    private final Queue<QueuedDuel> duelQueue = new LinkedList<>();
-    private final Map<UUID, ArenaCreator> arenaCreators = new HashMap<>();
-    private final Map<String, DuelKit> loadedKits = new LinkedHashMap<>();
-    // Armazena temporariamente o alvo do desafio enquanto o desafiante escolhe o kit.
-    private final Map<UUID, UUID> challengeTargetMap = new ConcurrentHashMap<>();
-    private final Map<UUID, Challenge> pendingChallenges = new ConcurrentHashMap<>();
-    private BukkitTask challengeExpirationTask;
-    private File arenaConfigFile;
-    private FileConfiguration arenaConfig;
-    private File kitConfigFile;
-    private FileConfiguration kitConfig;
+public class DuelManager {
 
-    private static final long CHALLENGE_TIMEOUT_SECONDS = 60;
+    private final MCTrilhasPlugin plugin;
+    private final Map<String, DuelArena> arenas = new HashMap<>();
+    private final Map<String, DuelKit> kits = new HashMap<>();
+    private final Map<UUID, DuelArena> arenaCreationSessions = new HashMap<>();
+
+    // Estruturas para gerenciar o fluxo de duelos
+    private final Map<UUID, Challenge> challenges = new ConcurrentHashMap<>(); // Challenger UUID -> Challenge
+    private final List<QueuedDuel> duelQueue = new ArrayList<>();
+    private final List<DuelGame> activeDuels = new ArrayList<>();
+    private final Map<UUID, Player> pendingKitSelection = new HashMap<>(); // Challenger -> Target
+    private final Map<UUID, DuelGame> playerToGameMap = new HashMap<>(); // Mapeia um jogador (duelista ou espectador) ao seu jogo
+
+    private File arenasFile;
+    private FileConfiguration arenasConfig;
+    private File kitsFile;
+    private FileConfiguration kitsConfig;
 
     public DuelManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        this.arenasFile = new File(plugin.getDataFolder(), "duel_arenas.yml");
+        this.arenasConfig = YamlConfiguration.loadConfiguration(arenasFile);
+        this.kitsFile = new File(plugin.getDataFolder(), "duel_kits.yml");
+        this.kitsConfig = YamlConfiguration.loadConfiguration(kitsFile);
+
         loadArenas();
         loadKits();
-        startChallengeExpirationTask();
+        startQueueProcessor();
     }
 
     /**
-     * Carrega as arenas do arquivo duel_arenas.yml.
-     * Este método deve ser chamado no onEnable do plugin.
+     * Inicia uma sessão de criação de arena para um administrador.
+     *
+     * @param admin O jogador administrador que está criando a arena.
+     * @param arenaName O nome da nova arena.
      */
-    public void loadArenas() {
-        createArenaConfigFile();
-
-        loadedArenas.clear();
-        availableArenas.clear();
-
-        ConfigurationSection arenasSection = arenaConfig.getConfigurationSection("arenas");
-        if (arenasSection == null) {
-            plugin.logInfo("[Duels] Nenhuma arena configurada em duel_arenas.yml.");
+    public void startArenaCreation(Player admin, String arenaName) {
+        if (arenaCreationSessions.containsKey(admin.getUniqueId())) {
+            admin.sendMessage(ChatColor.RED + "Você já está criando uma arena. Use '/scout admin duel save' para salvar ou '/scout admin duel cancel' para cancelar.");
             return;
         }
 
-        for (String arenaId : arenasSection.getKeys(false)) {
-            ConfigurationSection currentArenaSection = arenasSection.getConfigurationSection(arenaId);
-            DuelArena arena = DuelArena.fromConfig(arenaId, currentArenaSection);
-            if (arena != null) {
-                loadedArenas.add(arena);
-                availableArenas.add(arena); // Inicialmente, todas as arenas estão disponíveis
-            }
+        if (arenas.containsKey(arenaName.toLowerCase())) {
+            admin.sendMessage(ChatColor.RED + "Uma arena com o nome '" + arenaName + "' já existe.");
+            return;
         }
-        plugin.logInfo("[Duels] " + loadedArenas.size() + " arena(s) de duelo carregada(s). " + availableArenas.size() + " disponível(is).");
+
+        DuelArena newArena = new DuelArena(arenaName);
+        arenaCreationSessions.put(admin.getUniqueId(), newArena);
+
+        admin.sendMessage(ChatColor.GREEN + "Criação da arena '" + arenaName + "' iniciada!");
+        admin.sendMessage(ChatColor.YELLOW + "Agora, use os seguintes comandos para configurá-la:");
+        admin.sendMessage(ChatColor.AQUA + "/scout admin duel setspawn1" + ChatColor.GRAY + " - Define o ponto de spawn do jogador 1.");
+        admin.sendMessage(ChatColor.AQUA + "/scout admin duel setspawn2" + ChatColor.GRAY + " - Define o ponto de spawn do jogador 2.");
+        admin.sendMessage(ChatColor.AQUA + "/scout admin duel setspec" + ChatColor.GRAY + " - Define o ponto de spawn dos espectadores.");
+        admin.sendMessage(ChatColor.AQUA + "/scout admin duel save" + ChatColor.GRAY + " - Salva a arena.");
     }
 
     /**
-     * Carrega os kits do arquivo duel_kits.yml.
+     * Obtém a sessão de criação de arena de um administrador.
+     *
+     * @param admin O jogador administrador.
+     * @return O objeto DuelArena que está sendo criado, ou null se não houver sessão ativa.
      */
-    public void loadKits() {
-        createKitConfigFile();
-        loadedKits.clear();
-
-        ConfigurationSection kitsSection = kitConfig.getConfigurationSection("kits");
-        if (kitsSection == null) {
-            plugin.logInfo("[Duels] Nenhum kit configurado em duel_kits.yml.");
-            return;
-        }
-
-        for (String kitId : kitsSection.getKeys(false)) {
-            ConfigurationSection currentKitSection = kitsSection.getConfigurationSection(kitId);
-            DuelKit kit = DuelKit.fromConfig(kitId, currentKitSection);
-            if (kit != null) {
-                loadedKits.put(kitId.toLowerCase(), kit);
-            }
-        }
-        plugin.logInfo("[Duels] " + loadedKits.size() + " kit(s) de duelo carregado(s).");
+    public DuelArena getArenaCreationSession(Player admin) {
+        return arenaCreationSessions.get(admin.getUniqueId());
     }
 
-    /**
-     * Inicia o processo de desafio, abrindo a GUI de seleção de kits.
-     * @param challenger O jogador que está desafiando.
-     * @param target O jogador que está sendo desafiado.
-     */
-    public void startChallengeProcess(Player challenger, Player target) {
-        // Armazena quem é o alvo para que possamos recuperar após a seleção do kit.
-        challengeTargetMap.put(challenger.getUniqueId(), target.getUniqueId());
-
-        // Abre a GUI de seleção de kits.
-        KitSelectionMenu menu = new KitSelectionMenu(plugin);
-        menu.open(challenger);
-    }
-
-    /**
-     * Envia um desafio de duelo de um jogador para outro.
-     * @param challenger O jogador que está desafiando.
-     * @param target O jogador que está sendo desafiado.
-     * @param kitId O ID do kit escolhido para o duelo.
-     */
-    public void sendChallenge(Player challenger, Player target, String kitId) {
-        DuelKit kit = getKit(kitId);
-        if (kit == null) {
-            challenger.sendMessage(ChatColor.RED + "O kit '" + kitId + "' não existe.");
+    public void setArenaSpawn(Player admin, int spawnPoint) {
+        DuelArena sessionArena = getArenaCreationSession(admin);
+        if (sessionArena == null) {
+            admin.sendMessage(ChatColor.RED + "Você não está criando nenhuma arena. Use '/scout admin duel createarena <nome>' para começar.");
             return;
         }
 
-        if (challenger.equals(target)) {
-            challenger.sendMessage(ChatColor.RED + "Você não pode desafiar a si mesmo!");
-            return;
+        Location location = admin.getLocation();
+        if (spawnPoint == 1) {
+            sessionArena.setSpawn1(location);
+        } else if (spawnPoint == 2) {
+            sessionArena.setSpawn2(location);
         }
 
-        if (playerGameMap.containsKey(challenger.getUniqueId())) {
-            challenger.sendMessage(ChatColor.RED + "Você já está em um duelo.");
-            return;
-        }
-
-        if (playerGameMap.containsKey(target.getUniqueId())) {
-            challenger.sendMessage(ChatColor.RED + target.getName() + " já está em um duelo.");
-            return;
-        }
-
-        if (pendingChallenges.containsKey(target.getUniqueId())) {
-            challenger.sendMessage(ChatColor.RED + target.getName() + " já tem um desafio pendente.");
-            return;
-        }
-
-        // Verifica se os jogadores já estão na fila
-        for (QueuedDuel qd : duelQueue) {
-            if (qd.involves(challenger)) {
-                challenger.sendMessage(ChatColor.RED + "Você já está na fila para um duelo. Use /duelo sairfila para sair.");
-                return;
-            }
-            if (qd.involves(target)) {
-                challenger.sendMessage(ChatColor.RED + target.getName() + " já está na fila para um duelo.");
-                return;
-            }
-        }
-
-        // Verifica se o desafiante já enviou um desafio para outra pessoa
-        for (Challenge existingChallenge : pendingChallenges.values()) {
-            if (existingChallenge.getChallenger().equals(challenger)) {
-                challenger.sendMessage(ChatColor.RED + "Você já enviou um desafio. Aguarde a resposta ou o desafio expirar.");
-                return;
-            }
-        }
-
-        Challenge challenge = new Challenge(challenger, target, kit.getId());
-        pendingChallenges.put(target.getUniqueId(), challenge);
-
-        challenger.sendMessage(ChatColor.GREEN + "Você desafiou " + target.getName() + " para um duelo com o kit " + kit.getDisplayName() + ChatColor.GREEN + "! Aguardando resposta...");
-
-        // Mensagem para o alvo
-        target.sendMessage(ChatColor.GOLD + "---------------------------------");
-        target.sendMessage(ChatColor.YELLOW + challenger.getName() + " te desafiou para um duelo!");
-        target.sendMessage(ChatColor.YELLOW + "Kit: " + kit.getDisplayName());
-
-        TextComponent acceptComponent = new TextComponent(ChatColor.GREEN + "" + ChatColor.BOLD + "[ACEITAR]");
-        acceptComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/duelo aceitar " + challenger.getName()));
-        acceptComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.GREEN + "Clique para aceitar o duelo").create()));
-
-        TextComponent denyComponent = new TextComponent(ChatColor.RED + "" + ChatColor.BOLD + "[NEGAR]");
-        denyComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/duelo negar " + challenger.getName()));
-        denyComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(ChatColor.RED + "Clique para negar o duelo").create()));
-
-        TextComponent message = new TextComponent(" ");
-        message.addExtra(acceptComponent);
-        message.addExtra("  ");
-        message.addExtra(denyComponent);
-
-        target.spigot().sendMessage(message);
-        target.sendMessage(ChatColor.GRAY + "O desafio expira em " + CHALLENGE_TIMEOUT_SECONDS + " segundos.");
-        target.sendMessage(ChatColor.GOLD + "---------------------------------");
-    }
-
-    /**
-     * Aceita um desafio de duelo.
-     * @param target O jogador que está aceitando (quem recebeu o desafio).
-     * @param challenger O jogador que enviou o desafio.
-     */
-    public void acceptChallenge(Player target, Player challenger) {
-        Challenge challenge = pendingChallenges.get(target.getUniqueId());
-
-        if (challenge == null || !challenge.getChallenger().getUniqueId().equals(challenger.getUniqueId())) {
-            target.sendMessage(ChatColor.RED + "Você não tem um desafio pendente de " + challenger.getName() + ".");
-            return;
-        }
-
-        // Remove o desafio da lista de pendentes
-        pendingChallenges.remove(target.getUniqueId());
-
-        DuelKit kit = getKit(challenge.getKitId());
-        if (kit == null) {
-            // Fallback para o kit padrão se o kit do desafio não existir mais
-            kit = getDefaultKit();
-        }
-
-        if (availableArenas.isEmpty()) {
-            QueuedDuel queuedDuel = new QueuedDuel(challenger, target, kit);
-            duelQueue.add(queuedDuel);
-            String queueMessage = ChatColor.YELLOW + "Todas as arenas estão ocupadas. Vocês foram colocados na fila para um duelo. Posição: " + duelQueue.size();
-            challenger.sendMessage(queueMessage);
-            target.sendMessage(queueMessage);
-        } else {
-            startDuel(challenger, target, kit);
-        }
-    }
-
-    /**
-     * Nega um desafio de duelo.
-     * @param target O jogador que está negando (quem recebeu o desafio).
-     * @param challenger O jogador que enviou o desafio.
-     */
-    public void denyChallenge(Player target, Player challenger) {
-        Challenge challenge = pendingChallenges.get(target.getUniqueId());
-
-        if (challenge == null || !challenge.getChallenger().getUniqueId().equals(challenger.getUniqueId())) {
-            target.sendMessage(ChatColor.RED + "Você não tem um desafio pendente de " + challenger.getName() + " para negar.");
-            return;
-        }
-
-        // Remove o desafio da lista de pendentes
-        pendingChallenges.remove(target.getUniqueId());
-
-        target.sendMessage(ChatColor.YELLOW + "Você negou o desafio de " + challenger.getName() + ".");
-        challenger.sendMessage(ChatColor.RED + target.getName() + " negou seu desafio de duelo.");
-    }
-
-    /**
-     * Obtém o desafio pendente para um jogador específico.
-     * @param targetUUID O UUID do jogador que recebeu o desafio.
-     * @return O objeto Challenge, ou null se não houver desafio.
-     */
-    public Challenge getChallengeFor(UUID targetUUID) {
-        return pendingChallenges.get(targetUUID);
-    }
-
-    private void startDuel(Player player1, Player player2, DuelKit kit) {
-        if (availableArenas.isEmpty()) {
-            plugin.logWarn("startDuel foi chamado mas não há arenas disponíveis. Colocando jogadores de volta na fila.");
-            duelQueue.add(new QueuedDuel(player1, player2, kit)); // Adiciona no início da fila
-            return;
-        }
-        DuelArena arena = availableArenas.remove(0);
-
-        DuelGame newGame = new DuelGame(plugin, arena, player1, player2, kit);
-        activeGames.add(newGame);
-        playerGameMap.put(player1.getUniqueId(), newGame);
-        playerGameMap.put(player2.getUniqueId(), newGame);
-    }
-
-    // --- Métodos para Criação de Arenas In-Game ---
-
-    public void startArenaCreation(Player admin, String arenaId) {
-        if (arenaCreators.containsKey(admin.getUniqueId())) {
-            admin.sendMessage(ChatColor.RED + "Você já está criando uma arena. Use /duelo cancelarena para cancelar.");
-            return;
-        }
-        arenaCreators.put(admin.getUniqueId(), new ArenaCreator(arenaId));
-        admin.sendMessage(ChatColor.GREEN + "Criação da arena '" + arenaId + "' iniciada.");
-        admin.sendMessage(ChatColor.YELLOW + "Vá para o primeiro ponto de spawn e use /duelo setpos 1");
-    }
-
-    public void setArenaPosition(Player admin, int pos) {
-        ArenaCreator creator = arenaCreators.get(admin.getUniqueId());
-        if (creator == null) {
-            admin.sendMessage(ChatColor.RED + "Você não iniciou a criação de uma arena. Use /duelo createarena <id>.");
-            return;
-        }
-        if (pos == 1) {
-            creator.setPos1(admin.getLocation());
-            admin.sendMessage(ChatColor.GREEN + "Posição 1 da arena '" + creator.getId() + "' definida.");
-            admin.sendMessage(ChatColor.YELLOW + "Agora vá para o segundo ponto de spawn e use /duelo setpos 2");
-        } else if (pos == 2) {
-            creator.setPos2(admin.getLocation());
-            admin.sendMessage(ChatColor.GREEN + "Posição 2 da arena '" + creator.getId() + "' definida.");
-            admin.sendMessage(ChatColor.YELLOW + "Use /duelo savearena para salvar a arena.");
-        } else {
-            admin.sendMessage(ChatColor.RED + "Posição inválida. Use 1 ou 2.");
-        }
+        admin.sendMessage(ChatColor.GREEN + "Ponto de spawn " + spawnPoint + " da arena '" + sessionArena.getName() + "' definido na sua localização atual.");
     }
 
     public void setArenaSpectatorPosition(Player admin) {
-        ArenaCreator creator = arenaCreators.get(admin.getUniqueId());
-        if (creator == null) {
-            admin.sendMessage(ChatColor.RED + "Você não iniciou a criação de uma arena. Use /duelo createarena <id>.");
+        DuelArena sessionArena = getArenaCreationSession(admin);
+        if (sessionArena == null) {
+            admin.sendMessage(ChatColor.RED + "Você não está criando nenhuma arena. Use '/scout admin duel createarena <nome>' para começar.");
             return;
         }
-        creator.setSpectatorSpawn(admin.getLocation());
-        admin.sendMessage(ChatColor.GREEN + "Posição do espectador para a arena '" + creator.getId() + "' definida.");
+
+        sessionArena.setSpectatorSpawn(admin.getLocation());
+        admin.sendMessage(ChatColor.GREEN + "Ponto de spawn dos espectadores para a arena '" + sessionArena.getName() + "' definido.");
     }
 
     public void saveArena(Player admin) {
-        ArenaCreator creator = arenaCreators.get(admin.getUniqueId());
-        if (creator == null) {
-            admin.sendMessage(ChatColor.RED + "Você não está criando nenhuma arena.");
-            return;
-        }
-        if (!creator.isReady()) {
-            admin.sendMessage(ChatColor.RED + "A arena não está completa. Defina as posições 1, 2 e a do espectador.");
+        DuelArena sessionArena = getArenaCreationSession(admin);
+        if (sessionArena == null) {
+            admin.sendMessage(ChatColor.RED + "Você não está criando nenhuma arena para salvar.");
             return;
         }
 
-        // Salva a nova arena no arquivo duel_arenas.yml
-        String path = "arenas." + creator.getId();
-        arenaConfig.set(path + ".pos1", locationToString(creator.getPos1()));
-        arenaConfig.set(path + ".pos2", locationToString(creator.getPos2()));
-        arenaConfig.set(path + ".spectator-spawn", locationToString(creator.getSpectatorSpawn()));
+        if (!sessionArena.isComplete()) {
+            admin.sendMessage(ChatColor.RED + "A arena não está completa. Defina os spawns 1, 2 e o de espectador antes de salvar.");
+            return;
+        }
 
+        String arenaName = sessionArena.getName();
+        arenas.put(arenaName.toLowerCase(), sessionArena);
+
+        // Salva no arquivo de configuração
+        ConfigurationSection arenaSection = arenasConfig.createSection("arenas." + arenaName);
+        sessionArena.saveToConfig(arenaSection);
         try {
-            arenaConfig.save(arenaConfigFile);
-            admin.sendMessage(ChatColor.GREEN + "Arena '" + creator.getId() + "' salva com sucesso!");
-            arenaCreators.remove(admin.getUniqueId());
-            // Recarrega as arenas para que a nova já esteja disponível
-            loadArenas();
+            arenasConfig.save(arenasFile);
         } catch (IOException e) {
-            admin.sendMessage(ChatColor.RED + "Erro ao salvar a arena no arquivo. Verifique o console.");
-            plugin.logSevere("Não foi possível salvar a arena de duelo: " + e.getMessage());
+            plugin.logSevere("Não foi possível salvar a arena '" + arenaName + "' no arquivo duel_arenas.yml.");
+            e.printStackTrace();
         }
+
+        arenaCreationSessions.remove(admin.getUniqueId());
+        admin.sendMessage(ChatColor.GREEN + "Arena '" + arenaName + "' salva com sucesso!");
     }
 
     public void cancelArenaCreation(Player admin) {
-        if (arenaCreators.remove(admin.getUniqueId()) != null) {
+        if (arenaCreationSessions.remove(admin.getUniqueId()) != null) {
             admin.sendMessage(ChatColor.YELLOW + "Criação de arena cancelada.");
         } else {
             admin.sendMessage(ChatColor.RED + "Você não estava criando nenhuma arena.");
         }
     }
 
-    private String locationToString(Location loc) {
-        if (loc == null) return "";
-        // Formata a string de localização para ser consistente com o parseLocation
-        return String.format("%s,%.2f,%.2f,%.2f,%.1f,%.1f",
-                loc.getWorld().getName(),
-                loc.getX(),
-                loc.getY(),
-                loc.getZ(),
-                loc.getYaw(),
-                loc.getPitch())
-                .replace(",", ", "); // Adiciona um espaço após a vírgula para legibilidade
+    public void loadArenas() {
+        arenas.clear();
+        ConfigurationSection arenasSection = arenasConfig.getConfigurationSection("arenas");
+        if (arenasSection == null) {
+            plugin.logInfo("Nenhuma arena de duelo encontrada para carregar.");
+            return;
+        }
+
+        for (String arenaName : arenasSection.getKeys(false)) {
+            ConfigurationSection currentArenaSection = arenasSection.getConfigurationSection(arenaName);
+            if (currentArenaSection != null) {
+                DuelArena arena = new DuelArena(arenaName);
+                Location spawn1 = currentArenaSection.getLocation("spawn1");
+                Location spawn2 = currentArenaSection.getLocation("spawn2");
+                Location specSpawn = currentArenaSection.getLocation("spectatorSpawn");
+
+                if (spawn1 != null && spawn2 != null && specSpawn != null) {
+                    arena.setSpawn1(spawn1);
+                    arena.setSpawn2(spawn2);
+                    arena.setSpectatorSpawn(specSpawn);
+                    arenas.put(arenaName.toLowerCase(), arena);
+                } else {
+                    plugin.logWarn("Arena '" + arenaName + "' está incompleta (faltando spawns) no arquivo duel_arenas.yml e não foi carregada.");
+                }
+            }
+        }
+        plugin.logInfo(arenas.size() + " arenas de duelo carregadas.");
     }
 
-    public DuelKit getKit(String id) {
-        if (id == null) return getDefaultKit();
-        return loadedKits.get(id.toLowerCase());
+    public void loadKits() {
+        kits.clear();
+        ConfigurationSection kitsSection = kitsConfig.getConfigurationSection("kits");
+        if (kitsSection == null) {
+            plugin.logInfo("Nenhum kit de duelo encontrado para carregar.");
+            return;
+        }
+
+        for (String kitId : kitsSection.getKeys(false)) {
+            ConfigurationSection kitSection = kitsSection.getConfigurationSection(kitId);
+            DuelKit kit = DuelKit.fromConfig(kitId, kitSection);
+            if (kit != null) {
+                kits.put(kitId.toLowerCase(), kit);
+            } else {
+                plugin.logWarn("Falha ao carregar o kit de duelo '" + kitId + "'. Verifique a configuração.");
+            }
+        }
+        plugin.logInfo(kits.size() + " kits de duelo carregados.");
     }
 
-    public DuelKit getDefaultKit() {
-        // Tenta pegar o kit "default", se não, pega o primeiro da lista.
-        DuelKit kit = loadedKits.get("default");
-        if (kit != null) {
-            return kit;
-        }
-        if (!loadedKits.isEmpty()) {
-            return loadedKits.values().iterator().next();
-        }
-        return null; // Nenhum kit carregado
+    public void stopTasks() {
+        // Lógica para parar tarefas, se houver
+        Bukkit.getScheduler().cancelTasks(plugin);
     }
+
+    // --- Métodos de acesso para outras classes ---
 
     public Map<String, DuelKit> getLoadedKits() {
-        return loadedKits;
+        return kits;
+    }
+
+    public FileConfiguration getKitConfig() {
+        return kitsConfig;
+    }
+
+    public Challenge getChallengeFor(UUID targetUUID) {
+        for (Challenge challenge : challenges.values()) {
+            if (challenge.target().getUniqueId().equals(targetUUID)) {
+                return challenge;
+            }
+        }
+        return null;
     }
 
     /**
-     * Obtém o jogo de duelo em que um jogador está participando.
-     * @param player O jogador.
-     * @return A instância de DuelGame, ou null se não estiver em um duelo.
+     * Retorna uma lista de todos os jogadores que estão atualmente participando de um duelo ativo.
+     * @return Uma lista de jogadores em duelo.
      */
-    public DuelGame getGameForPlayer(Player player) {
-        return playerGameMap.get(player.getUniqueId());
+    public List<Player> getDuelingPlayers() {
+        List<Player> dueling = new ArrayList<>();
+        activeDuels.forEach(game -> dueling.addAll(List.of(game.getPlayer1(), game.getPlayer2())));
+        return dueling;
     }
 
     /**
-     * Finaliza um duelo, liberando a arena e os jogadores.
-     * @param game O jogo a ser finalizado.
+     * Retorna uma lista de jogadores que estão online e disponíveis para serem desafiados.
+     * Um jogador não está disponível se já estiver em um duelo, em uma fila ou com um desafio pendente.
+     * @return Uma lista de jogadores elegíveis para desafio.
      */
-    public void endDuel(DuelGame game) {
-        activeGames.remove(game);
-        playerGameMap.remove(game.getPlayer1().getUniqueId());
-        playerGameMap.remove(game.getPlayer2().getUniqueId());
+    public List<Player> getChallengeablePlayers() {
+        List<Player> challengeable = new ArrayList<>();
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            UUID pUUID = p.getUniqueId();
+            if (!playerToGameMap.containsKey(pUUID) && duelQueue.stream().noneMatch(q -> q.involves(p)) && getChallengeFor(pUUID) == null) {
+                challengeable.add(p);
+            }
+        }
+        return challengeable;
+    }
 
-        availableArenas.add(game.getArena());
-        plugin.logInfo("[Duels] Duelo na arena " + game.getArena().getId() + " finalizado. Arena agora está disponível.");
+    // --- Lógica de Jogo (a ser implementada) ---
 
-        checkDuelQueue();
+    public void startChallengeProcess(Player challenger, Player target) {
+        // Validações
+        if (challenger.equals(target)) {
+            challenger.sendMessage(ChatColor.RED + "Você não pode desafiar a si mesmo.");
+            return;
+        }
+        if (playerToGameMap.containsKey(challenger.getUniqueId()) || playerToGameMap.containsKey(target.getUniqueId())) {
+            challenger.sendMessage(ChatColor.RED + "Um dos jogadores já está em um duelo.");
+            return;
+        }
+        if (challenges.containsKey(challenger.getUniqueId())) {
+            challenger.sendMessage(ChatColor.RED + "Você já enviou um desafio. Aguarde ou cancele-o.");
+            return;
+        }
+        if (getChallengeFor(target.getUniqueId()) != null) {
+            challenger.sendMessage(ChatColor.RED + target.getName() + " já possui um desafio pendente.");
+            return;
+        }
+
+        // Abre o menu de seleção de kits
+        KitSelectionMenu kitMenu = new KitSelectionMenu(plugin);
+        kitMenu.open(challenger);
+
+        // Armazena temporariamente o alvo enquanto o desafiante escolhe o kit
+        pendingKitSelection.put(challenger.getUniqueId(), target);
+
+        // Adiciona uma tarefa para limpar a seleção pendente se o jogador fechar o menu ou demorar muito
+        // (A lógica de timeout e cancelamento será adicionada no listener do inventário)
+    }
+
+    /**
+     * Finaliza o processo de desafio após o desafiante selecionar um kit.
+     * @param challenger O jogador que desafiou.
+     * @param kitId O ID do kit selecionado.
+     */
+    public void finalizeChallenge(Player challenger, String kitId) {
+        Player target = pendingKitSelection.remove(challenger.getUniqueId());
+        if (target == null) {
+            // O jogador pode ter demorado demais ou outro processo limpou a seleção.
+            return;
+        }
+
+        Challenge challenge = new Challenge(challenger, target, kitId);
+        challenges.put(challenger.getUniqueId(), challenge);
+
+        challenger.sendMessage(ChatColor.GREEN + "Desafio enviado para " + target.getName() + "!");
+
+        // Envia uma mensagem clicável para o alvo
+        target.sendMessage(ChatColor.GOLD + "------------------------------------");
+        target.sendMessage(ChatColor.YELLOW + challenger.getName() + " te desafiou para um duelo!");
+
+        TextComponent acceptText = new TextComponent("[ACEITAR]");
+        acceptText.setColor(net.md_5.bungee.api.ChatColor.GREEN);
+        acceptText.setBold(true);
+        acceptText.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/duelo aceitar " + challenger.getName()));
+        acceptText.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Clique para aceitar o duelo").color(net.md_5.bungee.api.ChatColor.GRAY).create()));
+
+        TextComponent denyText = new TextComponent("[NEGAR]");
+        denyText.setColor(net.md_5.bungee.api.ChatColor.RED);
+        denyText.setBold(true);
+        denyText.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/duelo negar " + challenger.getName()));
+        denyText.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Clique para negar o duelo").color(net.md_5.bungee.api.ChatColor.GRAY).create()));
+
+        target.spigot().sendMessage(acceptText, new TextComponent("  "), denyText);
+        target.sendMessage(ChatColor.GRAY + "O desafio expira em " + plugin.getConfig().getInt("duel-settings.challenge-timeout-seconds", 60) + " segundos.");
+        target.sendMessage(ChatColor.GOLD + "------------------------------------");
+    }
+
+    public void cancelChallengeCreation(Player challenger) {
+        if (pendingKitSelection.remove(challenger.getUniqueId()) != null) {
+            challenger.sendMessage(ChatColor.RED + "Você fechou o menu de seleção. Desafio cancelado.");
+        }
+    }
+
+    public boolean isPlayerInKitSelection(UUID playerUUID) { return pendingKitSelection.containsKey(playerUUID); }
+
+    public void acceptChallenge(Player target, Player challenger) {
+        Challenge challenge = getChallengeFor(target.getUniqueId());
+
+        // Validações
+        if (challenge == null || !challenge.challenger().equals(challenger)) {
+            target.sendMessage(ChatColor.RED + "Você não tem um desafio pendente de " + challenger.getName() + ".");
+            return;
+        }
+
+        long timeout = plugin.getConfig().getLong("duel-settings.challenge-timeout-seconds", 60) * 1000L;
+        if (challenge.isExpired(timeout)) {
+            target.sendMessage(ChatColor.RED + "Este desafio de duelo já expirou.");
+            challenges.remove(challenger.getUniqueId()); // Limpa o desafio expirado
+            return;
+        }
+
+        // Remove o desafio da lista de pendentes
+        challenges.remove(challenger.getUniqueId());
+
+        DuelKit kit = kits.get(challenge.kitId().toLowerCase());
+        if (kit == null) {
+            challenger.sendMessage(ChatColor.RED + "Erro: O kit selecionado para o duelo não foi encontrado. O duelo foi cancelado.");
+            target.sendMessage(ChatColor.RED + "Erro: O kit selecionado para o duelo não foi encontrado. O duelo foi cancelado.");
+            return;
+        }
+
+        Optional<DuelArena> freeArenaOpt = findFreeArena();
+        if (freeArenaOpt.isPresent()) {
+            // Inicia o jogo imediatamente
+            DuelGame game = new DuelGame(plugin, freeArenaOpt.get(), challenger, target, kit);
+            activeDuels.add(game);
+            playerToGameMap.put(challenger.getUniqueId(), game);
+            playerToGameMap.put(target.getUniqueId(), game);
+        } else {
+            // Adiciona à fila de espera
+            duelQueue.add(new QueuedDuel(challenger, target, kit));
+            challenger.sendMessage(ChatColor.YELLOW + "Duelo aceito! Todas as arenas estão ocupadas. Vocês foram colocados na fila.");
+            target.sendMessage(ChatColor.YELLOW + "Duelo aceito! Todas as arenas estão ocupadas. Vocês foram colocados na fila.");
+        }
+    }
+
+    public void denyChallenge(Player target, Player challenger) {
+        Challenge challenge = getChallengeFor(target.getUniqueId());
+
+        // Valida se o desafio existe e se o desafiante é o correto.
+        if (challenge == null || !challenge.challenger().equals(challenger)) {
+            target.sendMessage(ChatColor.RED + "Você não tem um desafio pendente de " + challenger.getName() + ".");
+            return;
+        }
+
+        // Remove o desafio da lista de pendentes.
+        challenges.remove(challenger.getUniqueId());
+
+        target.sendMessage(ChatColor.YELLOW + "Você negou o desafio de duelo de " + challenger.getName() + ".");
+        challenger.sendMessage(ChatColor.RED + target.getName() + " negou seu desafio de duelo.");
     }
 
     public void startSpectating(Player spectator, Player target) {
-        DuelGame game = getGameForPlayer(target);
-        if (game == null) {
-            spectator.sendMessage(ChatColor.RED + target.getName() + " não está em um duelo no momento.");
-            return;
+        DuelGame game = playerToGameMap.get(target.getUniqueId());
+        if (game != null) {
+            game.addSpectator(spectator);
+        } else {
+            spectator.sendMessage(ChatColor.RED + "Este jogador não está em um duelo no momento.");
         }
-        game.addSpectator(spectator);
     }
 
     public void stopSpectating(Player spectator) {
-        DuelGame game = spectatorGameMap.get(spectator.getUniqueId());
-        if (game == null) {
+        DuelGame game = playerToGameMap.get(spectator.getUniqueId());
+        if (game != null && !game.isParticipant(spectator)) {
+            // O método removeSpectator já lida com a restauração do estado e o teleporte.
+            game.removeSpectator(spectator);
+        } else {
             spectator.sendMessage(ChatColor.RED + "Você não está assistindo a nenhum duelo.");
-            return;
         }
-        game.removeSpectator(spectator);
     }
 
-    /**
-     * Adiciona um espectador ao mapa de rastreamento.
-     * Chamado por DuelGame.
-     */
-    public void addSpectatorToMap(UUID spectatorUUID, DuelGame game) {
-        spectatorGameMap.put(spectatorUUID, game);
-    }
-
-    /**
-     * Remove um espectador do mapa de rastreamento.
-     * Chamado por DuelGame.
-     */
-    public void removeSpectatorFromMap(UUID spectatorUUID) {
-        spectatorGameMap.remove(spectatorUUID);
-    }
-
-    /**
-     * Processa a desistência de um jogador em um duelo.
-     * @param forfeiter O jogador que está desistindo.
-     */
-    public void forfeitDuel(Player forfeiter) {
-        DuelGame game = getGameForPlayer(forfeiter);
-        if (game == null) {
-            forfeiter.sendMessage(ChatColor.RED + "Você não está em um duelo para poder desistir.");
-            return;
+    public void forfeitDuel(Player player) {
+        DuelGame game = playerToGameMap.get(player.getUniqueId());
+        if (game != null && game.isParticipant(player)) {
+            String forfeitMessage = plugin.getConfig().getString("duel-settings.messages.forfeit", "&e{player} &7desistiu do duelo. A partida terminou em empate.");
+            game.endAsDraw(forfeitMessage, player);
+        } else {
+            player.sendMessage(ChatColor.RED + "Você não está em um duelo para poder desistir.");
         }
-
-        String forfeitMessage = plugin.getConfig().getString("duel-settings.messages.forfeit", "&e{player} &7desistiu do duelo. A partida terminou em empate.");
-        game.endAsDraw(forfeitMessage, forfeiter);
     }
 
     public void leaveQueue(Player player) {
         boolean removed = duelQueue.removeIf(queuedDuel -> {
             if (queuedDuel.involves(player)) {
-                Player other = queuedDuel.player1().equals(player) ? queuedDuel.player2() : queuedDuel.player1();
-                if (other.isOnline()) {
-                    other.sendMessage(ChatColor.RED + "Seu duelo em fila foi cancelado porque " + player.getName() + " saiu da fila.");
+                Player otherPlayer = queuedDuel.player1().equals(player) ? queuedDuel.player2() : queuedDuel.player1();
+                if (otherPlayer.isOnline()) {
+                    otherPlayer.sendMessage(ChatColor.YELLOW + player.getName() + " saiu da fila de duelos. O duelo foi cancelado.");
                 }
                 return true;
             }
@@ -499,85 +449,57 @@ public class DuelManager implements Listener {
         }
     }
 
-    private void checkDuelQueue() {
-        // Usa um laço para processar a fila até encontrar um duelo válido ou a fila/arenas acabarem.
-        while (!duelQueue.isEmpty() && !availableArenas.isEmpty()) {
-            QueuedDuel nextDuel = duelQueue.poll(); // Pega e remove o primeiro da fila
-
-            Player p1 = nextDuel.player1();
-            Player p2 = nextDuel.player2();
-
-            // Verifica se o duelo é válido
-            if (p1 != null && p1.isOnline() && p2 != null && p2.isOnline() && !playerGameMap.containsKey(p1.getUniqueId()) && !playerGameMap.containsKey(p2.getUniqueId())) {
-                p1.sendMessage(ChatColor.GREEN + "Uma arena ficou disponível! Seu duelo contra " + p2.getName() + " está começando.");
-                p2.sendMessage(ChatColor.GREEN + "Uma arena ficou disponível! Seu duelo contra " + p1.getName() + " está começando.");
-                startDuel(p1, p2, nextDuel.kit());
-                break; // Encontrou um duelo válido e iniciou, pode sair do laço.
-            } else {
-                // Se o duelo não é válido, notifica o jogador restante (se houver) e o laço continua para o próximo.
-                Player remainingPlayer = (p1 != null && p1.isOnline()) ? p1 : p2;
-                if (remainingPlayer != null && remainingPlayer.isOnline()) {
-                    remainingPlayer.sendMessage(ChatColor.RED + "Seu duelo em fila foi cancelado porque o oponente não está mais disponível.");
-                }
-            }
-        }
+    public void endDuel(DuelGame game) {
+        activeDuels.remove(game);
+        playerToGameMap.remove(game.getPlayer1().getUniqueId());
+        playerToGameMap.remove(game.getPlayer2().getUniqueId());
+        // Espectadores já são removidos do mapa pelo próprio DuelGame
     }
 
-    /**
-     * Inicia a tarefa que verifica e remove desafios de duelo expirados.
-     */
-    private void startChallengeExpirationTask() {
-        challengeExpirationTask = new BukkitRunnable() {
+    public void addSpectatorToMap(UUID spectatorUUID, DuelGame game) {
+        playerToGameMap.put(spectatorUUID, game);
+    }
+
+    public void removeSpectatorFromMap(UUID spectatorUUID) {
+        playerToGameMap.remove(spectatorUUID);
+    }
+
+    private void startQueueProcessor() {
+        new BukkitRunnable() {
             @Override
             public void run() {
-                if (pendingChallenges.isEmpty()) {
+                if (duelQueue.isEmpty()) {
                     return;
                 }
 
-                Iterator<Map.Entry<UUID, Challenge>> iterator = pendingChallenges.entrySet().iterator();
-                while (iterator.hasNext()) {
-                    Challenge challenge = iterator.next().getValue();
-                    if (challenge.isExpired(CHALLENGE_TIMEOUT_SECONDS * 1000)) {
-                        iterator.remove(); // Remove o desafio do mapa
+                Optional<DuelArena> freeArenaOpt = findFreeArena();
+                if (freeArenaOpt.isPresent()) {
+                    QueuedDuel nextDuel = duelQueue.remove(0);
+                    Player p1 = nextDuel.player1();
+                    Player p2 = nextDuel.player2();
 
-                        Player challenger = challenge.getChallenger();
-                        Player target = challenge.getTarget();
+                    // Verifica se ambos os jogadores ainda estão online
+                    if (p1.isOnline() && p2.isOnline()) {
+                        p1.sendMessage(ChatColor.GREEN + "Uma arena foi encontrada! Iniciando seu duelo...");
+                        p2.sendMessage(ChatColor.GREEN + "Uma arena foi encontrada! Iniciando seu duelo...");
 
-                        // Notifica os jogadores se eles ainda estiverem online
-                        if (challenger != null && challenger.isOnline()) {
-                            challenger.sendMessage(ChatColor.RED + "Seu desafio de duelo para " + target.getName() + " expirou.");
-                        }
-                        if (target != null && target.isOnline()) {
-                            target.sendMessage(ChatColor.RED + "O desafio de duelo de " + challenger.getName() + " expirou.");
+                        DuelGame game = new DuelGame(plugin, freeArenaOpt.get(), p1, p2, nextDuel.kit());
+                        activeDuels.add(game);
+                        playerToGameMap.put(p1.getUniqueId(), game);
+                        playerToGameMap.put(p2.getUniqueId(), game);
+                    } else {
+                        // Se um dos jogadores ficou offline, notifica o outro (se online)
+                        Player onlinePlayer = p1.isOnline() ? p1 : (p2.isOnline() ? p2 : null);
+                        if (onlinePlayer != null) {
+                            onlinePlayer.sendMessage(ChatColor.RED + "Seu oponente ficou offline e o duelo na fila foi cancelado.");
                         }
                     }
                 }
             }
-        }.runTaskTimer(plugin, 20L, 20L); // Verifica a cada segundo
+        }.runTaskTimer(plugin, 100L, 100L); // Verifica a cada 5 segundos
     }
 
-    public void stopTasks() {
-        if (challengeExpirationTask != null && !challengeExpirationTask.isCancelled()) {
-            challengeExpirationTask.cancel();
-        }
-    }
-    private void createArenaConfigFile() {
-        arenaConfigFile = new File(plugin.getDataFolder(), "duel_arenas.yml");
-        if (!arenaConfigFile.exists()) {
-            plugin.saveResource("duel_arenas.yml", false);
-        }
-        arenaConfig = YamlConfiguration.loadConfiguration(arenaConfigFile);
-    }
-
-    private void createKitConfigFile() {
-        kitConfigFile = new File(plugin.getDataFolder(), "duel_kits.yml");
-        if (!kitConfigFile.exists()) {
-            plugin.saveResource("duel_kits.yml", false);
-        }
-        kitConfig = YamlConfiguration.loadConfiguration(kitConfigFile);
-    }
-
-    public FileConfiguration getKitConfig() {
-        return kitConfig;
+    public Optional<DuelArena> findFreeArena() {
+        return arenas.values().stream().filter(a -> activeDuels.stream().noneMatch(g -> g.getArena().equals(a))).findFirst();
     }
 }

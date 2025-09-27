@@ -37,10 +37,15 @@ public class KitsSubCommand implements SubCommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
         sender.sendMessage(ChatColor.GOLD + "--- Kits de Duelo Disponíveis ---");
-        plugin.getDuelManager().getLoadedKits().values().forEach(kit -> {
-            sender.sendMessage(ChatColor.YELLOW + kit.getId() + ": " + kit.getDisplayName());
-        });
-        sender.sendMessage(ChatColor.GRAY + "Use /duelo desafiar <jogador> [kit]");
+        if (plugin.getDuelManager().getLoadedKits().isEmpty()) {
+            sender.sendMessage(ChatColor.GRAY + "Nenhum kit de duelo foi configurado no servidor.");
+        } else {
+            plugin.getDuelManager().getLoadedKits().values().forEach(kit -> {
+                sender.sendMessage(kit.getDisplayName() + ChatColor.GRAY + " (ID: " + kit.getId() + ")");
+                kit.getDescription().forEach(line -> sender.sendMessage(ChatColor.GRAY + "  " + line));
+            });
+        }
+        sender.sendMessage(ChatColor.GOLD + "------------------------------------");
     }
 
     @Override

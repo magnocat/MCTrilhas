@@ -27,10 +27,10 @@ public class SetSpecSubCommand implements SubCommand {
     public String getDescription() { return "Define o ponto de spawn dos espectadores."; }
 
     @Override
-    public String getSyntax() { return "/duelo setspec"; }
+    public String getSyntax() { return "/scout admin duel setspec"; }
 
     @Override
-    public String getPermission() { return "mctrilhas.duel.admin"; }
+    public String getPermission() { return "mctrilhas.scout.admin.duel.setspec"; }
 
     @Override
     public boolean isAdminCommand() { return true; }

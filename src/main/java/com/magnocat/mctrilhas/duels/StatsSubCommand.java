@@ -62,20 +62,28 @@ public class StatsSubCommand implements SubCommand {
     }
 
     private void displayStats(CommandSender sender, UUID targetUUID, String targetName) {
-        PlayerDuelStats stats = plugin.getPlayerDataManager().getPlayerDuelStats(targetUUID);
-        int wins = stats.getWins();
-        int losses = stats.getLosses();
-        int elo = stats.getElo();
-        int totalGames = wins + losses;
-        double winRate = (totalGames == 0) ? 0.0 : ((double) wins / totalGames) * 100;
+        sender.sendMessage(ChatColor.YELLOW + "Buscando estatísticas de " + targetName + "...");
 
-        sender.sendMessage(ChatColor.GOLD + "--- Estatísticas de Duelo: " + ChatColor.WHITE + targetName + ChatColor.GOLD + " ---");
-        sender.sendMessage(ChatColor.YELLOW + "ELO Rating: " + ChatColor.WHITE + elo);
-        sender.sendMessage(ChatColor.GREEN + "Vitórias: " + ChatColor.WHITE + wins);
-        sender.sendMessage(ChatColor.RED + "Derrotas: " + ChatColor.WHITE + losses);
-        sender.sendMessage(ChatColor.BLUE + "Partidas: " + ChatColor.WHITE + totalGames);
-        sender.sendMessage(String.format(ChatColor.AQUA + "Taxa de Vitória: " + ChatColor.WHITE + "%.2f%%", winRate));
-        sender.sendMessage(ChatColor.GOLD + "------------------------------------");
+        // Executa a leitura de dados de forma assíncrona para não travar o servidor.
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            PlayerDuelStats stats = plugin.getPlayerDataManager().getPlayerDuelStats(targetUUID);
+            int wins = stats.getWins();
+            int losses = stats.getLosses();
+            int elo = stats.getElo();
+            int totalGames = wins + losses;
+            double winRate = (totalGames == 0) ? 0.0 : ((double) wins / totalGames) * 100;
+
+            // Volta para a thread principal para enviar as mensagens ao jogador.
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                sender.sendMessage(ChatColor.GOLD + "--- Estatísticas de Duelo: " + ChatColor.WHITE + targetName + ChatColor.GOLD + " ---");
+                sender.sendMessage(ChatColor.YELLOW + "ELO Rating: " + ChatColor.WHITE + elo);
+                sender.sendMessage(ChatColor.GREEN + "Vitórias: " + ChatColor.WHITE + wins);
+                sender.sendMessage(ChatColor.RED + "Derrotas: " + ChatColor.WHITE + losses);
+                sender.sendMessage(ChatColor.BLUE + "Partidas: " + ChatColor.WHITE + totalGames);
+                sender.sendMessage(String.format(ChatColor.AQUA + "Taxa de Vitória: " + ChatColor.WHITE + "%.2f%%", winRate));
+                sender.sendMessage(ChatColor.GOLD + "------------------------------------");
+            });
+        });
     }
 
     @Override

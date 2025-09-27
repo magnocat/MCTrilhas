@@ -9,9 +9,6 @@ import org.bukkit.entity.Player;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Implementa o subcomando `/duelo cancelarena`.
- */
 public class CancelArenaSubCommand implements SubCommand {
 
     private final MCTrilhasPlugin plugin;
@@ -21,19 +18,29 @@ public class CancelArenaSubCommand implements SubCommand {
     }
 
     @Override
-    public String getName() { return "cancelarena"; }
+    public String getName() {
+        return "cancel";
+    }
 
     @Override
-    public String getDescription() { return "Cancela a criação da arena de duelo atual."; }
+    public String getDescription() {
+        return "Cancela a criação da arena de duelo atual.";
+    }
 
     @Override
-    public String getSyntax() { return "/duelo cancelarena"; }
+    public String getSyntax() {
+        return "/scout admin duel cancel";
+    }
 
     @Override
-    public String getPermission() { return "mctrilhas.duel.admin"; }
+    public String getPermission() {
+        return "mctrilhas.scout.admin.duel.cancel";
+    }
 
     @Override
-    public boolean isAdminCommand() { return true; }
+    public boolean isAdminCommand() {
+        return true;
+    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -41,8 +48,7 @@ public class CancelArenaSubCommand implements SubCommand {
             sender.sendMessage(ChatColor.RED + "Este comando só pode ser usado por jogadores.");
             return;
         }
-        Player admin = (Player) sender;
-        plugin.getDuelManager().cancelArenaCreation(admin);
+        plugin.getDuelManager().cancelArenaCreation((Player) sender);
     }
 
     @Override

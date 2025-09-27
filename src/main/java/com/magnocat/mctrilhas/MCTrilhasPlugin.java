@@ -28,7 +28,8 @@ import com.magnocat.mctrilhas.ctf.CTFCommand;
 import com.magnocat.mctrilhas.ctf.CTFManager;
 import com.magnocat.mctrilhas.ctf.CTFMilestoneManager;
 import com.magnocat.mctrilhas.duels.DuelCommand;
-import com.magnocat.mctrilhas.duels.DuelManager;
+import com.magnocat.mctrilhas.duels.DuelManager; // Garante que estamos usando o manager correto
+import com.magnocat.mctrilhas.duels.DuelListener;
 import com.magnocat.mctrilhas.duels.DuelRewardManager;
 import com.magnocat.mctrilhas.listeners.AdminPrivacyListener;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
@@ -182,8 +183,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.ctfMilestoneManager = new CTFMilestoneManager(this);
         this.hudManager = new HUDManager(this);
         this.scoreboardManager = new ScoreboardManager(this);
-        this.duelManager = new DuelManager(this);
         this.duelRewardManager = new DuelRewardManager(this);
+        this.duelManager = new DuelManager(this); // Instancia o DuelManager do pacote correto
         this.petManager = new PetManager(this);
 
         /* Comentado temporariamente para desativar a integração com BlueMap
@@ -233,7 +234,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new CommandBlockerListener(this),
                 new AdminPrivacyListener(this),
                 new GameChatListener(this),
-                new PetListener(this)
+                new PetListener(this),
+                new DuelListener(this)
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
@@ -302,7 +304,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     }
 
     public DuelManager getDuelManager() {
-        return duelManager;
+        return this.duelManager;
     }
 
     public DuelRewardManager getDuelRewardManager() {

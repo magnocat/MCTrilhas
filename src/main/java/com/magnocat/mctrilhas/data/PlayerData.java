@@ -1,6 +1,7 @@
 package com.magnocat.mctrilhas.data;
 
 import com.magnocat.mctrilhas.badges.BadgeType;
+import com.magnocat.mctrilhas.duels.PlayerDuelStats;
 import com.magnocat.mctrilhas.pet.PetData;
 import com.magnocat.mctrilhas.ranks.Rank;
 import org.bukkit.Location;
@@ -32,8 +33,9 @@ public class PlayerData {
     private final Set<String> claimedCtfMilestones;
     private PetData petData;
     private String webAccessToken;
+    private final PlayerDuelStats duelStats;
 
-    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones, PetData petData, String webAccessToken) {
+    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones, PetData petData, String webAccessToken, PlayerDuelStats duelStats) {
         this.playerUUID = playerUUID;
         this.earnedBadgesMap = earnedBadgesMap;
         this.progressMap = progressMap;
@@ -50,6 +52,7 @@ public class PlayerData {
         this.claimedCtfMilestones = claimedCtfMilestones;
         this.petData = petData;
         this.webAccessToken = webAccessToken;
+        this.duelStats = duelStats;
     }
 
     public UUID getPlayerUUID() {
@@ -179,5 +182,9 @@ public class PlayerData {
 
     public void setPetData(PetData petData) {
         this.petData = petData;
+    }
+
+    public PlayerDuelStats getDuelStats() {
+        return duelStats;
     }
 }
