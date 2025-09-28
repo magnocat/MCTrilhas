@@ -162,6 +162,15 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
         *   **Insígnia `DOMADOR`:** Concedida por domar diferentes tipos de animais.
         *   **Paginação na GUI de Insígnias:** Implementar um sistema de páginas no menu `/scout badges` para acomodar futuras insígnias.
 
+*   ### 🎯 PRÓXIMO FOCO: Sistema de Quests e NPCs
+    *   **Descrição:** Implementar um sistema de missões "in-house", totalmente integrado com os sistemas existentes (insígnias, ranques, economia).
+    *   **Filosofia:** Desenvolver internamente para garantir integração perfeita e customização, sem depender de plugins de terceiros como o `Quests`.
+    *   **Funcionalidades Planejadas:**
+        *   **`QuestManager` e `NPCManager`:** Classes para carregar, gerenciar e rastrear o progresso das missões e dos NPCs que as oferecem.
+        *   **`quests.yml`:** Arquivo de configuração para definir todas as missões, seus objetivos (coletar itens, falar com NPCs, visitar locais) e recompensas (insígnias, Totens, itens).
+        *   **NPCs Interativos:** NPCs com diálogos, aparências customizadas e que servem como pontos de início e fim para as quests.
+        *   **`QuestListener`:** Ouvinte de eventos para monitorar as ações dos jogadores e atualizar o progresso das missões.
+
 *   ### Painel de Administração (Web)
     *   **Descrição:** Uma plataforma web robusta para gerenciamento do servidor, baseada no template AdminLTE. O portal do jogador (`pdash.html`) e o login do admin já foram implementados.
     *   **Funcionalidades Planejadas (Painel do Admin):**

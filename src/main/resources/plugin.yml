@@ -44,6 +44,10 @@ commands:
     description: Apadrinha um novo jogador, promovendo-o para o ranque Filhote.
     usage: /<command> <jogador>
     permission: mctrilhas.apadrinhar
+  regras:
+    description: Mostra as regras do servidor.
+    usage: /<command>
+    aliases: [rules]
 
 permissions:
   mctrilhas.*:
