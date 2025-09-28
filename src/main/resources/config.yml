@@ -456,3 +456,16 @@ hud-settings:
     enabled: "&aHUD de estatísticas ativado."
     disabled: "&aHUD de estatísticas desativado."
     loading: "Carregando estatísticas..."
+
+# Regras do Servidor
+# Use códigos de cor com '&'
+server-rules-header: "&6--- [ Regras Escoteiras do MC Trilhas ] ---"
+server-rules:
+  - "&eHonra: &fSeja honesto e respeite as regras do servidor."
+  - "&eLealdade: &fApoie seus colegas jogadores e a comunidade."
+  - "&eRespeito: &fTrate todos com cortesia, sem ofensas ou comportamentos tóxicos."
+  - "&eCooperação: &fTrabalhe em equipe para construir e explorar."
+  - "&eResponsabilidade: &fCuide do ambiente do servidor e reporte problemas."
+  - "&eAmizade: &fFaça novos amigos e divirta-se com respeito mútuo."
+  - "&eCoragem: &fEnfrente desafios e ajude outros a superá-los."
+  - "&ePreservação: &fRespeite as construções alheias e o mundo do jogo."

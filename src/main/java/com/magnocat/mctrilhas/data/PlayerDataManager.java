@@ -87,9 +87,9 @@ public class PlayerDataManager {
     public void loadPlayerData(UUID uuid) {
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
         if (!playerFile.exists()) {
-            // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
-            // O ranque inicial é sempre FILHOTE. O token é nulo até ser gerado.
-            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.FILHOTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null, null, new PlayerDuelStats()));
+            // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez. O ranque inicial agora é VISITANTE.
+            // O token é nulo até ser gerado.
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.VISITANTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null, null, new PlayerDuelStats()));
             return;
         }
 
@@ -173,7 +173,7 @@ public class PlayerDataManager {
         // Carrega a lista de biomas visitados
         List<String> visitedBiomesList = config.getStringList("visited-biomes");
         // Carrega o ranque do jogador, com FILHOTE como padrão.
-        Rank rank = Rank.fromString(config.getString("rank", "FILHOTE"));
+        Rank rank = Rank.fromString(config.getString("rank", "VISITANTE"));
         // Carrega o tempo de jogo ativo.
         long activePlaytimeTicks = config.getLong("active-playtime-ticks", 0);
 
@@ -218,7 +218,18 @@ public class PlayerDataManager {
             }
         }
 
-        return new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedTreasureGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken, duelStats);
+        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedTreasureGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken, duelStats);
+
+        // Carrega o UUID do padrinho, se existir.
+        String godfatherUuidString = config.getString("godfather-uuid");
+        if (godfatherUuidString != null && !godfatherUuidString.isEmpty()) {
+            try {
+                playerData.setGodfatherUUID(UUID.fromString(godfatherUuidString));
+            } catch (IllegalArgumentException e) {
+                plugin.logWarn("UUID de padrinho inválido '" + godfatherUuidString + "' encontrado no arquivo de dados do jogador " + uuid);
+            }
+        }
+        return playerData;
     }
 
     /**
@@ -276,6 +287,11 @@ public class PlayerDataManager {
         PlayerDuelStats duelStats = playerData.getDuelStats();
         if (duelStats != null) {
             duelStats.saveToConfig(config.createSection("duel-stats"));
+        }
+
+        // Salva o UUID do padrinho
+        if (playerData.getGodfatherUUID() != null) {
+            config.set("godfather-uuid", playerData.getGodfatherUUID().toString());
         }
 
         config.set("web-access-token", playerData.getWebAccessToken());
@@ -387,7 +403,7 @@ public class PlayerDataManager {
         // 3. Como último recurso, lê do arquivo (operação mais lenta)
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
         if (!playerFile.exists()) {
-            return Rank.FILHOTE; // Jogador provavelmente nunca entrou no servidor.
+            return Rank.VISITANTE; // Jogador provavelmente nunca entrou no servidor.
         }
         FileConfiguration config = YamlConfiguration.loadConfiguration(playerFile);
         Rank rank = Rank.fromString(config.getString("rank", "FILHOTE"));

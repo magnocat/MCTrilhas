@@ -1,67 +1,49 @@
 package com.magnocat.mctrilhas.ranks;
 
-import java.util.Arrays;
+import org.bukkit.ChatColor;
 
-/**
- * Enum que representa os diferentes ranques escoteiros no servidor.
- * A ordem das constantes é crucial, pois define a hierarquia de progressão,
- * do menor (`FILHOTE`) ao maior (`CHEFE`).
- */
 public enum Rank {
-    FILHOTE("Filhote", "&7"),
-    LOBINHO("Lobinho", "&f"),
-    ESCOTEIRO("Escoteiro", "&a"),
-    SENIOR("Sênior", "&e"),
-    PIONEIRO("Pioneiro", "&6"),
-    CHEFE("Chefe", "&c&l");
+    VISITANTE("Visitante", ChatColor.GRAY),
+    FILHOTE("Filhote", ChatColor.WHITE),
+    LOBINHO("Lobinho", ChatColor.YELLOW),
+    ESCOTEIRO("Escoteiro", ChatColor.GREEN),
+    SENIOR("Sênior", ChatColor.BLUE),
+    PIONEIRO("Pioneiro", ChatColor.DARK_PURPLE),
+    CHEFE("Chefe", ChatColor.RED);
 
     private final String displayName;
-    private final String color;
+    private final ChatColor color;
 
-    /**
-     * Construtor do enum de ranques.
-     * @param displayName O nome de exibição formatado do ranque.
-     * @param color O código de cor do chat associado ao ranque.
-     */
-    Rank(String displayName, String color) {
+    Rank(String displayName, ChatColor color) {
         this.displayName = displayName;
         this.color = color;
     }
 
-    /**
-     * @return O nome de exibição formatado (ex: "Escoteiro").
-     */
     public String getDisplayName() {
         return displayName;
     }
 
-    /**
-     * @return O código de cor do chat (ex: "&a").
-     */
-    public String getColor() {
+    public ChatColor getColor() {
         return color;
     }
 
-    /**
-     * Retorna o próximo ranque na hierarquia.
-     * A progressão automática para no ranque PIONEIRO.
-     * @return O próximo ranque, ou {@code null} se o ranque atual for o último da linha de progressão automática.
-     */
     public Rank getNext() {
-        // A progressão automática para em PIONEIRO. CHEFE é um ranque especial.
-        if (this == PIONEIRO || this == CHEFE) {
+        // O ranque CHEFE não faz parte da progressão linear
+        if (this == CHEFE || this == PIONEIRO) {
             return null;
         }
         return values()[this.ordinal() + 1];
     }
 
-    /**
-     * Busca um ranque pelo nome, ignorando maiúsculas/minúsculas.
-     *
-     * @param name O nome do ranque a ser buscado.
-     * @return O Enum Rank correspondente, ou {@code FILHOTE} como padrão se não for encontrado.
-     */
-    public static Rank fromString(String name) {
-        return Arrays.stream(values()).filter(r -> r.name().equalsIgnoreCase(name)).findFirst().orElse(FILHOTE);
+    public static Rank fromString(String text) {
+        if (text != null) {
+            for (Rank r : Rank.values()) {
+                if (text.equalsIgnoreCase(r.name())) {
+                    return r;
+                }
+            }
+        }
+        // Retorna VISITANTE como padrão se o ranque for nulo ou inválido
+        return VISITANTE;
     }
 }

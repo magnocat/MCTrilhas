@@ -19,9 +19,11 @@ import net.milkbowl.vault.economy.Economy;
 
 // Project-specific Classes
 import com.magnocat.mctrilhas.badges.BadgeManager;
+import com.magnocat.mctrilhas.commands.ApadrinharCommand;
 import com.magnocat.mctrilhas.commands.DailyCommand;
 import com.magnocat.mctrilhas.commands.FamilyCommand;
 import com.magnocat.mctrilhas.commands.RankCommand;
+import com.magnocat.mctrilhas.commands.RulesCommand;
 import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;
 import com.magnocat.mctrilhas.commands.TreasureHuntCommand;
 import com.magnocat.mctrilhas.ctf.CTFCommand;
@@ -47,6 +49,8 @@ import com.magnocat.mctrilhas.listeners.LumberjackListener;
 import com.magnocat.mctrilhas.listeners.MenuListener;
 import com.magnocat.mctrilhas.listeners.MiningListener;
 import com.magnocat.mctrilhas.listeners.PlayerJoinListener;
+import com.magnocat.mctrilhas.listeners.PunishmentListener;
+import com.magnocat.mctrilhas.listeners.PlayerProtectionListener;
 import com.magnocat.mctrilhas.listeners.PlayerQuitListener;
 import com.magnocat.mctrilhas.listeners.TreasureHuntListener;
 import com.magnocat.mctrilhas.ctf.CTFListener;
@@ -211,7 +215,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         getCommand("ctf").setExecutor(ctfExecutor);
         getCommand("ctf").setTabCompleter(ctfExecutor);
         getCommand("familia").setExecutor(new FamilyCommand(this)); // O comando /hud foi movido para /scout hud
+        getCommand("regras").setExecutor(new RulesCommand(this));
         DuelCommand duelExecutor = new DuelCommand(this);
+        getCommand("apadrinhar").setExecutor(new ApadrinharCommand(this));
         getCommand("duelo").setExecutor(duelExecutor);
         getCommand("duelo").setTabCompleter(duelExecutor);
         logInfo("Comandos registrados.");
@@ -237,7 +243,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new GameChatListener(this),
                 new PetListener(this),
                 new DuelListener(this),
-                new GameListener(this)
+                new GameListener(this),
+                new PlayerProtectionListener(this),
+                new PunishmentListener(this)
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));

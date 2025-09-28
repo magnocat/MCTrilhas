@@ -1407,6 +1407,7 @@ public class HttpApiManager {
         apiData.put("ctfLeaderboards", Map.of("wins", ctfWinsLeaderboardCache, "kills", ctfKillsLeaderboardCache, "captures", ctfCapturesLeaderboardCache));
         apiData.put("eloLeaderboard", eloLeaderboardCache);
         apiData.put("activityHistory", activityHistory);
+        apiData.put("serverInfo", Map.of("rules", plugin.getConfig().getStringList("server-rules")));
         apiData.put("lastUpdated", System.currentTimeMillis());
         return apiData;
     }

@@ -145,16 +145,10 @@
         <!-- Regras Escoteiras -->
         <section class="card">
             <h2 class="section-title">Regras Escoteiras do MC Trilhas</h2>
-            <ul class="list-disc list-inside space-y-2 text-lg">
-                <li><strong>Honra:</strong> Seja honesto e respeite as regras do servidor.</li>
-                <li><strong>Lealdade:</strong> Apoie seus colegas jogadores e a comunidade.</li>
-                <li><strong>Respeito:</strong> Trate todos com cortesia, sem ofensas ou comportamentos tóxicos.</li>
-                <li><strong>Cooperação:</strong> Trabalhe em equipe para construir e explorar.</li>
-                <li><strong>Responsabilidade:</strong> Cuide do ambiente do servidor e reporte problemas.</li>
-                <li><strong>Amizade:</strong> Faça novos amigos e divirta-se com respeito mútuo.</li>
-                <li><strong>Coragem:</strong> Enfrente desafios e ajude outros a superá-los.</li>
-                <li><strong>Preservação:</strong> Respeite as construções alheias e o mundo do jogo.</li>
-            </ul>
+            <div id="rules-loading" class="text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>
+                Carregando regras...</div>
+            <ul id="rules-list" class="list-disc list-inside space-y-2 text-lg hidden"></ul>
+            <div id="rules-error" class="text-center text-red-500 hidden">Falha ao carregar as regras.</div>
         </section>
 
         <!-- Hall da Fama do CTF -->
@@ -659,6 +653,7 @@
                     renderPlayerChart(data.activityHistory);
                     renderCtfLeaderboards(data.ctfLeaderboards);
                     renderEloLeaderboard(data.eloLeaderboard);
+                    renderServerRules(data.serverInfo.rules);
 
                 } catch (error) {
                     console.error('Falha ao buscar dados da API:', error);
@@ -666,6 +661,11 @@
                     ['daily', 'monthly', 'all-time', 'wins', 'kills', 'captures', 'elo'].forEach(showLeaderboardError);
                     const chartLoadingEl = document.getElementById('chart-loading');
                     if (chartLoadingEl) chartLoadingEl.innerText = 'Não foi possível carregar os dados de atividade.';
+                    // Mostra erro na seção de regras também
+                    const rulesLoadingEl = document.getElementById('rules-loading');
+                    if (rulesLoadingEl) rulesLoadingEl.classList.add('hidden');
+                    const rulesErrorEl = document.getElementById('rules-error');
+                    if (rulesErrorEl) rulesErrorEl.classList.remove('hidden');
                 }
             }
 
@@ -707,7 +707,7 @@
                     players.forEach(player => {
                         const listItem = document.createElement('li');
                         listItem.innerHTML = `
-                    <span class="font-semibold text-gray-800">${player.name}</span> - 
+                    <span class="font-semibold text-gray-800">${player.name}</span> -
                     <span class="font-bold text-green-700">${player.badges}</span> insígnias
                 `;
                         listEl.appendChild(listItem);
@@ -733,7 +733,7 @@
                     players.forEach(player => {
                         const listItem = document.createElement('li');
                         listItem.innerHTML = `
-                    <span class="font-semibold text-gray-800">${player.name}</span> - 
+                    <span class="font-semibold text-gray-800">${player.name}</span> -
                     <span class="font-bold text-green-700">${player.value}</span> ${unit}
                 `;
                         listEl.appendChild(listItem);
@@ -769,6 +769,38 @@
                         listEl.appendChild(listItem);
                     });
                 }
+                loadingEl.classList.add('hidden');
+                listEl.classList.remove('hidden');
+            }
+
+            // Renderiza a lista de regras do servidor
+            function renderServerRules(rules) {
+                const listEl = document.getElementById('rules-list');
+                const loadingEl = document.getElementById('rules-loading');
+                const errorEl = document.getElementById('rules-error');
+
+                if (!listEl || !loadingEl || !errorEl) return;
+
+                if (!rules || rules.length === 0) {
+                    loadingEl.classList.add('hidden');
+                    errorEl.classList.remove('hidden');
+                    return;
+                }
+
+                listEl.innerHTML = ''; // Limpa a lista
+
+                rules.forEach(rule => {
+                    const listItem = document.createElement('li');
+                    // Converte códigos de cor '&' para tags <span> para estilização
+                    const formattedRule = rule.replace(/&([0-9a-fk-or])([^&]*)/g, (match, code, text) => {
+                        const colorClass = `mc-color-${code}`; // Você precisaria de CSS para isso
+                        return `<span class="${colorClass}">${text}</span>`;
+                    }).replace(/&l(.*?)(?=&|$)/g, '<strong>$1</strong>'); // Suporte para negrito
+
+                    listItem.innerHTML = formattedRule.replace(/&[0-9a-fk-orl]/g, ''); // Remove códigos restantes
+                    listEl.appendChild(listItem);
+                });
+
                 loadingEl.classList.add('hidden');
                 listEl.classList.remove('hidden');
             }

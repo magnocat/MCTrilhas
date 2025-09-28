@@ -121,17 +121,6 @@ Revisão das principais funcionalidades implementadas e decisões tomadas:
 
 Este é o plano de longo prazo para as próximas grandes funcionalidades, conforme discutido e documentado em `docs/DOCUMENTACAO_TECNICA.md`.
 
-*   ### 🎯 EM FOCO: Sistema de Duelos 1v1 (Implementação da Lógica)
-    *   **Estado Atual:** A base está pronta. Já temos o armazenamento de estatísticas (ELO, vitórias), a integração com a HUD e o placar, e os comandos registrados.
-    *   **O que Falta:** Implementar a lógica de jogo.
-    *   **Funcionalidades Planejadas:**
-        *   **`DuelManager`**: Classe para gerenciar desafios, filas e arenas.
-        *   **`DuelGame`**: Classe para controlar o ciclo de vida de uma partida (contagem, luta, fim).
-        *   **`DuelArena` e `DuelKit`**: Classes para representar arenas e kits carregados dos arquivos de configuração.
-        *   **Arquivos de Configuração:** Criar `duel_arenas.yml` e `duel_kits.yml`.
-        *   **Lógica de ELO:** Implementar o cálculo de ganho/perda de ELO após cada partida.
-        *   **Modo Espectador e Recompensas:** Adicionar a funcionalidade de assistir a duelos e o sistema de prêmios semanais.
-
 *   ### 🐾 CONCLUÍDO (FASE 1): Sistema de Pets
     *   **Descrição:** Um sistema que permite aos jogadores terem um companheiro animal que os segue, ajuda em combate e sobe de nível.
     *   **Filosofia:** Será desenvolvido internamente, sem depender de plugins como `MyPet`.
@@ -153,42 +142,25 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
         *   **Persistência:** Todos os dados (tipo, nome, nível, XP) serão salvos no arquivo do jogador.
         *   **Nota Especial:** Criar uma gata preta, item único e super OP para o Admin. 😼
 
-*   ### Sistema de Comunidade e Segurança (Graylist Híbrido)
-    *   **Descrição:** Um sistema para proteger o servidor de jogadores mal-intencionados, mantendo-o acessível para a comunidade escoteira.
+*   ### ✅ CONCLUÍDO: Sistema de Duelos 1v1
+    *   **Descrição:** Sistema completo de combate 1v1 com arenas, kits, ranking ELO, recompensas e modo espectador.
+    *   **Componentes:** `DuelManager`, `DuelGame`, `DuelArena`, `DuelKit`, `GameListener`, `DuelListener`.
+    *   **Dados:** `duel_arenas.yml`, `duel_kits.yml`, e seção `duel-stats` no arquivo de dados do jogador.
+    *   **Funcionalidades:** Desafios, filas, contagem regressiva, timer na HUD, cálculo de ELO, recompensas por vitória e ranking semanal.
+
+*   ### ✅ CONCLUÍDO: Sistema de Comunidade e Segurança (Graylist Híbrido)
+    *   **Descrição:** Sistema para proteger o servidor de novos jogadores, exigindo que sejam apadrinhados por membros existentes.
+    *   **Componentes:** `PlayerProtectionListener`, `PunishmentListener`, `ApadrinharCommand`.
+    *   **Funcionalidades:** Ranque `VISITANTE` com restrições, comando `/apadrinhar` para promoção, e sistema de responsabilidade que penaliza o padrinho se o afilhado for banido.
+
+---
+
+*   ### 🎯 EM FOCO: Novas Insígnias e Melhorias
+    *   **Descrição:** Expandir o sistema de progressão com novas insígnias e melhorar a experiência do jogador.
     *   **Funcionalidades Planejadas:**
-        *   **Ranque "Visitante":** Novos jogadores entram com permissões limitadas (não podem construir/quebrar).
-        *   **Sistema de Apadrinhamento:** Membros existentes podem usar `/apadrinhar <jogador>` para promover um visitante. O padrinho se torna responsável e pode sofrer penalidades (perda de Totens) se o afilhado for banido.
-        *   **Sistema de Aplicação via Site:** Visitantes sem padrinho podem preencher um formulário no site interno do servidor.
-        *   **Notificação de Aplicação:** O envio do formulário notifica os administradores (via Discord/in-game) para revisão manual.
-        *   **Ponte para o Mundo Real:** Se um candidato não for escoteiro, seus dados de aplicação serão coletados e encaminhados para uma sede escoteira parceira, servindo como uma ponte para o recrutamento no mundo real.
-        *   **Comandos de Moderação:** `/aprovar <jogador>` para promover manualmente após análise da aplicação.
-
-*   ### Sistema de Clãs
-    *   **Descrição:** Permitirá que jogadores se organizem em grupos formais ("patrulhas" ou "tropas").
-    *   **Funcionalidades:** Criação de clã, convites, cargos (líder, oficial), base do clã, banco de itens/Totens compartilhado.
-    *   **Comandos:** `/cla criar`, `/cla convidar`, `/cla base`, etc.
-
-*   ### Sistema CTF (Capture The Flag)
-    *   **Descrição:** Um modo de jogo competitivo baseado em equipes (ex: Vermelha vs. Azul) onde o objetivo é invadir a base inimiga, capturar a bandeira e trazê-la para a própria base para pontuar.
-    *   **Funcionalidades:**
-        *   Arenas dedicadas com bases, bandeiras e pontos de respawn.
-        *   Sistema de times e balanceamento automático de jogadores.
-        *   Kits de equipamento pré-definidos para um jogo justo.
-        *   Placar em tempo real e recompensas para a equipe vencedora (ex: 100 Totens por vitória).
-        *   **Seleção de Kits (Futuro):** Menu para escolher entre diferentes classes (ex: Arqueiro, Tanque, Batedor) antes da partida.
-    *   **Integrações Futuras (com Sistema de Clãs):**
-        *   Partidas de Clã vs. Clã.
-        *   Filas para times pré-formados por membros do mesmo clã.
-        *   Rankings de Clãs específicos para o modo CTF.
-        *   Ferramentas para organização de torneios.
-        *   **Integração com BlueMap:** Exibição em tempo real da posição das bandeiras e status da partida no mapa web.
-    *   **Recompensas Especiais (Futuro):**
-        *   Troféus customizados (similar aos de insígnias) para campeonatos.
-
-*   ### Sistema "Vale dos Pioneiros" (Terrenos de Jogadores)
-    *   **Descrição:** Um mundo de construção criativa onde jogadores de ranque elevado podem comprar e proteger seus próprios terrenos.
-    *   **Funcionalidades:** Compra de terrenos usando Totens, proteção automática da área, gerenciamento de permissões para amigos.
-    *   **Integrações:** Planejado para usar Multiverse (para o mundo), WorldGuard (para as proteções) e BlueMap (para visualização no mapa web).
+        *   **Insígnia `CAÇADOR`:** Concedida por derrotar monstros hostis.
+        *   **Insígnia `DOMADOR`:** Concedida por domar diferentes tipos de animais.
+        *   **Paginação na GUI de Insígnias:** Implementar um sistema de páginas no menu `/scout badges` para acomodar futuras insígnias.
 
 *   ### Painel de Administração (Web)
     *   **Descrição:** Uma plataforma web robusta para gerenciamento do servidor, baseada no template AdminLTE. O portal do jogador (`pdash.html`) e o login do admin já foram implementados.

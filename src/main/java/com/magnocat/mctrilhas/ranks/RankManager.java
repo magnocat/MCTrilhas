@@ -85,9 +85,9 @@ public class RankManager {
                 String broadcastMessage = plugin.getConfig().getString("messages.rank-promotion.broadcast", "&e{player_name} demonstrou seu valor e foi promovido para {rank_color}{rank_name}&e!");
 
                 // Substitui os placeholders
-                personalMessage = personalMessage.replace("{rank_color}", nextRank.getColor()).replace("{rank_name}", nextRank.getDisplayName());
-                subtitleMessage = subtitleMessage.replace("{rank_color}", nextRank.getColor()).replace("{rank_name}", nextRank.getDisplayName());
-                broadcastMessage = broadcastMessage.replace("{player_name}", player.getName()).replace("{rank_color}", nextRank.getColor()).replace("{rank_name}", nextRank.getDisplayName());
+                personalMessage = personalMessage.replace("{rank_color}", nextRank.getColor().toString()).replace("{rank_name}", nextRank.getDisplayName());
+                subtitleMessage = subtitleMessage.replace("{rank_color}", nextRank.getColor().toString()).replace("{rank_name}", nextRank.getDisplayName());
+                broadcastMessage = broadcastMessage.replace("{player_name}", player.getName()).replace("{rank_color}", nextRank.getColor().toString()).replace("{rank_name}", nextRank.getDisplayName());
 
                 // Anuncia a promoção para o jogador e para o servidor
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', personalMessage));

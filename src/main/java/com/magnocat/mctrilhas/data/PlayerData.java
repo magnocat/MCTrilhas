@@ -34,6 +34,7 @@ public class PlayerData {
     private PetData petData;
     private String webAccessToken;
     private final PlayerDuelStats duelStats;
+    private UUID godfatherUUID; // UUID de quem apadrinhou este jogador
 
     public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones, PetData petData, String webAccessToken, PlayerDuelStats duelStats) {
         this.playerUUID = playerUUID;
@@ -53,6 +54,7 @@ public class PlayerData {
         this.petData = petData;
         this.webAccessToken = webAccessToken;
         this.duelStats = duelStats;
+        this.godfatherUUID = null; // Padrão é nulo
     }
 
     public UUID getPlayerUUID() {
@@ -186,5 +188,13 @@ public class PlayerData {
 
     public PlayerDuelStats getDuelStats() {
         return duelStats;
+    }
+
+    public UUID getGodfatherUUID() {
+        return godfatherUUID;
+    }
+
+    public void setGodfatherUUID(UUID godfatherUUID) {
+        this.godfatherUUID = godfatherUUID;
     }
 }

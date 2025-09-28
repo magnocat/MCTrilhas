@@ -106,7 +106,7 @@ public class CTFScoreboard {
         objective.getScore(getFlagStatusLine(teamTwoColor)).setScore(5);
         objective.getScore("    ").setScore(4);
         if (playerRank != null) {
-            objective.getScore(ChatColor.WHITE + "Ranque: " + ChatColor.translateAlternateColorCodes('&', playerRank.getColor()) + playerRank.getDisplayName()).setScore(3);
+            objective.getScore(ChatColor.WHITE + "Ranque: " + playerRank.getColor() + playerRank.getDisplayName()).setScore(3);
         }
         if (stats != null) {
             objective.getScore(ChatColor.WHITE + "K/D: " + ChatColor.GREEN + stats.getKills() + "/" + stats.getDeaths()).setScore(2);

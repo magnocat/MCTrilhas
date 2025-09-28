@@ -1,7 +1,7 @@
 # Documentação Técnica: Plugin MCTrilhas
 
-**Versão do Documento:** 1.2
-**Data:** 2024-08-01
+**Versão do Documento:** 1.3
+**Data:** 28-09-2025
 
 ## 1. Visão Geral
 
@@ -222,27 +222,52 @@ MCTrilhas/
 
 ---
 
+### 3.11. Sistema de Duelos 1v1
+*   **Descrição:** Um sistema completo de combate 1v1 com arenas, kits customizáveis, ranking de habilidade (ELO) e modo espectador.
+*   **Estrutura:** `duels/DuelManager.java`, `duels/DuelGame.java`, `duels/DuelArena.java`, `duels/DuelKit.java`.
+
+*   **Dados:**
+    *   **`duel_arenas.yml`**: Armazena a configuração das arenas (spawns, nome).
+    *   **`duel_kits.yml`**: Define os kits de combate que os jogadores podem escolher.
+    *   **`playerdata/<UUID>.yml`**: As estatísticas de cada jogador (vitórias, derrotas, ELO) são salvas na seção `duel-stats`.
+
+*   **Lógica:**
+    1.  **Desafio:** Um jogador usa `/duelo desafiar <alvo>`, abre uma GUI para selecionar um kit e envia o desafio.
+    2.  **Aceite/Negação:** O alvo recebe uma mensagem clicável para aceitar ou negar.
+    3.  **Gerenciamento de Arenas:** Se uma arena estiver livre, a partida começa. Caso contrário, os jogadores são colocados em uma fila gerenciada pelo `DuelManager`.
+    4.  **Partida (`DuelGame`):**
+        *   O estado dos jogadores (inventário, localização) é salvo.
+        *   Uma contagem regressiva é iniciada.
+        *   Um timer de partida é exibido em uma `BossBar` (que se sobrepõe à HUD principal, escondendo-a temporariamente).
+        *   `GameListener` protege a partida, impedindo o uso de comandos, quebra de blocos e interferência externa.
+    5.  **Fim da Partida:** Ocorre por morte, desistência (`/duelo desistir`), desconexão ou fim do tempo. O ELO é recalculado, o vencedor recebe uma pequena recompensa em Totens e o estado dos jogadores é restaurado.
+
+*   **Recursos Adicionais:**
+    *   **Modo Espectador:** Jogadores podem assistir a duelos em andamento com `/duelo assistir <jogador>`.
+    *   **Ranking Semanal:** O `DuelRewardManager` distribui prêmios em Totens para o Top 3 do ranking ELO todo fim de semana.
+*   **Comandos:**
+    *   `/duelo desafiar|aceitar|negar`: Gerenciam o fluxo de desafios.
+    *   `/duelo assistir|sair`: Gerenciam o modo espectador.
+    *   `/duelo desistir|fila`: Permitem desistir de uma partida ou sair da fila de espera.
+    *   `/scout admin duel <subcomando>`: Conjunto de comandos para administradores criarem arenas e recarregarem os kits.
+
+---
+
+### 3.12. Sistema de Comunidade e Segurança (Graylist Híbrido)
+*   **Descrição:** Uma abordagem em camadas para proteger o servidor, combinando automação e interação da comunidade.
+*   **Estrutura:** `listeners/PlayerProtectionListener.java`, `listeners/PunishmentListener.java`, `commands/ApadrinharCommand.java`.
+*   **Lógica:**
+    1.  **Ranque `VISITANTE`:** Novos jogadores entram no servidor com este ranque por padrão.
+    2.  **Proteção (`PlayerProtectionListener`):** Jogadores com o ranque `VISITANTE` são impedidos de interagir com o mundo (quebrar/colocar blocos, abrir baús) e de usar a maioria dos comandos, exceto os informativos.
+    3.  **Apadrinhamento (`/apadrinhar <jogador>`):** Um membro com ranque superior a `VISITANTE` pode "apadrinhar" um novo jogador.
+    4.  **Promoção:** Ao ser apadrinhado, o visitante é promovido para o ranque `FILHOTE`, ganhando permissões para interagir com o servidor. O UUID do padrinho é salvo nos dados do afilhado.
+    5.  **Responsabilidade (`PunishmentListener`):** Se um jogador que foi apadrinhado for banido, o `PunishmentListener` detecta o evento e aplica uma penalidade em Totens (configurável) ao padrinho, notificando-o da ação.
+
+---
+
 ## 4. Sistemas Futuros e em Desenvolvimento
 
-### 4.1. Sistema de Duelos 1v1 (EM FOCO)
-> **[NOTA]** A base deste sistema está pronta (armazenamento de estatísticas, integração com HUD e placar, registro de comandos), mas a **lógica de jogo ainda não foi implementada**.
-*   **Descrição:** Permitirá que jogadores se organizem em grupos formais.
-*   **Estrutura:** `clans/Clan.java`, `clans/ClanManager.java`.
-*   **Dados:** Nova pasta `plugins/MCTrilhas/clans/` com um arquivo `.yml` para cada clã.
-*   **Comandos:** `/cla criar`, `/cla convidar`, `/cla sair`, `/cla base fundar`.
-
-### 4.3. Sistema de Comunidade e Segurança (Graylist Híbrido)
-*   **Descrição:** Uma abordagem em camadas para proteger o servidor, combinando automação e interação da comunidade.
-*   **Estrutura:** `community/PromotionManager.java`, `listeners/PlayerProtectionListener.java`. (Nomes sugeridos)
-*   **Lógica:**
-    1.  **Graylist:** O `PlayerProtectionListener` cancela eventos (quebrar blocos, abrir baús) para jogadores com o ranque "Visitante" (a ser criado).
-    2.  **Apadrinhamento:** O comando `/apadrinhar <jogador>` verifica se o autor é um membro e se o alvo é um "Visitante". Se sim, promove o alvo e registra o padrinho nos dados do novo membro. Um sistema de penalidades será acionado se o afilhado for banido.
-    3.  **Aplicação Web:** Um novo endpoint no `HttpApiManager` receberá dados de um formulário do `index.html`. O formulário perguntará se o candidato já é escoteiro.
-        *   Se **sim**, a aplicação é registrada para aprovação manual do admin.
-        *   Se **não**, a aplicação é registrada em um arquivo separado (ex: `recrutamento.log`) e/ou enviada via webhook para um canal específico do Discord, para ser encaminhada a uma sede escoteira parceira.
-    4.  **Aprovação Manual:** O comando `/aprovar <jogador>` permitirá que um admin promova um "Visitante" a membro, finalizando o processo de aplicação.
-
-### 4.4. Sistema "Vale dos Pioneiros" (Terrenos de Jogadores)
+### 4.1. Sistema "Vale dos Pioneiros" (Terrenos de Jogadores)
 *   **Descrição:** Um mundo de construção criativa onde jogadores podem comprar terrenos.
 *   **Estrutura:** `plots/PlotManager.java`.
 *   **Lógica:** Verificará o ranque e a economia (via **Vault**) do jogador para autorizar a compra.
