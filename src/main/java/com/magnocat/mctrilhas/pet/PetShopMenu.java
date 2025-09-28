@@ -102,7 +102,7 @@ public class PetShopMenu {
             // Aplica a textura customizada à cabeça
             if (meta instanceof SkullMeta) {
                 SkullMeta skullMeta = (SkullMeta) meta;
-                GameProfile profile = new GameProfile(java.util.UUID.randomUUID(), null);
+                GameProfile profile = new GameProfile(java.util.UUID.randomUUID(), petType);
                 profile.getProperties().put("textures", new Property("textures", texture));
                 try {
                     Field profileField = skullMeta.getClass().getDeclaredField("profile");
@@ -139,7 +139,7 @@ public class PetShopMenu {
             // Aplica a textura customizada à cabeça
             if (meta instanceof SkullMeta) {
                 SkullMeta skullMeta = (SkullMeta) meta;
-                GameProfile profile = new GameProfile(java.util.UUID.randomUUID(), null);
+                GameProfile profile = new GameProfile(java.util.UUID.randomUUID(), petType);
                 profile.getProperties().put("textures", new Property("textures", texture));
                 try {
                     Field profileField = skullMeta.getClass().getDeclaredField("profile");
@@ -176,7 +176,7 @@ public class PetShopMenu {
             // Aplica a textura customizada à cabeça
             if (meta instanceof SkullMeta) {
                 SkullMeta skullMeta = (SkullMeta) meta;
-                GameProfile profile = new GameProfile(java.util.UUID.randomUUID(), null);
+                GameProfile profile = new GameProfile(java.util.UUID.randomUUID(), petType);
                 profile.getProperties().put("textures", new Property("textures", texture));
                 try {
                     Field profileField = skullMeta.getClass().getDeclaredField("profile");
