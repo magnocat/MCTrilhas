@@ -14,12 +14,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
 import org.bukkit.persistence.PersistentDataType;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -101,16 +100,16 @@ public class PetShopMenu {
 
             // Aplica a textura customizada à cabeça
             if (meta instanceof SkullMeta) {
+                // Método moderno e seguro para aplicar texturas, sem reflexão.
+                // Isso resolve o erro de 'IllegalArgumentException' em versões recentes do Paper.
                 SkullMeta skullMeta = (SkullMeta) meta;
-                GameProfile profile = new GameProfile(java.util.UUID.randomUUID(), petType);
-                profile.getProperties().put("textures", new Property("textures", texture));
-                try {
-                    Field profileField = skullMeta.getClass().getDeclaredField("profile");
-                    profileField.setAccessible(true);
-                    profileField.set(skullMeta, profile);
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+                PlayerProfile profile = Bukkit.createPlayerProfile(java.util.UUID.randomUUID());
+                PlayerTextures textures = profile.getTextures();
+                // A textura é um JSON codificado em Base64. Nós o decodificamos e o aplicamos.
+                String decodedTexture = new String(Base64.getDecoder().decode(texture));
+                textures.setSkin(decodedTexture);
+                profile.setTextures(textures);
+                skullMeta.setPlayerProfile(profile);
             }
             item.setItemMeta(meta);
         }
@@ -138,16 +137,14 @@ public class PetShopMenu {
 
             // Aplica a textura customizada à cabeça
             if (meta instanceof SkullMeta) {
+                // Método moderno e seguro para aplicar texturas.
                 SkullMeta skullMeta = (SkullMeta) meta;
-                GameProfile profile = new GameProfile(java.util.UUID.randomUUID(), petType);
-                profile.getProperties().put("textures", new Property("textures", texture));
-                try {
-                    Field profileField = skullMeta.getClass().getDeclaredField("profile");
-                    profileField.setAccessible(true);
-                    profileField.set(skullMeta, profile);
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+                PlayerProfile profile = Bukkit.createPlayerProfile(java.util.UUID.randomUUID());
+                PlayerTextures textures = profile.getTextures();
+                String decodedTexture = new String(Base64.getDecoder().decode(texture));
+                textures.setSkin(decodedTexture);
+                profile.setTextures(textures);
+                skullMeta.setPlayerProfile(profile);
             }
             item.setItemMeta(meta);
         }
@@ -175,16 +172,14 @@ public class PetShopMenu {
 
             // Aplica a textura customizada à cabeça
             if (meta instanceof SkullMeta) {
+                // Método moderno e seguro para aplicar texturas.
                 SkullMeta skullMeta = (SkullMeta) meta;
-                GameProfile profile = new GameProfile(java.util.UUID.randomUUID(), petType);
-                profile.getProperties().put("textures", new Property("textures", texture));
-                try {
-                    Field profileField = skullMeta.getClass().getDeclaredField("profile");
-                    profileField.setAccessible(true);
-                    profileField.set(skullMeta, profile);
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+                PlayerProfile profile = Bukkit.createPlayerProfile(java.util.UUID.randomUUID());
+                PlayerTextures textures = profile.getTextures();
+                String decodedTexture = new String(Base64.getDecoder().decode(texture));
+                textures.setSkin(decodedTexture);
+                profile.setTextures(textures);
+                skullMeta.setPlayerProfile(profile);
             }
             item.setItemMeta(meta);
         }

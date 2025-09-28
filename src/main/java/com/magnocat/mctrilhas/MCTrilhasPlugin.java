@@ -48,10 +48,12 @@ import com.magnocat.mctrilhas.listeners.FishingListener;
 import com.magnocat.mctrilhas.listeners.LumberjackListener;
 import com.magnocat.mctrilhas.listeners.MenuListener;
 import com.magnocat.mctrilhas.listeners.MiningListener;
+import com.magnocat.mctrilhas.listeners.MobKillListener;
 import com.magnocat.mctrilhas.listeners.PlayerJoinListener;
 import com.magnocat.mctrilhas.listeners.PunishmentListener;
 import com.magnocat.mctrilhas.listeners.PlayerProtectionListener;
 import com.magnocat.mctrilhas.listeners.PlayerQuitListener;
+import com.magnocat.mctrilhas.listeners.TamingListener;
 import com.magnocat.mctrilhas.listeners.TreasureHuntListener;
 import com.magnocat.mctrilhas.ctf.CTFListener;
 import com.magnocat.mctrilhas.pet.PetListener;
@@ -221,6 +223,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         getCommand("duelo").setExecutor(duelExecutor);
         getCommand("duelo").setTabCompleter(duelExecutor);
         logInfo("Comandos registrados.");
+
     }
 
     private void registerListeners() {
@@ -234,8 +237,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new FarmingListener(this),
                 new CraftingListener(this),
                 new ExplorerListener(this),
+                new MobKillListener(this),
+                new TamingListener(this),
                 new PlayerQuitListener(this), // Essencial para salvar os dados do jogador ao sair.
-                new MenuListener(),
+                new MenuListener(this),
                 new TreasureHuntListener(this),
                 new CTFListener(this),
                 new CommandBlockerListener(this),

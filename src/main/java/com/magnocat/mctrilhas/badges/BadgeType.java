@@ -16,7 +16,9 @@ public enum BadgeType {
     FISHING("Pesca"),
     FARMING("Agricultura"),
     CRAFTING("Artesão"),
-    EXPLORER("Explorador");
+    EXPLORER("Explorador"),
+    HUNTER("Caçador"),
+    DOMADOR("Domador");
 
     private final String displayName;
 

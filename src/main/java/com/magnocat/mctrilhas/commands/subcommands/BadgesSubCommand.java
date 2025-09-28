@@ -90,7 +90,7 @@ public class BadgesSubCommand implements SubCommand {
         // A GUI só pode ser aberta para jogadores online e por um jogador.
         if (useGUI && sender instanceof Player && target.isOnline()) {
             // Abre a GUI para o jogador alvo, com o remetente como visualizador.
-            plugin.getBadgeMenu().open((Player) sender, target.getUniqueId(), target.getName());
+            plugin.getBadgeMenu().open((Player) sender, target.getUniqueId(), target.getName(), 1); // Abre a primeira página por padrão.
         } else {
             // Se a GUI não for usada, ou o alvo estiver offline, ou o remetente for o console, mostra no chat.
             if (useGUI && !(sender instanceof Player)) {

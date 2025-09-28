@@ -5,6 +5,7 @@ import com.magnocat.mctrilhas.badges.Badge;
 import com.magnocat.mctrilhas.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import org.bukkit.persistence.PersistentDataType;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,8 @@ public class BadgeMenu {
     private final MCTrilhasPlugin plugin;
     // O título do inventário é usado para identificá-lo em listeners.
     public static final String MENU_TITLE_PREFIX = "Insígnias de ";
+    private static final int BADGES_PER_PAGE = 45; // 5 linhas de 9 slots
+    private static final int INVENTORY_SIZE = 54; // 6 linhas
     private final NumberFormat numberFormat;
 
     public BadgeMenu(MCTrilhasPlugin plugin) {
@@ -41,8 +45,9 @@ public class BadgeMenu {
      * @param viewer O jogador que verá o menu.
      * @param targetUUID O UUID do jogador cujas insígnias estão sendo exibidas.
      * @param targetName O nome do jogador cujas insígnias estão sendo exibidas.
+     * @param page O número da página a ser exibida (começando em 1).
      */
-    public void open(Player viewer, UUID targetUUID, String targetName) {
+    public void open(Player viewer, UUID targetUUID, String targetName, int page) {
         // Tenta obter os dados do jogador do cache. Se não estiverem lá, carrega-os.
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(targetUUID);
         if (playerData == null) {
@@ -56,19 +61,30 @@ public class BadgeMenu {
         }
 
         List<Badge> badges = plugin.getBadgeManager().getAllBadges();
-        // Calcula o tamanho do inventário para caber todas as insígnias, arredondando para o múltiplo de 9 mais próximo.
-        // Máximo de 54 slots (6 linhas).
-        int inventorySize = Math.min(54, (int) (Math.ceil(badges.size() / 9.0) * 9));
-        if (inventorySize == 0) inventorySize = 9; // Garante um tamanho mínimo.
+        int totalPages = (int) Math.ceil((double) badges.size() / BADGES_PER_PAGE);
+        if (totalPages == 0) totalPages = 1;
 
-        Inventory inv = Bukkit.createInventory(null, inventorySize, MENU_TITLE_PREFIX + targetName);
+        // Garante que a página solicitada seja válida.
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        String menuTitle = MENU_TITLE_PREFIX + targetName + " (" + page + "/" + totalPages + ")";
+        Inventory inv = Bukkit.createInventory(null, INVENTORY_SIZE, menuTitle);
+
+        // Calcula o subconjunto de insígnias para a página atual.
+        int startIndex = (page - 1) * BADGES_PER_PAGE;
+        int endIndex = Math.min(startIndex + BADGES_PER_PAGE, badges.size());
+        List<Badge> pageBadges = badges.subList(startIndex, endIndex);
 
         // O PlayerData final precisa ser acessível dentro do forEach.
         final PlayerData finalPlayerData = playerData;
-        badges.forEach(badge -> {
+        pageBadges.forEach(badge -> {
             ItemStack badgeItem = createBadgeItem(badge, finalPlayerData);
             inv.addItem(badgeItem);
         });
+
+        // Adiciona os botões de navegação.
+        addNavigationButtons(inv, page, totalPages);
 
         viewer.openInventory(inv);
         // Adiciona um feedback sonoro para o jogador.
@@ -134,17 +150,57 @@ public class BadgeMenu {
     }
 
     /**
-     * Cria o ItemStack que representa o botão de fechar a GUI.
-     * @return O ItemStack configurado.
+     * Adiciona os botões de navegação (anterior, página atual, próximo) ao inventário.
+     * @param inv O inventário onde os botões serão adicionados.
+     * @param currentPage A página atual.
+     * @param totalPages O número total de páginas.
      */
-    private ItemStack createCloseButton() {
-        ItemStack item = new ItemStack(Material.BARRIER);
+    private void addNavigationButtons(Inventory inv, int currentPage, int totalPages) {
+        // Botão de página anterior (se não estiver na primeira página)
+        if (currentPage > 1) {
+            inv.setItem(45, createNavButton(Material.ARROW, ChatColor.YELLOW + "Página Anterior", "page_previous", currentPage - 1));
+        } else {
+            inv.setItem(45, createPlaceholderButton());
+        }
+
+        // Indicador da página atual
+        ItemStack pageIndicator = new ItemStack(Material.BOOK);
+        ItemMeta meta = pageIndicator.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.AQUA + "Página " + currentPage + " de " + totalPages);
+            pageIndicator.setItemMeta(meta);
+        }
+        inv.setItem(49, pageIndicator);
+
+        // Botão de próxima página (se não estiver na última página)
+        if (currentPage < totalPages) {
+            inv.setItem(53, createNavButton(Material.ARROW, ChatColor.YELLOW + "Próxima Página", "page_next", currentPage + 1));
+        } else {
+            inv.setItem(53, createPlaceholderButton());
+        }
+    }
+
+    private ItemStack createNavButton(Material material, String name, String action, int targetPage) {
+        ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.RED + "" + ChatColor.BOLD + "Fechar");
-            List<String> lore = new ArrayList<>();
-            lore.add(ChatColor.GRAY + "Clique para fechar o menu.");
-            meta.setLore(lore);
+            meta.setDisplayName(name);
+            // Armazena a ação e a página de destino nos dados persistentes do item.
+            NamespacedKey actionKey = new NamespacedKey(plugin, "gui_action");
+            NamespacedKey pageKey = new NamespacedKey(plugin, "gui_target_page");
+            meta.getPersistentDataContainer().set(actionKey, PersistentDataType.STRING, action);
+            meta.getPersistentDataContainer().set(pageKey, PersistentDataType.INTEGER, targetPage);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    private ItemStack createPlaceholderButton() {
+        ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            // Nome vazio para que o item não tenha texto.
+            meta.setDisplayName(" ");
             item.setItemMeta(meta);
         }
         return item;

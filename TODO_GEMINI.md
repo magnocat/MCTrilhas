@@ -153,16 +153,16 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
     *   **Componentes:** `PlayerProtectionListener`, `PunishmentListener`, `ApadrinharCommand`.
     *   **Funcionalidades:** Ranque `VISITANTE` com restrições, comando `/apadrinhar` para promoção, e sistema de responsabilidade que penaliza o padrinho se o afilhado for banido.
 
----
-
-*   ### 🎯 EM FOCO: Novas Insígnias e Melhorias
-    *   **Descrição:** Expandir o sistema de progressão com novas insígnias e melhorar a experiência do jogador.
-    *   **Funcionalidades Planejadas:**
+*   ### ✅ CONCLUÍDO: Novas Insígnias e Melhorias na GUI
+    *   **Descrição:** Expansão do sistema de progressão com novas insígnias e melhoria da experiência do jogador.
+    *   **Funcionalidades Implementadas:**
         *   **Insígnia `CAÇADOR`:** Concedida por derrotar monstros hostis.
         *   **Insígnia `DOMADOR`:** Concedida por domar diferentes tipos de animais.
-        *   **Paginação na GUI de Insígnias:** Implementar um sistema de páginas no menu `/scout badges` para acomodar futuras insígnias.
+        *   **Paginação na GUI de Insígnias:** Implementado um sistema de páginas no menu `/scout badges` para acomodar o número crescente de insígnias.
 
-*   ### 🎯 PRÓXIMO FOCO: Sistema de Quests e NPCs
+---
+
+*   ### 🎯 EM FOCO: Sistema de Quests e NPCs
     *   **Descrição:** Implementar um sistema de missões "in-house", totalmente integrado com os sistemas existentes (insígnias, ranques, economia).
     *   **Filosofia:** Desenvolver internamente para garantir integração perfeita e customização, sem depender de plugins de terceiros como o `Quests`.
     *   **Funcionalidades Planejadas:**

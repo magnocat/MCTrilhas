@@ -207,6 +207,41 @@ badges:
       image: "maps/explorer_badge.png"
       name: "&6Troféu de {player}: {badgeName}"
 
+  HUNTER:
+    name: "Insígnia de Caçador"
+    description: "Derrote 25000 monstros hostis."
+    required-progress: 25000
+    reward-totems: 500
+    # O progresso para esta insígnia é rastreado pelo MobKillListener,
+    # que verifica se a entidade morta é hostil.
+    reward-item-data:
+      material: "DIAMOND_SWORD"
+      amount: 1
+      name: "&cEspada do Caçador"
+      lore:
+        - "&7Forjada para o abate de feras."
+      enchantments:
+        - "sharpness:2"
+        - "unbreaking:1"
+    reward-map:
+      image: "maps/hunter_badge.png"
+      name: "&6Troféu de {player}: {badgeName}"
+  DOMADOR:
+    name: "Insígnia de Domador"
+    description: "Dome 350 animais (lobos, gatos, cavalos, etc.)."
+    required-progress: 350
+    reward-totems: 750
+    # O progresso é rastreado pelo TamingListener.
+    reward-item-data:
+      material: "LEAD"
+      amount: 5
+      name: "&aLaço do Domador"
+      lore:
+        - "&7Para guiar seus novos amigos."
+    reward-map:
+      image: "maps/tamer_badge.png"
+      name: "&6Troféu de {player}: {badgeName}"
+
 # Recompensa diária para os jogadores
 daily-reward:
   enabled: true
