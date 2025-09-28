@@ -405,6 +405,8 @@ command-blocker:
     - "tell"
     - "msg"
     - "r"
+    # Comando do SkinsRestorer
+    - "skins"
   block-message: "&cEste comando não está disponível."
 
 # Configurações de privacidade

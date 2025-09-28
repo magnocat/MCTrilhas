@@ -40,6 +40,10 @@ commands:
     description: Comando principal para o sistema de duelos.
     usage: /<command> <subcomando>
     aliases: [duel]
+  apadrinhar:
+    description: Apadrinha um novo jogador, promovendo-o para o ranque Filhote.
+    usage: /<command> <jogador>
+    permission: mctrilhas.apadrinhar
 
 permissions:
   mctrilhas.*:
@@ -85,6 +89,7 @@ permissions:
       mctrilhas.pet.info: true
       mctrilhas.pet.alimentar: true
       mctrilhas.admin.pet.reset: true
+      mctrilhas.apadrinhar: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
@@ -205,3 +210,6 @@ permissions:
   mctrilhas.admin.pet.reset:
     description: Permite resetar os dados de pet de um jogador.
     default: op
+  mctrilhas.apadrinhar:
+    description: Permite que um jogador apadrinhe um novo membro.
+    default: true
