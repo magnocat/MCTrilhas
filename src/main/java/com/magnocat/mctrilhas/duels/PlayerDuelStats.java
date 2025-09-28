@@ -29,6 +29,7 @@ public class PlayerDuelStats {
     public void incrementWins() { this.wins++; }
     public void incrementLosses() { this.losses++; }
     public void setElo(int elo) { this.elo = elo; }
+    public void addElo(int amount) { this.elo += amount; }
 
     public static PlayerDuelStats fromConfig(ConfigurationSection section) {
         if (section == null) {

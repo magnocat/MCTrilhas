@@ -25,7 +25,7 @@ public class AdminDuelSubCommand implements SubCommand {
         registerSubCommand(new CreateArenaSubCommand(plugin));
         registerSubCommand(new SetSpawnSubCommand(plugin, 1));
         registerSubCommand(new SetSpawnSubCommand(plugin, 2));
-        registerSubCommand(new SetSpectatorSubCommand(plugin));
+        registerSubCommand(new SetSpecSubCommand(plugin));
         registerSubCommand(new SaveArenaSubCommand(plugin));
         registerSubCommand(new CancelArenaSubCommand(plugin));
         registerSubCommand(new ReloadKitsSubCommand(plugin)); // Nosso novo comando
@@ -53,6 +53,11 @@ public class AdminDuelSubCommand implements SubCommand {
     @Override
     public String getPermission() {
         return "mctrilhas.scout.admin";
+    }
+
+    @Override
+    public boolean isAdminCommand() {
+        return true;
     }
 
     @Override

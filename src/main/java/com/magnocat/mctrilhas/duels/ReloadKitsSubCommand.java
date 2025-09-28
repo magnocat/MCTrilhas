@@ -44,4 +44,9 @@ public class ReloadKitsSubCommand implements SubCommand {
         plugin.getDuelManager().loadKits();
         sender.sendMessage(ChatColor.GREEN + "Os kits de duelo foram recarregados com sucesso!");
     }
+
+    @Override
+    public boolean isAdminCommand() {
+        return true;
+    }
 }

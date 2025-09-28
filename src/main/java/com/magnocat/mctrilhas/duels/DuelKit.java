@@ -40,7 +40,7 @@ public class DuelKit {
      * Aplica o kit ao inventário de um jogador, limpando-o primeiro.
      * @param player O jogador que receberá o kit.
      */
-    public void apply(Player player) {
+    public void applyTo(Player player) {
         PlayerInventory inv = player.getInventory();
         inv.clear();
 
