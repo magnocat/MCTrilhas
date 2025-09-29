@@ -48,7 +48,7 @@ public class HUDManager {
             String message = plugin.getConfig().getString("hud-settings.messages.disabled", "&aHUD de estatísticas desativado.");
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
         } else {
-            showHUD(player);
+            showHud(player);
             String message = plugin.getConfig().getString("hud-settings.messages.enabled", "&aHUD de estatísticas ativado.");
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
         }
