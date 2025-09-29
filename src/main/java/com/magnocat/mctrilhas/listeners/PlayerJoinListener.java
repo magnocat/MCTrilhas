@@ -1,6 +1,7 @@
 package com.magnocat.mctrilhas.listeners;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.data.PlayerData;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -55,6 +56,12 @@ public class PlayerJoinListener implements Listener {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (player.isOnline()) { // Garante que o jogador não desconectou nesse meio tempo
                 plugin.getScoreboardManager().toggleBoard(player, true); // O 'true' ativa silenciosamente
+
+                // Carrega o estado da HUD do jogador e a ativa se necessário.
+                PlayerData data = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
+                if (data != null && data.isHudEnabled()) {
+                    plugin.getHudManager().showHud(player);
+                }
             }
         }, 40L); // Atraso de 2 segundos
     }

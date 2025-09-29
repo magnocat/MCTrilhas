@@ -453,6 +453,10 @@ public class DuelManager {
         activeDuels.remove(game);
         playerToGameMap.remove(game.getPlayer1().getUniqueId());
         playerToGameMap.remove(game.getPlayer2().getUniqueId());
+
+        // Otimização: Atualiza o cache do ranking de ELO sob demanda, apenas quando uma partida termina.
+        plugin.getHttpApiManager().updateEloLeaderboardCaches();
+
         // Espectadores já são removidos do mapa pelo próprio DuelGame
     }
 

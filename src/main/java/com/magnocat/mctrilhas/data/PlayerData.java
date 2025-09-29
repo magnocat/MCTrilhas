@@ -6,6 +6,7 @@ import com.magnocat.mctrilhas.pet.PetData;
 import com.magnocat.mctrilhas.ranks.Rank;
 import org.bukkit.Location;
 
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +34,14 @@ public class PlayerData {
     private final Set<String> claimedCtfMilestones;
     private PetData petData;
     private String webAccessToken;
+    private boolean hudEnabled; // Salva se a HUD de estatísticas está ativa.
     private final PlayerDuelStats duelStats;
     private UUID godfatherUUID; // UUID de quem apadrinhou este jogador
+    // Armazena os IDs dos mapas-troféu para restauração após reinício.
+    // Chave: ID da insígnia (ex: "MINING"), Valor: ID do mapa (ex: 123)
+    private final Map<String, Integer> badgeMapIds;
 
-    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones, PetData petData, String webAccessToken, PlayerDuelStats duelStats) {
+    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones, PetData petData, String webAccessToken, PlayerDuelStats duelStats, boolean hudEnabled, Map<String, Integer> badgeMapIds) {
         this.playerUUID = playerUUID;
         this.earnedBadgesMap = earnedBadgesMap;
         this.progressMap = progressMap;
@@ -53,8 +58,10 @@ public class PlayerData {
         this.claimedCtfMilestones = claimedCtfMilestones;
         this.petData = petData;
         this.webAccessToken = webAccessToken;
+        this.hudEnabled = hudEnabled;
         this.duelStats = duelStats;
         this.godfatherUUID = null; // Padrão é nulo
+        this.badgeMapIds = badgeMapIds != null ? badgeMapIds : new HashMap<>();
     }
 
     public UUID getPlayerUUID() {
@@ -196,5 +203,21 @@ public class PlayerData {
 
     public void setGodfatherUUID(UUID godfatherUUID) {
         this.godfatherUUID = godfatherUUID;
+    }
+
+    public boolean isHudEnabled() {
+        return hudEnabled;
+    }
+
+    public void setHudEnabled(boolean hudEnabled) {
+        this.hudEnabled = hudEnabled;
+    }
+
+    /**
+     * Retorna o mapa que associa o ID de uma insígnia ao ID do seu mapa-troféu.
+     * @return Um mapa de ID da insígnia para o ID do mapa.
+     */
+    public Map<String, Integer> getBadgeMapIds() {
+        return badgeMapIds;
     }
 }

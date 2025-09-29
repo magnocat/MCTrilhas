@@ -252,6 +252,9 @@ public class CTFManager {
         );
         plugin.logInfo("[CTF] Partida na arena '" + game.getArena().getName() + "' finalizada.");
 
+        // Otimização: Atualiza o cache do ranking de CTF sob demanda, apenas quando uma partida termina.
+        plugin.getHttpApiManager().updateCtfLeaderboardCaches();
+
     }
 
     private Optional<CTFArena> findBestArenaForQueue() {

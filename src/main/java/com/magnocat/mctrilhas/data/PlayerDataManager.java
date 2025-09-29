@@ -87,9 +87,8 @@ public class PlayerDataManager {
     public void loadPlayerData(UUID uuid) {
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
         if (!playerFile.exists()) {
-            // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez. O ranque inicial agora é VISITANTE.
-            // O token é nulo até ser gerado.
-            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.VISITANTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null, null, new PlayerDuelStats()));
+            // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.VISITANTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null, null, new PlayerDuelStats(), true, new HashMap<>()));
             return;
         }
 
@@ -195,6 +194,18 @@ public class PlayerDataManager {
         // Carrega as estatísticas de duelo.
         PlayerDuelStats duelStats = PlayerDuelStats.fromConfig(config.getConfigurationSection("duel-stats"));
 
+        // Carrega o estado da HUD, sendo 'true' (ligada) o padrão se não existir.
+        boolean hudEnabled = config.getBoolean("settings.hud-enabled", true);
+
+        // Carrega os IDs dos mapas-troféu.
+        Map<String, Integer> badgeMapIds = new HashMap<>();
+        if (config.isConfigurationSection("badge-map-ids")) {
+            ConfigurationSection mapIdsSection = config.getConfigurationSection("badge-map-ids");
+            for (String badgeId : mapIdsSection.getKeys(false)) {
+                badgeMapIds.put(badgeId, mapIdsSection.getInt(badgeId));
+            }
+        }
+
         // Lógica de migração única para jogadores existentes sem tempo de jogo ativo.
         if (activePlaytimeTicks == 0 && !config.contains("playtime-migrated")) {
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
@@ -218,7 +229,7 @@ public class PlayerDataManager {
             }
         }
 
-        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedTreasureGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken, duelStats);
+        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedTreasureGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken, duelStats, hudEnabled, badgeMapIds);
 
         // Carrega o UUID do padrinho, se existir.
         String godfatherUuidString = config.getString("godfather-uuid");
@@ -259,6 +270,7 @@ public class PlayerDataManager {
         });
 
         config.set("settings.progress-messages-disabled", playerData.areProgressMessagesDisabled());
+        config.set("settings.hud-enabled", playerData.isHudEnabled());
         config.set("last-daily-reward", playerData.getLastDailyRewardTime());
         // Salva a lista de biomas visitados
         config.set("visited-biomes", new ArrayList<>(playerData.getVisitedBiomes()));
@@ -292,6 +304,11 @@ public class PlayerDataManager {
         // Salva o UUID do padrinho
         if (playerData.getGodfatherUUID() != null) {
             config.set("godfather-uuid", playerData.getGodfatherUUID().toString());
+        }
+
+        // Salva os IDs dos mapas-troféu.
+        if (!playerData.getBadgeMapIds().isEmpty()) {
+            config.createSection("badge-map-ids", playerData.getBadgeMapIds());
         }
 
         config.set("web-access-token", playerData.getWebAccessToken());
@@ -561,6 +578,12 @@ public class PlayerDataManager {
         // --- LÓGICA DE RECOMPENSA EM MAPA ---
         ItemStack mapReward = plugin.getMapRewardManager().createMapReward(player, badge.id());
         if (mapReward != null) {
+            // Adicionado: Salva o ID do mapa-troféu nos dados do jogador para persistência.
+            // Isso é crucial para restaurar os mapas em quadros após o reinício do servidor.
+            int mapId = ((org.bukkit.inventory.meta.MapMeta) mapReward.getItemMeta()).getMapId();
+            PlayerData data = getPlayerData(player.getUniqueId());
+            if (data != null) data.getBadgeMapIds().put(badge.id(), mapId);
+
             player.getInventory().addItem(mapReward);
             player.sendMessage(ChatColor.GREEN + "Você também recebeu um troféu especial!");
         }

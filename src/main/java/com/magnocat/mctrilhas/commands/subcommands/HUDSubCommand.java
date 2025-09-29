@@ -1,6 +1,7 @@
 package com.magnocat.mctrilhas.commands.subcommands;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.data.PlayerData;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -53,7 +54,19 @@ public class HUDSubCommand implements SubCommand {
             sender.sendMessage(ChatColor.RED + "Este comando só pode ser usado por jogadores.");
             return;
         }
-        plugin.getHudManager().toggleHUD((Player) sender);
+        Player player = (Player) sender;
+
+        // Obtém os dados do jogador para salvar a preferência.
+        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
+        if (playerData == null) {
+            player.sendMessage(ChatColor.RED + "Não foi possível carregar seus dados. Tente novamente.");
+            return;
+        }
+
+        // Alterna o estado da HUD e salva a nova preferência.
+        boolean isNowEnabled = !playerData.isHudEnabled();
+        playerData.setHudEnabled(isNowEnabled);
+        plugin.getHudManager().setHudVisibility(player, isNowEnabled);
     }
 
     @Override

@@ -160,6 +160,13 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
         *   **Insígnia `DOMADOR`:** Concedida por domar diferentes tipos de animais.
         *   **Paginação na GUI de Insígnias:** Implementado um sistema de páginas no menu `/scout badges` para acomodar o número crescente de insígnias.
 
+*   ### ✅ CONCLUÍDO: Correções e Otimizações (Feedback dos Jogadores)
+    *   **Descrição:** Implementação de correções para bugs e melhorias de qualidade de vida reportadas pela comunidade.
+    *   **Funcionalidades Implementadas:**
+        *   **HUD Persistente:** O estado da HUD (`/scout hud`) agora é salvo no arquivo do jogador e restaurado ao entrar no servidor.
+        *   **Restauração de Mapas:** Os mapas-troféu em quadros de itens agora têm suas imagens restauradas automaticamente após o reinício do servidor, corrigindo o bug dos "mapas em branco".
+        *   **Otimização de Cache de Rankings:** Os caches de ranking de Duelo e CTF agora são atualizados sob demanda (ao final de uma partida) e o cache da API web é populado na inicialização, garantindo que o site nunca fique em branco e reduzindo a carga no servidor.
+
 ---
 
 *   ### 🎯 EM FOCO: Sistema de Quests e NPCs

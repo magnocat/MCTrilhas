@@ -64,7 +64,7 @@ public class MapRewardManager {
             // MELHORIA: Usa o BadgeManager como fonte única da verdade para o nome da insígnia.
             Badge badge = plugin.getBadgeManager().getBadge(badgeId);
             String badgeName = (badge != null) ? badge.name() : badgeId;
-            
+
             // Substitui ambos os placeholders: {badgeName} e {player}
             String finalName = name.replace("{badgeName}", badgeName).replace("{player}", player.getName());
 
@@ -74,5 +74,31 @@ public class MapRewardManager {
         }
 
         return mapItem;
+    }
+
+    /**
+     * Restaura o renderizador de imagem para um mapa existente.
+     * <p>
+     * Este método é chamado na inicialização do plugin para garantir que os mapas
+     * em quadros de itens não percam sua imagem após um reinício do servidor.
+     *
+     * @param mapId O ID do mapa a ser restaurado.
+     * @param badgeId O ID da insígnia associada ao mapa, para encontrar a imagem correta.
+     */
+    public void restoreMapRenderer(int mapId, String badgeId) {
+        MapView mapView = Bukkit.getMap(mapId);
+        if (mapView == null) {
+            // O mapa pode ter sido excluído ou é inválido.
+            return;
+        }
+
+        String imagePath = plugin.getConfig().getString("badges." + badgeId + ".reward-map.image");
+        if (imagePath == null || imagePath.isEmpty()) {
+            return; // Imagem não encontrada na configuração.
+        }
+
+        // Limpa renderizadores antigos e adiciona o novo para garantir que a imagem correta seja exibida.
+        mapView.getRenderers().forEach(mapView::removeRenderer);
+        mapView.addRenderer(new ImageMapRenderer(plugin, imagePath));
     }
 }

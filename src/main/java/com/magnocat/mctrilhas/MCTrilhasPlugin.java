@@ -4,11 +4,15 @@ package com.magnocat.mctrilhas;
 import java.util.Arrays;
 import java.util.List;
 
+import java.io.File;
 // Bukkit & Spigot API
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.map.MapView;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -127,6 +131,13 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
         // Inicia a verificação por atualizações.
         new UpdateChecker(this, "magnocat/MCTrilhas").checkForUpdates();
+
+        // Popula os caches de ranking na inicialização para garantir que a API web
+        // nunca esteja vazia.
+        httpApiManager.updateAllLeaderboardCaches();
+
+        // Restaura os renderizadores de mapas de insígnias para corrigir o bug dos quadros.
+        restoreMapRenderers();
     }
 
     @Override
@@ -396,13 +407,12 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             return; // Tarefas já estão ativas.
         }
 
-        logInfo("Primeiro jogador entrou. Iniciando tarefas de atualização de cache de rankings.");
+        logInfo("Primeiro jogador entrou. Iniciando tarefa de atualização de cache de ranking de insígnias.");
 
-        // Tarefa para o PlaceholderAPI
+        // Tarefa para o PlaceholderAPI (ranking de insígnias)
         placeholderApiCacheUpdater = new org.bukkit.scheduler.BukkitRunnable() {
             @Override
             public void run() {
-                logInfo("Atualizando caches de ranking para PlaceholderAPI...");
                 playerDataManager.getDailyBadgeCountsAsync();
                 playerDataManager.getMonthlyBadgeCountsAsync();
                 playerDataManager.getAllTimeBadgeCountsAsync();
@@ -410,13 +420,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         }.runTaskTimerAsynchronously(this, 20L * 60, 20L * 60 * 5); // Inicia após 1 min, repete a cada 5 min
 
         // Tarefa para a API Web
+        // A atualização dos rankings de Duelo e CTF agora é feita sob demanda.
+        // Este timer agora atualiza apenas o ranking de insígnias para o site.
         if (httpApiManager != null) {
-            webApiCacheUpdater = new org.bukkit.scheduler.BukkitRunnable() {
-                @Override
-                public void run() {
-                    httpApiManager.updateAllLeaderboardCaches();
-                }
-            }.runTaskTimerAsynchronously(this, 20L * 10, 20L * 60 * 5); // Inicia após 10s, repete a cada 5 min
+            httpApiManager.startBadgeCacheUpdater();
         }
     }
 
@@ -425,15 +432,54 @@ public final class MCTrilhasPlugin extends JavaPlugin {
      * quando o último jogador sai do servidor.
      */
     public void stopCacheUpdateTasks() {
-        logInfo("Último jogador saiu. Parando tarefas de atualização de cache de rankings.");
+        logInfo("Último jogador saiu. Parando tarefas de atualização de cache.");
         if (placeholderApiCacheUpdater != null) {
             placeholderApiCacheUpdater.cancel();
             placeholderApiCacheUpdater = null;
         }
-        if (webApiCacheUpdater != null) {
-            webApiCacheUpdater.cancel();
-            webApiCacheUpdater = null;
-        }
+        // Para a tarefa de cache de insígnias da API web.
+        httpApiManager.stopBadgeCacheUpdater();
+    }
+
+    /**
+     * Restaura as imagens dos mapas-troféu que estão em quadros de itens.
+     * Este método é chamado na inicialização do plugin para corrigir o problema de
+     * mapas ficarem em branco após um reinício do servidor.
+     */
+    private void restoreMapRenderers() {
+        logInfo("Iniciando restauração dos mapas-troféu...");
+        // A varredura dos arquivos é feita de forma assíncrona para não atrasar o boot.
+        getServer().getScheduler().runTaskAsynchronously(this, () -> {
+            File playerDataFolder = new File(getDataFolder(), "playerdata");
+            File[] playerFiles = playerDataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+
+            if (playerFiles == null) {
+                logInfo("Nenhum dado de jogador encontrado para restaurar mapas.");
+                return;
+            }
+
+            int restoredCount = 0;
+            for (File playerFile : playerFiles) {
+                FileConfiguration config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(playerFile);
+                if (!config.isConfigurationSection("badge-map-ids")) {
+                    continue;
+                }
+
+                ConfigurationSection mapIdsSection = config.getConfigurationSection("badge-map-ids");
+                for (String badgeId : mapIdsSection.getKeys(false)) {
+                    int mapId = mapIdsSection.getInt(badgeId);
+
+                    // A manipulação da MapView deve ocorrer no thread principal.
+                    getServer().getScheduler().runTask(this, () -> {
+                        mapRewardManager.restoreMapRenderer(mapId, badgeId);
+                    });
+                    restoredCount++;
+                }
+            }
+            if (restoredCount > 0) {
+                logInfo(restoredCount + " renderizadores de mapas-troféu foram restaurados com sucesso.");
+            }
+        });
     }
     // --- Métodos de Log com Cores ---
 
