@@ -104,6 +104,7 @@ public class HttpApiManager {
     private final Map<String, Object> economyStatsCache = new ConcurrentHashMap<>();
     private final List<Map<String, Object>> chatHistory = new CopyOnWriteArrayList<>();
 
+    private BukkitTask badgeCacheUpdater;
     public HttpApiManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
     }
@@ -1379,7 +1380,7 @@ public class HttpApiManager {
         updateEloLeaderboardCaches();
     }
 
-    private void updateCtfLeaderboardCaches() {
+    public void updateCtfLeaderboardCaches() {
         plugin.getPlayerDataManager().getAllPlayerCTFStatsAsync().thenAccept(allStats -> {
             ctfWinsLeaderboardCache.clear();
             ctfKillsLeaderboardCache.clear();
@@ -1392,7 +1393,7 @@ public class HttpApiManager {
         });
     }
 
-    private void updateEloLeaderboardCaches() {
+    public void updateEloLeaderboardCaches() {
         plugin.getPlayerDataManager().getAllPlayerDuelStatsAsync().thenAccept(allStats -> {
             eloLeaderboardCache.clear();
             eloLeaderboardCache.putAll(sortAndLimitElo(allStats));
@@ -1478,6 +1479,30 @@ public class HttpApiManager {
         CachedPlayerResponse(String jsonResponse) {
             this.jsonResponse = jsonResponse;
             this.timestamp = System.currentTimeMillis();
+        }
+    }
+
+    /**
+     * Inicia a tarefa agendada para atualizar o cache de ranking de insígnias para a API web.
+     */
+    public void startBadgeCacheUpdater() {
+        if (badgeCacheUpdater != null && !badgeCacheUpdater.isCancelled()) {
+            return; // Tarefa já está rodando.
+        }
+        badgeCacheUpdater = new BukkitRunnable() {
+            @Override
+            public void run() {
+                plugin.getPlayerDataManager().getDailyBadgeCountsAsync().thenAccept(counts -> dailyLeaderboardCache.putAll(formatLeaderboard(counts)));
+                plugin.getPlayerDataManager().getMonthlyBadgeCountsAsync().thenAccept(counts -> monthlyLeaderboardCache.putAll(formatLeaderboard(counts)));
+                plugin.getPlayerDataManager().getAllTimeBadgeCountsAsync().thenAccept(counts -> allTimeLeaderboardCache.putAll(formatLeaderboard(counts)));
+            }
+        }.runTaskTimerAsynchronously(plugin, 20L * 10, 20L * 60 * 5); // Inicia após 10s, repete a cada 5 min
+    }
+
+    public void stopBadgeCacheUpdater() {
+        if (badgeCacheUpdater != null) {
+            badgeCacheUpdater.cancel();
+            badgeCacheUpdater = null;
         }
     }
 }

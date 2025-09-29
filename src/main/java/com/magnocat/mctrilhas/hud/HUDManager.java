@@ -58,7 +58,7 @@ public class HUDManager {
      * Mostra o HUD para um jogador, criando e configurando a BossBar.
      * @param player O jogador que verá o HUD.
      */
-    private void showHUD(Player player) {
+    public void showHud(Player player) {
         UUID playerUUID = player.getUniqueId();
         String loadingText = plugin.getConfig().getString("hud-settings.messages.loading", "Carregando estatísticas...");
         BarColor color = BarColor.valueOf(plugin.getConfig().getString("hud-settings.color", "BLUE").toUpperCase());
@@ -70,6 +70,24 @@ public class HUDManager {
         updateHUD(player); // Atualiza imediatamente
     }
 
+    /**
+     * Define a visibilidade do HUD para um jogador e envia uma mensagem de feedback.
+     * Este método é chamado pelo comando `/scout hud`.
+     *
+     * @param player O jogador.
+     * @param visible True para mostrar, false para esconder.
+     */
+    public void setHudVisibility(Player player, boolean visible) {
+        if (visible) {
+            showHud(player);
+            String message = plugin.getConfig().getString("hud-settings.messages.enabled", "&aHUD de estatísticas ativado.");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+        } else {
+            removeHUD(player);
+            String message = plugin.getConfig().getString("hud-settings.messages.disabled", "&aHUD de estatísticas desativado.");
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+        }
+    }
     /**
      * Remove o HUD de um jogador.
      * @param player O jogador cujo HUD será removido.
