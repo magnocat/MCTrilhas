@@ -343,6 +343,12 @@ Esta seção detalha as ideias discutidas para referência futura.
     *   **Músicas Customizadas (via Resource Pack):**
         *   **Conceito:** Criar um Resource Pack oficial do servidor contendo músicas escoteiras e outros sons customizados.
         *   **Implementação:** O servidor ofereceria o download do pacote ao jogador entrar. O plugin poderia então tocar as músicas em momentos específicos (ao entrar em uma região, ao conquistar uma insígnia, etc.).
+        *   **Modelo Técnico (In-House):**
+            1.  **`MusicManager.java`**: Classe para gerenciar a lógica.
+            2.  **Geração Dinâmica de Resource Pack**: Na inicialização, o plugin criaria um `.zip` contendo os arquivos de música (`.ogg`) e um `sounds.json` que mapeia nomes de eventos (ex: `mctrilhas.musica.hino_alerta`) aos arquivos.
+            3.  **Hospedagem**: O `HttpApiManager` seria usado para hospedar o `.zip` gerado.
+            4.  **Distribuição**: Ao entrar, o jogador seria solicitado a baixar o pacote.
+            5.  **Execução**: O plugin usaria o comando `/playsound` com o nome do evento customizado para tocar a música para o jogador.
 
 ---
 

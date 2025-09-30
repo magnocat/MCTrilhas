@@ -1,0 +1,22 @@
+# ----------------------------------------------------------------------------------- #
+#                                                                                     #
+#                            Configuração de NPCs - MCTrilhas                           #
+#                                                                                     #
+# ----------------------------------------------------------------------------------- #
+#
+# Este arquivo armazena as definições de todos os NPCs (Non-Player Characters)
+# do servidor. Cada NPC tem um ID único e várias propriedades.
+#
+# Estrutura de um NPC:
+#
+# npcs:
+#   id_unico_do_npc:
+#     name: '&eNome do NPC'
+#     location: # Localização no mundo (gerada automaticamente pelo comando)
+#     skin:
+#       texture: "textura_da_skin" # (gerado automaticamente)
+#       signature: "assinatura_da_skin" # (gerado automaticamente)
+#     start-dialogue-id: 'id_do_dialogo_inicial' # ID do diálogo em dialogues.yml
+#
+
+npcs: {}
