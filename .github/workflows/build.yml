@@ -31,8 +31,8 @@ jobs:
           distribution: 'temurin'
           cache: 'maven' # Adiciona cache para as dependências do Maven, acelerando os builds
 
-      # Passo de Validação: Verifica a sintaxe do plugin.yml antes de compilar
-      - name: Validate plugin.yml
+      # Passo de Validação: Verifica a sintaxe de todos os arquivos .yml em 'resources'
+      - name: Validate YAML files
         uses: ibiqlik/action-yamllint@v3
         with:
           file_or_dir: src/main/resources/
@@ -44,20 +44,9 @@ jobs:
 
       # Passo 3: Compila o projeto com Maven, criando o arquivo .jar.
       # Os testes são pulados (-DskipTests) pois testes de plugins Bukkit requerem um ambiente
-      # de servidor mockado, que não está configurado neste workflow.
-      # A versão é passada dinamicamente usando o número da execução do workflow (ex: 1.0.4, 1.0.5, etc)
-      # Para tags, a versão é extraída da tag (ex: v1.1.0 -> 1.1.0)
+      # de servidor mockado, que não está configurado neste workflow. A versão é lida diretamente do pom.xml.
       - name: Build with Maven
-        run: |
-          VERSION_STRING=""
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VERSION_STRING="${{ github.ref_name }}"
-            VERSION_STRING="${VERSION_STRING:1}" # Remove o prefixo 'v' da tag (ex: v1.1.0 -> 1.1.0)
-          else
-            VERSION_STRING="1.0.${{ github.run_number }}" # Para builds de desenvolvimento, usa 1.0.X onde X é o número da execução
-          fi
-          echo "Building with version: $VERSION_STRING"
-          mvn clean package -Dproject.version.full="$VERSION_STRING" -Dmaven.compiler.showWarnings=false -DskipTests --file pom.xml
+        run: mvn clean package -Dmaven.compiler.showWarnings=false -DskipTests --file pom.xml
 
       # Passo 4: Se o gatilho foi uma tag, cria um Release no GitHub
       - name: Create Release and Upload Artifact

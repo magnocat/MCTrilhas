@@ -74,11 +74,22 @@ public class UpdateChecker {
     }
 
     private void downloadUpdate(String downloadUrl, String fileName) {
+        // SEGURANÇA: Sanitiza o nome do arquivo para prevenir ataques de Path Traversal.
+        // O método new File().getName() extrai apenas o nome do arquivo, removendo
+        // qualquer informação de diretório como "../" ou "/".
+        String sanitizedFileName = new File(fileName).getName();
+
+        // Verificação adicional para garantir que não há caracteres maliciosos.
+        if (sanitizedFileName.contains("..") || sanitizedFileName.contains("/") || sanitizedFileName.contains("\\")) {
+            plugin.logSevere("Nome de arquivo de atualização inválido/malicioso detectado: " + fileName);
+            return;
+        }
+
         try (InputStream in = new URL(downloadUrl).openStream();
              ReadableByteChannel rbc = Channels.newChannel(in);
-             FileOutputStream fos = new FileOutputStream(new File(plugin.getDataFolder().getParentFile(), fileName))) {
+             FileOutputStream fos = new FileOutputStream(new File(plugin.getDataFolder().getParentFile(), sanitizedFileName))) {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-            plugin.logInfo("A nova versão (" + fileName + ") foi baixada para a pasta 'plugins'.");
+            plugin.logInfo("A nova versão (" + sanitizedFileName + ") foi baixada para a pasta 'plugins'.");
             plugin.logInfo("Por favor, reinicie o servidor para aplicar a atualização.");
         } catch (Exception e) {
             plugin.logSevere("Falha ao baixar a atualização: " + e.getMessage());

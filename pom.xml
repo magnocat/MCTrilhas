@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.magnocat</groupId>
     <artifactId>MCtrilhas</artifactId>
-    <version>${project.version.full}</version>
+    <version>1.0.25</version>
     <packaging>jar</packaging>
     <name>MCtrilhas</name>
     <description>Plugin de insígnias com temática escoteira para o servidor MC Trilhas.</description>
@@ -13,9 +13,7 @@
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- A versão completa é injetada pelo GitHub Actions. Este valor é um fallback para desenvolvimento local. -->
-        <project.version.full>1.0.25</project.version.full>
-        <!-- Define o formato do timestamp que será gerado durante o build -->
+        <!-- Define o formato do timestamp que será gerado durante o build (ISO 8601) -->
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
         <!-- Centralized dependency versions for easy updates -->
         <paper.api.version>1.20.4-R0.1-SNAPSHOT</paper.api.version>
@@ -43,7 +41,8 @@
                         <configuration>
                             <name>build.timestamp</name>
                             <pattern>${maven.build.timestamp.format}</pattern>
-                            <timeZone>UTC</timeZone>
+                            <timeZone>America/Sao_Paulo</timeZone>
+                            <locale>pt_BR</locale>
                         </configuration>
                     </execution>
                 </executions>
@@ -74,6 +73,20 @@
                 </executions>
                 <configuration>
                     <!-- Otimização: Remove classes não utilizadas das dependências empacotadas -->
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <!-- Exclui arquivos de metadados duplicados para evitar avisos -->
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                                <exclude>META-INF/LICENSE</exclude>
+                                <exclude>META-INF/LICENSE.txt</exclude>
+                                <exclude>META-INF/NOTICE</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
                     <minimizeJar>true</minimizeJar>
                     <relocations>
                         <relocation>
@@ -90,6 +103,15 @@
                             <shadedPattern>com.magnocat.mctrilhas.lib.jackson</shadedPattern>
                         </relocation>
                     </relocations>
+                </configuration>
+            </plugin>
+            <!-- Garante que os recursos sejam copiados com o encoding correto -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
         </plugins>

@@ -1066,7 +1066,18 @@
             });
 
             function logToConsole(message) {
-                consoleOutput.innerHTML += `\n${message}`;
+                // Adiciona uma quebra de linha antes da mensagem
+                consoleOutput.appendChild(document.createTextNode('\n'));
+
+                // Cria um elemento temporário para "higienizar" o HTML
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = message; // Insere a mensagem com HTML
+
+                // Adiciona apenas os nós de texto e spans seguros ao console
+                Array.from(tempDiv.childNodes).forEach(node => {
+                    consoleOutput.appendChild(node);
+                });
+
                 consoleOutput.scrollTop = consoleOutput.scrollHeight; // Rola para o final
             }
 
