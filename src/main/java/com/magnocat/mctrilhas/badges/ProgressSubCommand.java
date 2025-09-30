@@ -1,8 +1,7 @@
-package com.magnocat.mctrilhas.commands.subcommands;
+package com.magnocat.mctrilhas.badges;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.badges.Badge;
-import com.magnocat.mctrilhas.badges.BadgeType;
+import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
 import com.magnocat.mctrilhas.data.PlayerData;
 import com.magnocat.mctrilhas.ranks.Rank;

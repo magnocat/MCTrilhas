@@ -113,6 +113,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         saveDefaultConfig();
 
         saveResource("duel_kits.yml", false);
+        saveResource("npcs.yml", false);
         saveResource("duel_arenas.yml", false); // Garante que o arquivo de arenas seja criado
         setupEconomy();
         loadManagers();
@@ -192,25 +193,31 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     }
 
     private void loadManagers() {
-        this.playerDataManager = new PlayerDataManager(this);
-        this.badgeManager = new BadgeManager(this);
-        this.blockPersistenceManager = new BlockPersistenceManager(this);
-        this.badgeMenu = new BadgeMenu(this);
-        this.mapRewardManager = new MapRewardManager(this);
-        this.rankManager = new RankManager(this);
-        this.treasureHuntManager = new TreasureHuntManager(this);
-        this.treasureLocationsManager = new TreasureLocationsManager(this);
-        this.treasureHuntRewardManager = new TreasureHuntRewardManager(this);
-        this.httpApiManager = new HttpApiManager(this);
-        this.ctfManager = new CTFManager(this);
-        this.ctfMilestoneManager = new CTFMilestoneManager(this);
-        this.hudManager = new HUDManager(this);
-        this.scoreboardManager = new ScoreboardManager(this);
-        this.duelRewardManager = new DuelRewardManager(this);
-        this.duelManager = new DuelManager(this); // Instancia o DuelManager do pacote correto
-        this.petManager = new PetManager(this);
-        this.npcManager = new NPCManager(this);
-        this.dialogueManager = new DialogueManager(this);
+        // Módulos Essenciais (se falharem, o plugin não deve continuar)
+        try {
+            this.playerDataManager = new PlayerDataManager(this);
+            this.badgeManager = new BadgeManager(this);
+            this.rankManager = new RankManager(this);
+            this.httpApiManager = new HttpApiManager(this);
+            logInfo("Módulos essenciais (Dados, Insígnias, Ranques, API) carregados.");
+        } catch (Exception e) {
+            logSevere("Falha crítica ao carregar um módulo essencial. O plugin não pode continuar.");
+            e.printStackTrace();
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        // Módulos de Funcionalidades (podem falhar individualmente)
+        initBlockPersistenceSystem();
+        initBadgeMenuSystem();
+        initMapRewardSystem();
+        initTreasureHuntSystem();
+        initCtfSystem();
+        initHudSystem();
+        initScoreboardSystem();
+        initDuelSystem();
+        initPetSystem();
+        initNpcSystem();
 
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
@@ -221,6 +228,102 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         logInfo("Gerenciadores e menus inicializados.");
     }
 
+    private void initBlockPersistenceSystem() {
+        try {
+            this.blockPersistenceManager = new BlockPersistenceManager(this);
+        } catch (Exception e) {
+            logSevere("Módulo de Persistência de Blocos falhou ao iniciar e será desativado.", e);
+            this.blockPersistenceManager = null;
+        }
+    }
+
+    private void initBadgeMenuSystem() {
+        try {
+            this.badgeMenu = new BadgeMenu(this);
+        } catch (Exception e) {
+            logSevere("Módulo de Menu de Insígnias falhou ao iniciar e será desativado.", e);
+            this.badgeMenu = null;
+        }
+    }
+
+    private void initMapRewardSystem() {
+        try {
+            this.mapRewardManager = new MapRewardManager(this);
+        } catch (Exception e) {
+            logSevere("Módulo de Recompensa de Mapas falhou ao iniciar e será desativado.", e);
+            this.mapRewardManager = null;
+        }
+    }
+
+    private void initTreasureHuntSystem() {
+        try {
+            this.treasureLocationsManager = new TreasureLocationsManager(this);
+            this.treasureHuntManager = new TreasureHuntManager(this);
+            this.treasureHuntRewardManager = new TreasureHuntRewardManager(this);
+        } catch (Exception e) {
+            logSevere("Módulo de Caça ao Tesouro falhou ao iniciar e será desativado.", e);
+            this.treasureHuntManager = null;
+        }
+    }
+
+    private void initCtfSystem() {
+        try {
+            this.ctfManager = new CTFManager(this);
+            this.ctfMilestoneManager = new CTFMilestoneManager(this);
+        } catch (Exception e) {
+            logSevere("Módulo de CTF falhou ao iniciar e será desativado.", e);
+            this.ctfManager = null;
+        }
+    }
+
+    private void initHudSystem() {
+        try {
+            this.hudManager = new HUDManager(this);
+        } catch (Exception e) {
+            logSevere("Módulo de HUD falhou ao iniciar e será desativado.", e);
+            this.hudManager = null;
+        }
+    }
+
+    private void initScoreboardSystem() {
+        try {
+            this.scoreboardManager = new ScoreboardManager(this);
+        } catch (Exception e) {
+            logSevere("Módulo de Scoreboard falhou ao iniciar e será desativado.", e);
+            this.scoreboardManager = null;
+        }
+    }
+
+    private void initDuelSystem() {
+        try {
+            this.duelRewardManager = new DuelRewardManager(this);
+            this.duelManager = new DuelManager(this);
+        } catch (Exception e) {
+            logSevere("Módulo de Duelos falhou ao iniciar e será desativado.", e);
+            this.duelManager = null;
+        }
+    }
+
+    private void initPetSystem() {
+        try {
+            this.petManager = new PetManager(this);
+        } catch (Exception e) {
+            logSevere("Módulo de Pets falhou ao iniciar e será desativado.", e);
+            this.petManager = null;
+        }
+    }
+
+    private void initNpcSystem() {
+        try {
+            this.dialogueManager = new DialogueManager(this);
+            this.npcManager = new NPCManager(this);
+        } catch (Exception e) {
+            logSevere("Módulo de NPCs falhou ao iniciar e será desativado.", e);
+            this.npcManager = null;
+            this.dialogueManager = null;
+        }
+    }
+
     private void registerCommands() {
         // O ScoutCommandExecutor gerencia todos os subcomandos do /scout
         ScoutCommandExecutor scoutExecutor = new ScoutCommandExecutor(this);
@@ -228,18 +331,24 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         getCommand("scout").setTabCompleter(scoutExecutor);
         getCommand("daily").setExecutor(new DailyCommand(this));
         getCommand("ranque").setExecutor(new RankCommand(this));
-        TreasureHuntCommand treasureHuntExecutor = new TreasureHuntCommand(this);
-        getCommand("tesouro").setExecutor(treasureHuntExecutor);
-        getCommand("tesouro").setTabCompleter(treasureHuntExecutor);
-        CTFCommand ctfExecutor = new CTFCommand(this);
-        getCommand("ctf").setExecutor(ctfExecutor);
-        getCommand("ctf").setTabCompleter(ctfExecutor);
+        if (treasureHuntManager != null) {
+            TreasureHuntCommand treasureHuntExecutor = new TreasureHuntCommand(this);
+            getCommand("tesouro").setExecutor(treasureHuntExecutor);
+            getCommand("tesouro").setTabCompleter(treasureHuntExecutor);
+        }
+        if (ctfManager != null) {
+            CTFCommand ctfExecutor = new CTFCommand(this);
+            getCommand("ctf").setExecutor(ctfExecutor);
+            getCommand("ctf").setTabCompleter(ctfExecutor);
+        }
         getCommand("familia").setExecutor(new FamilyCommand(this)); // O comando /hud foi movido para /scout hud
         getCommand("regras").setExecutor(new RulesCommand(this));
-        DuelCommand duelExecutor = new DuelCommand(this);
         getCommand("apadrinhar").setExecutor(new ApadrinharCommand(this));
-        getCommand("duelo").setExecutor(duelExecutor);
-        getCommand("duelo").setTabCompleter(duelExecutor);
+        if (duelManager != null) {
+            DuelCommand duelExecutor = new DuelCommand(this);
+            getCommand("duelo").setExecutor(duelExecutor);
+            getCommand("duelo").setTabCompleter(duelExecutor);
+        }
         logInfo("Comandos registrados.");
 
     }
@@ -259,20 +368,25 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new TamingListener(this),
                 new PlayerQuitListener(this), // Essencial para salvar os dados do jogador ao sair.
                 new MenuListener(this),
-                new TreasureHuntListener(this),
-                new CTFListener(this),
                 new CommandBlockerListener(this),
                 new AdminPrivacyListener(this),
                 new GameChatListener(this),
-                new PetListener(this),
-                new DuelListener(this),
-                new GameListener(this),
                 new PlayerProtectionListener(this),
                 new PunishmentListener(this),
-                new NPCListener(this)
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
+
+        // Registra listeners de módulos apenas se eles foram inicializados com sucesso
+        if (treasureHuntManager != null) getServer().getPluginManager().registerEvents(new TreasureHuntListener(this), this);
+        if (ctfManager != null) getServer().getPluginManager().registerEvents(new CTFListener(this), this);
+        if (petManager != null) getServer().getPluginManager().registerEvents(new PetListener(this), this);
+        if (duelManager != null) {
+            getServer().getPluginManager().registerEvents(new DuelListener(this), this);
+            getServer().getPluginManager().registerEvents(new GameListener(this), this);
+        }
+        if (npcManager != null) getServer().getPluginManager().registerEvents(new NPCListener(this), this);
+
         logInfo("Ouvintes de eventos registrados.");
     }
 
@@ -503,6 +617,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         // Removido o prefixo e as cores manuais. O logger do Bukkit já adiciona o nome do plugin.
         // Isso corrige a exibição de caracteres estranhos como '?b' no console.
         getLogger().info(message);
+    }
+
+    public void logSevere(String message, Throwable throwable) {
+        getLogger().log(java.util.logging.Level.SEVERE, message, throwable);
     }
 
     public void logWarn(String message) {

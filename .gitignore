@@ -35,3 +35,12 @@ replay_pid*
 # Arquivos gerados pelo Sistema Operacional
 .DS_Store
 Thumbs.db
+
+# Arquivos de Documentação e Office
+# Ignora arquivos do Microsoft Office (Word, Excel, PowerPoint).
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx

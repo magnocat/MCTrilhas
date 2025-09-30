@@ -14,9 +14,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.badges.BadgesSubCommand; // A importação já está correta, mas confirmamos.
 import com.magnocat.mctrilhas.commands.subcommands.AdminSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.BoardSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.BadgesSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.GetMapSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.PetSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.ProgressSubCommand;
@@ -84,6 +84,13 @@ public class ScoutCommandExecutor implements CommandExecutor, TabCompleter {
 
         if (subCommand == null) {
             sender.sendMessage(ChatColor.RED + "Comando desconhecido. Use '/scout' para ver a lista de comandos.");
+            return true;
+        }
+
+        // Verifica se o módulo do subcomando está ativo ANTES de verificar a permissão.
+        if (!subCommand.isModuleEnabled(plugin)) {
+            // TODO: Mover esta mensagem para o config.yml
+            sender.sendMessage(ChatColor.RED + "Este módulo está temporariamente desativado devido a um erro. Por favor, contate um administrador.");
             return true;
         }
 

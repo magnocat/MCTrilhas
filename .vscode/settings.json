@@ -12,6 +12,5 @@
     },
     // Configura o linter de YAML para seguir as regras do nosso build
     "yaml.format.singleQuote": false, // Usa aspas duplas por padrão
-    "yaml.format.printWidth": 80,
     "yaml.format.proseWrap": "preserve"
 }

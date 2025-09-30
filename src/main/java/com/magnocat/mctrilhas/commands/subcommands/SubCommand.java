@@ -1,9 +1,11 @@
 package com.magnocat.mctrilhas.commands.subcommands;
 
-import org.bukkit.command.CommandSender;
-
 import java.util.Collections;
 import java.util.List;
+
+import org.bukkit.command.CommandSender;
+
+import com.magnocat.mctrilhas.MCTrilhasPlugin;
 
 /**
  * Define o contrato padrão para todos os subcomandos do plugin.
@@ -45,6 +47,16 @@ public interface SubCommand {
      * @param args Os argumentos fornecidos após o nome do subcomando.
      */
     void execute(CommandSender sender, String[] args);
+
+    /**
+     * Verifica se o módulo necessário para este comando está ativo.
+     * A implementação padrão retorna {@code true}, assumindo que o módulo está sempre ativo.
+     * Subcomandos que dependem de um módulo específico devem sobrescrever este método.
+     *
+     * @param plugin A instância principal do plugin.
+     * @return {@code true} se o módulo estiver ativo, {@code false} caso contrário.
+     */
+    default boolean isModuleEnabled(MCTrilhasPlugin plugin) { return true; }
 
     /**
      * Fornece sugestões de autocompletar para os argumentos do subcomando.

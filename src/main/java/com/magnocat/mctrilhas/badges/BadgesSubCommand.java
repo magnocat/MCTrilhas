@@ -1,7 +1,7 @@
-package com.magnocat.mctrilhas.commands.subcommands;
+package com.magnocat.mctrilhas.badges;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.badges.Badge;
+import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
 import com.magnocat.mctrilhas.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -52,6 +52,12 @@ public class BadgesSubCommand implements SubCommand {
 
     @Override
     public boolean isAdminCommand() { return false; }
+
+    /**
+     * Verifica se o módulo de Menu de Insígnias está ativo.
+     */
+    @Override
+    public boolean isModuleEnabled(MCTrilhasPlugin plugin) { return plugin.getBadgeMenu() != null; }
 
     /**
      * Executa a lógica para exibir as insígnias de um jogador.
