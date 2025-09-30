@@ -241,6 +241,35 @@ badges:
     reward-map:
       image: "maps/tamer_badge.png"
       name: "&6Troféu de {player}: {badgeName}"
+  WELCOME:
+    name: "Insígnia de Boas-Vindas"
+    description: "Concedida ao ser apadrinhado e se tornar um membro oficial."
+    # Sem progresso, concedida via evento.
+    required-progress: 0
+    reward-totems: 0
+    reward-map:
+      image: "maps/welcome_badge.png"
+      name: "&6Lembrança de Boas-Vindas de {player}"
+
+  SCOUT:
+    name: "Insígnia de Escoteiro"
+    description: "Concedida ao alcançar o ranque Escoteiro."
+    # Sem progresso, concedida via evento de promoção.
+    required-progress: 0
+    reward-totems: 0
+    reward-map:
+      image: "maps/scout_badge.png"
+      name: "&6Flor de Lis de {player}"
+
+  MCTRILHAS:
+    name: "Insígnia do Servidor"
+    description: "Uma insígnia especial para mostrar seu orgulho pelo MC Trilhas!"
+    # Sem progresso, obtida via comando.
+    required-progress: 0
+    reward-totems: 0
+    reward-map:
+      image: "maps/mctrilhas_badge.png"
+      name: "&6Insígnia Oficial do MC Trilhas"
 
 # Recompensa diária para os jogadores
 daily-reward:
@@ -440,6 +469,8 @@ command-blocker:
     - "tell"
     - "msg"
     - "r"
+    # Comando de saldo do EssentialsX
+    - "balance"
     # Comando do SkinsRestorer
     - "skins"
   block-message: "&cEste comando não está disponível."

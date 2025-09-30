@@ -604,6 +604,26 @@ public class PlayerDataManager {
             }
         }
 
+        // --- LÓGICA DE RECOMPENSA PARA O PADRINHO POR CONQUISTA DE INSÍGNIA ---
+        PlayerData playerData = getPlayerData(player.getUniqueId());
+        if (playerData != null && playerData.getGodfatherUUID() != null) {
+            UUID godfatherUUID = playerData.getGodfatherUUID();
+            OfflinePlayer godfatherOffline = Bukkit.getOfflinePlayer(godfatherUUID);
+
+            double rewardAmount = 10.0; // Valor da recompensa
+            if (plugin.getEconomy() != null) {
+                plugin.getEconomy().depositPlayer(godfatherOffline, rewardAmount);
+            }
+
+            // Notifica o padrinho se ele estiver online.
+            if (godfatherOffline.isOnline()) {
+                Player godfatherOnline = godfatherOffline.getPlayer();
+                if (godfatherOnline != null) {
+                    godfatherOnline.sendMessage(ChatColor.GOLD + "Seu afilhado, " + player.getName() + ", conquistou a insígnia " + badge.name() + "! Você recebeu " + (int) rewardAmount + " Totens como recompensa.");
+                }
+            }
+        }
+
         // Após conceder todas as recompensas, verifica se o jogador pode ser promovido.
         plugin.getRankManager().checkAndPromote(player);
     }

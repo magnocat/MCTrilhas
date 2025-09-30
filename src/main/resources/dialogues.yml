@@ -1,0 +1,43 @@
+# Arquivo para definir todos os diálogos interativos com NPCs.
+#
+# Estrutura:
+# dialogues:
+#   <id_do_dialogo>:
+#     npc-text:
+#       - "Linha 1 do diálogo do NPC."
+#       - "Linha 2 do diálogo."
+#     choices:
+#       <numero_da_escolha>:
+#         text: "Texto que aparece para o jogador."
+#         action: "tipo_da_acao:valor_da_acao"
+#
+# Tipos de Ação Possíveis:
+#   - dialogue:<id_de_outro_dialogo>  (Abre uma nova janela de diálogo)
+#   - quest:start:<id_da_quest>        (Inicia uma quest)
+#   - quest:end:<id_da_quest>          (Tenta finalizar uma quest)
+#   - command:player:<comando>         (Executa um comando como jogador)
+#   - command:console:<comando>        (Executa um comando pelo console)
+#   - close                            (Fecha a janela de diálogo)
+
+dialogues:
+  # Diálogo inicial para o Chefe Escoteiro
+  chefe_escoteiro_inicio:
+    npc-text:
+      - "&e[Chefe Escoteiro]: &fOlá, {player_name}! Bem-vindo(a) ao nosso acampamento."
+      - "&fEstou aqui para te guiar. O que deseja?"
+    choices:
+      1:
+        text: "&aFale-me sobre as insígnias."
+        action: "dialogue:info_insignias" # Abre o diálogo 'info_insignias'
+      2:
+        text: "&7Nada, obrigado."
+        action: "close" # Ação para fechar o menu
+
+  # Diálogo informativo sobre as insígnias
+  info_insignias:
+    npc-text:
+      - "&e[Chefe Escoteiro]: &fAs insígnias são a prova de suas habilidades! Conquiste-as minerando, construindo, explorando e muito mais. Use &b/scout badges&f para ver seu progresso."
+    choices:
+      1:
+        text: "&9Voltar"
+        action: "dialogue:chefe_escoteiro_inicio" # Volta para o diálogo inicial

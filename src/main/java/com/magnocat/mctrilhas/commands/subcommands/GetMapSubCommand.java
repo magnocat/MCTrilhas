@@ -1,6 +1,7 @@
 package com.magnocat.mctrilhas.commands.subcommands;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.ranks.Rank;
 import com.magnocat.mctrilhas.badges.Badge;
 import com.magnocat.mctrilhas.data.PlayerData;
 import org.bukkit.ChatColor;
@@ -71,11 +72,26 @@ public class GetMapSubCommand implements SubCommand {
         }
 
         Player player = (Player) sender;
-        String badgeId = args[0];
+        String badgeId = args[0].toUpperCase();
+        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
+        if (playerData == null) {
+            player.sendMessage(ChatColor.RED + "Não foi possível carregar seus dados. Tente novamente.");
+            return;
+        }
+
+        // Lógica especial para a insígnia MCTRILHAS: pode ser reivindicada por todos.
+        if ("MCTRILHAS".equals(badgeId)) {
+            if (playerData.getRank() == Rank.VISITANTE) {
+                player.sendMessage(ChatColor.RED + "Você precisa ser um membro oficial para reivindicar esta insígnia.");
+                return;
+            }
+            // Concede a insígnia se o jogador ainda não a tiver. O método já lida com a duplicação.
+            plugin.getPlayerDataManager().grantBadgeAndReward(player, "MCTRILHAS");
+            return; // O método grantBadgeAndReward já entrega o mapa, então podemos parar aqui.
+        }
 
         // 1. Verifica se o jogador possui a insígnia.
-        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
-        if (playerData == null || !playerData.hasBadge(badgeId)) {
+        if (!playerData.hasBadge(badgeId)) {
             player.sendMessage(ChatColor.RED + "Você ainda não conquistou a insígnia '" + badgeId + "'.");
             return;
         }

@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Statistic;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -93,6 +94,31 @@ public class RankManager {
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', personalMessage));
                 player.sendTitle(ChatColor.translateAlternateColorCodes('&', titleMessage), ChatColor.translateAlternateColorCodes('&', subtitleMessage), 10, 70, 20);
                 Bukkit.broadcastMessage(ChatColor.translateAlternateColorCodes('&', broadcastMessage));
+
+                // --- LÓGICA DE INSÍGNIA DE RANQUE ---
+                // Se o novo ranque for ESCOTEIRO, concede a insígnia comemorativa.
+                if (nextRank == Rank.ESCOTEIRO) {
+                    plugin.getPlayerDataManager().grantBadgeAndReward(player, "SCOUT");
+                }
+
+                // --- LÓGICA DE RECOMPENSA PARA O PADRINHO ---
+                if (playerData.getGodfatherUUID() != null) {
+                    UUID godfatherUUID = playerData.getGodfatherUUID();
+                    org.bukkit.OfflinePlayer godfatherOffline = Bukkit.getOfflinePlayer(godfatherUUID);
+
+                    double rewardAmount = 10.0; // Valor da recompensa
+                    if (plugin.getEconomy() != null) {
+                        plugin.getEconomy().depositPlayer(godfatherOffline, rewardAmount);
+                    }
+
+                    // Notifica o padrinho se ele estiver online.
+                    if (godfatherOffline.isOnline()) {
+                        Player godfatherOnline = godfatherOffline.getPlayer();
+                        if (godfatherOnline != null) {
+                            godfatherOnline.sendMessage(ChatColor.GOLD + "Seu afilhado, " + player.getName() + ", foi promovido para " + nextRank.getDisplayName() + "! Você recebeu " + (int) rewardAmount + " Totens como recompensa.");
+                        }
+                    }
+                }
             }
         } while (promotedInThisCheck);
     }

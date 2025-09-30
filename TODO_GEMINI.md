@@ -20,6 +20,7 @@ Este documento serve como um resumo completo do estado do projeto MCTrilhas, sua
 3.  **Correção Incremental:** Ao corrigir código, devo proceder em blocos pequenos, começando pelo topo do arquivo. Após cada bloco, devo parar e pedir permissão para continuar. Não devo tentar corrigir tudo de uma vez.
 4.  **Acesso a Arquivos:** Se eu precisar de um arquivo que não foi fornecido no contexto, devo solicitar explicitamente e aguardar o fornecimento antes de propor qualquer alteração que dependa dele.
 5.  **Confirmação:** Devo sempre confirmar o entendimento das tarefas e regras.
+6.  **Verificação de Importações:** Antes de finalizar qualquer sugestão de código, devo realizar uma verificação interna para garantir que todas as classes utilizadas estão devidamente importadas, evitando erros de `cannot find symbol`.
 
 ---
 
@@ -167,16 +168,30 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
         *   **Restauração de Mapas:** Os mapas-troféu em quadros de itens agora têm suas imagens restauradas automaticamente após o reinício do servidor, corrigindo o bug dos "mapas em branco".
         *   **Otimização de Cache de Rankings:** Os caches de ranking de Duelo e CTF agora são atualizados sob demanda (ao final de uma partida) e o cache da API web é populado na inicialização, garantindo que o site nunca fique em branco e reduzindo a carga no servidor.
 
+*   ### ✅ CONCLUÍDO: Insígnias Comemorativas e Sistema de Mentoria
+    *   **Descrição:** Implementação de insígnias especiais e um sistema de recompensa para incentivar a comunidade, com base no feedback dos jogadores.
+    *   **Funcionalidades Implementadas:**
+        *   **Recompensa para Padrinhos:** Padrinhos agora recebem 10 Totens como recompensa sempre que seus afilhados sobem de ranque ou conquistam uma nova insígnia.
+        *   **Insígnia de Boas-Vindas:** Concedida a novos jogadores ao serem apadrinhados. Jogadores antigos também podem recebê-la ao serem apadrinhados pela primeira vez.
+        *   **Insígnia do Servidor:** A insígnia `MCTRILHAS` agora pode ser reivindicada por todos os membros através do comando `/scout getmap mctrilhas`.
+        *   **Apadrinhamento Flexível:** O comando `/apadrinhar` foi atualizado para permitir que jogadores já existentes (com ranques superiores a Visitante) também possam ser apadrinhados.
+
 ---
 
 *   ### 🎯 EM FOCO: Sistema de Quests e NPCs
     *   **Descrição:** Implementar um sistema de missões "in-house", totalmente integrado com os sistemas existentes (insígnias, ranques, economia).
-    *   **Filosofia:** Desenvolver internamente para garantir integração perfeita e customização, sem depender de plugins de terceiros como o `Quests`.
+    *   **Filosofia:** Desenvolver internamente para garantir integração perfeita e customização, sem depender de plugins de terceiros como o `Quests` ou `Citizens`.
     *   **Funcionalidades Planejadas:**
         *   **`QuestManager` e `NPCManager`:** Classes para carregar, gerenciar e rastrear o progresso das missões e dos NPCs que as oferecem.
         *   **`quests.yml`:** Arquivo de configuração para definir todas as missões, seus objetivos (coletar itens, falar com NPCs, visitar locais) e recompensas (insígnias, Totens, itens).
-        *   **NPCs Interativos:** NPCs com diálogos, aparências customizadas e que servem como pontos de início e fim para as quests.
+        *   **NPCs Interativos:** NPCs com aparências customizadas (skins de jogador) ou `Villagers` com profissões, dependendo do contexto. Servirão como pontos de início e fim para as quests.
         *   **`QuestListener`:** Ouvinte de eventos para monitorar as ações dos jogadores e atualizar o progresso das missões.
+    *   **Fluxo de Trabalho Atual (Manual):**
+        1.  **Criar o NPC no Jogo:** Use o comando `/scout admin npc create <id_do_npc> <nome_do_npc>` para criar o NPC na sua localização atual.
+        2.  **Associar o Diálogo:** Abra o arquivo `plugins/MCTrilhas/npcs.yml`, encontre o NPC recém-criado e adicione o ID do diálogo desejado (do arquivo `dialogues.yml`) ao campo `start-dialogue-id`.
+        3.  **Recarregar:** Use `/scout admin reload` ou reinicie o servidor para aplicar a alteração.
+    *   **Melhoria Futura:**
+        *   Criar um comando `/scout admin npc setdialogue <id_do_npc> <id_do_dialogo>` para associar diálogos diretamente pelo jogo, eliminando a necessidade de editar arquivos manualmente.
 
 *   ### Painel de Administração (Web)
     *   **Descrição:** Uma plataforma web robusta para gerenciamento do servidor, baseada no template AdminLTE. O portal do jogador (`pdash.html`) e o login do admin já foram implementados.
@@ -272,6 +287,23 @@ Esta seção detalha as ideias discutidas para referência futura.
 
 ### 8.4. Gerador de Cards de Jogador (Ideia)
 *   **Conceito:** Criar um gerador de imagem (JPG/PNG) que crie um "card" (estilo card de jogo colecionável) com a foto da skin do jogador em uma pose e com seus dados (insígnias, conquistas, etc.). O objetivo é criar um item que o jogador possa imprimir ou enviar para amigos.
+
+### 8.5. Enciclopédia Escoteira (S.A.P.S.)
+*   **Conceito:** Criar uma "mini IA" interna para responder a perguntas dos jogadores sobre o escotismo e o servidor, sem a necessidade de uma API externa.
+*   **Comando:** `/saps <pergunta>` (Sempre Alerta Para Servir).
+*   **Estrutura:**
+    *   **`library.yml`:** Um arquivo de configuração que funcionará como a base de conhecimento, com verbetes, palavras-chave e o conteúdo da resposta.
+    *   **Lógica de Busca:** O sistema extrairia palavras-chave da pergunta e usaria algoritmos de similaridade de texto para encontrar o verbete mais relevante na enciclopédia.
+*   **Visão Futura:** A arquitetura seria modular, permitindo que, no futuro, o motor de busca por similaridade possa ser substituído por uma API de IA generativa (como a do Gemini), se houver recursos para isso.
+
+### 8.6. Nomes Customizados para Jogadores
+*   **Conceito:** Permitir que os jogadores sejam chamados por um nome de sua escolha nas interações com os NPCs, aumentando a imersão.
+*   **Implementação:**
+    *   Um NPC poderia, em um diálogo futuro, perguntar ao jogador como ele gostaria de ser chamado.
+    *   Essa preferência seria salva no `PlayerData` do jogador.
+    *   O `NPCListener` e outros sistemas usariam esse nome customizado em vez do nome de usuário do Minecraft.
+*   **Segurança:** Seria necessário implementar um filtro de palavras para evitar nomes inadequados.
+*   **Exceções Especiais:** Manter a lógica atual que já permite nomes especiais para jogadores específicos (como você e seu filho) via UUID.
 
 ---
 

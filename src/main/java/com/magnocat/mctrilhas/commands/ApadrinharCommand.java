@@ -50,33 +50,50 @@ public class ApadrinharCommand implements CommandExecutor {
             return true;
         }
 
-        Rank afilhadoRank = plugin.getPlayerDataManager().getRank(afilhado.getUniqueId());
-        if (afilhadoRank != Rank.VISITANTE) {
-            padrinho.sendMessage(ChatColor.RED + afilhado.getName() + " não é um visitante e não pode ser apadrinhado.");
-            return true;
-        }
-
-        // Lógica de promoção
         PlayerData afilhadoData = plugin.getPlayerDataManager().getPlayerData(afilhado.getUniqueId());
         if (afilhadoData == null) {
             padrinho.sendMessage(ChatColor.RED + "Ocorreu um erro ao carregar os dados de " + afilhado.getName() + ".");
             return true;
         }
 
-        // Promove o visitante para Filhote
-        afilhadoData.setRank(Rank.FILHOTE);
+        // Nova validação: Verifica se o jogador já tem um padrinho.
+        if (afilhadoData.getGodfatherUUID() != null) {
+            padrinho.sendMessage(ChatColor.RED + afilhado.getName() + " já foi apadrinhado por outro jogador.");
+            return true;
+        }
+
         // Define o padrinho nos dados do afilhado para registrar a responsabilidade.
         afilhadoData.setGodfatherUUID(padrinho.getUniqueId());
-        plugin.getPlayerDataManager().savePlayerData(afilhadoData); // Salva a alteração
 
-        // Mensagens de confirmação
-        String padrinhoMessage = "§aVocê apadrinhou §e" + afilhado.getName() + "§a! Ele agora é um Filhote e pode interagir com o mundo.";
-        String afilhadoMessage = "§aVocê foi apadrinhado por §e" + padrinho.getName() + "§a e promovido para §fFilhote§a! Bem-vindo(a) oficialmente ao grupo!";
-        String broadcastMessage = "§e" + padrinho.getName() + " §adeu as boas-vindas a §e" + afilhado.getName() + "§a, que agora faz parte da nossa família de Filhotes!";
+        // Lógica condicional: Promove e recompensa apenas se for um visitante.
+        if (afilhadoData.getRank() == Rank.VISITANTE) {
+            // Promove o visitante para Filhote
+            afilhadoData.setRank(Rank.FILHOTE);
 
-        padrinho.sendMessage(padrinhoMessage);
-        afilhado.sendMessage(afilhadoMessage);
-        Bukkit.broadcastMessage(broadcastMessage);
+            // Concede a insígnia de boas-vindas ao novo membro.
+            plugin.getPlayerDataManager().grantBadgeAndReward(afilhado, "WELCOME");
+
+            // Mensagens de confirmação para promoção
+            String padrinhoMessage = "§aVocê apadrinhou §e" + afilhado.getName() + "§a! Ele agora é um Filhote e pode interagir com o mundo.";
+            String afilhadoMessage = "§aVocê foi apadrinhado por §e" + padrinho.getName() + "§a e promovido para §fFilhote§a! Bem-vindo(a) oficialmente ao grupo!";
+            String broadcastMessage = "§e" + padrinho.getName() + " §adeu as boas-vindas a §e" + afilhado.getName() + "§a, que agora faz parte da nossa família de Filhotes!";
+
+            padrinho.sendMessage(padrinhoMessage);
+            afilhado.sendMessage(afilhadoMessage);
+            Bukkit.broadcastMessage(broadcastMessage);
+        } else {
+            // Mensagens de confirmação para jogadores já existentes
+            padrinho.sendMessage("§aVocê agora é o padrinho de §e" + afilhado.getName() + "§a e será responsável por guiá-lo!");
+            afilhado.sendMessage("§aVocê agora tem um padrinho! §e" + padrinho.getName() + "§a irá te ajudar em sua jornada.");
+        }
+
+        // Concede a insígnia de boas-vindas, independentemente do ranque,
+        // para que jogadores antigos também possam recebê-la.
+        // O método grantBadgeAndReward já impede a duplicação se o jogador já tiver.
+        plugin.getPlayerDataManager().grantBadgeAndReward(afilhado, "WELCOME");
+
+        // Salva os dados do afilhado após todas as modificações.
+        plugin.getPlayerDataManager().savePlayerData(afilhadoData);
 
         return true;
     }

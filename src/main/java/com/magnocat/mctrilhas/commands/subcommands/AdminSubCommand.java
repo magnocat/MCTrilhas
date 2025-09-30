@@ -2,6 +2,7 @@ package com.magnocat.mctrilhas.commands.subcommands;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.duels.AdminDuelSubCommand;
+import com.magnocat.mctrilhas.commands.subcommands.NpcAdminSubCommand;
 import com.magnocat.mctrilhas.pet.AdminPetSubCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -35,6 +36,7 @@ public class AdminSubCommand implements SubCommand {
         registerSubCommand(new ReloadSubCommand(plugin));
         registerSubCommand(new AdminPetSubCommand(plugin));
         registerSubCommand(new AdminDuelSubCommand(plugin));
+        registerSubCommand(new NpcAdminSubCommand(plugin));
     }
 
     private void registerSubCommand(SubCommand subCommand) {

@@ -18,7 +18,10 @@ public enum BadgeType {
     CRAFTING("Artesão"),
     EXPLORER("Explorador"),
     HUNTER("Caçador"),
-    DOMADOR("Domador");
+    DOMADOR("Domador"),
+    WELCOME("Boas-Vindas"),
+    SCOUT("Escoteiro"),
+    MCTRILHAS("MC Trilhas");
 
     private final String displayName;
 

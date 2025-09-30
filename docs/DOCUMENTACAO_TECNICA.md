@@ -264,6 +264,14 @@ MCTrilhas/
     5.  **Responsabilidade (`PunishmentListener`):** Se um jogador que foi apadrinhado for banido, o `PunishmentListener` detecta o evento e aplica uma penalidade em Totens (configurável) ao padrinho, notificando-o da ação.
 
 ---
+### 3.13. Identificação de Jogadores (UUID)
+*   **Descrição:** O sistema utiliza o UUID (Universally Unique Identifier) como a forma primária e mais confiável para identificar jogadores.
+*   **Funcionamento:**
+    *   **Contas Premium (Java Original):** O UUID é globalmente único e permanente para a conta do jogador, sendo o mesmo em qualquer servidor.
+    *   **Contas Não-Premium / Bedrock (Geyser):** O servidor gera um UUID "offline" com base no nome de usuário do jogador. Este UUID é consistente e único *dentro do servidor*, mas pode ser diferente em outros servidores.
+*   **Importância:** Usar o UUID em vez do nome de usuário é crucial porque o nome pode ser alterado, enquanto o UUID (seja online ou offline) permanece constante para aquele jogador no contexto do servidor. É por isso que todos os arquivos de dados em `playerdata/` são nomeados com o UUID do jogador.
+
+---
 
 ## 4. Sistemas Futuros e em Desenvolvimento
 

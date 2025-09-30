@@ -34,6 +34,7 @@ import com.magnocat.mctrilhas.ctf.CTFCommand;
 import com.magnocat.mctrilhas.ctf.CTFManager;
 import com.magnocat.mctrilhas.ctf.CTFMilestoneManager;
 import com.magnocat.mctrilhas.duels.DuelCommand;
+import com.magnocat.mctrilhas.npc.DialogueManager;
 import com.magnocat.mctrilhas.duels.DuelManager; // Garante que estamos usando o manager correto
 import com.magnocat.mctrilhas.duels.GameListener;
 import com.magnocat.mctrilhas.duels.DuelListener;
@@ -58,7 +59,9 @@ import com.magnocat.mctrilhas.listeners.PunishmentListener;
 import com.magnocat.mctrilhas.listeners.PlayerProtectionListener;
 import com.magnocat.mctrilhas.listeners.PlayerQuitListener;
 import com.magnocat.mctrilhas.listeners.TamingListener;
+import com.magnocat.mctrilhas.npc.NPCListener;
 import com.magnocat.mctrilhas.listeners.TreasureHuntListener;
+import com.magnocat.mctrilhas.npc.NPCManager;
 import com.magnocat.mctrilhas.ctf.CTFListener;
 import com.magnocat.mctrilhas.pet.PetListener;
 import com.magnocat.mctrilhas.pet.PetManager;
@@ -97,6 +100,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private DuelRewardManager duelRewardManager;
     private PetManager petManager;
     private HttpApiManager httpApiManager;
+    private NPCManager npcManager;
+    private DialogueManager dialogueManager;
 
     // --- Integrations & Tasks ---
     private BukkitTask placeholderApiCacheUpdater;
@@ -204,6 +209,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         this.duelRewardManager = new DuelRewardManager(this);
         this.duelManager = new DuelManager(this); // Instancia o DuelManager do pacote correto
         this.petManager = new PetManager(this);
+        this.npcManager = new NPCManager(this);
+        this.dialogueManager = new DialogueManager(this);
 
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
@@ -261,7 +268,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new DuelListener(this),
                 new GameListener(this),
                 new PlayerProtectionListener(this),
-                new PunishmentListener(this)
+                new PunishmentListener(this),
+                new NPCListener(this)
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
@@ -343,6 +351,14 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
     public HttpApiManager getHttpApiManager() {
         return httpApiManager;
+    }
+
+    public NPCManager getNpcManager() {
+        return npcManager;
+    }
+
+    public DialogueManager getDialogueManager() {
+        return dialogueManager;
     }
 
     /* Comentado temporariamente

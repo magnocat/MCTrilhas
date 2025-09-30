@@ -2,7 +2,9 @@ package com.magnocat.mctrilhas.listeners;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.menus.BadgeMenu;
+import com.magnocat.mctrilhas.npc.DialogueMenu;
 import org.bukkit.NamespacedKey;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -36,8 +38,8 @@ public class MenuListener implements Listener {
 
         String viewTitle = event.getView().getTitle();
 
-        // Verifica se o inventário clicado é um dos nossos menus de insígnias.
-        if (!viewTitle.startsWith(BadgeMenu.MENU_TITLE_PREFIX)) {
+        // Verifica se o inventário clicado é um dos nossos menus.
+        if (!viewTitle.startsWith(BadgeMenu.MENU_TITLE_PREFIX) && !viewTitle.equals(DialogueMenu.MENU_TITLE)) {
             return;
         }
 
@@ -46,33 +48,57 @@ public class MenuListener implements Listener {
 
         ItemStack clickedItem = event.getCurrentItem();
 
-        // Verifica se o item clicado é nulo ou um item de preenchimento.
-        if (clickedItem == null || clickedItem.getType() == Material.AIR || clickedItem.getType() == Material.GRAY_STAINED_GLASS_PANE) {
+        // Verifica se o item clicado é nulo ou um item de placeholder/decoração.
+        if (clickedItem == null || clickedItem.getType() == Material.AIR || clickedItem.getType() == Material.GRAY_STAINED_GLASS_PANE || clickedItem.getType() == Material.BOOK) {
             return;
         }
 
         ItemMeta meta = clickedItem.getItemMeta();
         if (meta == null) return;
 
-        PersistentDataContainer container = meta.getPersistentDataContainer();
-        NamespacedKey actionKey = new NamespacedKey(plugin, "gui_action");
-        NamespacedKey pageKey = new NamespacedKey(plugin, "gui_target_page");
+        // Lógica para o menu de insígnias (paginação)
+        if (viewTitle.startsWith(BadgeMenu.MENU_TITLE_PREFIX)) {
+            PersistentDataContainer container = meta.getPersistentDataContainer();
+            NamespacedKey actionKey = new NamespacedKey(plugin, "gui_action");
+            NamespacedKey pageKey = new NamespacedKey(plugin, "gui_target_page");
 
-        // Verifica se o item clicado é um botão de navegação.
-        if (container.has(actionKey, PersistentDataType.STRING) && container.has(pageKey, PersistentDataType.INTEGER)) {
-            String action = container.get(actionKey, PersistentDataType.STRING);
+            if (container.has(actionKey, PersistentDataType.STRING) && container.has(pageKey, PersistentDataType.INTEGER)) {
+                String action = container.get(actionKey, PersistentDataType.STRING);
 
-            if ("page_previous".equals(action) || "page_next".equals(action)) {
-                int targetPage = container.get(pageKey, PersistentDataType.INTEGER);
+                if ("page_previous".equals(action) || "page_next".equals(action)) {
+                    // Extrai o nome do jogador alvo do título do inventário.
+                    int targetPage = container.get(pageKey, PersistentDataType.INTEGER);
+                    String tempTitle = viewTitle.substring(BadgeMenu.MENU_TITLE_PREFIX.length());
+                    String targetName = tempTitle.substring(0, tempTitle.lastIndexOf(" ("));
 
-                // Extrai o nome do jogador alvo do título do inventário.
-                String tempTitle = viewTitle.substring(BadgeMenu.MENU_TITLE_PREFIX.length());
-                String targetName = tempTitle.substring(0, tempTitle.lastIndexOf(" ("));
-
-                // Reabre o menu na página correta.
-                OfflinePlayer target = plugin.getServer().getOfflinePlayer(targetName);
-                plugin.getBadgeMenu().open(player, target.getUniqueId(), target.getName(), targetPage);
+                    // Reabre o menu na página correta.
+                    OfflinePlayer target = plugin.getServer().getOfflinePlayer(targetName);
+                    plugin.getBadgeMenu().open(player, target.getUniqueId(), target.getName(), targetPage);
+                }
             }
+        }
+        // Lógica para o menu de diálogo
+        else if (viewTitle.equals(DialogueMenu.MENU_TITLE)) {
+            PersistentDataContainer container = meta.getPersistentDataContainer();
+            NamespacedKey actionKey = new NamespacedKey(plugin, "dialogue_action");
+
+            if (container.has(actionKey, PersistentDataType.STRING)) {
+                String action = container.get(actionKey, PersistentDataType.STRING);
+                handleDialogueAction(player, action);
+            }
+        }
+    }
+
+    private void handleDialogueAction(Player player, String action) {
+        if (action.equalsIgnoreCase("close")) {
+            player.closeInventory();
+        } else if (action.startsWith("dialogue:")) {
+            String nextDialogueId = action.substring("dialogue:".length());
+            plugin.getDialogueManager().startDialogue(player, nextDialogueId);
+        } else {
+            // Placeholder para futuras ações (quests, comandos, etc.)
+            player.sendMessage(ChatColor.GRAY + "[DEBUG] Ação '" + action + "' ainda não implementada.");
+            player.closeInventory();
         }
     }
 }
