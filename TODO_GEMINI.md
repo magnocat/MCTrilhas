@@ -178,6 +178,15 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
 
 ---
 
+*   ### 🎯 PRIORIDADE MÁXIMA: Revisão Geral e Refatoração
+    *   **Descrição:** Realizar uma revisão completa do código para garantir a estabilidade e a consistência do projeto após as recentes e numerosas alterações. Esta é a nossa próxima tarefa antes de prosseguir com novas funcionalidades.
+    *   **Objetivos:**
+        *   **Verificação Funcional:** Testar todos os sistemas (Insígnias, Ranques, Duelos, Pets, NPCs, etc.) para identificar e corrigir bugs.
+        *   **Padronização de Classes:** Analisar o código em busca de classes com lógicas duplicadas ou muito similares e refatorá-las em uma única classe genérica para reduzir a redundância e facilitar a manutenção.
+        *   **Consistência de Código:** Garantir que todas as classes sigam as diretrizes de organização e estilo que definimos.
+
+---
+
 *   ### 🎯 EM FOCO: Sistema de Quests e NPCs
     *   **Descrição:** Implementar um sistema de missões "in-house", totalmente integrado com os sistemas existentes (insígnias, ranques, economia).
     *   **Filosofia:** Desenvolver internamente para garantir integração perfeita e customização, sem depender de plugins de terceiros como o `Quests` ou `Citizens`.
@@ -186,6 +195,8 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
         *   **`quests.yml`:** Arquivo de configuração para definir todas as missões, seus objetivos (coletar itens, falar com NPCs, visitar locais) e recompensas (insígnias, Totens, itens).
         *   **NPCs Interativos:** NPCs com aparências customizadas (skins de jogador) ou `Villagers` com profissões, dependendo do contexto. Servirão como pontos de início e fim para as quests.
         *   **`QuestListener`:** Ouvinte de eventos para monitorar as ações dos jogadores e atualizar o progresso das missões.
+    *   **Princípios de Interação:**
+        *   **Diálogos Privados:** Todas as interações com NPCs, sejam via GUI ou mensagens de chat, devem ser enviadas como mensagens privadas apenas para o jogador que interagiu, para não poluir o chat global.
     *   **Fluxo de Trabalho Atual (Manual):**
         1.  **Criar o NPC no Jogo:** Use o comando `/scout admin npc create <id_do_npc> <nome_do_npc>` para criar o NPC na sua localização atual.
         2.  **Associar o Diálogo:** Abra o arquivo `plugins/MCTrilhas/npcs.yml`, encontre o NPC recém-criado e adicione o ID do diálogo desejado (do arquivo `dialogues.yml`) ao campo `start-dialogue-id`.
@@ -304,6 +315,16 @@ Esta seção detalha as ideias discutidas para referência futura.
     *   O `NPCListener` e outros sistemas usariam esse nome customizado em vez do nome de usuário do Minecraft.
 *   **Segurança:** Seria necessário implementar um filtro de palavras para evitar nomes inadequados.
 *   **Exceções Especiais:** Manter a lógica atual que já permite nomes especiais para jogadores específicos (como você e seu filho) via UUID.
+
+### 8.7. Sistema de Hologramas
+*   **Conceito:** Implementar um sistema "in-house" para criar hologramas de texto flutuante, sem depender de plugins externos.
+*   **Estrutura:**
+    *   **`holo/HologramManager.java`:** Classe para criar, deletar e gerenciar hologramas.
+    *   **`holograms.yml`:** Arquivo de configuração para salvar a localização e o texto de cada holograma.
+*   **Implementação Técnica:** Usar `ArmorStand`s invisíveis, sem gravidade e empilhados verticalmente, onde o nome de cada um representa uma linha do texto.
+*   **Casos de Uso:**
+    *   Exibir informações estáticas (regras, comandos, bem-vindo).
+    *   **Diálogos de NPC:** Exibir as falas dos NPCs como um holograma temporário acima de suas cabeças, tornando a interação mais visual.
 
 ---
 
