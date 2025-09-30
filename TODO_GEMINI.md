@@ -327,6 +327,24 @@ Esta seção detalha as ideias discutidas para referência futura.
     *   **Diálogos de NPC:** Exibir as falas dos NPCs como um holograma temporário acima de suas cabeças, tornando a interação mais visual.
 
 ---
+### 8.8. Brainstorm de Novas Ideias (Para Desenvolvimento Futuro)
+*   **Comunicação Aprimorada:**
+    *   **Chat de Proximidade:** Implementar um sistema onde as mensagens do chat só são visíveis para jogadores dentro de um raio definido, aumentando a imersão.
+    *   **Sistema de Amigos:** Criar um sistema com comandos (`/amigo add`, `/amigo remover`) e um canal de chat privado (`/amigo chat <mensagem>`).
+*   **Modo Visitante Aprimorado:**
+    *   **Imunidade a Mobs:** Fazer com que monstros hostis ignorem jogadores com o ranque `VISITANTE`, protegendo tanto o jogador quanto o cenário.
+    *   **Formulário de Apresentação:** Criar uma página web externa com um formulário para novos jogadores se apresentarem. Os dados seriam enviados para uma planilha do Google Sheets via Google Apps Script para análise da moderação.
+*   **Ferramentas de Qualidade de Vida:**
+    *   **Relógio Pessoal com Alarme:** Criar um item ou comando que mostre a hora do mundo real e permita ao jogador definir um "despertador" pessoal dentro do jogo.
+*   **Acessibilidade e Expansão:**
+    *   **Sistema de Tradução:** Desenvolver um sistema de múltiplos idiomas. Cada jogador poderia escolher seu idioma preferido (`/idioma <en|es|pt>`), e o plugin carregaria as mensagens de arquivos de idioma correspondentes (ex: `lang/en.yml`), mantendo o `config.yml` principal em português.
+*   **Engajamento e Diversão:**
+    *   **Sistema de Easter Eggs:** Criar um gerenciador de eventos aleatórios e segredos escondidos no mundo. Exemplos: NPCs raros que aparecem por tempo limitado, itens com nomes engraçados, mensagens secretas em locais inusitados.
+    *   **Músicas Customizadas (via Resource Pack):**
+        *   **Conceito:** Criar um Resource Pack oficial do servidor contendo músicas escoteiras e outros sons customizados.
+        *   **Implementação:** O servidor ofereceria o download do pacote ao jogador entrar. O plugin poderia então tocar as músicas em momentos específicos (ao entrar em uma região, ao conquistar uma insígnia, etc.).
+
+---
 
 ## 9. Monetização e Filosofia do Projeto (Brainstorm)
 
