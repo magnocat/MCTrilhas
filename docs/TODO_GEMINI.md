@@ -21,6 +21,7 @@ Este documento serve como um resumo completo do estado do projeto MCTrilhas, sua
 4.  **Acesso a Arquivos:** Se eu precisar de um arquivo que não foi fornecido no contexto, devo solicitar explicitamente e aguardar o fornecimento antes de propor qualquer alteração que dependa dele.
 5.  **Confirmação:** Devo sempre confirmar o entendimento das tarefas e regras.
 6.  **Verificação de Importações:** Antes de finalizar qualquer sugestão de código, devo realizar uma verificação interna para garantir que todas as classes utilizadas estão devidamente importadas, evitando erros de `cannot find symbol`.
+7.  **Comunicação Direta:** As respostas devem ser diretas, concisas e sem floreios. Não devo agir de forma alegre ou excessivamente formal. Devo me dirigir ao usuário como "Magno".
 
 ---
 
@@ -351,6 +352,79 @@ Esta seção detalha as ideias discutidas para referência futura.
             5.  **Execução**: O plugin usaria o comando `/playsound` com o nome do evento customizado para tocar a música para o jogador.
 
 ---
+
+## 11. Backlog de Novas Tarefas (Definidas pelo Usuário)
+
+Esta seção contém as novas tarefas e ideias solicitadas para desenvolvimento futuro.
+
+### 11.1. Otimização do Cache de Economia
+*   **Tarefa:** O cache de estatísticas de economia está sendo atualizado mesmo sem jogadores online.
+*   **Solução:** Modificar a lógica para que a tarefa de atualização só seja executada quando houver pelo menos um jogador no servidor, a fim de economizar recursos.
+
+### 11.2. Identificador para Jogadores Bedrock
+*   **Problema:** Jogadores da edição Bedrock são identificados por um prefixo `.` em seus nomes.
+*   **Tarefa:** Remover este prefixo do nome visível e criar um método de identificação alternativo que seja discreto e visível apenas para administradores (ex: um ícone ou tag especial nos painéis web e em listas de jogadores no jogo).
+
+### 11.3. Funcionalidade de Carregar Jogadores
+*   **Ideia:** Implementar um sistema que permita a um jogador "carregar" outro jogador (um por vez), similar a empilhar entidades.
+*   **Implementação:** Criar um comando (ex: `/carregar <jogador>`) que faria o alvo "montar" no jogador que executou o comando.
+
+### 11.4. Exibir Versão do Plugin nos Painéis Web
+*   **Tarefa:** Adicionar a versão atual do plugin (obtida dinamicamente do `plugin.yml`) em todos os painéis web.
+*   **Locais:**
+    *   `index.html` (página principal, talvez no rodapé).
+    *   `admin.html` (painel de administração).
+    *   `pdash.html` (portal da família/jogador).
+*   **Implementação:** A API (`/api/v1/data` e `/api/v1/player`) deverá incluir a versão do plugin no JSON de resposta para que o frontend possa exibi-la.
+
+### 11.5. Painel da Chefia
+*   **Conceito:** Criar uma nova página web (`chefia.html`) dedicada aos líderes escoteiros que não jogam, focada em visualização de dados.
+*   **Requisitos:**
+    *   **Foco em Estatísticas:** Exibir gráficos e números sobre o progresso geral dos jogadores, retenção, atividades mais populares, etc.
+    *   **Sem Comandos:** Não deve ter funcionalidades de interação direta com o servidor (como o painel de admin).
+    *   **Chat Integrado:** Incluir um widget de chat (Discord ou do jogo) para acompanhamento das conversas.
+
+### 11.6. Minigame de Corrida (Estilo Diddy Kong Racing)
+*   **Conceito:** Um minigame de corrida com transformações e power-ups.
+*   **Modos de Jogo:**
+    *   **Corrida em Terra:** Jogadores se transformam em animais (porco, cavalo, lhama, jegue, gato, etc.).
+    *   **Corrida no Ar:** Jogadores se transformam em criaturas voadoras (arara, ghast, allay) ou usam Elytra.
+*   **Velocidade:** Padronizada em ambos os modos para garantir justiça.
+*   **Análise de Jogadores:**
+    *   **Sugestão:** O padrão para jogos de corrida casuais varia entre 4 e 12 jogadores. Um número como **8 jogadores** por corrida seria um bom ponto de partida, pois oferece um bom equilíbrio entre competitividade e caos divertido, sem superlotar a pista. Começar com um máximo de 5 é seguro para testes iniciais.
+
+*   **Armas e Power-ups (Não cumulativos):**
+    *   **Itens Ofensivos:** Bola de Neve, Carga de Vento, TNT (explode no impacto), Bola de Fogo.
+    *   **Power-up (Modo Aéreo):** Foguete de artifício atua como um acelerador temporário.
+
+*   **Mecânicas (Corrida em Terra):**
+    *   **Pista:** O traçado principal será de gelo para promover deslize.
+    *   **Blocos de Interação:**
+        *   **Aceleradores:** Gelo Compactado.
+        *   **Lentidão:** Blocos de Mel.
+        *   **Repulsão:** Blocos de Slime (joga o jogador para trás).
+    *   **Obstáculos na Pista:**
+        *   **Fixos:** Paredes, pedras, lava, que causam lentidão temporária ao serem atingidos.
+        *   **Dinâmicos:** Buracos que aparecem aleatoriamente e paralisam o jogador por alguns segundos.
+    *   **Caminhos Secretos:**
+        *   **Portal Psicodélico:** Uma entrada secreta com um portal que leva a um túnel visualmente distinto e devolve o jogador mais à frente na pista.
+
+*   **Mecânicas (Corrida Aérea):**
+    *   **Armas:** Apenas as de projétil (Bola de Neve, Carga de Vento, etc.).
+    *   **Obstáculos:**
+        *   **Cachoeiras:** Causam lentidão extrema por alguns segundos.
+        *   **Estruturais:** Túneis e estalactites no teto para dificultar a navegação.
+
+*   **Sistema de Colecionáveis (Quebra-Cabeça):**
+    *   **Objetivo:** Incentivar a exploração e rejogabilidade das pistas.
+    *   **Mecânica:**
+        1.  Cada mapa terá um local escondido acessível apenas por um tipo de animal específico.
+        2.  Nesse local, o jogador encontrará uma peça de um quebra-cabeça.
+        3.  As peças serão itens de mapa customizado (como os troféus de insígnia), numeradas sequencialmente (1, 2, 3...) para facilitar a montagem.
+    *   **Recompensa Final:**
+        *   Ao completar o quebra-cabeça, o jogador recebe um cavalo permanente.
+        *   **Atributos do Cavalo:** Terá um efeito cosmético (brilho) e será ligeiramente mais rápido que um cavalo normal, oferecendo uma pequena vantagem sem desbalancear o jogo.
+        *   **Imagem do Quebra-Cabeça:** A imagem final, formada pelos mapas, será grande e decorativa. (A definir o tema da imagem).
 
 ## 9. Monetização e Filosofia do Projeto (Brainstorm)
 
