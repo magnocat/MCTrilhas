@@ -54,6 +54,11 @@ public class NpcAdminSubCommand implements SubCommand {
     }
 
     @Override
+    public boolean isModuleEnabled(MCTrilhasPlugin plugin) {
+        return plugin.getNpcManager() != null;
+    }
+
+    @Override
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Este comando só pode ser usado por jogadores.");

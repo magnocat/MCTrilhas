@@ -26,6 +26,12 @@ public class NPCListener implements Listener {
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
+
+        // Garante que os módulos de NPC e Diálogo estejam ativos
+        if (plugin.getNpcManager() == null || plugin.getDialogueManager() == null) {
+            return;
+        }
+
         Npc npc = plugin.getNpcManager().getNpcByEntityId(event.getRightClicked().getUniqueId());
 
         if (npc != null) {

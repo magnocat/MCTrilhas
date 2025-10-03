@@ -176,6 +176,17 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
         *   **Insígnia de Boas-Vindas:** Concedida a novos jogadores ao serem apadrinhados. Jogadores antigos também podem recebê-la ao serem apadrinhados pela primeira vez.
         *   **Insígnia do Servidor:** A insígnia `MCTRILHAS` agora pode ser reivindicada por todos os membros através do comando `/scout getmap mctrilhas`.
         *   **Apadrinhamento Flexível:** O comando `/apadrinhar` foi atualizado para permitir que jogadores já existentes (com ranques superiores a Visitante) também possam ser apadrinhados.
+*   ### ✅ CONCLUÍDO: Maratona de Refatoração e Robustez (Setembro/2025)
+    *   **Descrição:** Realizamos uma revisão completa de todos os pacotes do projeto para aumentar a estabilidade e a consistência.
+    *   **Funcionalidades Implementadas:**
+        *   **Sistema "Fail-Safe":** Todos os módulos de funcionalidades (Duelos, CTF, Pets, etc.) agora são inicializados em blocos `try-catch`. Se um módulo falhar, ele é desativado individualmente sem impedir o funcionamento do restante do plugin. Módulos essenciais (como `PlayerDataManager`) continuam desativando o plugin para evitar corrupção de dados.
+        *   **Consolidação de Código:** As importações em `MCTrilhasPlugin.java` foram consolidadas usando wildcards para melhorar a legibilidade.
+        *   **Limpeza de Código Obsoleto:** Removemos as classes `ItemCreator.java` e `ProgressBarUtil.java`, que eram redundantes.
+        *   **Melhorias no Painel Web:**
+            *   Adicionamos favicons, links de privacidade e a versão do plugin em todas as páginas.
+            *   O painel de admin agora exibe estatísticas de ranques e um botão para acessar o painel do jogador (`pdash`).
+            *   A página de login foi limpa, removendo opções não funcionais.
+        *   **Atualização da API:** A API web foi atualizada para fornecer os novos dados necessários para o frontend (versão do plugin, distribuição de ranques, etc.).
 
 ---
 
@@ -190,10 +201,9 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
 
 *   ### 🎯 EM FOCO: Sistema de Quests e NPCs
     *   **Descrição:** Implementar um sistema de missões "in-house", totalmente integrado com os sistemas existentes (insígnias, ranques, economia).
-    *   **Filosofia:** Desenvolver internamente para garantir integração perfeita e customização, sem depender de plugins de terceiros como o `Quests` ou `Citizens`.
+    *   **Filosofia:** A lógica de missões é baseada na estrutura de plugins consolidados como o `Quests`, mas a nossa implementação foca em uma integração profunda e customizada com nosso sistema de **NPCs e Diálogos**, criando uma experiência única e "in-house" sem depender de plugins de gerenciamento de NPCs como o `Citizens`.
     *   **Funcionalidades Planejadas:**
         *   **`QuestManager` e `NPCManager`:** Classes para carregar, gerenciar e rastrear o progresso das missões e dos NPCs que as oferecem.
-        *   **`quests.yml`:** Arquivo de configuração para definir todas as missões, seus objetivos (coletar itens, falar com NPCs, visitar locais) e recompensas (insígnias, Totens, itens).
         *   **NPCs Interativos:** NPCs com aparências customizadas (skins de jogador) ou `Villagers` com profissões, dependendo do contexto. Servirão como pontos de início e fim para as quests.
         *   **`QuestListener`:** Ouvinte de eventos para monitorar as ações dos jogadores e atualizar o progresso das missões.
     *   **Princípios de Interação:**
@@ -231,6 +241,10 @@ Esta seção contém as ideias e tarefas discutidas para o futuro do projeto.
 *   **BedWars:** Jogo de equipe clássico.
 *   **Build Battle:** Jogo de construção criativa por tempo.
 *   **Survival Games:** Com forte apelo ao tema de sobrevivência escoteira.
+*   **Modo "Trilha dos Céus" (Skyblock):**
+    *   **Conceito:** Adicionar um modo de jogo opcional no estilo Skyblock, onde os jogadores progridem em ilhas flutuantes guiados por missões.
+    *   **Inspiração:** Inspirado em modpacks como FTB Skies, mas implementado com plugins Spigot e mecânicas "in-house".
+    *   **Mecânicas:** Incluiria geração de recursos através de "máquinas" customizadas (como peneiras) e uma progressão guiada por NPCs.
 *   **Murder Mystery:** Focado em dedução e trabalho em equipe.
 *   **Lobbies:** Criar um lobby dedicado para cada minigame.
 
@@ -359,18 +373,18 @@ Esta seção contém as novas tarefas e ideias solicitadas para desenvolvimento 
 
 ### 11.1. Otimização do Cache de Economia
 *   **Tarefa:** O cache de estatísticas de economia está sendo atualizado mesmo sem jogadores online.
-*   **Solução:** Modificar a lógica para que a tarefa de atualização só seja executada quando houver pelo menos um jogador no servidor, a fim de economizar recursos.
+*   **Status:** ✅ **Concluído**. A tarefa de atualização agora verifica se há jogadores online antes de ser executada.
 
 ### 11.2. Identificador para Jogadores Bedrock
 *   **Problema:** Jogadores da edição Bedrock são identificados por um prefixo `.` em seus nomes.
-*   **Tarefa:** Remover este prefixo do nome visível e criar um método de identificação alternativo que seja discreto e visível apenas para administradores (ex: um ícone ou tag especial nos painéis web e em listas de jogadores no jogo).
+*   **Status:** ✅ **Concluído**. O prefixo foi removido do nome de exibição e um ícone de celular foi adicionado ao lado do nome dos jogadores Bedrock no painel de administração.
 
 ### 11.3. Funcionalidade de Carregar Jogadores
 *   **Ideia:** Implementar um sistema que permita a um jogador "carregar" outro jogador (um por vez), similar a empilhar entidades.
 *   **Implementação:** Criar um comando (ex: `/carregar <jogador>`) que faria o alvo "montar" no jogador que executou o comando.
 
 ### 11.4. Exibir Versão do Plugin nos Painéis Web
-*   **Tarefa:** Adicionar a versão atual do plugin (obtida dinamicamente do `plugin.yml`) em todos os painéis web.
+*   **Status:** ✅ **Concluído**.
 *   **Locais:**
     *   `index.html` (página principal, talvez no rodapé).
     *   `admin.html` (painel de administração).

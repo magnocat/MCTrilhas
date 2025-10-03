@@ -1,15 +1,15 @@
-package com.magnocat.mctrilhas.commands.subcommands;
+package com.magnocat.mctrilhas.commands;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.badges.AddBadgeSubCommand;
 import com.magnocat.mctrilhas.badges.RemoveBadgeSubCommand;
 import com.magnocat.mctrilhas.badges.StatsSubCommand;
 import com.magnocat.mctrilhas.duels.AdminDuelSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.NpcAdminSubCommand;
+import com.magnocat.mctrilhas.npc.NpcAdminSubCommand;
 import com.magnocat.mctrilhas.pet.AdminPetSubCommand;
+import com.magnocat.mctrilhas.commands.SubCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,11 +19,7 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
- * Implementa o comando roteador `/scout admin`.
- * <p>
- * Esta classe não executa uma ação própria, mas gerencia e delega a execução
- * para os subcomandos de administração registrados (ex: addbadge, reload).
- * Ela também lida com a mensagem de ajuda e o autocompletar para os subcomandos.
+ * Implementa o comando roteador `/scout admin`. Esta classe não executa uma ação própria, mas gerencia e delega a execução para os subcomandos de administração registrados (ex: addbadge, reload). Ela também lida com a mensagem de ajuda e o autocompletar para os subcomandos.
  */
 public class AdminSubCommand implements SubCommand {
 
@@ -33,13 +29,13 @@ public class AdminSubCommand implements SubCommand {
     public AdminSubCommand(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
         // Registra todos os subcomandos de administração disponíveis.
-        registerSubCommand(new AddBadgeSubCommand(plugin));
-        registerSubCommand(new RemoveBadgeSubCommand(plugin));
-        registerSubCommand(new StatsSubCommand(plugin));
-        registerSubCommand(new ReloadSubCommand(plugin));
-        registerSubCommand(new AdminPetSubCommand(plugin));
-        registerSubCommand(new AdminDuelSubCommand(plugin));
-        registerSubCommand(new NpcAdminSubCommand(plugin));
+        subCommands.put("addbadge", new AddBadgeSubCommand(plugin));
+        subCommands.put("removebadge", new RemoveBadgeSubCommand(plugin));
+        subCommands.put("stats", new StatsSubCommand(plugin));
+        subCommands.put("reload", new ReloadSubCommand(plugin));
+        subCommands.put("pet", new AdminPetSubCommand(plugin));
+        subCommands.put("duel", new AdminDuelSubCommand(plugin));
+        subCommands.put("npc", new NpcAdminSubCommand(plugin));
     }
 
     private void registerSubCommand(SubCommand subCommand) {

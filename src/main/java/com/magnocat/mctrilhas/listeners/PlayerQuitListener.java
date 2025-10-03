@@ -23,7 +23,14 @@ public class PlayerQuitListener implements Listener {
         Player player = event.getPlayer();
 
         // Limpa o HUD do jogador para evitar memory leaks.
-        plugin.getHudManager().cleanupOnQuit(player);
+        if (plugin.getHudManager() != null) {
+            plugin.getHudManager().cleanupOnQuit(player);
+        }
+
+        // Libera o pet do jogador para evitar entidades órfãs.
+        if (plugin.getPetManager() != null) {
+            plugin.getPetManager().releasePetOnQuit(player);
+        }
 
         // Verifica se este é o último jogador a sair do servidor.
         // Se for, para as tarefas de atualização de cache para economizar recursos.

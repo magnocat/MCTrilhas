@@ -50,6 +50,11 @@ public class PetSubCommand implements SubCommand {
     public boolean isAdminCommand() { return false; }
 
     @Override
+    public boolean isModuleEnabled(MCTrilhasPlugin plugin) {
+        return plugin.getPetManager() != null;
+    }
+
+    @Override
     public void execute(CommandSender sender, String[] args) {
         if (args.length == 0) {
             sender.sendMessage(ChatColor.GOLD + "--- Comandos de Pet ---");

@@ -202,11 +202,9 @@ MCTrilhas/
 │       └── UpdateChecker.java      # Verifica se há novas versões do plugin no GitHub.
 │   │
 │   └── utils/
-│       ├── ItemCreator.java        # (Obsoleto) Versão antiga de uma fábrica de itens, substituída pelo ItemFactory.
 │       ├── ItemFactory.java        # Utilitário moderno para criar `ItemStack` a partir de seções de configuração, com logging.
 │       ├── MessageUtils.java       # Utilitário para criar e exibir mensagens formatadas, como o progresso de ranques.
 │       ├── PlayerStateManager.java # Gerencia o salvamento e a restauração do estado completo de um jogador (inventário, vida, etc.).
-│       ├── ProgressBarUtil.java    # Utilitário específico para construir barras de progresso em formato de texto.
 │       └── SecurityUtils.java      # Utilitário para funções de segurança, como gerar 'salts' e 'hashes' de senhas.
 │
 └── src/main/resources/

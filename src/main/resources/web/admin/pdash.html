@@ -16,6 +16,16 @@
   <meta name="author" content="MagnoCat" />
   <meta name="description" content="Painel de acompanhamento de progresso para jogadores do servidor MCTrilhas." />
   <!--end::Primary Meta Tags-->
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+  <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+  <link rel="icon" type="image/png" sizes="70x70" href="/android-icon-70x70.png">
+
   <!--begin::Fonts-->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
     integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q=" crossorigin="anonymous" media="print"
@@ -432,14 +442,13 @@
     <!--begin::Footer-->
     <footer class="app-footer">
       <!--begin::To the end-->
-      <div class="float-end d-none d-sm-inline">MCTrilhas - Uma Aventura Digital</div>
+      <div class="float-end d-none d-sm-inline">
+        <a href="/privacy.html" target="_blank">Política de Privacidade</a>
+      </div>
       <!--end::To the end-->
       <!--begin::Copyright-->
-      <strong>
-        Copyright &copy; 2024&nbsp;
-        <a href="https://magnocat.net" class="text-decoration-none">MagnoCat</a>.
-      </strong>
-      All rights reserved.
+      <strong>Copyright &copy; 2024 MagnoCat.</strong>
+      <span class="text-muted">| Versão do Plugin: <span id="plugin-version">...</span></span>
       <!--end::Copyright-->
     </footer>
     <!--end::Footer-->
@@ -557,6 +566,7 @@
       // 3. Funções para popular o dashboard com os dados
       function updateDashboard(data) {
         if (!data) return;
+        const pluginVersionSpan = document.getElementById('plugin-version');
 
         // Atualiza o cabeçalho e menu
         document.getElementById('player-name-header').textContent = data.name;
@@ -579,6 +589,11 @@
         document.getElementById('stat-duel-wins').textContent = data.duelStats?.wins || 0;
         document.getElementById('stat-elo').textContent = data.duelStats?.elo || 1000;
         document.getElementById('stat-totems').textContent = data.totems.toLocaleString('pt-BR');
+
+        // Atualiza a versão do plugin no rodapé
+        if (data.pluginVersion && pluginVersionSpan) {
+          pluginVersionSpan.textContent = data.pluginVersion;
+        }
 
         // Renderiza o gráfico de progresso das insígnias dinamicamente
         const progressPercentages = {};

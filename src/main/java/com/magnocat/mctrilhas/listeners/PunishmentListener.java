@@ -59,7 +59,7 @@ public class PunishmentListener implements Listener {
 
             // Aplica a penalidade
             double penaltyAmount = plugin.getConfig().getDouble("sponsorship-penalty.totem-amount", 5000.0);
-            if (plugin.getEconomy() != null) {
+            if (plugin.getEconomy() != null && plugin.getEconomy().isEnabled()) { // Verifica se a economia está ativa
                 plugin.getEconomy().withdrawPlayer(godfatherOffline, penaltyAmount);
             }
 

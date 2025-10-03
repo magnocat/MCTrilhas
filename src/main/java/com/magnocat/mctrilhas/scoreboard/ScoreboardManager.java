@@ -180,6 +180,11 @@ public class ScoreboardManager implements Listener {
         Badge closestBadge = null;
         double maxPercentage = -1.0;
 
+        // Fail-safe: Garante que o BadgeManager esteja ativo.
+        if (plugin.getBadgeManager() == null) {
+            return null;
+        }
+
         for (Badge badge : plugin.getBadgeManager().getAllBadges()) {
             // Pula insígnias que o jogador já conquistou
             if (playerData.getEarnedBadgesMap().containsKey(badge.id())) {

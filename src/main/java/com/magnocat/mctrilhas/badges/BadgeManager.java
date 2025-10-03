@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.event.Listener;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 
@@ -29,6 +31,26 @@ public class BadgeManager {
     public BadgeManager(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
         loadBadgesFromConfig();
+    }
+
+    /**
+     * Registra todos os listeners relacionados ao sistema de insígnias.
+     * Isso centraliza a lógica e torna o módulo de insígnias mais autônomo.
+     */
+    public void registerBadgeListeners() {
+        List<Listener> badgeListeners = Arrays.asList(
+                new MiningListener(plugin),
+                new LumberjackListener(plugin),
+                new CookingListener(plugin),
+                new BuilderListener(plugin),
+                new FishingListener(plugin),
+                new FarmingListener(plugin),
+                new CraftingListener(plugin),
+                new MobKillListener(plugin),
+                new TamingListener(plugin),
+                new ExplorerListener(plugin)
+        );
+        badgeListeners.forEach(listener -> plugin.getServer().getPluginManager().registerEvents(listener, plugin));
     }
 
     /**

@@ -50,6 +50,11 @@ public class HUDSubCommand implements SubCommand {
     }
 
     @Override
+    public boolean isModuleEnabled(MCTrilhasPlugin plugin) {
+        return plugin.getHudManager() != null;
+    }
+
+    @Override
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Este comando só pode ser usado por jogadores.");

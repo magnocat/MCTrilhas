@@ -56,8 +56,14 @@ public class ReloadSubCommand implements SubCommand {
         sender.sendMessage(ChatColor.YELLOW + "Recarregando configurações do MCTrilhas...");
 
         plugin.reloadConfig();
-        plugin.getBadgeManager().loadBadgesFromConfig();
-        plugin.getTreasureLocationsManager().loadLocations();
+        // Recarrega os módulos apenas se eles estiverem ativos.
+        if (plugin.getBadgeManager() != null) {
+            plugin.getBadgeManager().loadBadgesFromConfig();
+        }
+        if (plugin.getTreasureLocationsManager() != null) {
+            plugin.getTreasureLocationsManager().loadLocations();
+        }
+        // A classe MCTrilhasPlugin.reloadPluginConfig() já lida com os outros módulos.
 
         sender.sendMessage(ChatColor.GREEN + "Configurações do MCTrilhas recarregadas com sucesso!");
     }

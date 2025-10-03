@@ -1,51 +1,40 @@
 package com.magnocat.mctrilhas;
 
 // Java Standard Library
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-// Bukkit & Spigot API
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
-// Vault API
-import net.milkbowl.vault.economy.Economy;
-
-// Project-specific Classes
-import com.magnocat.mctrilhas.badges.BuilderListener;
 import com.magnocat.mctrilhas.badges.BadgeManager;
-import com.magnocat.mctrilhas.badges.BadgeMenu;
-import com.magnocat.mctrilhas.badges.CookingListener;
-import com.magnocat.mctrilhas.badges.CraftingListener;
-import com.magnocat.mctrilhas.badges.ExplorerListener;
-import com.magnocat.mctrilhas.badges.FarmingListener;
-import com.magnocat.mctrilhas.badges.FishingListener;
-import com.magnocat.mctrilhas.badges.LumberjackListener;
-import com.magnocat.mctrilhas.badges.MiningListener;
-import com.magnocat.mctrilhas.badges.MobKillListener;
-import com.magnocat.mctrilhas.badges.TamingListener;
-import com.magnocat.mctrilhas.commands.DailyCommand;
-import com.magnocat.mctrilhas.commands.DuelCommand;
-import com.magnocat.mctrilhas.commands.FamilyCommand;
-import com.magnocat.mctrilhas.commands.RulesCommand;
-import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;
-import com.magnocat.mctrilhas.ctf.CTFCommand;
-import com.magnocat.mctrilhas.ctf.CTFListener;
-import com.magnocat.mctrilhas.ctf.CTFManager;
-import com.magnocat.mctrilhas.ctf.CTFMilestoneManager;
-import com.magnocat.mctrilhas.data.ActivityTracker;
-import com.magnocat.mctrilhas.data.PlayerDataManager;
-import com.magnocat.mctrilhas.duels.DuelListener;
-import com.magnocat.mctrilhas.duels.DuelManager; // Garante que estamos usando o manager correto
-import com.magnocat.mctrilhas.duels.DuelRewardManager;
-import com.magnocat.mctrilhas.duels.GameListener;
-import com.magnocat.mctrilhas.hud.HUDManager;
-import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;
+import com.magnocat.mctrilhas.badges.BadgeMenu; // Importa todas as classes do pacote badges
+import com.magnocat.mctrilhas.commands.DailyCommand; // Importa todas as classes do pacote commands
+import com.magnocat.mctrilhas.commands.FamilyCommand;      // Importa todas as classes do pacote ctf
+import com.magnocat.mctrilhas.commands.RulesCommand;    // Importa todas as classes do pacote data
+import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;    // Importa todas as classes do pacote duels
+import com.magnocat.mctrilhas.ctf.CTFCommand;      // Importa todas as classes do pacote hud
+import com.magnocat.mctrilhas.ctf.CTFListener;      // Importa todas as classes do pacote npc
+import com.magnocat.mctrilhas.ctf.CTFManager; // Importa todas as classes do pacote listeners
+import com.magnocat.mctrilhas.ctf.CTFMilestoneManager; // Importa todas as classes do pacote integrations
+import com.magnocat.mctrilhas.data.ActivityTracker; // Importa todas as classes do pacote quests
+import com.magnocat.mctrilhas.data.PlayerDataManager;      // Importa todas as classes do pacote maps
+import com.magnocat.mctrilhas.duels.DuelCommand;      // Importa todas as classes do pacote pet
+import com.magnocat.mctrilhas.duels.DuelListener;    // Importa todas as classes do pacote ranks
+import com.magnocat.mctrilhas.duels.DuelManager; // Importa todas as classes do pacote scoreboard
+import com.magnocat.mctrilhas.duels.DuelRewardManager;   // Importa todas as classes do pacote storage
+import com.magnocat.mctrilhas.duels.GameListener;   // Importa todas as classes do pacote updater
+import com.magnocat.mctrilhas.hud.HUDManager;      // Importa todas as classes do pacote web
+import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;    // Importa todas as classes do pacote utils
 import com.magnocat.mctrilhas.listeners.AdminPrivacyListener;
 import com.magnocat.mctrilhas.listeners.CommandBlockerListener;
 import com.magnocat.mctrilhas.listeners.GameChatListener;
@@ -72,6 +61,8 @@ import com.magnocat.mctrilhas.scoreboard.ScoreboardManager;
 import com.magnocat.mctrilhas.storage.BlockPersistenceManager;
 import com.magnocat.mctrilhas.updater.UpdateChecker;
 import com.magnocat.mctrilhas.web.HttpApiManager;
+
+import net.milkbowl.vault.economy.Economy;
 
 public final class MCTrilhasPlugin extends JavaPlugin {
 
@@ -195,19 +186,18 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private void loadManagers() {
         // Módulos Essenciais (se falharem, o plugin não deve continuar)
         try {
-            this.playerDataManager = new PlayerDataManager(this);
-            this.badgeManager = new BadgeManager(this);
             this.rankManager = new RankManager(this);
-            this.httpApiManager = new HttpApiManager(this);
-            logInfo("Módulos essenciais (Dados, Insígnias, Ranques, API) carregados.");
+            this.playerDataManager = new PlayerDataManager(this);
+            logInfo("Módulos essenciais (Ranques, Dados) carregados.");
         } catch (Exception e) {
-            logSevere("Falha crítica ao carregar um módulo essencial. O plugin não pode continuar.");
-            e.printStackTrace();
+
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
         // Módulos de Funcionalidades (podem falhar individualmente)
+        initWebApiSystem();
+        initBadgeSystem();
         initBlockPersistenceSystem();
         initBadgeMenuSystem();
         initMapRewardSystem();
@@ -226,6 +216,26 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             getLogger().info("Integração com BlueMap ativada.");
         }*/
         logInfo("Gerenciadores e menus inicializados.");
+    }
+
+    private void initWebApiSystem() {
+        try {
+            this.httpApiManager = new HttpApiManager(this);
+            this.httpApiManager.start();
+        } catch (Exception e) {
+            logSevere("Módulo de API Web falhou ao iniciar e será desativado.", e);
+            this.httpApiManager = null;
+        }
+    }
+
+    private void initBadgeSystem() {
+        try {
+            this.badgeManager = new BadgeManager(this);
+            this.badgeManager.registerBadgeListeners();
+        } catch (Exception e) {
+            logSevere("Módulo de Insígnias falhou ao iniciar e será desativado.", e);
+            this.badgeManager = null;
+        }
     }
 
     private void initBlockPersistenceSystem() {
@@ -263,12 +273,17 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         } catch (Exception e) {
             logSevere("Módulo de Caça ao Tesouro falhou ao iniciar e será desativado.", e);
             this.treasureHuntManager = null;
+            this.treasureLocationsManager = null;
+            this.treasureHuntRewardManager = null;
         }
     }
 
     private void initCtfSystem() {
         try {
             this.ctfManager = new CTFManager(this);
+            // O CTFManager agora carrega as arenas em seu construtor,
+            // mas chamamos explicitamente para garantir o recarregamento em /reload.
+            this.ctfManager.loadArenas();
             this.ctfMilestoneManager = new CTFMilestoneManager(this);
         } catch (Exception e) {
             logSevere("Módulo de CTF falhou ao iniciar e será desativado.", e);
@@ -339,11 +354,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             getCommand("tesouro").setExecutor(treasureHuntExecutor);
             getCommand("tesouro").setTabCompleter(treasureHuntExecutor);
         }
-        if (ctfManager != null) {
-            CTFCommand ctfExecutor = new CTFCommand(this);
-            getCommand("ctf").setExecutor(ctfExecutor);
-            getCommand("ctf").setTabCompleter(ctfExecutor);
-        }
         if (duelManager != null) {
             DuelCommand duelExecutor = new DuelCommand(this);
             getCommand("duelo").setExecutor(duelExecutor);
@@ -351,44 +361,44 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         }
         logInfo("Comandos registrados.");
 
+        // Registra comandos de módulos apenas se eles foram inicializados com sucesso
+        if (ctfManager != null) {
+            CTFCommand ctfExecutor = new CTFCommand(this);
+            getCommand("ctf").setExecutor(ctfExecutor);
+            getCommand("ctf").setTabCompleter(ctfExecutor);
+        }
+
     }
 
     private void registerListeners() {
         List<Listener> listenersToRegister = Arrays.asList(
-                new MiningListener(this),
-                new LumberjackListener(this),
-                new CookingListener(this),
-                new BuilderListener(this),
-                new FishingListener(this),
-                new FarmingListener(this),
-                new CraftingListener(this),
-                new MobKillListener(this),
-                new TamingListener(this),
-                new ExplorerListener(this),
+                // Listeners de insígnias foram movidos para o BadgeManager
+                // Listeners essenciais que devem sempre ser registrados
                 new PlayerJoinListener(this),
                 new PlayerQuitListener(this), // Essencial para salvar os dados do jogador ao sair.
-                new MenuListener(this),
                 new CommandBlockerListener(this),
                 new AdminPrivacyListener(this),
-                new GameChatListener(this),
                 new PlayerProtectionListener(this),
                 new PunishmentListener(this)
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
 
-        // Registra listeners de módulos apenas se eles foram inicializados com sucesso
+        // Registra listeners de módulos opcionais apenas se eles foram inicializados com sucesso
+        if (getHttpApiManager() != null) getServer().getPluginManager().registerEvents(new GameChatListener(this), this);
+        if (getBadgeMenu() != null || getDialogueManager() != null) getServer().getPluginManager().registerEvents(new MenuListener(this), this);
         if (treasureHuntManager != null) getServer().getPluginManager().registerEvents(new TreasureHuntListener(this), this);
         if (petManager != null) getServer().getPluginManager().registerEvents(new PetListener(this), this);
         if (duelManager != null) {
-            getServer().getPluginManager().registerEvents(new CTFListener(this), this);
             getServer().getPluginManager().registerEvents(new DuelListener(this), this);
             getServer().getPluginManager().registerEvents(new GameListener(this), this);
         }
         if (npcManager != null) getServer().getPluginManager().registerEvents(new NPCListener(this), this);
+        if (ctfManager != null) getServer().getPluginManager().registerEvents(new CTFListener(this), this);
 
         logInfo("Ouvintes de eventos registrados.");
     }
+
 
     private void setupPlaceholders() {
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -404,62 +414,107 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     }
 
     public BadgeManager getBadgeManager() {
+        if (badgeManager == null) {
+            logWarn("O módulo de Insígnias está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return badgeManager;
     }
 
     public BlockPersistenceManager getBlockPersistenceManager() {
+        if (blockPersistenceManager == null) {
+            logWarn("O módulo de Persistência de Blocos está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return blockPersistenceManager;
     }
 
     public BadgeMenu getBadgeMenu() {
+        if (badgeMenu == null) {
+            logWarn("O módulo de Menu de Insígnias está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return badgeMenu;
     }
 
     public MapRewardManager getMapRewardManager() {
+        if (mapRewardManager == null) {
+            logWarn("O módulo de Recompensa de Mapas está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return mapRewardManager;
     }
 
     public RankManager getRankManager() {
+        if (rankManager == null) {
+            logWarn("O módulo de Ranques está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return rankManager;
     }
 
     public TreasureHuntManager getTreasureHuntManager() {
+        if (treasureHuntManager == null) {
+            logWarn("O módulo de Caça ao Tesouro está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return treasureHuntManager;
     }
 
     public TreasureLocationsManager getTreasureLocationsManager() {
+        if (treasureLocationsManager == null) {
+            logWarn("O módulo de Locais de Tesouro está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return treasureLocationsManager;
     }
 
     public TreasureHuntRewardManager getTreasureHuntRewardManager() {
+        if (treasureHuntRewardManager == null) {
+            logWarn("O módulo de Recompensas da Caça ao Tesouro está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return treasureHuntRewardManager;
     }
 
     public CTFManager getCtfManager() {
+        if (ctfManager == null) {
+            logWarn("O módulo de CTF está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return ctfManager;
     }
 
     public CTFMilestoneManager getCtfMilestoneManager() {
+        if (ctfMilestoneManager == null) {
+            logWarn("O módulo de Marcos de CTF está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return ctfMilestoneManager;
     }
 
     public HUDManager getHudManager() {
+        if (hudManager == null) {
+            logWarn("O módulo de HUD está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return hudManager;
     }
 
     public ScoreboardManager getScoreboardManager() {
+        if (scoreboardManager == null) {
+            logWarn("O módulo de Scoreboard está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return scoreboardManager;
     }
 
     public DuelManager getDuelManager() {
+        if (duelManager == null) {
+            logWarn("O módulo de Duelos está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return this.duelManager;
     }
 
     public DuelRewardManager getDuelRewardManager() {
+        if (duelRewardManager == null) {
+            logWarn("O módulo de Recompensas de Duelos está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return duelRewardManager;
     }
 
     public PetManager getPetManager() {
+        if (petManager == null) {
+            logWarn("O módulo de Pets está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return petManager;
     }
 
@@ -468,10 +523,16 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     }
 
     public NPCManager getNpcManager() {
+        if (npcManager == null) {
+            logWarn("O módulo de NPCs está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return npcManager;
     }
 
     public DialogueManager getDialogueManager() {
+        if (dialogueManager == null) {
+            logWarn("O módulo de Diálogos está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
         return dialogueManager;
     }
 
@@ -493,19 +554,29 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         setupEconomy();
 
         // Notifica o BadgeManager para recarregar sua lista interna de insígnias
-        badgeManager.loadBadgesFromConfig();
+        if (badgeManager != null) {
+            badgeManager.loadBadgesFromConfig();
+        }
 
         // Recarrega os locais de tesouro
-        treasureLocationsManager.loadLocations();
+        if (treasureLocationsManager != null) {
+            treasureLocationsManager.loadLocations();
+        }
 
         // Recarrega as arenas de CTF
-        ctfManager.loadArenas();
+        if (ctfManager != null) {
+            ctfManager.loadArenas();
+        }
 
         // Recarrega as arenas de Duelo
-        duelManager.loadArenas();
+        if (duelManager != null) {
+            duelManager.loadArenas();
+        }
 
         // Recarrega os kits de Duelo
-        duelManager.loadKits();
+        if (duelManager != null) {
+            duelManager.loadKits();
+        }
 
         logInfo("As configurações (config.yml) do MCTrilhas foram recarregadas.");
     }
@@ -577,6 +648,11 @@ public final class MCTrilhasPlugin extends JavaPlugin {
      * mapas ficarem em branco após um reinício do servidor.
      */
     private void restoreMapRenderers() {
+        if (mapRewardManager == null) {
+            logInfo("Restauração de mapas-troféu pulada pois o módulo está desativado.");
+            return;
+        }
+
         logInfo("Iniciando restauração dos mapas-troféu...");
         // A varredura dos arquivos é feita de forma assíncrona para não atrasar o boot.
         getServer().getScheduler().runTaskAsynchronously(this, () -> {

@@ -33,6 +33,15 @@ public class PlayerJoinListener implements Listener {
         // Esta ação é síncrona para garantir que os dados estejam disponíveis imediatamente.
         playerDataManager.loadPlayerData(player.getUniqueId());
 
+        // Identifica jogadores Bedrock (prefixo ".") e ajusta o nome de exibição.
+        if (player.getName().startsWith(".")) {
+            String cleanName = player.getName().substring(1);
+            player.setDisplayName(cleanName);
+            PlayerData data = playerDataManager.getPlayerData(player.getUniqueId());
+            if (data != null) data.setBedrockPlayer(true);
+            plugin.logInfo("Jogador Bedrock detectado: " + player.getName() + ". Nome de exibição definido como: " + cleanName);
+        }
+
         // 2. Verifica se este é o primeiro jogador a entrar no servidor.
         // Se for, inicia as tarefas de atualização de cache que estavam paradas.
         // A verificação é feita com 1 tick de atraso para garantir que a contagem de jogadores esteja correta.
@@ -55,11 +64,14 @@ public class PlayerJoinListener implements Listener {
         // A verificação é feita com um pequeno atraso para garantir que tudo esteja carregado.
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (player.isOnline()) { // Garante que o jogador não desconectou nesse meio tempo
-                plugin.getScoreboardManager().toggleBoard(player, true); // O 'true' ativa silenciosamente
+                if (plugin.getScoreboardManager() != null) {
+                    plugin.getScoreboardManager().toggleBoard(player, true); // O 'true' ativa silenciosamente
+                }
 
                 // Carrega o estado da HUD do jogador e a ativa se necessário.
                 PlayerData data = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
-                if (data != null && data.isHudEnabled()) {
+                // Verifica se o HUDManager está ativo antes de tentar usá-lo
+                if (plugin.getHudManager() != null && data != null && data.isHudEnabled()) {
                     plugin.getHudManager().showHud(player);
                 }
             }
@@ -120,8 +132,10 @@ public class PlayerJoinListener implements Listener {
      */
     private void scheduleRankPromotionCheck(Player player) {
         // Atraso de 10 segundos para garantir que todas as estatísticas do jogador estejam carregadas.
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            plugin.getRankManager().checkAndPromote(player);
-        }, 200L); // Atraso de 10 segundos (200 ticks)
+        if (plugin.getRankManager() != null) {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                plugin.getRankManager().checkAndPromote(player);
+            }, 200L); // Atraso de 10 segundos (200 ticks)
+        }
     }
 }

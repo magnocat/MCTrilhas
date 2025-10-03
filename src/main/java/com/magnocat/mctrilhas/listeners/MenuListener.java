@@ -72,8 +72,10 @@ public class MenuListener implements Listener {
                     String targetName = tempTitle.substring(0, tempTitle.lastIndexOf(" ("));
 
                     // Reabre o menu na página correta.
-                    OfflinePlayer target = plugin.getServer().getOfflinePlayer(targetName);
-                    plugin.getBadgeMenu().open(player, target.getUniqueId(), target.getName(), targetPage);
+                    if (plugin.getBadgeMenu() != null) {
+                        OfflinePlayer target = plugin.getServer().getOfflinePlayer(targetName);
+                        plugin.getBadgeMenu().open(player, target.getUniqueId(), target.getName(), targetPage);
+                    }
                 }
             }
         }
@@ -84,7 +86,9 @@ public class MenuListener implements Listener {
 
             if (container.has(actionKey, PersistentDataType.STRING)) {
                 String action = container.get(actionKey, PersistentDataType.STRING);
-                handleDialogueAction(player, action);
+                if (plugin.getDialogueManager() != null) {
+                    handleDialogueAction(player, action);
+                }
             }
         }
     }
@@ -93,8 +97,10 @@ public class MenuListener implements Listener {
         if (action.equalsIgnoreCase("close")) {
             player.closeInventory();
         } else if (action.startsWith("dialogue:")) {
-            String nextDialogueId = action.substring("dialogue:".length());
-            plugin.getDialogueManager().startDialogue(player, nextDialogueId);
+            if (plugin.getDialogueManager() != null) {
+                String nextDialogueId = action.substring("dialogue:".length());
+                plugin.getDialogueManager().startDialogue(player, nextDialogueId);
+            }
         } else {
             // Placeholder para futuras ações (quests, comandos, etc.)
             player.sendMessage(ChatColor.GRAY + "[DEBUG] Ação '" + action + "' ainda não implementada.");

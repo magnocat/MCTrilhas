@@ -49,7 +49,9 @@ public class TreasureHuntListener implements Listener {
             Location targetLocation = new Location(plugin.getServer().getWorld(parts[0]), Double.parseDouble(parts[1]), Double.parseDouble(parts[2]), Double.parseDouble(parts[3]));
 
             // Verifica se o jogador está no mesmo mundo e dentro do raio de detecção.
-            if (player.getWorld().equals(targetLocation.getWorld()) && player.getLocation().distanceSquared(targetLocation) <= FIND_RADIUS_SQUARED) {
+            // Adiciona verificação para o TreasureHuntManager
+            if (plugin.getTreasureHuntManager() != null &&
+                player.getWorld().equals(targetLocation.getWorld()) && player.getLocation().distanceSquared(targetLocation) <= FIND_RADIUS_SQUARED) {
                 // O jogador encontrou o local! Delega a lógica para o manager.
                 plugin.getTreasureHuntManager().advanceStage(player);
             }

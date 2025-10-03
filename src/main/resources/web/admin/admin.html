@@ -6,6 +6,16 @@
     <title>MCTrilhas | Painel de Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow">
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="icon" type="image/png" sizes="70x70" href="/android-icon-70x70.png">
+
     <link rel="stylesheet" href="./css/adminlte.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.css" />
@@ -322,6 +332,30 @@
                             </div>
                         </div>
 
+                        <!-- Linha de Estatísticas de Ranques -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <i class="bi bi-shield-shaded me-2"></i>Distribuição de Ranques
+                                        </h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="rank-distribution-chart">
+                                            <div class="text-center p-4">
+                                                <div class="spinner-border spinner-border-sm"></div> Carregando...
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer text-center text-muted">
+                                        Total de jogadores com ranque definido: <strong
+                                            id="total-ranked-players">...</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Linha do Console Remoto -->
                         <div class="row mt-4">
                             <div class="col-12">
@@ -350,6 +384,18 @@
                         </div>
                     </div>
             </div>
+            <!--begin::Footer-->
+            <footer class="app-footer">
+                <!--begin::To the end-->
+                <div class="float-end d-none d-sm-inline">
+                    <a href="/privacy.html" target="_blank">Política de Privacidade</a>
+                </div>
+                <!--end::To the end-->
+                <!--begin::Copyright-->
+                <strong>Copyright &copy; 2024 MagnoCat.</strong>
+                <span class="text-muted">| Versão do Plugin: <span id="plugin-version">...</span></span>
+                <!--end::Copyright-->
+            </footer>
         </main>
 
         <!-- Modal Detalhes do Jogador -->
@@ -440,6 +486,7 @@
             const overviewPane = document.getElementById('overview-pane');
             const inventoryPane = document.getElementById('inventory-pane');
             let inventoryLoadedForPlayer = ''; // Guarda o UUID do jogador cujo inventário foi carregado
+            const pluginVersionSpan = document.getElementById('plugin-version');
 
             // Limpa o conteúdo e reseta o estado ao fechar o modal
             playerDetailsModal._element.addEventListener('hidden.bs.modal', () => {
@@ -526,6 +573,11 @@
                     if (timeLabels.length > MAX_DATA_POINTS) { timeLabels.shift(); cpuData.shift(); tpsData.shift(); }
                     cpuChart.updateOptions({ series: [{ data: cpuData }, { data: tpsData }], xaxis: { categories: timeLabels } });
 
+                    // Atualiza a versão do plugin no rodapé
+                    if (data.pluginVersion && pluginVersionSpan) {
+                        pluginVersionSpan.textContent = data.pluginVersion;
+                    }
+
                 } catch (error) {
                     console.error("Erro ao buscar métricas:", error);
                 }
@@ -558,10 +610,13 @@
                         data.forEach(player => {
                             const row = document.createElement('tr');
                             const tokenIcon = player.hasWebToken ?
-                                '<i class="bi bi-key-fill text-success" title="Sim"></i>' :
-                                '<i class="bi bi-key text-muted" title="Não"></i>';
+                                '<i class="bi bi-key-fill text-success" title="Possui token de acesso web"></i>' :
+                                '<i class="bi bi-key text-muted" title="Não possui token de acesso web"></i>';
+                            const bedrockIcon = player.isBedrock ?
+                                ' <i class="bi bi-phone-fill text-info" title="Jogador do Bedrock Edition"></i>' : '';
+
                             row.innerHTML = `
-                                <td><img src="https://cravatar.eu/helmavatar/${player.uuid}/24.png" class="rounded-circle me-2" alt="${player.name}" width="24" height="24"> <strong>${player.name}</strong></td>
+                                <td><img src="https://cravatar.eu/helmavatar/${player.uuid}/24.png" class="rounded-circle me-2" alt="${player.name}" width="24" height="24"> <strong>${player.name}</strong>${bedrockIcon}</td>
                                 <td>${player.ping}ms</td>
                                 <td class="text-center">${tokenIcon}</td>
                                 <td>${player.world}</td>
@@ -601,10 +656,12 @@
                     } else {
                         data.players.forEach(player => {
                             const lastPlayedDate = new Date(parseInt(player.lastPlayed));
+                            const bedrockIcon = player.isBedrock ?
+                                ' <i class="bi bi-phone-fill text-info" title="Jogador do Bedrock Edition"></i>' : '';
                             const row = document.createElement('tr');
                             row.dataset.playerName = player.name.toLowerCase();
                             row.innerHTML = `
-                                <td><img src="https://cravatar.eu/helmavatar/${player.uuid}/24.png" class="rounded-circle me-2" alt="${player.name}" width="24" height="24"> <strong>${player.name}</strong></td>
+                                <td><img src="https://cravatar.eu/helmavatar/${player.uuid}/24.png" class="rounded-circle me-2" alt="${player.name}" width="24" height="24"> <strong>${player.name}</strong>${bedrockIcon}</td>
                                 <td>${lastPlayedDate.toLocaleString('pt-BR')}</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary btn-view-details" title="Ver Detalhes" data-player-uuid="${player.uuid}" data-player-name="${player.name}"><i class="bi bi-eye"></i></button>
@@ -704,6 +761,13 @@
                     } else if (amount !== null) {
                         alert('Por favor, insira um número válido.');
                     }
+                    return;
+                }
+
+                const pdashButton = event.target.closest('.btn-pdash');
+                if (pdashButton) {
+                    const { playerToken } = pdashButton.dataset;
+                    window.open(`pdash.html?token=${playerToken}`, '_blank');
                     return;
                 }
             });
@@ -815,6 +879,12 @@
             }
 
             function populateModal(data) {
+                const pdashButtonHTML = data.webToken ?
+                    `<button class="btn btn-sm btn-info btn-pdash" data-player-token="${data.webToken}" title="Abrir Painel do Jogador"><i class="bi bi-box-arrow-up-right"></i> Abrir Painel</button>` :
+                    `<button class="btn btn-sm btn-secondary" disabled title="O jogador não gerou um token de acesso."><i class="bi bi-box-arrow-up-right"></i> Painel Indisponível</button>`;
+                const bedrockIcon = data.isBedrock ?
+                    ' <i class="bi bi-phone-fill text-info" title="Jogador do Bedrock Edition"></i>' : '';
+
                 let badgeProgressHTML = '';
                 if (data.badgeDefinitions) {
                     data.badgeDefinitions.forEach(badgeDef => {
@@ -846,7 +916,8 @@
                     <div class="row">
                         <div class="col-md-4 text-center border-end">
                             <img src="https://cravatar.eu/helmavatar/${data.uuid}/128.png" class="img-fluid rounded-circle shadow-lg mb-3" alt="${data.name}">
-                            <h3>${data.name}</h3>
+                            <h3>${data.name}${bedrockIcon}</h3>
+                            <div class="mb-3">${pdashButtonHTML}</div>
                             <p class="text-muted small">${data.uuid}</p>
                             <hr>
                             <ul class="list-group list-group-flush text-start">
@@ -999,6 +1070,47 @@
                     console.error("Erro ao buscar estatísticas da economia:", error);
                     totalTotemsEl.textContent = 'Erro';
                     richestPlayersListEl.innerHTML = `<li class="list-group-item text-center p-4 text-danger">${error.message}</li>`;
+                }
+            }
+
+            // --- Lógica da Distribuição de Ranques ---
+            const rankChartEl = document.getElementById('rank-distribution-chart');
+            const totalRankedPlayersEl = document.getElementById('total-ranked-players');
+
+            async function updateRankDistribution() {
+                if (!rankChartEl || !totalRankedPlayersEl) return;
+                try {
+                    const response = await fetch('/api/v1/admin/rank-distribution', { headers: getAuthHeaders() });
+                    if (!response.ok) {
+                        if (response.status === 401) logout();
+                        throw new Error(`Erro na API: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    rankChartEl.innerHTML = '';
+                    let totalPlayers = 0;
+
+                    if (Object.keys(data).length > 0) {
+                        for (const [rank, count] of Object.entries(data)) {
+                            totalPlayers += count;
+                        }
+                        for (const [rank, count] of Object.entries(data)) {
+                            const percentage = totalPlayers > 0 ? ((count / totalPlayers) * 100).toFixed(1) : 0;
+                            const rankHTML = `
+                                <div class="progress-group">
+                                    ${rank}
+                                    <span class="float-end"><b>${count}</b>/${totalPlayers}</span>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-primary" style="width: ${percentage}%"></div>
+                                    </div>
+                                </div>`;
+                            rankChartEl.innerHTML += rankHTML;
+                        }
+                        totalRankedPlayersEl.textContent = totalPlayers.toLocaleString('pt-BR');
+                    } else {
+                        rankChartEl.innerHTML = '<div class="text-center p-4 text-muted">Nenhum dado de ranque disponível.</div>';
+                    }
+                } catch (error) {
+                    rankChartEl.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
                 }
             }
 
@@ -1196,10 +1308,12 @@
             fetchAndDisplayOnlinePlayers();
             fetchAndDisplayOfflinePlayers(); // Carrega a primeira página de jogadores offline
             updateEconomyStats();
+            updateRankDistribution();
             updateAdminList();
             setInterval(updateGameChat, 3000); // Atualiza o chat a cada 3s
             setInterval(updateMetrics, 5000); // Atualiza métricas a cada 5s
             setInterval(fetchAndDisplayOnlinePlayers, 30000); // Atualiza jogadores a cada 30s
+            setInterval(updateRankDistribution, 60000 * 5); // Atualiza ranques a cada 5 minutos
         });
     </script>
 </body>

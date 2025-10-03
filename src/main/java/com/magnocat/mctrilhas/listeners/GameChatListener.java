@@ -21,6 +21,8 @@ public class GameChatListener implements Listener {
         Player player = event.getPlayer();
         String message = event.getMessage();
 
-        plugin.getHttpApiManager().addChatMessage(player, message);
+        if (plugin.getHttpApiManager() != null) {
+            plugin.getHttpApiManager().addChatMessage(player, message);
+        }
     }
 }

@@ -54,6 +54,17 @@ public class GetMapSubCommand implements SubCommand {
     }
 
     /**
+     * Verifica se os módulos necessários (BadgeManager, MapRewardManager) estão ativos.
+     *
+     * @param plugin A instância principal do plugin.
+     * @return {@code true} se os módulos estiverem ativos, {@code false} caso contrário.
+     */
+    @Override
+    public boolean isModuleEnabled(MCTrilhasPlugin plugin) {
+        return plugin.getBadgeManager() != null && plugin.getMapRewardManager() != null;
+    }
+
+    /**
      * Executa a lógica para entregar um mapa-troféu a um jogador.
      *
      * @param sender A entidade que executou o comando (deve ser um jogador).

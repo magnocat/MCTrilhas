@@ -4,8 +4,8 @@
   <groupId>com.magnocat</groupId>
   <artifactId>MCtrilhas</artifactId>
   <name>MCtrilhas</name>
-  <version>1.0.25</version>
-  <description>Plugin de insígnias com temática escoteira para o servidor MC Trilhas.</description>
+  <version>1.0.31</version>
+  <description>Plugin com temática escoteira para o servidor MC Trilhas.</description>
   <url>https://github.com/magnocat/MCTrilhas</url>
   <build>
     <resources>
@@ -52,6 +52,9 @@
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
+          <compilerArgs>
+            <arg>-Xlint:-deprecation</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>

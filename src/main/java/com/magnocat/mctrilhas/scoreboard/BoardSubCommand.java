@@ -50,12 +50,22 @@ public class BoardSubCommand implements SubCommand {
     }
 
     @Override
+    public boolean isModuleEnabled(MCTrilhasPlugin plugin) {
+        return plugin.getScoreboardManager() != null;
+    }
+
+    @Override
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.RED + "Este comando só pode ser usado por jogadores.");
             return;
         }
-        plugin.getScoreboardManager().toggleBoard((Player) sender);
+        ScoreboardManager manager = plugin.getScoreboardManager();
+        if (manager != null) {
+            manager.toggleBoard((Player) sender);
+        } else {
+            sender.sendMessage(ChatColor.RED + "O sistema de painel está temporariamente desativado.");
+        }
     }
 
     @Override

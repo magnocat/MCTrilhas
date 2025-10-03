@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.EnumMap;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -37,6 +38,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -60,6 +62,7 @@ import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerCTFStats;
 import com.magnocat.mctrilhas.duels.PlayerDuelStats;
 import com.magnocat.mctrilhas.data.PlayerData;
+import com.magnocat.mctrilhas.ranks.Rank;
 import com.magnocat.mctrilhas.utils.SecurityUtils;
 
 /**
@@ -156,6 +159,7 @@ public class HttpApiManager {
             server.createContext("/api/v1/admin/game-chat", this::handleAdminGameChatRequest);
             server.createContext("/api/v1/admin/execute-command", this::handleAdminExecuteCommandRequest);
             server.createContext("/api/v1/admin/list-admins", this::handleAdminListAdminsRequest);
+            server.createContext("/api/v1/admin/rank-distribution", this::handleAdminRankDistributionRequest);
 
             // --- Static File Server ---
             // Define o diretório raiz de onde os arquivos web serão servidos.
@@ -457,6 +461,7 @@ public class HttpApiManager {
                     com.magnocat.mctrilhas.data.PlayerData pData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
                     boolean hasToken = pData != null && pData.getWebAccessToken() != null && !pData.getWebAccessToken().isEmpty();
                     playerData.put("hasWebToken", hasToken);
+                    playerData.put("isBedrock", pData != null && pData.isBedrockPlayer());
 
                     return playerData;
                 })
@@ -594,6 +599,7 @@ public class HttpApiManager {
         metrics.put("maxMemory", maxMemory);
         metrics.put("tps", String.format(Locale.US, "%.2f", tps));
         metrics.put("timestamp", System.currentTimeMillis());
+        metrics.put("pluginVersion", plugin.getDescription().getVersion());
 
         sendJsonResponse(exchange, 200, gson.toJson(metrics));
     }
@@ -1028,6 +1034,11 @@ public class HttpApiManager {
         new BukkitRunnable() {
             @Override
             public void run() {
+                // Otimização: Só atualiza o cache se houver jogadores online.
+                if (Bukkit.getOnlinePlayers().isEmpty()) {
+                    return;
+                }
+
                 if (plugin.getEconomy() == null) {
                     plugin.logWarn("Vault/Economy não encontrado. Pulando atualização de estatísticas da economia.");
                     return;
@@ -1284,6 +1295,49 @@ public class HttpApiManager {
         }.runTaskAsynchronously(plugin);
     }
 
+    private void handleAdminRankDistributionRequest(HttpExchange exchange) throws IOException {
+        // Configura CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+        if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
+        }
+
+        if (verifyAdminToken(exchange) == null) {
+            return;
+        }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    Map<Rank, Integer> rankCounts = new EnumMap<>(Rank.class);
+                    File playerDataFolder = new File(plugin.getDataFolder(), "playerdata");
+                    File[] playerFiles = playerDataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+
+                    if (playerFiles != null) {
+                        for (File playerFile : playerFiles) {
+                            FileConfiguration config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(playerFile);
+                            String rankStr = config.getString("rank", "VISITANTE");
+                            try {
+                                Rank rank = Rank.valueOf(rankStr.toUpperCase());
+                                rankCounts.put(rank, rankCounts.getOrDefault(rank, 0) + 1);
+                            } catch (IllegalArgumentException ignored) {
+                                // Ignora ranques inválidos nos arquivos
+                            }
+                        }
+                    }
+                    sendJsonResponse(exchange, 200, gson.toJson(rankCounts));
+                } catch (IOException e) {
+                    plugin.logSevere("Erro de IO ao calcular distribuição de ranques via API: " + e.getMessage());
+                }
+            }
+        }.runTaskAsynchronously(plugin);
+    }
+
     private Map<String, Object> buildPlayerDetailsMap(UUID playerUUID) {
         // Tenta obter os dados do cache (para jogadores online).
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(playerUUID);
@@ -1307,9 +1361,12 @@ public class HttpApiManager {
         responseData.put("uuid", playerUUID.toString());
         responseData.put("rank", playerData.getRank().name());
         responseData.put("playtimeHours", playerData.getActivePlaytimeTicks() / 72000);
+        responseData.put("isBedrock", playerData.isBedrockPlayer());
         responseData.put("totems", plugin.getEconomy() != null ? plugin.getEconomy().getBalance(offlinePlayer) : 0);
         responseData.put("ctfStats", ctfStats); // O objeto já é serializável pelo Gson
         responseData.put("duelStats", duelStats); // Adiciona as estatísticas de duelo
+        responseData.put("webToken", playerData.getWebAccessToken()); // Adiciona o token para o botão do painel
+        responseData.put("pluginVersion", plugin.getDescription().getVersion()); // Adiciona a versão do plugin
 
         // Adiciona o progresso atual das insígnias
         Map<String, Double> badgeProgress = new HashMap<>();

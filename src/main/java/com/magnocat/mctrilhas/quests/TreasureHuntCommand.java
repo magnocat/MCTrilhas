@@ -49,6 +49,12 @@ public class TreasureHuntCommand implements CommandExecutor, TabCompleter {
         }
         Player player = (Player) sender;
 
+        // Fail-safe: Verifica se o módulo está ativo
+        if (plugin.getTreasureHuntManager() == null) {
+            player.sendMessage(ChatColor.RED + "O sistema de Caça ao Tesouro está temporariamente desativado. Contate um administrador.");
+            return true;
+        }
+
         if (args.length == 0) {
             sendHelpMessage(player);
             return true;
