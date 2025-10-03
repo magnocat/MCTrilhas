@@ -1,7 +1,7 @@
 package com.magnocat.mctrilhas.listeners;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.menus.BadgeMenu;
+import com.magnocat.mctrilhas.badges.BadgeMenu;
 import com.magnocat.mctrilhas.npc.DialogueMenu;
 import org.bukkit.NamespacedKey;
 import org.bukkit.ChatColor;

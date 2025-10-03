@@ -9,7 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
+import com.magnocat.mctrilhas.commands.SubCommand;
 
 /**
  * Implementa o subcomando `/duelo aceitar <jogador>`.

@@ -3,16 +3,11 @@ package com.magnocat.mctrilhas;
 // Java Standard Library
 import java.util.Arrays;
 import java.util.List;
-
-import java.io.File;
 // Bukkit & Spigot API
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.map.MapView;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -22,61 +17,61 @@ import org.bukkit.scheduler.BukkitTask;
 import net.milkbowl.vault.economy.Economy;
 
 // Project-specific Classes
+import com.magnocat.mctrilhas.badges.BuilderListener;
 import com.magnocat.mctrilhas.badges.BadgeManager;
-import com.magnocat.mctrilhas.commands.ApadrinharCommand;
+import com.magnocat.mctrilhas.badges.BadgeMenu;
+import com.magnocat.mctrilhas.badges.CookingListener;
+import com.magnocat.mctrilhas.badges.CraftingListener;
+import com.magnocat.mctrilhas.badges.ExplorerListener;
+import com.magnocat.mctrilhas.badges.FarmingListener;
+import com.magnocat.mctrilhas.badges.FishingListener;
+import com.magnocat.mctrilhas.badges.LumberjackListener;
+import com.magnocat.mctrilhas.badges.MiningListener;
+import com.magnocat.mctrilhas.badges.MobKillListener;
+import com.magnocat.mctrilhas.badges.TamingListener;
 import com.magnocat.mctrilhas.commands.DailyCommand;
+import com.magnocat.mctrilhas.commands.DuelCommand;
 import com.magnocat.mctrilhas.commands.FamilyCommand;
-import com.magnocat.mctrilhas.commands.RankCommand;
 import com.magnocat.mctrilhas.commands.RulesCommand;
 import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;
-import com.magnocat.mctrilhas.commands.TreasureHuntCommand;
 import com.magnocat.mctrilhas.ctf.CTFCommand;
+import com.magnocat.mctrilhas.ctf.CTFListener;
 import com.magnocat.mctrilhas.ctf.CTFManager;
 import com.magnocat.mctrilhas.ctf.CTFMilestoneManager;
-import com.magnocat.mctrilhas.duels.DuelCommand;
-import com.magnocat.mctrilhas.npc.DialogueManager;
-import com.magnocat.mctrilhas.duels.DuelManager; // Garante que estamos usando o manager correto
-import com.magnocat.mctrilhas.duels.GameListener;
-import com.magnocat.mctrilhas.duels.DuelListener;
-import com.magnocat.mctrilhas.duels.DuelRewardManager;
-import com.magnocat.mctrilhas.listeners.AdminPrivacyListener;
+import com.magnocat.mctrilhas.data.ActivityTracker;
 import com.magnocat.mctrilhas.data.PlayerDataManager;
+import com.magnocat.mctrilhas.duels.DuelListener;
+import com.magnocat.mctrilhas.duels.DuelManager; // Garante que estamos usando o manager correto
+import com.magnocat.mctrilhas.duels.DuelRewardManager;
+import com.magnocat.mctrilhas.duels.GameListener;
+import com.magnocat.mctrilhas.hud.HUDManager;
 import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;
-import com.magnocat.mctrilhas.listeners.BuilderListener;
+import com.magnocat.mctrilhas.listeners.AdminPrivacyListener;
 import com.magnocat.mctrilhas.listeners.CommandBlockerListener;
-import com.magnocat.mctrilhas.listeners.CookingListener;
-import com.magnocat.mctrilhas.listeners.CraftingListener;
-import com.magnocat.mctrilhas.listeners.ExplorerListener;
-import com.magnocat.mctrilhas.listeners.FarmingListener;
 import com.magnocat.mctrilhas.listeners.GameChatListener;
-import com.magnocat.mctrilhas.listeners.FishingListener;
-import com.magnocat.mctrilhas.listeners.LumberjackListener;
 import com.magnocat.mctrilhas.listeners.MenuListener;
-import com.magnocat.mctrilhas.listeners.MiningListener;
-import com.magnocat.mctrilhas.listeners.MobKillListener;
 import com.magnocat.mctrilhas.listeners.PlayerJoinListener;
-import com.magnocat.mctrilhas.listeners.PunishmentListener;
 import com.magnocat.mctrilhas.listeners.PlayerProtectionListener;
 import com.magnocat.mctrilhas.listeners.PlayerQuitListener;
-import com.magnocat.mctrilhas.listeners.TamingListener;
-import com.magnocat.mctrilhas.npc.NPCListener;
+import com.magnocat.mctrilhas.listeners.PunishmentListener;
 import com.magnocat.mctrilhas.listeners.TreasureHuntListener;
+import com.magnocat.mctrilhas.maps.MapRewardManager;
+import com.magnocat.mctrilhas.npc.DialogueManager;
+import com.magnocat.mctrilhas.npc.NPCListener;
 import com.magnocat.mctrilhas.npc.NPCManager;
-import com.magnocat.mctrilhas.ctf.CTFListener;
 import com.magnocat.mctrilhas.pet.PetListener;
 import com.magnocat.mctrilhas.pet.PetManager;
-import com.magnocat.mctrilhas.maps.MapRewardManager;
-import com.magnocat.mctrilhas.menus.BadgeMenu;
+import com.magnocat.mctrilhas.quests.TreasureHuntCommand;
 import com.magnocat.mctrilhas.quests.TreasureHuntManager;
 import com.magnocat.mctrilhas.quests.TreasureHuntRewardManager;
 import com.magnocat.mctrilhas.quests.TreasureLocationsManager;
+import com.magnocat.mctrilhas.ranks.ApadrinharCommand;
+import com.magnocat.mctrilhas.ranks.RankCommand;
 import com.magnocat.mctrilhas.ranks.RankManager;
+import com.magnocat.mctrilhas.scoreboard.ScoreboardManager;
 import com.magnocat.mctrilhas.storage.BlockPersistenceManager;
-import com.magnocat.mctrilhas.data.ActivityTracker;
 import com.magnocat.mctrilhas.updater.UpdateChecker;
 import com.magnocat.mctrilhas.web.HttpApiManager;
-import com.magnocat.mctrilhas.hud.HUDManager;
-import com.magnocat.mctrilhas.scoreboard.ScoreboardManager;
 
 public final class MCTrilhasPlugin extends JavaPlugin {
 
@@ -112,9 +107,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
 
+        saveResource("duel_arenas.yml", false); // Garante que o arquivo de arenas seja criado
         saveResource("duel_kits.yml", false);
         saveResource("npcs.yml", false);
-        saveResource("duel_arenas.yml", false); // Garante que o arquivo de arenas seja criado
         setupEconomy();
         loadManagers();
 
@@ -126,6 +121,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         registerCommands();
         registerListeners();
         setupPlaceholders();
+
+        // Inicia as tarefas agendadas para atualizar os caches de ranking.
+        // A lógica de iniciar/parar foi movida para o PlayerJoinListener para economizar recursos.
+        startCacheUpdateTasks();
 
         // Inicia o novo servidor de API web.
         httpApiManager.start();
@@ -148,6 +147,12 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // Para as tarefas agendadas para evitar erros durante o reload.
+        if (placeholderApiCacheUpdater != null) placeholderApiCacheUpdater.cancel();
+        if (webApiCacheUpdater != null) webApiCacheUpdater.cancel();
+        // Para as tarefas do DuelManager
+        if (duelManager != null) duelManager.stopTasks();
+
         // Salva os dados de todos os jogadores online para evitar perda de dados durante um reload ou desligamento.
         if (playerDataManager != null) {
             logInfo("Salvando dados dos jogadores online...");
@@ -166,11 +171,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         // Para o gerenciador de HUD
         if (hudManager != null) {
             hudManager.stop();
-        }
-
-        // Para as tarefas do DuelManager
-        if (duelManager != null) {
-            duelManager.stopTasks();
         }
 
         logInfo("MCTrilhas foi desativado.");
@@ -331,6 +331,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         getCommand("scout").setTabCompleter(scoutExecutor);
         getCommand("daily").setExecutor(new DailyCommand(this));
         getCommand("ranque").setExecutor(new RankCommand(this));
+        getCommand("familia").setExecutor(new FamilyCommand(this)); // O comando /hud foi movido para /scout hud
+        getCommand("regras").setExecutor(new RulesCommand(this));
+        getCommand("apadrinhar").setExecutor(new ApadrinharCommand(this));
         if (treasureHuntManager != null) {
             TreasureHuntCommand treasureHuntExecutor = new TreasureHuntCommand(this);
             getCommand("tesouro").setExecutor(treasureHuntExecutor);
@@ -341,9 +344,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             getCommand("ctf").setExecutor(ctfExecutor);
             getCommand("ctf").setTabCompleter(ctfExecutor);
         }
-        getCommand("familia").setExecutor(new FamilyCommand(this)); // O comando /hud foi movido para /scout hud
-        getCommand("regras").setExecutor(new RulesCommand(this));
-        getCommand("apadrinhar").setExecutor(new ApadrinharCommand(this));
         if (duelManager != null) {
             DuelCommand duelExecutor = new DuelCommand(this);
             getCommand("duelo").setExecutor(duelExecutor);
@@ -355,7 +355,6 @@ public final class MCTrilhasPlugin extends JavaPlugin {
 
     private void registerListeners() {
         List<Listener> listenersToRegister = Arrays.asList(
-                new PlayerJoinListener(this),
                 new MiningListener(this),
                 new LumberjackListener(this),
                 new CookingListener(this),
@@ -363,25 +362,26 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new FishingListener(this),
                 new FarmingListener(this),
                 new CraftingListener(this),
-                new ExplorerListener(this),
                 new MobKillListener(this),
                 new TamingListener(this),
+                new ExplorerListener(this),
+                new PlayerJoinListener(this),
                 new PlayerQuitListener(this), // Essencial para salvar os dados do jogador ao sair.
                 new MenuListener(this),
                 new CommandBlockerListener(this),
                 new AdminPrivacyListener(this),
                 new GameChatListener(this),
                 new PlayerProtectionListener(this),
-                new PunishmentListener(this),
+                new PunishmentListener(this)
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
 
         // Registra listeners de módulos apenas se eles foram inicializados com sucesso
         if (treasureHuntManager != null) getServer().getPluginManager().registerEvents(new TreasureHuntListener(this), this);
-        if (ctfManager != null) getServer().getPluginManager().registerEvents(new CTFListener(this), this);
         if (petManager != null) getServer().getPluginManager().registerEvents(new PetListener(this), this);
         if (duelManager != null) {
+            getServer().getPluginManager().registerEvents(new CTFListener(this), this);
             getServer().getPluginManager().registerEvents(new DuelListener(this), this);
             getServer().getPluginManager().registerEvents(new GameListener(this), this);
         }
@@ -547,7 +547,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 playerDataManager.getMonthlyBadgeCountsAsync();
                 playerDataManager.getAllTimeBadgeCountsAsync();
             }
-        }.runTaskTimerAsynchronously(this, 20L * 60, 20L * 60 * 5); // Inicia após 1 min, repete a cada 5 min
+        }.runTaskTimerAsynchronously(this, 20L * 30, 20L * 60 * 5); // Inicia após 30s, repete a cada 5 min
 
         // Tarefa para a API Web
         // A atualização dos rankings de Duelo e CTF agora é feita sob demanda.

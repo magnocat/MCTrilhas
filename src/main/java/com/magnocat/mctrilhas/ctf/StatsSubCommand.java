@@ -1,7 +1,7 @@
 package com.magnocat.mctrilhas.ctf;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
+import com.magnocat.mctrilhas.commands.SubCommand;
 import com.magnocat.mctrilhas.data.PlayerCTFStats;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

@@ -1,7 +1,8 @@
 package com.magnocat.mctrilhas.duels;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
+import com.magnocat.mctrilhas.commands.SubCommand;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;

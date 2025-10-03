@@ -1,4 +1,4 @@
-package com.magnocat.mctrilhas.listeners;
+package com.magnocat.mctrilhas.badges;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

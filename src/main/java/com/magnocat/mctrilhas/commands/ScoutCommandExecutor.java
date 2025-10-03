@@ -15,15 +15,11 @@ import org.bukkit.command.TabCompleter;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.badges.BadgesSubCommand; // A importação já está correta, mas confirmamos.
-import com.magnocat.mctrilhas.commands.subcommands.AdminSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.BoardSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.GetMapSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.PetSubCommand;
+import com.magnocat.mctrilhas.badges.ToggleProgressSubCommand;
 import com.magnocat.mctrilhas.commands.subcommands.ProgressSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.HUDSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.ToggleProgressSubCommand;
-import com.magnocat.mctrilhas.commands.subcommands.VersionSubCommand;
+import com.magnocat.mctrilhas.hud.HUDSubCommand;
+import com.magnocat.mctrilhas.pet.PetSubCommand;
+import com.magnocat.mctrilhas.scoreboard.BoardSubCommand;
 
 /**
  * Executor principal e roteador para o comando `/scout`.

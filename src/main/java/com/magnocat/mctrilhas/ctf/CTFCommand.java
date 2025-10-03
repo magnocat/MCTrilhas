@@ -1,7 +1,7 @@
 package com.magnocat.mctrilhas.ctf;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.commands.subcommands.SubCommand;
+import com.magnocat.mctrilhas.commands.SubCommand;
 import com.magnocat.mctrilhas.ctf.JoinSubCommand;
 import com.magnocat.mctrilhas.ctf.LeaveSubCommand;
 import com.magnocat.mctrilhas.ctf.ListSubCommand;
