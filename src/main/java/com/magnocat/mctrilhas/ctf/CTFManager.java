@@ -367,13 +367,14 @@ public class CTFManager {
             return;
         }
 
-        List<String> validTypes = Arrays.asList("lobby", "redspawn", "bluespawn", "redflag", "blueflag");
-        if (!validTypes.contains(locationType.toLowerCase())) {
+        String locationKey = locationType.toLowerCase();
+        List<String> validTypes = Arrays.asList("lobby", "red-spawn", "blue-spawn", "red-flag", "blue-flag");
+        if (!validTypes.contains(locationKey)) {
             admin.sendMessage(ChatColor.RED + "Tipo de local inválido. Use um dos seguintes: " + String.join(", ", validTypes));
             return;
         }
 
-        builder.setLocation(locationType, admin.getLocation());
+        builder.setLocation(locationKey, admin.getLocation());
         admin.sendMessage(ChatColor.GREEN + "Local '" + locationType + "' definido para a sua posição atual.");
         showArenaCreationStatus(admin);
     }

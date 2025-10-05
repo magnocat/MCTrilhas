@@ -49,10 +49,10 @@ public class ArenaBuilder {
      */
     public boolean isComplete() {
         return locations.containsKey("lobby") &&
-               locations.containsKey("red-spawn") &&
-               locations.containsKey("blue-spawn") &&
-               locations.containsKey("red-flag") &&
-               locations.containsKey("blue-flag");
+               locations.containsKey("red-spawn") && // Corrigido para usar hífen
+               locations.containsKey("blue-spawn") && // Corrigido para usar hífen
+               locations.containsKey("red-flag") &&   // Corrigido para usar hífen
+               locations.containsKey("blue-flag");  // Corrigido para usar hífen
     }
 
     /**
@@ -62,11 +62,11 @@ public class ArenaBuilder {
     public String getStatus() {
         StringBuilder status = new StringBuilder();
         status.append("§6--- Status da Arena '§e").append(id).append("§6' ---\n");
-        status.append(check("Lobby", locations.containsKey("lobby")));
-        status.append(check("Spawn Vermelho", locations.containsKey("red-spawn")));
-        status.append(check("Spawn Azul", locations.containsKey("blue-spawn")));
-        status.append(check("Bandeira Vermelha", locations.containsKey("red-flag")));
-        status.append(check("Bandeira Azul", locations.containsKey("blue-flag")));
+        status.append(check("Lobby", locations.containsKey("lobby"))); // Mantido
+        status.append(check("Spawn Vermelho", locations.containsKey("red-spawn"))); // Corrigido
+        status.append(check("Spawn Azul", locations.containsKey("blue-spawn")));   // Corrigido
+        status.append(check("Bandeira Vermelha", locations.containsKey("red-flag"))); // Corrigido
+        status.append(check("Bandeira Azul", locations.containsKey("blue-flag")));   // Corrigido
         if (isComplete()) {
             status.append("\n§aArena pronta para ser salva! Use /ctf admin save");
         } else {

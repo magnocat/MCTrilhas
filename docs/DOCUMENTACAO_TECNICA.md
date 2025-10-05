@@ -278,6 +278,20 @@ MCTrilhas/
     5.  **Responsabilidade (`PunishmentListener`):** Se um jogador que foi apadrinhado for banido, o `PunishmentListener` detecta o evento e aplica uma penalidade em Totens (configurável) ao padrinho, notificando-o da ação.
 
 ---
+### 3.13. Sistema de Organização de Baús (ChestSort)
+*   **Descrição:** Uma funcionalidade de qualidade de vida que permite aos jogadores organizar o conteúdo de um baú com um único clique.
+*   **Estrutura:** `sorting/ChestSortListener.java`.
+*   **Permissão:** `mctrilhas.chestsort`.
+*   **Lógica:**
+    1.  **`onInventoryOpen`:** Quando um jogador com a permissão necessária abre um baú, o `ChestSortListener` adiciona um botão customizado (uma bússola) a um slot específico do inventário.
+    2.  **`onInventoryClick`:** Se o jogador clica no botão de organizar:
+        *   O evento é cancelado para evitar que o jogador pegue o botão.
+        *   O sistema coleta todos os itens do baú (exceto o próprio botão).
+        *   Os itens são ordenados (primeiro por tipo de material, depois por nome customizado).
+        *   O baú é limpo e os itens são reinseridos de forma ordenada e agrupada.
+        *   Um som de feedback é tocado para o jogador.
+
+---
 ### 3.13. Identificação de Jogadores (UUID)
 *   **Descrição:** O sistema utiliza o UUID (Universally Unique Identifier) como a forma primária e mais confiável para identificar jogadores.
 *   **Funcionamento:**

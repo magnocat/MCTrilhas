@@ -60,6 +60,7 @@ import com.magnocat.mctrilhas.ranks.ApadrinharCommand;
 import com.magnocat.mctrilhas.ranks.RankCommand;
 import com.magnocat.mctrilhas.ranks.RankManager;
 import com.magnocat.mctrilhas.scoreboard.ScoreboardManager;
+import com.magnocat.mctrilhas.sorting.ChestSortListener;
 import com.magnocat.mctrilhas.storage.BlockPersistenceManager;
 import com.magnocat.mctrilhas.updater.UpdateChecker;
 import com.magnocat.mctrilhas.web.HttpApiManager;
@@ -396,7 +397,8 @@ public final class MCTrilhasPlugin extends JavaPlugin {
                 new CommandBlockerListener(this),
                 new AdminPrivacyListener(this),
                 new PlayerProtectionListener(this),
-                new PunishmentListener(this)
+                new PunishmentListener(this),
+                new ChestSortListener(this) // Adiciona o novo listener de organização de baús
         );
 
         listenersToRegister.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));

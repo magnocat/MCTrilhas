@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class SetCTFAdminSubCommand implements SubCommand {
     private final MCTrilhasPlugin plugin;
-    private final List<String> locationTypes = Arrays.asList("lobby", "redspawn", "bluespawn", "redflag", "blueflag");
+    private final List<String> locationTypes = Arrays.asList("lobby", "red-spawn", "blue-spawn", "red-flag", "blue-flag");
 
     public SetCTFAdminSubCommand(MCTrilhasPlugin plugin) {
         this.plugin = plugin;
