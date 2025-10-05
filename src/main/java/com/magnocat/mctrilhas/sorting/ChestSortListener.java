@@ -77,8 +77,9 @@ public class ChestSortListener implements Listener {
         items.sort(Comparator.comparing((ItemStack item) -> item.getType().toString())
                 .thenComparing(item -> item.hasItemMeta() && item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : ""));
 
-        // Limpa o baú (exceto o botão)
-        chestInventory.clear(8); // Limpa tudo, exceto o slot 8 onde está o botão
+        // Limpa o baú completamente, exceto o botão de organizar
+        chestInventory.clear();
+        chestInventory.setItem(8, createSortButton());
 
         // Re-adiciona os itens de forma agrupada e ordenada
         for (ItemStack sortedItem : items) {
