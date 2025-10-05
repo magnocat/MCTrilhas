@@ -221,6 +221,20 @@ MCTrilhas/
         *   **Papagaio:** Pode sentar no ombro do jogador e concede uma habilidade de "super zoom" ao se agachar.
 
 ---
+### 3.10.1. Detalhamento das Habilidades dos Pets
+
+| Pet | Comida Favorita | Habilidade Ativa/Interativa | Habilidade Passiva |
+|---|---|---|---|
+| **Lobo** | Osso | **Guarda-Costas:** Ataca monstros que o dono ataca ou que atacam o dono. | **Uivo do Líder:** Periodicamente, concede um buff de Força I temporário para si e para o dono. |
+| **Gato** | Bacalhau | **Alerta Felino:** Emite sons e partículas quando monstros se aproximam. Espanta Creepers. | **Visão Felina:** Concede Visão Noturna ao dono quando ele está em locais escuros. |
+| **Porco** | Cenoura | **Faro Fino:** Coleta automaticamente itens caídos no chão e os entrega ao dono. | **Caçador de Trufas:** Periodicamente, tem a chance de desenterrar cogumelos ou cenouras douradas. |
+| **Papagaio** | Sementes de Trigo | **Olho de Águia:** Quando está no ombro do dono, concede um efeito de "super zoom" ao se agachar. | N/A |
+| **Allay** | F. de Ametista | **Coletor Inteligente:** Ao receber um item do dono, procura e coleta itens do mesmo tipo. | **Harmonia Musical:** Ganha um buff de Velocidade I temporário quando está perto de um Bloco de Música tocando. |
+| **Ovelha** | Trigo | **Lã Camaleônica:** Pode ser tosquiada para obter lã colorida. A cada tosquia, muda para uma nova cor aleatória. | **Aura Calmante:** Concede Regeneração I ao dono quando ele está com vida baixa e fora de combate. |
+| **Vaca** | Trigo | **Fonte de Leite:** Pode ser ordenhada com um balde para obter leite. | **Aura Purificante:** Periodicamente, remove um efeito negativo (veneno, lentidão, etc.) do dono. |
+| **Galinha** | Sementes de Trigo | **Botar Ovo:** Pode ser estimulada para botar um ovo. | **Queda Suave:** Concede o efeito de Queda Lenta ao dono se ele estiver caindo de uma grande altura. |
+
+---
 
 ### 3.11. Sistema de Duelos 1v1
 *   **Descrição:** Um sistema completo de combate 1v1 com arenas, kits customizáveis, ranking de habilidade (ELO) e modo espectador.

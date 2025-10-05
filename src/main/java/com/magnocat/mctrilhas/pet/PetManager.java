@@ -8,6 +8,9 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.NamespacedKey;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.entity.Sittable;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -149,6 +152,13 @@ public class PetManager implements Listener {
         Pet pet = activePets.remove(player.getUniqueId());
         if (pet != null) {
             pet.despawn();
+
+            // Limpa o registro do último pet ativo, pois foi uma ação manual.
+            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
+            if (playerData != null) {
+                playerData.setLastActivePetType(null);
+            }
+
             player.sendMessage(ChatColor.YELLOW + "Seu pet foi guardado com segurança.");
         } else {
             player.sendMessage(ChatColor.RED + "Você não tem nenhum pet invocado.");
@@ -237,12 +247,40 @@ public class PetManager implements Listener {
         activePet.showAffection();
     }
 
+    /**
+     * Alterna o estado de "ficar" (sentado) de um pet.
+     * @param player O dono do pet.
+     */
+    public void togglePetStay(Player player) {
+        Pet activePet = activePets.get(player.getUniqueId());
+        if (activePet == null) {
+            player.sendMessage(ChatColor.RED + "Você precisa ter seu pet invocado para dar ordens.");
+            return;
+        }
+
+        if (activePet.getEntity() instanceof Sittable) {
+            Sittable petEntity = (Sittable) activePet.getEntity();
+            boolean isSitting = petEntity.isSitting();
+            petEntity.setSitting(!isSitting);
+
+            if (!isSitting) {
+                player.sendMessage(ChatColor.GREEN + "Você mandou seu pet ficar parado.");
+            } else {
+                player.sendMessage(ChatColor.GREEN + "Você mandou seu pet seguir você.");
+            }
+        }
+    }
+
     private Material getFoodForPet(String petType) {
         switch (petType.toLowerCase()) {
             case "lobo": return Material.BONE;
             case "gato": return Material.COD;
             case "porco": return Material.CARROT;
             case "papagaio": return Material.WHEAT_SEEDS;
+            case "allay": return Material.AMETHYST_SHARD;
+            case "ovelha": return Material.WHEAT;
+            case "vaca": return Material.WHEAT;
+            case "galinha": return Material.WHEAT_SEEDS;
             default: return null;
         }
     }
@@ -342,6 +380,11 @@ public class PetManager implements Listener {
         // Aplica os novos atributos ao pet se ele estiver ativo
         Pet activePet = activePets.get(owner.getUniqueId());
         if (activePet != null) {
+            // Adiciona feedback visual e sonoro
+            if (activePet.getEntity() != null && activePet.getEntity().isValid()) {
+                owner.playSound(activePet.getEntity().getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.2f);
+                activePet.getEntity().getWorld().spawnParticle(Particle.TOTEM, activePet.getEntity().getLocation().add(0, 1, 0), 30, 0.5, 0.5, 0.5, 0.1);
+            }
             activePet.onLevelUp();
         }
     }
@@ -367,15 +410,28 @@ public class PetManager implements Listener {
      * Cria a instância correta do pet com base no tipo.
      */
     private Pet createPetInstance(Player owner, PetData petData) {
+        // CRÍTICO: Cria uma cópia dos dados do pet para esta instância.
+        // Isso evita que múltiplos pets (ex: o seu e o de outro jogador) compartilhem o mesmo objeto de dados,
+        // o que causava o bug de todos terem o mesmo nome e nível.
+        PetData instanceData = new PetData(petData.getType(), petData.getName(), petData.getLevel(), petData.getExperience(), petData.hasCustomName(), petData.isOwned(), petData.getHappiness());
+
         switch (petData.getType().toLowerCase()) {
             case "lobo":
-                return new WolfPet(owner, petData, plugin);
+                return new WolfPet(owner, instanceData, plugin);
             case "porco":
-                return new PigPet(owner, petData, plugin);
+                return new PigPet(owner, instanceData, plugin);
             case "gato":
-                return new CatPet(owner, petData, plugin);
+                return new CatPet(owner, instanceData, plugin);
             case "papagaio":
-                return new ParrotPet(owner, petData, plugin);
+                return new ParrotPet(owner, instanceData, plugin);
+            case "allay":
+                return new AllayPet(owner, instanceData, plugin);
+            case "ovelha":
+                return new SheepPet(owner, instanceData, plugin);
+            case "vaca":
+                return new CowPet(owner, instanceData, plugin);
+            case "galinha":
+                return new ChickenPet(owner, instanceData, plugin);
             default:
                 return null;
         }
@@ -388,6 +444,12 @@ public class PetManager implements Listener {
         Pet pet = activePets.remove(player.getUniqueId());
         if (pet != null) {
             pet.despawn();
+
+            // Salva o tipo do pet que estava ativo para poder re-invocá-lo no próximo login.
+            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
+            if (playerData != null) {
+                playerData.setLastActivePetType(pet.petData.getType());
+            }
         }
     }
 

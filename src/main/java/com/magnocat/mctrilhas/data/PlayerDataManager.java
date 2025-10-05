@@ -88,7 +88,7 @@ public class PlayerDataManager {
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
         if (!playerFile.exists()) {
             // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
-            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.VISITANTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null, null, new PlayerDuelStats(), true, new HashMap<>(), false));
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.VISITANTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null, null, new PlayerDuelStats(), true, new HashMap<>(), false, null));
             return;
         }
 
@@ -200,6 +200,9 @@ public class PlayerDataManager {
         // Carrega a flag de jogador Bedrock.
         boolean isBedrockPlayer = config.getBoolean("is-bedrock-player", false);
 
+        // Carrega o último tipo de pet ativo.
+        String lastActivePetType = config.getString("last-active-pet-type", null);
+
         // Carrega os IDs dos mapas-troféu.
         Map<String, Integer> badgeMapIds = new HashMap<>();
         if (config.isConfigurationSection("badge-map-ids")) {
@@ -232,7 +235,7 @@ public class PlayerDataManager {
             }
         }
 
-        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedTreasureGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken, duelStats, hudEnabled, badgeMapIds, isBedrockPlayer);
+        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedTreasureGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken, duelStats, hudEnabled, badgeMapIds, isBedrockPlayer, lastActivePetType);
 
         // Carrega o UUID do padrinho, se existir.
         String godfatherUuidString = config.getString("godfather-uuid");
@@ -274,6 +277,7 @@ public class PlayerDataManager {
 
         config.set("settings.progress-messages-disabled", playerData.areProgressMessagesDisabled());
         config.set("settings.hud-enabled", playerData.isHudEnabled());
+        config.set("last-active-pet-type", playerData.getLastActivePetType());
         config.set("is-bedrock-player", playerData.isBedrockPlayer());
         config.set("last-daily-reward", playerData.getLastDailyRewardTime());
         // Salva a lista de biomas visitados
@@ -622,9 +626,7 @@ public class PlayerDataManager {
             // Notifica o padrinho se ele estiver online.
             if (godfatherOffline.isOnline()) {
                 Player godfatherOnline = godfatherOffline.getPlayer();
-                if (godfatherOnline != null) {
-                    godfatherOnline.sendMessage(ChatColor.GOLD + "Seu afilhado, " + player.getName() + ", conquistou a insígnia " + badge.name() + "! Você recebeu " + (int) rewardAmount + " Totens como recompensa.");
-                }
+                godfatherOnline.sendMessage(ChatColor.GOLD + "Seu afilhado, " + player.getName() + ", conquistou a especialidade " + badge.name() + "! Você recebeu " + (int) rewardAmount + " Totens como recompensa.");
             }
         }
 

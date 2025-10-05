@@ -74,9 +74,9 @@ public class AddBadgeSubCommand implements SubCommand {
         boolean success = plugin.getPlayerDataManager().grantBadgeAndReward(target, badgeId);
 
         if (success) {
-            sender.sendMessage(ChatColor.GREEN + "A insígnia '" + badgeId + "' foi concedida com sucesso a " + target.getName() + ".");
+            sender.sendMessage(ChatColor.GREEN + "A especialidade '" + badgeId + "' foi concedida com sucesso a " + target.getName() + ".");
         } else {
-            sender.sendMessage(ChatColor.RED + "Não foi possível conceder a insígnia. O jogador já a possui ou a insígnia '" + badgeId + "' não existe.");
+            sender.sendMessage(ChatColor.RED + "Não foi possível conceder a especialidade. O jogador já a possui ou a especialidade '" + badgeId + "' não existe.");
         }
     }
 

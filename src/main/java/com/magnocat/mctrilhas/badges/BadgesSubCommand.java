@@ -117,7 +117,7 @@ public class BadgesSubCommand implements SubCommand {
      */
     private void showBadgesInChat(CommandSender sender, OfflinePlayer target) {
         String targetName = Objects.toString(target.getName(), "Desconhecido");
-        sender.sendMessage(ChatColor.YELLOW + "Buscando insígnias de " + targetName + "...");
+        sender.sendMessage(ChatColor.YELLOW + "Buscando especialidades de " + targetName + "...");
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             // Tenta obter dados do cache (se online) ou carrega do arquivo (se offline).
@@ -137,13 +137,13 @@ public class BadgesSubCommand implements SubCommand {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (earnedBadges.isEmpty()) {
                     String message = (sender.getName().equals(targetName))
-                            ? "Você ainda não conquistou nenhuma insígnia. Continue se esforçando!"
-                            : targetName + " ainda não conquistou nenhuma insígnia.";
+                            ? "Você ainda não conquistou nenhuma especialidade. Continue se esforçando!"
+                            : targetName + " ainda não conquistou nenhuma especialidade.";
                     sender.sendMessage(ChatColor.YELLOW + message);
                     return;
                 }
 
-                sender.sendMessage(ChatColor.GOLD + "--- Insígnias de " + targetName + " ---");
+                sender.sendMessage(ChatColor.GOLD + "--- Especialidades de " + targetName + " ---");
                 earnedBadges.forEach(badgeId -> {
                     Badge badge = plugin.getBadgeManager().getBadge(badgeId);
                     if (badge != null) {

@@ -1,9 +1,11 @@
 package com.magnocat.mctrilhas.maps;
 
+import java.io.File;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
@@ -100,5 +102,47 @@ public class MapRewardManager {
         // Limpa renderizadores antigos e adiciona o novo para garantir que a imagem correta seja exibida.
         mapView.getRenderers().forEach(mapView::removeRenderer);
         mapView.addRenderer(new ImageMapRenderer(plugin, imagePath));
+    }
+
+    /**
+     * Restaura os renderizadores para todos os mapas-troféu de todos os jogadores.
+     * Este método varre a pasta de dados dos jogadores de forma assíncrona,
+     * encontra os IDs de mapas salvos e agenda a restauração do renderizador
+     * para cada um no thread principal.
+     */
+    public void restoreAllMapRenderers() {
+        plugin.logInfo("Iniciando restauração dos mapas-troféu...");
+
+        // A varredura dos arquivos é feita de forma assíncrona para não atrasar o boot.
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            File playerDataFolder = new File(plugin.getDataFolder(), "playerdata");
+            File[] playerFiles = playerDataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+
+            if (playerFiles == null) {
+                plugin.logInfo("Nenhum dado de jogador encontrado para restaurar mapas.");
+                return;
+            }
+
+            // Usamos um array atômico para contar em um ambiente multithread.
+            java.util.concurrent.atomic.AtomicInteger restoredCount = new java.util.concurrent.atomic.AtomicInteger(0);
+
+            for (File playerFile : playerFiles) {
+                FileConfiguration config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(playerFile);
+                if (!config.isConfigurationSection("badge-map-ids")) {
+                    continue;
+                }
+
+                ConfigurationSection mapIdsSection = config.getConfigurationSection("badge-map-ids");
+                for (String badgeId : mapIdsSection.getKeys(false)) {
+                    int mapId = mapIdsSection.getInt(badgeId);
+                    plugin.getServer().getScheduler().runTask(plugin, () -> restoreMapRenderer(mapId, badgeId));
+                    restoredCount.incrementAndGet();
+                }
+            }
+
+            if (restoredCount.get() > 0) {
+                plugin.logInfo(restoredCount.get() + " renderizadores de mapas-troféu foram restaurados com sucesso.");
+            }
+        });
     }
 }

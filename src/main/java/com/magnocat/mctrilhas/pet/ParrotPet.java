@@ -2,12 +2,19 @@ package com.magnocat.mctrilhas.pet;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Implementação concreta de um Pet do tipo Papagaio.
@@ -45,9 +52,28 @@ public class ParrotPet extends Pet {
                     this.cancel();
                     return;
                 }
+
+                // Habilidade Passiva: Mímico Engraçado
+                // A cada 30 segundos, tem uma chance de imitar um animal próximo.
+                if (entity.getTicksLived() % (20 * 30) == 0) {
+                    List<Animals> nearbyAnimals = entity.getWorld().getNearbyEntities(entity.getLocation(), 10, 10, 10)
+                            .stream()
+                            .filter(e -> e instanceof Animals && !(e instanceof Parrot))
+                            .map(e -> (Animals) e)
+                            .collect(Collectors.toList());
+
+                    if (!nearbyAnimals.isEmpty()) {
+                        Animals targetAnimal = nearbyAnimals.get(new Random().nextInt(nearbyAnimals.size()));
+                        Sound soundToMimic = getAmbientSound(targetAnimal.getType());
+                        if (soundToMimic != null) {
+                            entity.getWorld().playSound(entity.getLocation(), soundToMimic, 1.0f, 1.5f); // Tom mais agudo
+                        }
+                    }
+                }
+
                 follow();
             }
-        }.runTaskTimer(plugin, 0L, 60L);
+        }.runTaskTimer(plugin, 0L, 60L); // Verifica a cada 3 segundos
     }
 
     @Override
@@ -75,6 +101,19 @@ public class ParrotPet extends Pet {
         AttributeInstance healthAttribute = ((Parrot) entity).getAttribute(Attribute.GENERIC_MAX_HEALTH);
         if (healthAttribute != null) {
             healthAttribute.setBaseValue(6.0 + (petData.getLevel() / 2.0)); // Vida aumenta lentamente
+        }
+    }
+
+    private Sound getAmbientSound(EntityType type) {
+        switch (type) {
+            case COW: return Sound.ENTITY_COW_AMBIENT;
+            case PIG: return Sound.ENTITY_PIG_AMBIENT;
+            case SHEEP: return Sound.ENTITY_SHEEP_AMBIENT;
+            case CHICKEN: return Sound.ENTITY_CHICKEN_AMBIENT;
+            case WOLF: return Sound.ENTITY_WOLF_AMBIENT;
+            case CAT: return Sound.ENTITY_CAT_AMBIENT;
+            // case ARMADILLO: return Sound.ENTITY_ARMADILLO_AMBIENT; // Desativado temporariamente
+            default: return null;
         }
     }
 

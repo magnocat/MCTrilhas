@@ -27,7 +27,7 @@ public class BadgeMenu {
 
     private final MCTrilhasPlugin plugin;
     // O título do inventário é usado para identificá-lo em listeners.
-    public static final String MENU_TITLE_PREFIX = "Insígnias de ";
+    public static final String MENU_TITLE_PREFIX = "Especialidades de ";
     private static final int BADGES_PER_PAGE = 45; // 5 linhas de 9 slots
     private static final int INVENTORY_SIZE = 54; // 6 linhas
     private final NumberFormat numberFormat;

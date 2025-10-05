@@ -45,7 +45,15 @@ public class PetSummonSubCommand implements SubCommand {
         }
         if (args.length < 1) {
             sender.sendMessage(ChatColor.RED + "Uso: " + getSyntax());
-            sender.sendMessage(ChatColor.GRAY + "Tipos disponíveis: lobo, gato, porco, papagaio");
+            sender.sendMessage(ChatColor.GRAY + "Tipos disponíveis e suas comidas favoritas:");
+            sender.sendMessage(ChatColor.GRAY + "- Lobo (" + ChatColor.WHITE + "Osso" + ChatColor.GRAY + ")");
+            sender.sendMessage(ChatColor.GRAY + "- Gato (" + ChatColor.WHITE + "Bacalhau" + ChatColor.GRAY + ")");
+            sender.sendMessage(ChatColor.GRAY + "- Porco (" + ChatColor.WHITE + "Cenoura" + ChatColor.GRAY + ")");
+            sender.sendMessage(ChatColor.GRAY + "- Papagaio (" + ChatColor.WHITE + "Sementes de Trigo" + ChatColor.GRAY + ")");
+            sender.sendMessage(ChatColor.GRAY + "- Allay (" + ChatColor.WHITE + "Fragmento de Ametista" + ChatColor.GRAY + ")");
+            sender.sendMessage(ChatColor.GRAY + "- Ovelha (" + ChatColor.WHITE + "Trigo" + ChatColor.GRAY + ")");
+            sender.sendMessage(ChatColor.GRAY + "- Vaca (" + ChatColor.WHITE + "Trigo" + ChatColor.GRAY + ")");
+            sender.sendMessage(ChatColor.GRAY + "- Galinha (" + ChatColor.WHITE + "Sementes de Trigo" + ChatColor.GRAY + ")");
             return;
         }
 
@@ -58,7 +66,7 @@ public class PetSummonSubCommand implements SubCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
         if (args.length == 1) {
-            return Stream.of("lobo", "gato", "porco", "papagaio").filter(s -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
+            return Stream.of("lobo", "gato", "porco", "papagaio", "allay", "ovelha", "vaca", "galinha").filter(s -> s.startsWith(args[0].toLowerCase())).collect(Collectors.toList());
         }
         return List.of();
     }

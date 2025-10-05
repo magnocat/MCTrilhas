@@ -7,10 +7,13 @@ import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Cat;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -29,16 +32,9 @@ public class CatPet extends Pet {
         Location spawnLocation = owner.getLocation();
         Cat cat = (Cat) owner.getWorld().spawnEntity(spawnLocation, EntityType.CAT);
 
-        // Lógica especial para o Admin! 😼
-        if (owner.getName().equalsIgnoreCase("MagnoCat")) {
-            cat.setCatType(Cat.Type.BLACK);
-            petData.setName("§5Bastet"); // Nome especial
-        } else {
-            // Tipo de gato aleatório para outros jogadores
-            Cat.Type[] types = Cat.Type.values();
-            cat.setCatType(types[(int) (Math.random() * types.length)]);
-        }
-
+        // Tipo de gato aleatório para outros jogadores
+        Cat.Type[] types = Cat.Type.values();
+        cat.setCatType(types[(int) (Math.random() * types.length)]);
         cat.setOwner(owner);
         cat.setTamed(true);
         cat.setSitting(false);
@@ -63,6 +59,18 @@ public class CatPet extends Pet {
                 if (!nearbyMonsters.isEmpty()) {
                     owner.playSound(owner.getLocation(), Sound.ENTITY_CAT_STRAY_AMBIENT, 0.5f, 1.2f);
                     entity.getWorld().spawnParticle(Particle.VILLAGER_ANGRY, entity.getLocation().add(0, 1, 0), 1);
+                }
+
+                // Habilidade: Espantar Creepers
+                entity.getWorld().getNearbyEntities(entity.getLocation(), 8, 8, 8, e -> e instanceof Creeper).forEach(creeper -> {
+                    // A IA do Creeper já o faz fugir de gatos, mas garantimos que ele tenha um alvo para fugir.
+                    ((Creeper) creeper).getPathfinder().moveTo(entity.getLocation(), -1.0); // O valor negativo indica para fugir
+                });
+
+                // Habilidade Passiva: Visão Noturna
+                // Se o dono estiver em um local escuro, o gato concede visão noturna.
+                if (owner.getLocation().getBlock().getLightFromBlocks() < 7) {
+                    owner.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 15, 0, true, false)); // 15 segundos
                 }
 
                 follow();

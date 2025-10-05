@@ -23,6 +23,8 @@ import com.magnocat.mctrilhas.commands.FamilyCommand;      // Importa todas as c
 import com.magnocat.mctrilhas.commands.RulesCommand;    // Importa todas as classes do pacote data
 import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;    // Importa todas as classes do pacote duels
 import com.magnocat.mctrilhas.ctf.CTFCommand;      // Importa todas as classes do pacote hud
+import com.magnocat.mctrilhas.chat.ProximityChatListener;
+import com.magnocat.mctrilhas.chat.ProximityChatManager;
 import com.magnocat.mctrilhas.ctf.CTFListener;      // Importa todas as classes do pacote npc
 import com.magnocat.mctrilhas.ctf.CTFManager; // Importa todas as classes do pacote listeners
 import com.magnocat.mctrilhas.ctf.CTFMilestoneManager; // Importa todas as classes do pacote integrations
@@ -63,6 +65,7 @@ import com.magnocat.mctrilhas.updater.UpdateChecker;
 import com.magnocat.mctrilhas.web.HttpApiManager;
 
 import net.milkbowl.vault.economy.Economy;
+import org.bstats.bukkit.Metrics;
 
 public final class MCTrilhasPlugin extends JavaPlugin {
 
@@ -88,6 +91,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private HttpApiManager httpApiManager;
     private NPCManager npcManager;
     private DialogueManager dialogueManager;
+    private ProximityChatManager proximityChatManager;
 
     // --- Integrations & Tasks ---
     private BukkitTask placeholderApiCacheUpdater;
@@ -108,6 +112,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         // sem sobrescrever as configurações existentes do usuário.
         // Isso resolve o problema de novas opções não aparecerem após uma atualização.
         getConfig().options().copyDefaults(true);
+        // Inicializa o bStats para coletar métricas anônimas de uso.
+        int pluginId = 27457; // Substitua pelo seu ID do bStats
+        new Metrics(this, pluginId);
         saveConfig();
         registerCommands();
         registerListeners();
@@ -206,6 +213,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         initHudSystem();
         initScoreboardSystem();
         initDuelSystem();
+        initProximityChatSystem();
         initPetSystem();
         initNpcSystem();
 
@@ -216,6 +224,15 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             getLogger().info("Integração com BlueMap ativada.");
         }*/
         logInfo("Gerenciadores e menus inicializados.");
+    }
+
+    private void initProximityChatSystem() {
+        try {
+            this.proximityChatManager = new ProximityChatManager(this);
+        } catch (Exception e) {
+            logSevere("Módulo de Chat por Proximidade falhou ao iniciar e será desativado.", e);
+            this.proximityChatManager = null;
+        }
     }
 
     private void initWebApiSystem() {
@@ -391,6 +408,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         if (petManager != null) getServer().getPluginManager().registerEvents(new PetListener(this), this);
         if (duelManager != null) {
             getServer().getPluginManager().registerEvents(new DuelListener(this), this);
+            if (proximityChatManager != null && proximityChatManager.isEnabled()) getServer().getPluginManager().registerEvents(new ProximityChatListener(this), this);
             getServer().getPluginManager().registerEvents(new GameListener(this), this);
         }
         if (npcManager != null) getServer().getPluginManager().registerEvents(new NPCListener(this), this);
@@ -536,6 +554,13 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         return dialogueManager;
     }
 
+    public ProximityChatManager getProximityChatManager() {
+        if (proximityChatManager == null) {
+            logWarn("O módulo de Chat por Proximidade está desativado devido a um erro. Esta funcionalidade não está disponível.");
+        }
+        return proximityChatManager;
+    }
+
     /* Comentado temporariamente
     public BlueMapManager getBlueMapManager() {
         return blueMapManager;
@@ -648,44 +673,13 @@ public final class MCTrilhasPlugin extends JavaPlugin {
      * mapas ficarem em branco após um reinício do servidor.
      */
     private void restoreMapRenderers() {
-        if (mapRewardManager == null) {
-            logInfo("Restauração de mapas-troféu pulada pois o módulo está desativado.");
-            return;
+        // Delega a lógica de restauração para o MapRewardManager.
+        // Isso mantém o código do sistema de mapas encapsulado em seu próprio gerenciador.
+        if (getMapRewardManager() != null) {
+            getMapRewardManager().restoreAllMapRenderers();
+        } else {
+            logInfo("Restauração de mapas-troféu pulada, pois o módulo está desativado.");
         }
-
-        logInfo("Iniciando restauração dos mapas-troféu...");
-        // A varredura dos arquivos é feita de forma assíncrona para não atrasar o boot.
-        getServer().getScheduler().runTaskAsynchronously(this, () -> {
-            File playerDataFolder = new File(getDataFolder(), "playerdata");
-            File[] playerFiles = playerDataFolder.listFiles((dir, name) -> name.endsWith(".yml"));
-
-            if (playerFiles == null) {
-                logInfo("Nenhum dado de jogador encontrado para restaurar mapas.");
-                return;
-            }
-
-            int restoredCount = 0;
-            for (File playerFile : playerFiles) {
-                FileConfiguration config = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(playerFile);
-                if (!config.isConfigurationSection("badge-map-ids")) {
-                    continue;
-                }
-
-                ConfigurationSection mapIdsSection = config.getConfigurationSection("badge-map-ids");
-                for (String badgeId : mapIdsSection.getKeys(false)) {
-                    int mapId = mapIdsSection.getInt(badgeId);
-
-                    // A manipulação da MapView deve ocorrer no thread principal.
-                    getServer().getScheduler().runTask(this, () -> {
-                        mapRewardManager.restoreMapRenderer(mapId, badgeId);
-                    });
-                    restoredCount++;
-                }
-            }
-            if (restoredCount > 0) {
-                logInfo(restoredCount + " renderizadores de mapas-troféu foram restaurados com sucesso.");
-            }
-        });
     }
     // --- Métodos de Log com Cores ---
 

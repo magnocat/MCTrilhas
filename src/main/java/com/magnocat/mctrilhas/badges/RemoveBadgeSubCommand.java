@@ -71,7 +71,7 @@ public class RemoveBadgeSubCommand implements SubCommand {
         String badgeId = args[1];
         String targetName = args[0];
 
-        sender.sendMessage(ChatColor.YELLOW + "Processando remoção da insígnia '" + badgeId + "' para " + targetName + "...");
+        sender.sendMessage(ChatColor.YELLOW + "Processando remoção da especialidade '" + badgeId + "' para " + targetName + "...");
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
@@ -106,7 +106,7 @@ public class RemoveBadgeSubCommand implements SubCommand {
                 plugin.getPlayerDataManager().savePlayerData(playerData);
             }
 
-            Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(ChatColor.GREEN + "A insígnia '" + badgeId + "' e seu progresso foram removidos de " + targetName + "."));
+            Bukkit.getScheduler().runTask(plugin, () -> sender.sendMessage(ChatColor.GREEN + "A especialidade '" + badgeId + "' e seu progresso foram removidos de " + targetName + "."));
         });
     }
 

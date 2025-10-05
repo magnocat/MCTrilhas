@@ -38,17 +38,17 @@ public class PetShopMenu {
         boolean hasRank = playerData != null && playerData.getRank().ordinal() >= Rank.ESCOTEIRO.ordinal();
 
         // --- Pets Disponíveis ---
-        gui.setItem(11, createPetItem(Material.BONE, "Lobo", "Um companheiro leal e forte em combate.", "&6Habilidade: &fGuarda-Costas\n&7Ataca monstros que te atacam\n&7ou que você ataca.", hasPet, hasRank));
-        gui.setItem(13, createPetItem(Material.COD, "Gato", "Um amigo ágil que pode alertá-lo sobre perigos.", "&6Habilidade: &fAlerta Felino\n&7Emite um som e uma partícula\n&7quando monstros se aproximam.", hasPet, hasRank));
-        gui.setItem(15, createPetItem(Material.CARROT, "Porco", "Um ajudante que pode coletar itens para você.", "&6Habilidade: &fFaro Fino\n&7Coleta itens caídos no chão\n&7e os entrega para você.", hasPet, hasRank));
+        gui.setItem(11, createPetItem(Material.BONE, "Lobo", "Um companheiro leal e forte em combate.", "&6Habilidade: &fGuarda-Costas\n&7Ataca seus alvos.\n&6Passiva: &fUivo do Líder\n&7Concede Força I temporária.", hasPet, hasRank));
+        gui.setItem(13, createPetItem(Material.COD, "Gato", "Um amigo ágil que espanta Creepers.", "&6Habilidade: &fAlerta Felino\n&7Alerta sobre monstros próximos.\n&6Passiva: &fVisão Felina\n&7Concede Visão Noturna no escuro.", hasPet, hasRank));
+        gui.setItem(15, createPetItem(Material.CARROT, "Porco", "Um ajudante que coleta itens para você.", "&6Habilidade: &fFaro Fino\n&7Coleta itens caídos no chão.\n&6Passiva: &fCaçador de Trufas\n&7Pode encontrar itens no chão.", hasPet, hasRank));
+        gui.setItem(17, createPetItem(Material.FEATHER, "Papagaio", "Um amigo que te dá uma visão de longo alcance.", "&6Habilidade: &fOlho de Águia\n&7Concede super zoom ao se agachar.", hasPet, hasRank));
+        gui.setItem(19, createPetItem(Material.AMETHYST_SHARD, "Allay", "Uma criatura mágica que coleta itens para você.", "&6Habilidade: &fColetor Inteligente\n&7Coleta itens do tipo que você segura.\n&6Passiva: &fHarmonia Musical\n&7Ganha velocidade perto de Note Blocks.", hasPet, hasRank));
+        gui.setItem(21, createPetItem(Material.WHITE_WOOL, "Ovelha", "Uma companheira dócil que fornece lã colorida.", "&6Habilidade: &fLã Camaleônica\n&7Pode ser tosquiada para obter lã.\n&6Passiva: &fAura Calmante\n&7Concede Regeneração fora de combate.", hasPet, hasRank));
+        gui.setItem(23, createPetItem(Material.BUCKET, "Vaca", "Uma amiga que fornece leite e purifica você.", "&6Habilidade: &fFonte de Leite\n&7Pode ser ordenhada com um balde.\n&6Passiva: &fAura Purificante\n&7Remove efeitos negativos de você.", hasPet, hasRank));
+        gui.setItem(25, createPetItem(Material.EGG, "Galinha", "Uma companheira que te salva de quedas.", "&6Habilidade: &fBotar Ovo\n&7Bota um ovo ao ser estimulada.\n&6Passiva: &fQueda Suave\n&7Amortece suas quedas.", hasPet, hasRank));
 
         // --- Pets Futuros (Em Breve) ---
-        gui.setItem(20, createComingSoonItem(Material.FEATHER, "Papagaio", "Um amigo colorido que pode imitar sons e sentar no seu ombro."));
-        gui.setItem(22, createComingSoonItem(Material.AMETHYST_SHARD, "Allay", "Uma criatura mágica que ajuda a coletar itens para você."));
-        gui.setItem(24, createComingSoonItem(Material.WHITE_WOOL, "Ovelha", "Uma companheira dócil que pode fornecer lã."));
-        gui.setItem(29, createComingSoonItem(Material.BUCKET, "Vaca", "Uma amiga que pode fornecer leite."));
-        gui.setItem(31, createComingSoonItem(Material.EGG, "Galinha", "Pode botar ovos periodicamente."));
-        gui.setItem(33, createComingSoonItem(Material.SCUTE, "Tatu", "Pode se enrolar para se defender e fornecer escamas."));
+        gui.setItem(33, createComingSoonItem(Material.SCUTE, "Tatu", "Um protetor blindado."));
 
         // --- Pets VIP Futuros (Em Breve) ---
         gui.setItem(38, createVipComingSoonItem(Material.SNOWBALL, "Urso Polar", "Um protetor poderoso e imponente."));

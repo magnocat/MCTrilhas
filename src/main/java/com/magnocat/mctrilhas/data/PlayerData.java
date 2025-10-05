@@ -41,8 +41,9 @@ public class PlayerData {
     // Chave: ID da insígnia (ex: "MINING"), Valor: ID do mapa (ex: 123)
     private final Map<String, Integer> badgeMapIds;
     private boolean isBedrockPlayer;
+    private String lastActivePetType; // Armazena o tipo do pet que estava ativo ao sair.
 
-    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones, PetData petData, String webAccessToken, PlayerDuelStats duelStats, boolean hudEnabled, Map<String, Integer> badgeMapIds, boolean isBedrockPlayer) {
+    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones, PetData petData, String webAccessToken, PlayerDuelStats duelStats, boolean hudEnabled, Map<String, Integer> badgeMapIds, boolean isBedrockPlayer, String lastActivePetType) {
         this.playerUUID = playerUUID;
         this.earnedBadgesMap = earnedBadgesMap;
         this.progressMap = progressMap;
@@ -64,6 +65,7 @@ public class PlayerData {
         this.godfatherUUID = null; // Padrão é nulo
         this.badgeMapIds = badgeMapIds != null ? badgeMapIds : new HashMap<>();
         this.isBedrockPlayer = isBedrockPlayer;
+        this.lastActivePetType = lastActivePetType;
     }
 
     public UUID getPlayerUUID() {
@@ -229,5 +231,13 @@ public class PlayerData {
 
     public void setBedrockPlayer(boolean bedrockPlayer) {
         isBedrockPlayer = bedrockPlayer;
+    }
+
+    public String getLastActivePetType() {
+        return lastActivePetType;
+    }
+
+    public void setLastActivePetType(String lastActivePetType) {
+        this.lastActivePetType = lastActivePetType;
     }
 }

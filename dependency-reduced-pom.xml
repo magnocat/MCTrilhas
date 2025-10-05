@@ -96,6 +96,10 @@
               <pattern>com.fasterxml.jackson</pattern>
               <shadedPattern>com.magnocat.mctrilhas.lib.jackson</shadedPattern>
             </relocation>
+            <relocation>
+              <pattern>org.bstats</pattern>
+              <shadedPattern>com.magnocat.mctrilhas.lib.bstats</shadedPattern>
+            </relocation>
           </relocations>
         </configuration>
       </plugin>
@@ -128,6 +132,10 @@
     <repository>
       <id>placeholderapi-repo</id>
       <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+    </repository>
+    <repository>
+      <id>codemc-repo</id>
+      <url>https://repo.codemc.io/repository/maven-public/</url>
     </repository>
   </repositories>
   <dependencies>

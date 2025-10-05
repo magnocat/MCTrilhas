@@ -70,7 +70,7 @@ public class StatsSubCommand implements SubCommand {
 
             Bukkit.getScheduler().runTask(plugin, () -> {
                 sender.sendMessage(ChatColor.GOLD + "--- Estatísticas de " + ChatColor.WHITE + target.getName() + ChatColor.GOLD + " ---");
-                sender.sendMessage(ChatColor.YELLOW + "Insígnias: " + ChatColor.AQUA + finalPlayerData.getEarnedBadgesMap().size() + " / " + totalBadges);
+                sender.sendMessage(ChatColor.YELLOW + "Especialidades: " + ChatColor.AQUA + finalPlayerData.getEarnedBadgesMap().size() + " / " + totalBadges);
                 sender.sendMessage(" ");
                 sender.sendMessage(ChatColor.GOLD + "--- Progresso Total (Vida Inteira) ---");
 

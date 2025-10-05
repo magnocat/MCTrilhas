@@ -1,6 +1,7 @@
 package com.magnocat.mctrilhas.pet;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -12,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.potion.PotionEffect;
@@ -108,6 +110,43 @@ public class PetListener implements Listener {
         Pet pet = petManager.getPetByEntity(clickedEntity);
 
         // Verifica se a entidade clicada é um pet e se o jogador é o dono
+        if (pet instanceof SheepPet && player.getInventory().getItemInMainHand().getType() == Material.SHEARS) {
+            event.setCancelled(true);
+            ((SheepPet) pet).shear();
+            return;
+        }
+
+        // Habilidade da Vaca: ser ordenhada
+        if (pet instanceof CowPet && player.getInventory().getItemInMainHand().getType() == Material.BUCKET) {
+            event.setCancelled(true);
+            ((CowPet) pet).milk();
+            return;
+        }
+
+        // Habilidade da Galinha: botar ovo
+        if (pet instanceof ChickenPet && player.getInventory().getItemInMainHand().getType() == Material.AIR) {
+            event.setCancelled(true);
+            ((ChickenPet) pet).layEgg();
+            return;
+        }
+
+        // Habilidade do Tatu: enrolar (Desativado Temporariamente)
+        // if (pet instanceof ArmadilloPet) {
+        //     event.setCancelled(true);
+        //     ((ArmadilloPet) pet).rollUp();
+        //     return;
+        // }
+
+        // Habilidade do Allay: dar um item para ele procurar
+        if (pet instanceof AllayPet) {
+            ItemStack itemInHand = player.getInventory().getItemInMainHand();
+            if (itemInHand != null && itemInHand.getType() != Material.AIR) {
+                ((AllayPet) pet).setTargetItemType(itemInHand.getType());
+                player.sendMessage(org.bukkit.ChatColor.AQUA + "Seu Allay agora procurará por " + itemInHand.getType().name().toLowerCase().replace('_', ' ') + ".");
+                event.setCancelled(true); // Previne a interação padrão
+            }
+        }
+
         if (pet != null && pet.getOwner().equals(player)) {
             // Cancela o evento padrão (como fazer o lobo sentar)
             event.setCancelled(true);

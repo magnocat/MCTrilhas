@@ -35,7 +35,7 @@ public class ProgressSubCommand implements SubCommand {
     public String getName() { return "progress"; }
 
     @Override
-    public String getDescription() { return "Mostra seu progresso para as próximas insígnias e ranque."; }
+    public String getDescription() { return "Mostra seu progresso para as próximas especialidades e ranque."; }
 
     @Override
     public String getSyntax() { return "/scout progress [jogador]"; }
@@ -82,7 +82,7 @@ public class ProgressSubCommand implements SubCommand {
     }
 
     private void displayBadgeProgress(CommandSender sender, PlayerData playerData) {
-        sender.sendMessage(ChatColor.DARK_AQUA + "» Progresso das Insígnias:");
+        sender.sendMessage(ChatColor.DARK_AQUA + "» Progresso das Especialidades:");
         boolean hasUnearnedBadges = false;
 
         List<Badge> allBadges = plugin.getBadgeManager().getAllBadges();
@@ -96,7 +96,7 @@ public class ProgressSubCommand implements SubCommand {
         }
 
         if (!hasUnearnedBadges) {
-            sender.sendMessage(ChatColor.GREEN + "   Todas as insígnias foram conquistadas!");
+            sender.sendMessage(ChatColor.GREEN + "   Todas as especialidades foram conquistadas!");
         }
     }
 

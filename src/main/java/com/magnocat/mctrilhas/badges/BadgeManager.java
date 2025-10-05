@@ -97,7 +97,7 @@ public class BadgeManager {
                 plugin.getLogger().severe("Ocorreu um erro inesperado ao carregar a insígnia '" + id + "': " + e.getMessage());
             }
         }
-        plugin.getLogger().info(badges.size() + " insígnias foram carregadas.");
+        plugin.getLogger().info(badges.size() + " especialidades foram carregadas.");
     }
 
     /**

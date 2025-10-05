@@ -32,6 +32,7 @@ public class PetSubCommand implements SubCommand {
         subCommands.put("loja", new PetShopSubCommand(plugin));
         subCommands.put("info", new PetInfoSubCommand(plugin));
         subCommands.put("alimentar", new PetFeedSubCommand(plugin));
+        subCommands.put("ficar", new PetStaySubCommand(plugin));
     }
 
     @Override

@@ -59,6 +59,7 @@ public class PetInfoSubCommand implements SubCommand {
         sender.sendMessage(ChatColor.AQUA + "Tipo: " + ChatColor.WHITE + petData.getType());
         sender.sendMessage(ChatColor.AQUA + "Nível: " + ChatColor.WHITE + petData.getLevel());
         sender.sendMessage(ChatColor.AQUA + "Felicidade: " + ChatColor.WHITE + String.format("%.0f%%", petData.getHappiness()));
+        sender.sendMessage(ChatColor.AQUA + "Habilidades: " + ChatColor.WHITE + getPetAbilities(petData.getType()));
 
         if (petData.getLevel() < PetData.MAX_LEVEL) {
             sender.sendMessage(ChatColor.AQUA + "XP: " + ChatColor.WHITE + currentXp + " / " + nextLevelXp);
@@ -71,5 +72,28 @@ public class PetInfoSubCommand implements SubCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
         return Collections.emptyList();
+    }
+
+    private String getPetAbilities(String petType) {
+        switch (petType.toLowerCase()) {
+            case "lobo":
+                return "Ataca seus alvos e concede Força I.";
+            case "gato":
+                return "Alerta sobre monstros e concede Visão Noturna.";
+            case "porco":
+                return "Coleta itens e pode encontrar cogumelos.";
+            case "papagaio":
+                return "Concede super zoom e imita sons.";
+            case "allay":
+                return "Coleta itens específicos e ganha velocidade com música.";
+            case "ovelha":
+                return "Fornece lã colorida e concede Regeneração.";
+            case "vaca":
+                return "Fornece leite e remove efeitos negativos.";
+            case "galinha":
+                return "Bota ovos e amortece quedas.";
+            default:
+                return "Habilidades especiais desconhecidas.";
+        }
     }
 }

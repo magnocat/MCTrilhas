@@ -119,32 +119,33 @@ Revisão das principais funcionalidades implementadas e decisões tomadas:
 
 ---
 
-## 5. Roadmap de Funcionalidades
+## 5. Roadmap de Funcionalidades (Revisado em 04/10/2025)
 
 Este é o plano de longo prazo para as próximas grandes funcionalidades, conforme discutido e documentado em `docs/DOCUMENTACAO_TECNICA.md`.
 
-*   ### 🐾 CONCLUÍDO (FASE 1): Sistema de Pets
+*   ### ✅ CONCLUÍDO: Sistema de Pets (Fase 1)
     *   **Descrição:** Um sistema que permite aos jogadores terem um companheiro animal que os segue, ajuda em combate e sobe de nível.
     *   **Filosofia:** Será desenvolvido internamente, sem depender de plugins como `MyPet`.
     *   **Funcionalidades Planejadas (Detalhado):**
         *   **Aquisição:** Requerer ranque `ESCOTEIRO` e um custo inicial em Totens.
-        *   **Comandos:** `/scout pet invocar`, `/scout pet liberar`, `/scout pet nome`.
+        *   **Comandos:** `/scout pet invocar`, `liberar`, `nome`, `info`, `alimentar`, `ficar`.
         *   **Customização:** Primeira nomeação gratuita, renomear terá um custo.
         *   **GUI de Compra:** Uma interface gráfica para adquirir novos tipos de pets.
         *   **Sistema de Níveis:** Pets ganharão XP e subirão de nível, com um limite máximo de evolução.
+        *   **Persistência:** O pet ativo é re-invocado automaticamente quando o jogador entra no servidor.
         *   **Habilidades Únicas por Tipo:**
             *   **Lobo:** Foco em combate. (Concluído)
             *   **Gato:** Habilidade de "alerta". (Concluído)
             *   **Porco:** Habilidade de coletar itens. (Concluído)
             *   **Papagaio:** Senta no ombro e melhora o zoom. (Concluído)
         *   **Próximos Pets (Fase 2):**
-            *   **Perfeitos:** Papagaio, Allay, Ovelha, Vaca, Galinha, Tatu.
-            *   **Possíveis (com desafios):** Urso Polar, Aranha, Tartaruga, Abelha.
+            *   **Implementados:** Allay, Ovelha, Vaca, Galinha.
+            *   **VIPs (Futuro):** Tatu, Urso Polar, Aranha, Tartaruga.
         *   **Skins:** Variantes aleatórias (cor da coleira do lobo, tipo do gato) e, futuramente, skins totalmente customizadas via Resource Pack.
         *   **Persistência:** Todos os dados (tipo, nome, nível, XP) serão salvos no arquivo do jogador.
-        *   **Nota Especial:** Criar uma gata preta, item único e super OP para o Admin. 😼
+        *   **Nota Especial:** A ideia da gata preta para o Admin foi removida para manter a consistência.
 
-*   ### ✅ CONCLUÍDO: Sistema de Duelos 1v1
+*   ### ✅ CONCLUÍDO: Sistema de Duelos 1v1 (Requer Revisão)
     *   **Descrição:** Sistema completo de combate 1v1 com arenas, kits, ranking ELO, recompensas e modo espectador.
     *   **Componentes:** `DuelManager`, `DuelGame`, `DuelArena`, `DuelKit`, `GameListener`, `DuelListener`.
     *   **Dados:** `duel_arenas.yml`, `duel_kits.yml`, e seção `duel-stats` no arquivo de dados do jogador.
@@ -364,6 +365,16 @@ Esta seção detalha as ideias discutidas para referência futura.
             3.  **Hospedagem**: O `HttpApiManager` seria usado para hospedar o `.zip` gerado.
             4.  **Distribuição**: Ao entrar, o jogador seria solicitado a baixar o pacote.
             5.  **Execução**: O plugin usaria o comando `/playsound` com o nome do evento customizado para tocar a música para o jogador.
+    *   **Fogos de Artifício Customizados:**
+        *   **Conceito:** Criar uma coleção de fogos de artifício com efeitos visuais únicos (ex: formato de Creeper, cores do servidor), inspirados em ferramentas como o `mcutils.com/firework-creator`.
+        *   **Implementação:**
+            1.  Criar uma classe `FireworksFactory` para construir os `ItemStack`s dos fogos de artifício usando a `FireworkMeta` API.
+            2.  Definir os diferentes tipos de fogos em um arquivo de configuração (ex: `fireworks.yml`) para fácil customização.
+            3.  Criar um comando de administrador (`/scout admin givefirework <tipo>`) para obter os fogos.
+        *   **Casos de Uso:**
+            *   Recompensas especiais por completar grandes quests ou eventos.
+            *   Itens de celebração para datas comemorativas no servidor.
+            *   Itens cosméticos para a loja VIP.
 
 ---
 

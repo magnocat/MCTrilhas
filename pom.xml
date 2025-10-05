@@ -102,6 +102,10 @@
                             <pattern>com.fasterxml.jackson</pattern>
                             <shadedPattern>com.magnocat.mctrilhas.lib.jackson</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>com.magnocat.mctrilhas.lib.bstats</shadedPattern>
+                        </relocation>
                     </relocations>
                 </configuration>
             </plugin>
@@ -158,6 +162,10 @@
             <id>placeholderapi-repo</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
+        <repository>
+            <id>codemc-repo</id>
+            <url>https://repo.codemc.io/repository/maven-public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -195,6 +203,13 @@
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
             <version>4.4.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- bStats para métricas de uso do plugin -->
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.2</version>
             <scope>compile</scope>
         </dependency>
         <!-- Authlib para texturas de cabeça de jogador -->
