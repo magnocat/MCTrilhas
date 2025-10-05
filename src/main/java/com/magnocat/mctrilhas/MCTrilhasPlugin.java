@@ -37,6 +37,9 @@ import com.magnocat.mctrilhas.duels.DuelRewardManager;   // Importa todas as cla
 import com.magnocat.mctrilhas.duels.GameListener;   // Importa todas as classes do pacote updater
 import com.magnocat.mctrilhas.hud.HUDManager;      // Importa todas as classes do pacote web
 import com.magnocat.mctrilhas.integrations.MCTrilhasExpansion;    // Importa todas as classes do pacote utils
+import com.magnocat.mctrilhas.land.LandCommand;
+import com.magnocat.mctrilhas.land.ClaimToolListener;
+import com.magnocat.mctrilhas.land.LandManager;
 import com.magnocat.mctrilhas.listeners.AdminPrivacyListener;
 import com.magnocat.mctrilhas.listeners.CommandBlockerListener;
 import com.magnocat.mctrilhas.listeners.GameChatListener;
@@ -93,6 +96,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
     private NPCManager npcManager;
     private DialogueManager dialogueManager;
     private ProximityChatManager proximityChatManager;
+    private LandManager landManager;
 
     // --- Integrations & Tasks ---
     private BukkitTask placeholderApiCacheUpdater;
@@ -217,6 +221,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         initProximityChatSystem();
         initPetSystem();
         initNpcSystem();
+        initLandSystem();
 
         /* Comentado temporariamente para desativar a integração com BlueMap
         // Inicializa integrações opcionais
@@ -225,6 +230,15 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             getLogger().info("Integração com BlueMap ativada.");
         }*/
         logInfo("Gerenciadores e menus inicializados.");
+    }
+
+    private void initLandSystem() {
+        if (getServer().getPluginManager().getPlugin("WorldGuard") == null) {
+            logWarn("WorldGuard não encontrado. O sistema de proteção de terrenos será desativado.");
+            this.landManager = null;
+            return;
+        }
+        this.landManager = new LandManager(this);
     }
 
     private void initProximityChatSystem() {
@@ -385,6 +399,11 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             getCommand("ctf").setExecutor(ctfExecutor);
             getCommand("ctf").setTabCompleter(ctfExecutor);
         }
+        if (landManager != null) {
+            LandCommand landExecutor = new LandCommand(this);
+            getCommand("terreno").setExecutor(landExecutor);
+            getCommand("terreno").setTabCompleter(landExecutor);
+        }
 
     }
 
@@ -415,6 +434,7 @@ public final class MCTrilhasPlugin extends JavaPlugin {
         }
         if (npcManager != null) getServer().getPluginManager().registerEvents(new NPCListener(this), this);
         if (ctfManager != null) getServer().getPluginManager().registerEvents(new CTFListener(this), this);
+        if (landManager != null) getServer().getPluginManager().registerEvents(new ClaimToolListener(this), this);
 
         logInfo("Ouvintes de eventos registrados.");
     }
@@ -561,6 +581,13 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             logWarn("O módulo de Chat por Proximidade está desativado devido a um erro. Esta funcionalidade não está disponível.");
         }
         return proximityChatManager;
+    }
+
+    public LandManager getLandManager() {
+        if (landManager == null) {
+            logWarn("O módulo de Proteção de Terrenos está desativado. Esta funcionalidade não está disponível.");
+        }
+        return landManager;
     }
 
     /* Comentado temporariamente

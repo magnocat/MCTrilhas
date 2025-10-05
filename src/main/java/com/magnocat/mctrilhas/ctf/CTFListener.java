@@ -40,10 +40,10 @@ public class CTFListener implements Listener {
 
         if (game != null) {
             // Este jogador está em uma partida de CTF.
-            
+
             // Impede que o jogador drope seus itens de kit.
             event.getDrops().clear();
-            
+
             // Deixa a instância do jogo lidar com a lógica de morte (respawn, drop de bandeira, etc.).
             game.handlePlayerDeath(player, event);
         }
@@ -102,13 +102,8 @@ public class CTFListener implements Listener {
                     return; // Não envia mensagens vazias
                 }
 
-                // Envia a mensagem para o time na thread principal para segurança
-                Bukkit.getScheduler().runTask(plugin, () -> {
-                    // Re-verifica se o jogador ainda está no jogo
-                    if (ctfManager.getGameForPlayer(player) != null) {
-                        game.sendTeamMessage(player, teamMessage);
-                    }
-                });
+                // Envia a mensagem para o time. Como a operação é rápida, podemos fazer de forma síncrona.
+                game.sendTeamMessage(player, teamMessage);
             }
         }
     }

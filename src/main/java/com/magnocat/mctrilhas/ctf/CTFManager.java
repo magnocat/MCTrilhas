@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
+import java.util.stream.Collectors;
 import java.io.IOException;
 import java.util.*;
 
@@ -228,7 +229,7 @@ public class CTFManager {
             }
         }
 
-        plugin.logInfo("[CTF] Iniciando partida na arena '" + arena.getName() + "' com " + participants.size() + " jogadores.");
+        plugin.logInfo("[CTF] Arena '" + arena.getId() + "' selecionada. Iniciando partida com " + participants.size() + " jogadores.");
         CTFGame newGame = new CTFGame(plugin, arena, participants);
         activeGames.add(newGame);
         for (Player p : participants) {
@@ -258,11 +259,28 @@ public class CTFManager {
     }
 
     private Optional<CTFArena> findBestArenaForQueue() {
-        // Lógica simples: pega a primeira arena livre que comporte os jogadores.
-        return loadedArenas.stream()
+        final int queueSize = playerQueue.size();
+
+        // 1. Filtra as arenas que podem iniciar uma partida com o número atual de jogadores.
+        List<CTFArena> suitableArenas = loadedArenas.stream()
                 .filter(arena -> !isArenaInUse(arena))
-                .filter(arena -> playerQueue.size() >= arena.getMinPlayers())
-                .findFirst();
+                .filter(arena -> queueSize >= arena.getMinPlayers())
+                .collect(Collectors.toList());
+
+        if (suitableArenas.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // 2. Ordena as arenas para encontrar a "melhor".
+        // A melhor arena é aquela cuja capacidade máxima é a mais próxima (e maior ou igual) ao número de jogadores na fila.
+        // Isso evita colocar 4 jogadores em uma arena para 16 se houver uma para 8 disponível.
+        suitableArenas.sort(Comparator.comparingInt(arena -> {
+            int players = Math.min(queueSize, arena.getMaxPlayers());
+            return Math.abs(arena.getMaxPlayers() - players);
+        }));
+
+        // 3. Retorna a arena com o melhor "fit".
+        return Optional.of(suitableArenas.get(0));
     }
 
     private void cancelCountdown(String reason) {

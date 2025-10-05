@@ -545,3 +545,23 @@ proximity-chat:
   radius: 50
   # Formato da mensagem. Placeholders: {player}, {message}
   format: "&8[Próximo] &7{player}: &f{message}"
+
+# Configurações para o sistema de proteção de terrenos
+land-protection:
+  enabled: true
+  # Ferramenta usada para selecionar o terreno.
+  claim-tool: "GOLDEN_SHOVEL"
+  # Limites de tamanho do terreno.
+  size-limits:
+    # Limite máximo de blocos que um terreno pode ter (largura * profundidade).
+    max-total-blocks: 10000 # Exemplo: 100x100
+    # Limite máximo para qualquer um dos lados (largura ou profundidade).
+    max-side-length: 200
+  # Custo para reivindicar o terreno.
+  cost:
+    # Custo em Totens por bloco. Defina como 0 para ser gratuito.
+    per-block: 10.0
+  # Limite de quantos terrenos um jogador pode ter.
+  max-claims-per-player: 1
+  # Cooldown em segundos para o comando /terreno home. 0 para desativar.
+  home-cooldown-seconds: 300 # 5 minutos

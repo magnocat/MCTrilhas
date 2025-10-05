@@ -31,6 +31,7 @@ public class CTFGame {
 
     private final Map<TeamColor, CTFTeam> teams = new HashMap<>();
     private final Map<UUID, TeamColor> playerTeams = new HashMap<>();
+    private final Set<UUID> originalParticipants = new HashSet<>(); // Novo: Guarda todos que iniciaram a partida
     private final Map<TeamColor, CTFFlag> flags = new HashMap<>();
     private final Map<UUID, com.magnocat.mctrilhas.data.PlayerState> originalPlayerStates = new HashMap<>();
     private final Map<UUID, ItemStack> temporaryHelmets = new HashMap<>();
@@ -78,6 +79,7 @@ public class CTFGame {
             TeamColor assignedTeam = (i % 2 == 0) ? teamOne : teamTwo;
             teams.get(assignedTeam).addPlayer(player.getUniqueId());
             playerTeams.put(player.getUniqueId(), assignedTeam);
+            originalParticipants.add(player.getUniqueId()); // Adiciona à lista de participantes originais
             playerStats.put(player.getUniqueId(), new CTFPlayerStats());
         }
 
@@ -242,22 +244,25 @@ public class CTFGame {
         new BukkitRunnable() {
             @Override
             public void run() {
-                for (UUID playerUUID : playerTeams.keySet()) {
-                    Player player = Bukkit.getPlayer(playerUUID);
-                    if (player == null || !player.isOnline()) {
-                        continue;
-                    }
+                // Usa a lista de participantes originais para garantir que todos sejam restaurados
+                for (UUID playerUUID : originalParticipants) {
+                    Player onlinePlayer = Bukkit.getPlayer(playerUUID);
+                    if (onlinePlayer != null && onlinePlayer.isOnline()) {
+                        // Restaura jogadores que estão online
+                        removeGlow(onlinePlayer);
+                        scoreboard.destroyPlayerScoreboard(onlinePlayer);
+                        restorePlayerState(onlinePlayer); // Isso já teleporta o jogador de volta
 
-                    removeGlow(player); // Garante que ninguém saia da partida brilhando
-                    scoreboard.destroyPlayerScoreboard(player);
-                    restorePlayerState(player); // Isso já teleporta o jogador de volta
-
-                    if (winner != null && teams.get(winner).getPlayers().contains(player.getUniqueId())) {
-                        if (rewardAmount > 0) {
-                            player.sendMessage(formattedRewardMessage);
+                        if (winner != null && teams.get(winner).getPlayers().contains(playerUUID)) {
+                            if (rewardAmount > 0) {
+                                onlinePlayer.sendMessage(formattedRewardMessage);
+                            }
+                        } else if (winner != null) { // Jogador do time perdedor
+                            onlinePlayer.sendMessage(ChatColor.GRAY + "O time adversário venceu. Mais sorte na próxima vez!");
                         }
-                    } else if (winner != null) { // Jogador do time perdedor
-                        player.sendMessage(ChatColor.GRAY + "O time adversário venceu. Mais sorte na próxima vez!");
+                    } else {
+                        // Apenas processa a restauração de estado para jogadores offline
+                        restorePlayerState(playerUUID);
                     }
                 }
 
@@ -321,12 +326,8 @@ public class CTFGame {
             restorePlayerState(player); // Restaura inventário, etc.
         }
 
-        TeamColor teamColor = playerTeams.remove(player.getUniqueId());
+        TeamColor teamColor = getPlayerTeamColor(player.getUniqueId());
         if (teamColor != null) {
-            CTFTeam leftTeam = teams.get(teamColor);
-            leftTeam.removePlayer(player.getUniqueId());
-
-            // Verifica se o jogador estava carregando uma bandeira e a derruba
             for (CTFFlag flag : flags.values()) {
                 if (flag.isCarried() && player.getUniqueId().equals(flag.getCarrier())) {
                     flag.drop(player.getLocation());
@@ -336,12 +337,17 @@ public class CTFGame {
                 }
             }
 
+            CTFTeam leftTeam = teams.get(teamColor);
             broadcastMessage(teamColor.getChatColor() + player.getName() + ChatColor.YELLOW + " saiu da partida.");
 
             // Se o time ficou vazio, o outro time vence por desistência.
             // A verificação gameState == GameState.IN_PROGRESS impede que isso aconteça se o jogo já estiver terminando.
             if (gameState == GameState.IN_PROGRESS && leftTeam.getPlayers().isEmpty()) {
                 TeamColor winningTeamColor = (teamColor == teamOne) ? teamTwo : teamOne;
+                // A remoção do jogador deve acontecer DEPOIS da chamada do endGame
+                // para que o resumo final tenha os dados de todos.
+                playerTeams.remove(player.getUniqueId());
+                leftTeam.removePlayer(player.getUniqueId());
                 endGame(winningTeamColor, true);
             }
         }
@@ -662,13 +668,26 @@ public class CTFGame {
         originalPlayerStates.put(player.getUniqueId(), new com.magnocat.mctrilhas.data.PlayerState(player));
     }
 
-    private void restorePlayerState(Player player) {
-        com.magnocat.mctrilhas.data.PlayerState state = originalPlayerStates.remove(player.getUniqueId());
+    private void restorePlayerState(UUID playerUUID) {
+        com.magnocat.mctrilhas.data.PlayerState state = originalPlayerStates.remove(playerUUID);
         if (state != null) {
-            state.restore(player);
-            // Teleporta o jogador de volta para sua localização original
-            player.teleport(state.getLocation());
+            Player onlinePlayer = Bukkit.getPlayer(playerUUID);
+            if (onlinePlayer != null && onlinePlayer.isOnline()) {
+                state.restore(onlinePlayer);
+                // Teleporta o jogador de volta para sua localização original
+                onlinePlayer.teleport(state.getLocation());
+            } else {
+                // Se o jogador estiver offline, a lógica de restauração (inventário, etc.)
+                // precisaria ser adaptada para funcionar com OfflinePlayer, o que é complexo.
+                // Por enquanto, o PlayerState já lida com a restauração ao logar.
+            }
         }
+    }
+
+    private void restorePlayerState(Player player) {
+        if (player == null) return;
+        // Delega a lógica para o método principal, garantindo que o estado seja removido do mapa.
+        restorePlayerState(player.getUniqueId());
     }
 
     private void clearPlayer(Player player) {

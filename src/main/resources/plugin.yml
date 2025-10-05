@@ -48,6 +48,10 @@ commands:
     description: Mostra as regras do servidor.
     usage: /<command>
     aliases: [rules]
+  terreno:
+    description: Gerencia seu terreno protegido.
+    usage: /terreno <subcomando>
+    aliases: [land]
 
 permissions:
   mctrilhas.*:
@@ -94,6 +98,19 @@ permissions:
       mctrilhas.pet.alimentar: true
       mctrilhas.admin.pet.reset: true
       mctrilhas.apadrinhar: true
+      mctrilhas.land.use: true
+      mctrilhas.land.claim: true
+      mctrilhas.land.cost: true
+      mctrilhas.land.addmember: true
+      mctrilhas.land.removemember: true
+      mctrilhas.land.abandon: true
+      mctrilhas.land.home: true
+      mctrilhas.land.setgreeting: true
+      mctrilhas.land.setfarewell: true
+      mctrilhas.land.sell: true
+      mctrilhas.land.acceptsale: true
+      mctrilhas.land.setflag: true
+      mctrilhas.land.info: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
@@ -216,4 +233,43 @@ permissions:
     default: op
   mctrilhas.apadrinhar:
     description: Permite que um jogador apadrinhe um novo membro.
+    default: true
+  mctrilhas.land.use:
+    description: Permite usar os comandos básicos de terreno.
+    default: true
+  mctrilhas.land.claim:
+    description: Permite reivindicar um terreno.
+    default: true
+  mctrilhas.land.cost:
+    description: Permite ver o custo de uma seleção de terreno.
+    default: true
+  mctrilhas.land.addmember:
+    description: Permite adicionar um amigo ao seu terreno.
+    default: true
+  mctrilhas.land.removemember:
+    description: Permite remover um amigo do seu terreno.
+    default: true
+  mctrilhas.land.info:
+    description: Permite ver informações sobre seu terreno.
+    default: true
+  mctrilhas.land.sethome:
+    description: Permite definir o ponto de teletransporte do seu terreno.
+    default: true
+  mctrilhas.land.setgreeting:
+    description: Permite definir a mensagem de boas-vindas do seu terreno.
+    default: true
+  mctrilhas.land.setfarewell:
+    description: Permite definir a mensagem de despedida do seu terreno.
+    default: true
+  mctrilhas.land.sell:
+    description: Permite colocar seu terreno à venda para outro jogador.
+    default: true
+  mctrilhas.land.acceptsale:
+    description: Permite aceitar uma oferta de compra de terreno.
+    default: true
+  mctrilhas.land.setflag:
+    description: Permite alterar as permissões (flags) do seu terreno.
+    default: true
+  mctrilhas.land.abandon:
+    description: Permite abandonar um terreno protegido.
     default: true
