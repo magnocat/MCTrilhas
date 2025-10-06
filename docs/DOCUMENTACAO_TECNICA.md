@@ -292,7 +292,32 @@ MCTrilhas/
         *   Um som de feedback é tocado para o jogador.
 
 ---
-### 3.13. Identificação de Jogadores (UUID)
+### 3.14. Sistema de Proteção de Terrenos (WorldGuard)
+*   **Descrição:** Um sistema que se integra com o plugin **WorldGuard** para permitir que os jogadores reivindiquem e protejam suas próprias áreas no mundo de sobrevivência. O MCTrilhas atua como uma interface amigável, gerenciando os custos, permissões e comandos, enquanto o WorldGuard faz o trabalho pesado de proteção de blocos.
+*   **Estrutura:** `land/LandManager.java`, `land/LandCommand.java`, `land/ClaimToolListener.java` e classes de subcomando.
+*   **Lógica:**
+    1.  **Seleção:** O jogador usa uma ferramenta (Pá de Ouro, configurável) para selecionar os dois cantos de uma área cubóide.
+    2.  **Verificação de Custo:** O jogador pode usar `/terreno custo` para ver o tamanho da área e o custo em Totens para reivindicá-la.
+    3.  **Reivindicação:** Com o comando `/terreno reivindicar`, o sistema realiza uma série de validações:
+        *   **Tamanho:** Verifica se a área selecionada está dentro dos limites definidos no `config.yml`.
+        *   **Sobreposição:** Garante que a nova área não se sobreponha a nenhuma região já existente.
+        *   **Limite por Jogador:** Verifica se o jogador não excedeu o número máximo de terrenos permitidos.
+        *   **Custo:** Calcula o custo total com base no tamanho e cobra o valor em Totens do jogador via API do Vault.
+    4.  **Criação da Região:** Se todas as validações passarem, o `LandManager` usa a API do WorldGuard para criar uma nova região protegida, definindo o jogador como dono.
+*   **Comandos Implementados:**
+    *   `/terreno reivindicar`: Cria a proteção na área selecionada.
+    *   `/terreno custo`: Mostra o tamanho e o custo da seleção.
+    *   `/terreno abandonar`: Remove a proteção do terreno do jogador.
+    *   `/terreno info`: Lista o dono e os membros do terreno.
+    *   `/terreno add <jogador>`: Adiciona um amigo como membro do terreno.
+    *   `/terreno remove <jogador>`: Remove um membro do terreno.
+    *   `/terreno home`: Teleporta o jogador para o centro de seu terreno (com cooldown).
+    *   `/terreno setgreeting <msg>`: Define uma mensagem de boas-vindas.
+    *   `/terreno setfarewell <msg>`: Define uma mensagem de despedida.
+    *   `/terreno flag <nome> <allow|deny>`: Altera permissões (pvp, chest-access).
+
+---
+### 3.15. Identificação de Jogadores (UUID)
 *   **Descrição:** O sistema utiliza o UUID (Universally Unique Identifier) como a forma primária e mais confiável para identificar jogadores.
 *   **Funcionamento:**
     *   **Contas Premium (Java Original):** O UUID é globalmente único e permanente para a conta do jogador, sendo o mesmo em qualquer servidor.

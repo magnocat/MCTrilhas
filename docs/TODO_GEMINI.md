@@ -145,11 +145,29 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
         *   **Persistência:** Todos os dados (tipo, nome, nível, XP) serão salvos no arquivo do jogador.
         *   **Nota Especial:** A ideia da gata preta para o Admin foi removida para manter a consistência.
 
-*   ### ✅ CONCLUÍDO: Sistema de Duelos 1v1 (Requer Revisão)
+*   ### ✅ CONCLUÍDO: Sistema de Duelos 1v1 (Requer Revisão de Bugs)
     *   **Descrição:** Sistema completo de combate 1v1 com arenas, kits, ranking ELO, recompensas e modo espectador.
     *   **Componentes:** `DuelManager`, `DuelGame`, `DuelArena`, `DuelKit`, `GameListener`, `DuelListener`.
     *   **Dados:** `duel_arenas.yml`, `duel_kits.yml`, e seção `duel-stats` no arquivo de dados do jogador.
     *   **Funcionalidades:** Desafios, filas, contagem regressiva, timer na HUD, cálculo de ELO, recompensas por vitória e ranking semanal.
+    *   **⚠️ Nota de Correção:** O sistema de pontuação de ELO e o placar de batalhas não estão funcionando corretamente. A correção foi adiada e deve ser priorizada em uma futura revisão do sistema de Duelos.
+
+*   ### ✅ CONCLUÍDO: Sistema de Proteção de Terrenos
+    *   **Descrição:** Integração com o WorldGuard para permitir que jogadores comprem e gerenciem seus próprios terrenos protegidos.
+    *   **Componentes:** `LandManager`, `LandCommand`, `ClaimToolListener`.
+    *   **Funcionalidades Implementadas:**
+        *   **Seleção e Reivindicação:** Usando uma ferramenta (Pá de Ouro) e o comando `/terreno reivindicar`.
+        *   **Validações:** Limites de tamanho, custo por bloco, prevenção de sobreposição e limite de terrenos por jogador.
+        *   **Gerenciamento de Membros:** Comandos para adicionar e remover amigos (`/terreno add|remove`).
+        *   **Gerenciamento de Terreno:** Comandos para abandonar, ver informações e se teletransportar (`/terreno abandonar|info|home`).
+        *   **Customização:** Comandos para definir mensagens de boas-vindas/despedida e alterar flags (pvp, chest-access).
+        *   **Venda de Terreno:** Sistema de oferta e aceite para vender o terreno a outro jogador.
+    *   **Ideias Futuras (Brainstorm):**
+        *   Permitir que jogadores definam um preço para outros jogadores entrarem em seu terreno.
+        *   Adicionar mais flags que os jogadores possam controlar (ex: `use` para botões/alavancas).
+        *   Criar uma GUI para facilitar o gerenciamento do terreno (membros, flags, etc.).
+        *   Implementar um sistema de aluguel de terrenos.
+        *   Permitir a expansão de um terreno já existente.
 
 *   ### ✅ CONCLUÍDO: Sistema de Comunidade e Segurança (Graylist Híbrido)
     *   **Descrição:** Sistema para proteger o servidor de novos jogadores, exigindo que sejam apadrinhados por membros existentes.
