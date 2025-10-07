@@ -64,9 +64,8 @@ permissions:
       mctrilhas.ctf.join: true
       mctrilhas.ctf.leave: true
       mctrilhas.ctf.list: true
+      mctrilhas.ctf.stuck: true
       mctrilhas.ctf.stats: true
-      mctrilhas.ctf.stats.other: true
-      mctrilhas.ctf.use: true
       mctrilhas.daily: true
       mctrilhas.familia.use: true
       mctrilhas.hud: true
@@ -129,9 +128,6 @@ permissions:
   mctrilhas.tesouro:
     description: Permite ao jogador participar da caça ao tesouro.
     default: true
-  mctrilhas.ctf.use:
-    description: Permite usar os comandos básicos do CTF.
-    default: true
   mctrilhas.ctf.join:
     description: Permite entrar na fila do CTF.
     default: true
@@ -140,6 +136,9 @@ permissions:
     default: true
   mctrilhas.ctf.list:
     description: Permite listar as arenas de CTF.
+    default: true
+  mctrilhas.ctf.stuck:
+    description: Permite que um jogador se mate se ficar preso em uma partida de CTF.
     default: true
   mctrilhas.ctf.stats:
     description: Permite ver as próprias estatísticas de CTF.

@@ -27,6 +27,7 @@ import com.magnocat.mctrilhas.chat.ProximityChatListener;
 import com.magnocat.mctrilhas.chat.ProximityChatManager;
 import com.magnocat.mctrilhas.ctf.CTFListener;      // Importa todas as classes do pacote npc
 import com.magnocat.mctrilhas.ctf.CTFManager; // Importa todas as classes do pacote listeners
+import com.magnocat.mctrilhas.ctf.CTFMenuListener;
 import com.magnocat.mctrilhas.ctf.CTFMilestoneManager; // Importa todas as classes do pacote integrations
 import com.magnocat.mctrilhas.data.ActivityTracker; // Importa todas as classes do pacote quests
 import com.magnocat.mctrilhas.data.PlayerDataManager;      // Importa todas as classes do pacote maps
@@ -433,7 +434,10 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new GameListener(this), this);
         }
         if (npcManager != null) getServer().getPluginManager().registerEvents(new NPCListener(this), this);
-        if (ctfManager != null) getServer().getPluginManager().registerEvents(new CTFListener(this), this);
+        if (ctfManager != null) {
+            getServer().getPluginManager().registerEvents(new CTFListener(this), this);
+            getServer().getPluginManager().registerEvents(new CTFMenuListener(this), this); // Adicionado o listener do menu
+        }
         if (landManager != null) getServer().getPluginManager().registerEvents(new ClaimToolListener(this), this);
 
         logInfo("Ouvintes de eventos registrados.");

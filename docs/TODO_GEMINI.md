@@ -1,27 +1,39 @@
-# Resumo do Projeto e Próximos Passos (TODO Gemini)
+# MANUAL DE OPERAÇÕES - GEMINI CODE ASSIST
 
-**Data:** 22-09-2025 (Revisão Concluída)
+**Última Revisão:** 06-10-2025
 
-Este documento serve como um resumo completo do estado do projeto MCTrilhas, suas tecnologias, histórico de desenvolvimento e o roadmap de funcionalidades futuras. Ele foi criado para servir como um lembrete para nós quando retomarmos o projeto.
-
----
-
-## 0. Nota para Gemini
-
-> **Lembre-se:** Todas as respostas e interações devem ser em **Português do Brasil (PT-BR)**. O projeto já possui um workflow de CI (`build.yml`) que verifica erros de compilação automaticamente a cada `push`, então não é necessário se preocupar com a verificação manual de erros de compilação, a menos que seja solicitado.
+Este documento é o **manual de operações definitivo** para nossa colaboração no projeto MCTrilhas. Ele deve ser incluído no contexto de cada prompt para garantir que todas as diretrizes, regras e o estado atual do projeto sejam sempre considerados.
 
 ---
-## 0.1. Regras de Interação (Definidas pelo Usuário)
 
-> Estas são as regras de ouro para nossa colaboração. Devo segui-las sempre.
+## 0.1. DIRETRIZES FUNDAMENTAIS (LEITURA OBRIGATÓRIA)
+
+> **Diretriz Mestra:** Todas as respostas e interações devem ser em **Português do Brasil (PT-BR)**.
+
+---
+### 0.1.1. Regras de Interação (Definidas pelo Usuário)
+
+> Estas são as regras de ouro para nossa colaboração. Devo segui-las em todas as interações.
 
 1.  **Analisar Antes de Agir:** Devo parar, analisar o contexto e fazer perguntas se algo não estiver claro antes de gerar código. O objetivo é a precisão, não a velocidade.
 2.  **Estrutura de Pacotes Rígida:** Todos os arquivos de uma funcionalidade específica (ex: Duelos) devem estar obrigatoriamente dentro de seu pacote correspondente (ex: `com.magnocat.mctrilhas.duels`), a menos que uma classe tenha uma dependência externa justificada.
 3.  **Correção Incremental:** Ao corrigir código, devo proceder em blocos pequenos, começando pelo topo do arquivo. Após cada bloco, devo parar e pedir permissão para continuar. Não devo tentar corrigir tudo de uma vez.
 4.  **Acesso a Arquivos:** Se eu precisar de um arquivo que não foi fornecido no contexto, devo solicitar explicitamente e aguardar o fornecimento antes de propor qualquer alteração que dependa dele.
 5.  **Confirmação:** Devo sempre confirmar o entendimento das tarefas e regras.
-6.  **Verificação de Importações:** Antes de finalizar qualquer sugestão de código, devo realizar uma verificação interna para garantir que todas as classes utilizadas estão devidamente importadas, evitando erros de `cannot find symbol`.
+6.  **Verificação de Compilação:** Antes de finalizar qualquer sugestão de código, devo realizar uma verificação interna para garantir que todas as classes utilizadas estão devidamente importadas e que os métodos chamados existem, evitando erros de `cannot find symbol`.
 7.  **Comunicação Direta:** As respostas devem ser diretas, concisas e sem floreios. Não devo agir de forma alegre ou excessivamente formal. Devo me dirigir ao usuário como "Magno".
+
+---
+
+## 0.2. COMO TRABALHAR COMIGO (FLUXO DE TRABALHO)
+
+Eu sou um modelo de linguagem **stateless** (sem estado). Minha "memória" é limitada ao contexto fornecido em cada prompt. Para garantir a melhor performance, nosso fluxo de trabalho é baseado em **RAG (Retrieval-Augmented Generation)**:
+
+1.  **Você (Retrieval):** Você atua como o sistema de recuperação, analisando a tarefa e selecionando os arquivos de código relevantes (`.java`, `.yml`, etc.).
+2.  **Contexto (Augmentation):** Você fornece esses arquivos no `<CONTEXT>`, junto com este manual de operações. Isso "aumenta" minha capacidade de gerar uma resposta precisa e contextualizada.
+3.  **Eu (Generation):** Eu processo todo o contexto fornecido para gerar a resposta.
+
+Seguir este fluxo é a maneira mais eficiente de colaborarmos e minimiza a necessidade de correções.
 
 ---
 
@@ -154,20 +166,24 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
 
 *   ### ✅ CONCLUÍDO: Sistema de Proteção de Terrenos
     *   **Descrição:** Integração com o WorldGuard para permitir que jogadores comprem e gerenciem seus próprios terrenos protegidos.
-    *   **Componentes:** `LandManager`, `LandCommand`, `ClaimToolListener`.
+    *   **Componentes:** `land/LandManager.java`, `land/LandCommand.java`, `land/ClaimToolListener.java`.
     *   **Funcionalidades Implementadas:**
         *   **Seleção e Reivindicação:** Usando uma ferramenta (Pá de Ouro) e o comando `/terreno reivindicar`.
         *   **Validações:** Limites de tamanho, custo por bloco, prevenção de sobreposição e limite de terrenos por jogador.
         *   **Gerenciamento de Membros:** Comandos para adicionar e remover amigos (`/terreno add|remove`).
         *   **Gerenciamento de Terreno:** Comandos para abandonar, ver informações e se teletransportar (`/terreno abandonar|info|home`).
         *   **Customização:** Comandos para definir mensagens de boas-vindas/despedida e alterar flags (pvp, chest-access).
-        *   **Venda de Terreno:** Sistema de oferta e aceite para vender o terreno a outro jogador.
+        *   **Venda de Terreno:** Sistema de oferta e aceite para vender o terreno a outro jogador (`/terreno vender|aceitarvenda`).
+        *   **Comando /ctf stuck:** Comando de emergência para jogadores presos.
+        *   **GUI de Acesso:** Menu com botões para entrar/sair da fila, acessível via NPC (base implementada).
+        *   **Comemoração de Vitória:** Fogos de artifício com as cores do time vencedor ao final da partida.
     *   **Ideias Futuras (Brainstorm):**
         *   Permitir que jogadores definam um preço para outros jogadores entrarem em seu terreno.
         *   Adicionar mais flags que os jogadores possam controlar (ex: `use` para botões/alavancas).
         *   Criar uma GUI para facilitar o gerenciamento do terreno (membros, flags, etc.).
         *   Implementar um sistema de aluguel de terrenos.
         *   Permitir a expansão de um terreno já existente.
+        *   **Modo Espectador:** Permitir que jogadores assistam a partidas em andamento.
 
 *   ### ✅ CONCLUÍDO: Sistema de Comunidade e Segurança (Graylist Híbrido)
     *   **Descrição:** Sistema para proteger o servidor de novos jogadores, exigindo que sejam apadrinhados por membros existentes.

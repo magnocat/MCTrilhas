@@ -1,22 +1,21 @@
 package com.magnocat.mctrilhas.duels;
 
-import com.magnocat.mctrilhas.MCTrilhasPlugin;
-import com.magnocat.mctrilhas.data.PlayerData;
-import com.magnocat.mctrilhas.utils.PlayerStateManager;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Sound;
+import org.bukkit.GameMode;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.data.PlayerData;
+import com.magnocat.mctrilhas.utils.PlayerStateManager;
 
 /**
  * Representa uma única partida de duelo em andamento.
@@ -189,6 +188,12 @@ public class DuelGame {
         // Salva os dados
         plugin.getPlayerDataManager().savePlayerData(winnerData);
         plugin.getPlayerDataManager().savePlayerData(loserData);
+
+        // Otimização: Atualiza os caches de ranking da API sob demanda, apenas quando uma partida termina.
+        // Isso garante que o site sempre tenha os dados mais recentes.
+        if (plugin.getHttpApiManager() != null) {
+            plugin.getHttpApiManager().updateAllLeaderboardCaches();
+        }
     }
 
     private void cleanup() {

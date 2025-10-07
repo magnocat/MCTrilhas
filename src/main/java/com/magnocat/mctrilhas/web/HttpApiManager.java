@@ -17,8 +17,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.EnumMap;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,19 +32,17 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-// Bukkit / Spigot API
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-// External Libraries
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -52,18 +50,17 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.management.OperatingSystemMXBean;
-import com.sun.net.httpserver.HttpServer;
-import net.kyori.adventure.text.Component;
-
-// Project-specific Classes
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerCTFStats;
-import com.magnocat.mctrilhas.duels.PlayerDuelStats;
 import com.magnocat.mctrilhas.data.PlayerData;
+import com.magnocat.mctrilhas.duels.PlayerDuelStats;
 import com.magnocat.mctrilhas.ranks.Rank;
 import com.magnocat.mctrilhas.utils.SecurityUtils;
+import com.sun.management.OperatingSystemMXBean;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
+
+import net.kyori.adventure.text.Component;
 
 /**
  * Gerencia o servidor web integrado e a API RESTful do plugin.
@@ -1034,13 +1031,13 @@ public class HttpApiManager {
         new BukkitRunnable() {
             @Override
             public void run() {
-                // Otimização: Só atualiza o cache se houver jogadores online.
-                if (Bukkit.getOnlinePlayers().isEmpty()) {
-                    return;
-                }
-
                 if (plugin.getEconomy() == null) {
                     plugin.logWarn("Vault/Economy não encontrado. Pulando atualização de estatísticas da economia.");
+                    return;
+                }
+                // Otimização: Só executa a lógica pesada se houver jogadores online.
+                if (Bukkit.getOnlinePlayers().isEmpty()) {
+                    plugin.logInfo("Nenhum jogador online. Pulando atualização do cache de economia.");
                     return;
                 }
                 plugin.logInfo("Atualizando cache de estatísticas da economia...");
@@ -1421,10 +1418,12 @@ public class HttpApiManager {
     }
 
     public void stop() {
+        stopBadgeCacheUpdater();
         if (server != null) {
             server.stop(0);
             plugin.logInfo("Servidor da API web parado.");
         }
+
     }
 
     public void updateAllLeaderboardCaches() {

@@ -1,9 +1,12 @@
 package com.magnocat.mctrilhas.data;
 
+import java.util.Collection;
+
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 /**
  * Armazena o estado de um jogador (inventário, vida, etc.) antes de um duelo,
@@ -20,6 +23,7 @@ public class PlayerState {
     private final int level;
     private final GameMode gameMode;
     private final Location location;
+    private final Collection<PotionEffect> potionEffects;
 
     /**
      * Cria um "snapshot" do estado atual do jogador.
@@ -36,6 +40,7 @@ public class PlayerState {
         this.level = player.getLevel();
         this.gameMode = player.getGameMode();
         this.location = player.getLocation();
+        this.potionEffects = player.getActivePotionEffects();
     }
 
     /**
@@ -58,6 +63,10 @@ public class PlayerState {
         player.setExp(this.experience);
         player.setLevel(this.level);
         player.setGameMode(this.gameMode);
+
+        // Limpa todos os efeitos de poção atuais antes de restaurar os antigos
+        player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
+        player.addPotionEffects(this.potionEffects);
 
         player.updateInventory();
     }

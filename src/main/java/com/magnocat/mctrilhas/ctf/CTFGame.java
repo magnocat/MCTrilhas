@@ -2,19 +2,22 @@ package com.magnocat.mctrilhas.ctf;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
 import com.magnocat.mctrilhas.data.PlayerState;
-import com.magnocat.mctrilhas.utils.ItemFactory;
 import com.magnocat.mctrilhas.data.PlayerCTFStats;
+import com.magnocat.mctrilhas.utils.ItemFactory;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.entity.Firework;
+import org.bukkit.FireworkEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -33,7 +36,7 @@ public class CTFGame {
     private final Map<UUID, TeamColor> playerTeams = new HashMap<>();
     private final Set<UUID> originalParticipants = new HashSet<>(); // Novo: Guarda todos que iniciaram a partida
     private final Map<TeamColor, CTFFlag> flags = new HashMap<>();
-    private final Map<UUID, com.magnocat.mctrilhas.data.PlayerState> originalPlayerStates = new HashMap<>();
+    private final Map<UUID, PlayerState> originalPlayerStates = new HashMap<>();
     private final Map<UUID, ItemStack> temporaryHelmets = new HashMap<>();
     private final Map<UUID, CTFPlayerStats> playerStats = new HashMap<>();
 
@@ -226,6 +229,7 @@ public class CTFGame {
                 broadcastMessage(winner.getChatColor() + "O time " + winner.getDisplayName() + " venceu a partida!");
             }
 
+            launchVictoryFireworks(winner);
             // Dá a recompensa para o time vencedor
             CTFTeam winningTeam = teams.get(winner);
             if (winningTeam != null) {
@@ -665,7 +669,7 @@ public class CTFGame {
 
     // --- Métodos de Gerenciamento de Estado e Kit ---
     private void savePlayerState(Player player) {
-        originalPlayerStates.put(player.getUniqueId(), new com.magnocat.mctrilhas.data.PlayerState(player));
+        originalPlayerStates.put(player.getUniqueId(), new PlayerState(player));
     }
 
     private void restorePlayerState(UUID playerUUID) {
@@ -830,5 +834,32 @@ public class CTFGame {
             }
         }
         return players;
+    }
+
+    /**
+     * Lança fogos de artifício para celebrar a vitória de um time.
+     * @param winningTeamColor A cor do time vencedor.
+     */
+    private void launchVictoryFireworks(TeamColor winningTeamColor) {
+        CTFTeam winningTeam = teams.get(winningTeamColor);
+        if (winningTeam == null) return;
+
+        for (UUID playerUUID : winningTeam.getPlayers()) {
+            Player player = Bukkit.getPlayer(playerUUID);
+            if (player != null && player.isOnline()) {
+                // Lança 3 fogos de artifício por jogador vencedor
+                for (int i = 0; i < 3; i++) {
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            Firework fw = player.getWorld().spawn(player.getLocation(), Firework.class);
+                            FireworkMeta fwm = fw.getFireworkMeta();
+                            fwm.addEffect(FireworkEffect.builder().withColor(winningTeamColor.getArmorColor()).flicker(true).build());
+                            fw.setFireworkMeta(fwm);
+                        }
+                    }.runTaskLater(plugin, i * 10L); // Lança com um pequeno atraso entre eles
+                }
+            }
+        }
     }
 }

@@ -135,6 +135,17 @@ public class CTFManager {
         }
     }
 
+    public void handlePlayerStuck(Player player) {
+        CTFGame game = getGameForPlayer(player);
+        if (game == null) {
+            player.sendMessage(ChatColor.RED + "Você não está em uma partida de CTF.");
+            return;
+        }
+
+        player.sendMessage(ChatColor.YELLOW + "Você usou o comando de emergência e será renascido.");
+        player.setHealth(0); // Mata o jogador para acionar o respawn
+    }
+
     /**
      * Tenta iniciar uma nova partida se houver jogadores suficientes na fila e uma arena disponível.
      */
@@ -253,8 +264,10 @@ public class CTFManager {
         );
         plugin.logInfo("[CTF] Partida na arena '" + game.getArena().getName() + "' finalizada.");
 
-        // Otimização: Atualiza o cache do ranking de CTF sob demanda, apenas quando uma partida termina.
-        plugin.getHttpApiManager().updateCtfLeaderboardCaches();
+        // Otimização: Atualiza todos os caches de ranking da API sob demanda, apenas quando uma partida termina.
+        if (plugin.getHttpApiManager() != null) {
+            plugin.getHttpApiManager().updateAllLeaderboardCaches();
+        }
 
     }
 

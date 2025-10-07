@@ -23,6 +23,7 @@ public class CTFCommand implements CommandExecutor, TabCompleter {
         registerSubCommand(new JoinSubCommand(plugin));
         registerSubCommand(new LeaveSubCommand(plugin));
         registerSubCommand(new ListSubCommand(plugin));
+        registerSubCommand(new StuckSubCommand(plugin));
         registerSubCommand(new StatsSubCommand(plugin));
         registerSubCommand(new AdminSubCommand(plugin));
     }

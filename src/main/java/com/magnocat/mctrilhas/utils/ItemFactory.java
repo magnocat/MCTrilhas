@@ -13,12 +13,12 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * A utility class for creating ItemStacks from configuration files.
+ * Uma classe utilitária para criar ItemStacks a partir de arquivos de configuração.
  */
-@SuppressWarnings("deprecation") // Suppress warnings for deprecated methods like setDisplayName, setLore, and ChatColor
+@SuppressWarnings("deprecation") // Suprime avisos para métodos obsoletos como setDisplayName, setLore e ChatColor
 public final class ItemFactory {
 
-    // Constants for configuration keys to avoid "magic strings"
+    // Constantes para as chaves de configuração para evitar "strings mágicas"
     private static final String KEY_NAME = "name";
     private static final String KEY_LORE = "lore";
     private static final String KEY_MATERIAL = "material";
@@ -26,17 +26,17 @@ public final class ItemFactory {
     private static final String KEY_ENCHANTS = "enchantments";
 
     /**
-     * Creates an ItemStack from a configuration section. This is a utility class and cannot be instantiated.
+     * Esta é uma classe utilitária e não pode ser instanciada.
      */
     private ItemFactory() {}
 
     /**
-     * Creates an ItemStack from a configuration section with context for logging.
+     * Cria um ItemStack a partir de uma seção de configuração, com contexto para logs.
      *
-     * @param itemSection The ConfigurationSection containing the item data.
-     * @param contextId The ID of the badge or other context for logging purposes.
-     * @param logger The logger instance to report warnings.
-     * @return The created ItemStack, or null if the material is invalid.
+     * @param itemSection A ConfigurationSection contendo os dados do item.
+     * @param contextId O ID da insígnia ou outro contexto para fins de log.
+     * @param logger A instância do logger para reportar avisos.
+     * @return O ItemStack criado, ou null se o material for inválido.
      */
     public static ItemStack createFromConfig(ConfigurationSection itemSection, String contextId, Logger logger) {
         if (itemSection == null) {
@@ -45,13 +45,13 @@ public final class ItemFactory {
 
         String materialName = itemSection.getString(KEY_MATERIAL);
         if (materialName == null) {
-            logger.warning("Item configuration for context '" + contextId + "' is missing a 'material' key.");
+            logger.warning("A configuração do item para o contexto '" + contextId + "' não possui a chave 'material'.");
             return null;
         }
 
         Material material = Material.matchMaterial(materialName.toUpperCase());
         if (material == null) {
-            logger.warning("Invalid material '" + materialName + "' for context '" + contextId + "'.");
+            logger.warning("Material inválido '" + materialName + "' para o contexto '" + contextId + "'.");
             return null;
         }
 
@@ -88,14 +88,38 @@ public final class ItemFactory {
     }
 
     /**
-     * Creates an ItemStack from a generic configuration section.
-     * This is a convenience overload that uses a default context and the global logger.
+     * Cria um ItemStack a partir de uma seção de configuração genérica.
+     * Esta é uma sobrecarga de conveniência que usa um contexto padrão e o logger global.
      *
-     * @param itemSection The ConfigurationSection containing the item data.
-     * @return The created ItemStack, or null if the configuration is invalid.
+     * @param itemSection A ConfigurationSection contendo os dados do item.
+     * @return O ItemStack criado, ou null se a configuração for inválida.
      */
     public static ItemStack createFromConfig(ConfigurationSection itemSection) {
-        // Calls the main creator with a generic context and the global Minecraft logger.
+        // Chama o criador principal com um contexto genérico e o logger global do Minecraft.
         return createFromConfig(itemSection, "generic-item", Logger.getLogger("Minecraft"));
+    }
+
+    /**
+     * Cria um ItemStack simples com nome e lore, sem precisar de uma seção de configuração.
+     *
+     * @param material O material do item.
+     * @param name O nome de exibição do item (será colorido).
+     * @param lore A descrição (lore) do item (será colorida).
+     * @return O ItemStack criado.
+     */
+    public static ItemStack createSimple(Material material, String name, List<String> lore) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            if (name != null && !name.isEmpty()) {
+                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+            }
+            if (lore != null && !lore.isEmpty()) {
+                List<String> coloredLore = lore.stream().map(line -> ChatColor.translateAlternateColorCodes('&', line)).collect(Collectors.toList());
+                meta.setLore(coloredLore);
+            }
+            item.setItemMeta(meta);
+        }
+        return item;
     }
 }
