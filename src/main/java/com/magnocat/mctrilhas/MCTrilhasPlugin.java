@@ -20,6 +20,7 @@ import com.magnocat.mctrilhas.badges.BadgeManager;
 import com.magnocat.mctrilhas.badges.BadgeMenu; // Importa todas as classes do pacote badges
 import com.magnocat.mctrilhas.commands.DailyCommand; // Importa todas as classes do pacote commands
 import com.magnocat.mctrilhas.commands.FamilyCommand;      // Importa todas as classes do pacote ctf
+import com.magnocat.mctrilhas.commands.EmoteCommand;
 import com.magnocat.mctrilhas.commands.RulesCommand;    // Importa todas as classes do pacote data
 import com.magnocat.mctrilhas.commands.ScoutCommandExecutor;    // Importa todas as classes do pacote duels
 import com.magnocat.mctrilhas.ctf.CTFCommand;      // Importa todas as classes do pacote hud
@@ -404,6 +405,9 @@ public final class MCTrilhasPlugin extends JavaPlugin {
             LandCommand landExecutor = new LandCommand(this);
             getCommand("terreno").setExecutor(landExecutor);
             getCommand("terreno").setTabCompleter(landExecutor);
+            EmoteCommand emoteExecutor = new EmoteCommand(this);
+            getCommand("emote").setExecutor(emoteExecutor);
+            getCommand("emote").setTabCompleter(emoteExecutor);
         }
 
     }

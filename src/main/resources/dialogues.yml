@@ -41,3 +41,292 @@ dialogues:
       1:
         text: "&9Voltar"
         action: "dialogue:chefe_escoteiro_inicio" # Volta para o diálogo inicial
+
+  # --- Diálogos do Chefe Magno ---
+  chefe_magno_principal:
+    npc-text:
+      - "&e[Chefe Magno]: &fSempre alerta, {player_name}! Como posso ajudar hoje?"
+    choices:
+      0: # Slot 0
+        text: "&aQuero aprender sobre o Escotismo."
+        action: "dialogue:chefe_magno_historia_inicio"
+      1: # Slot 1
+        text: "&aPreciso de dicas sobre o Minecraft."
+        action: "dialogue:chefe_magno_dicas_mc"
+      2: # Slot 2
+        text: "&bQuais os comandos do servidor?"
+        action: "dialogue:chefe_magno_comandos"
+      3: # Slot 3
+        text: "&cQuero iniciar uma atividade."
+        action: "dialogue:chefe_magno_atividades"
+      4: # Slot 4
+        text: "&6Onde encontro um bioma específico?"
+        action: "dialogue:chefe_magno_locate_biome_menu"
+      5: # Slot 5
+        text: "&dPreciso de ajuda com algo."
+        action: "dialogue:chefe_magno_ajuda"
+      6: # Slot 6
+        text: "&9Gostaria que me chamasse por outro nome."
+        action: "input:set_custom_name"
+      7: # Slot 7
+        text: "&dQuem é você?"
+        action: "dialogue:chefe_magno_quemsoueu"
+      8: # Usando slot 8 (último da linha) para a opção de sair
+        text: "&7Até mais, Chefe!"
+        action: "close"
+
+  chefe_magno_dicas_mc:
+    npc-text:
+      - "&e[Chefe Magno]: &fConhecimento é a melhor ferramenta. Sobre o que você quer aprender?"
+    choices:
+      1:
+        text: "&cRedstone"
+        action: "dialogue:dica_redstone_1" # Placeholder para a primeira dica de redstone
+      2:
+        text: "&aConstrução"
+        action: "dialogue:dica_construcao_1" # Placeholder para a primeira dica de construção
+      3:
+        text: "&eSobrevivência"
+        action: "ranked_dialogue:dica_sobrevivencia_" # Ação que busca por diálogos com base no ranque
+      4: # Nova opção para dica aleatória
+        text: "&6Dê-me uma dica aleatória!"
+        action: "dialogue:random:dica_geral_"
+      5: # Nova opção para dica contextual de tempo
+        text: "&bUma dica para agora?"
+        action: "timed_dialogue:dica_momento_"
+      7: # Nova opção para dica contextual de bioma
+        text: "&2Uma dica sobre este lugar?"
+        action: "biome_dialogue:dica_bioma_"
+      8: # Slot 8 para voltar
+        text: "&9Voltar"
+        action: "dialogue:chefe_magno_principal"
+
+  chefe_magno_atividades:
+    npc-text:
+      - "&e[Chefe Magno]: &fÓtimo! Ação e aventura nos esperam. O que vamos fazer?"
+    choices:
+      1:
+        text: "&9Entrar na fila do Capture a Bandeira"
+        action: "command:player:ctf join"
+      2:
+        text: "&9Voltar"
+        action: "dialogue:chefe_magno_principal"
+
+  chefe_magno_quemsoueu:
+    npc-text:
+      - "&e[Chefe Magno]: &fEu sou o Chefe Magno, seu guia neste acampamento digital. Minha missão é ajudar todos os escoteiros a aproveitarem ao máximo sua jornada no MC Trilhas."
+    choices:
+      1:
+        text: "&9Voltar"
+        action: "dialogue:chefe_magno_principal"
+
+  chefe_magno_comandos:
+    npc-text:
+      - "&e[Chefe Magno]: &fClaro! Conhecer os comandos é como ter um bom canivete suíço. Aqui estão os principais:"
+      - "&b/scout badges &7- Vê suas especialidades."
+      - "&b/scout progress &7- Mostra seu progresso."
+      - "&b/daily &7- Coleta sua recompensa diária."
+      - "&b/ranque &7- Vê os requisitos para o próximo ranque."
+      - "&b/tesouro &7- Gerencia sua Caça ao Tesouro."
+      - "&b/ctf &7- Comandos do Capture a Bandeira."
+      - "&b/familia token &7- Gera seu link do Portal da Família."
+      - "&b/terreno &7- Gerencia seu terreno protegido."
+    choices:
+      1:
+        text: "&9Voltar"
+        action: "dialogue:chefe_magno_principal"
+
+  chefe_magno_ajuda:
+    npc-text:
+      - "&e[Chefe Magno]: &fUm escoteiro está sempre alerta para ajudar. Qual o problema?"
+    choices:
+      1:
+        text: "&aQuero minha insígnia do MC Trilhas!"
+        action: "grant_badge:mctrilhas"
+      2:
+        text: "&cPerdi um mapa-troféu de uma especialidade."
+        action: "replace_badge_map_menu"
+      3:
+        text: "&9Voltar"
+        action: "dialogue:chefe_magno_principal"
+
+  chefe_magno_locate_biome_menu:
+    npc-text:
+      - "&e[Chefe Magno]: &fA exploração é a alma do escotismo! Qual bioma você está procurando?"
+    choices:
+      1:
+        text: "&eDeserto"
+        action: "locate_biome:desert"
+      2:
+        text: "&2Selva (Jungle)"
+        action: "locate_biome:jungle"
+      3:
+        text: "&9Voltar"
+        action: "dialogue:chefe_magno_principal"
+
+  # --- Dicas de Minecraft ---
+  dica_redstone_1:
+    npc-text:
+      - "&e[Chefe Magno]: &fUm sinal de redstone só viaja 15 blocos. Se precisar que ele vá mais longe, use um &cRepetidor de Redstone&f! Ele renova o sinal por mais 15 blocos."
+      - "&fVocê também pode clicar com o botão direito no repetidor para adicionar um pequeno atraso ao sinal. É ótimo para criar circuitos mais complexos!"
+    choices:
+      1:
+        text: "&aEntendi, voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_sobrevivencia_visitante:
+    npc-text:
+      - "&e[Chefe Magno]: &fBem-vindo, Visitante! Sua primeira missão é se tornar parte da nossa família. Encontre um membro mais experiente e peça para ele usar o comando &e/apadrinhar {player_name}&f."
+      - "&fEnquanto isso, você pode aprender sobre nosso movimento clicando na opção 'Quero aprender sobre o Escotismo'."
+    choices:
+      1:
+        text: "&aEntendido! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_sobrevivencia_filhote:
+    npc-text:
+      - "&e[Chefe Magno]: &fComo um Filhote, sua prioridade é a segurança! Sempre construa um abrigo simples na primeira noite e ilumine bem a área com tochas para evitar que monstros apareçam."
+    choices:
+      1:
+        text: "&aEntendi! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_sobrevivencia_lobinho:
+    npc-text:
+      - "&e[Chefe Magno]: &fVocê já tem algumas especialidades, Lobinho, muito bem! Agora é hora de aprimorar suas ferramentas. Use uma Bigorna para reparar e combinar encantamentos. Uma boa ferramenta dura muito mais!"
+    choices:
+      1:
+        text: "&aVou fazer isso! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_sobrevivencia_escoteiro:
+    npc-text:
+      - "&e[Chefe Magno]: &fAgora que você é um Escoteiro, comece a explorar cavernas com mais cuidado. Leve sempre um balde d'água para neutralizar lava e um escudo para se proteger de esqueletos."
+      - "&fAh, e não se esqueça de cuidar do seu Pet! Use &e/scout pet&f para ver os comandos."
+    choices:
+      1:
+        text: "&aÓtima dica! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_sobrevivencia_senior:
+    npc-text:
+      - "&e[Chefe Magno]: &fComo um Sênior, seu desafio é a automação. Comece a estudar Redstone para criar fazendas automáticas de comida e recursos. Isso vai te poupar muito tempo para se dedicar a projetos maiores!"
+    choices:
+      1:
+        text: "&aDesafio aceito! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_sobrevivencia_pioneiro:
+    npc-text:
+      - "&e[Chefe Magno]: &fSempre Alerta, Pioneiro! Sua jornada agora é sobre deixar um legado. Você tem a honra de poder fundar sua própria patrulha e construir uma base no Vale dos Pioneiros. Guie os mais novos!"
+    choices:
+      1:
+        text: "&aPode deixar, Chefe! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_sobrevivencia_default:
+    npc-text:
+      - "&e[Chefe Magno]: &fUma das primeiras coisas que você deve fazer é um &8Escudo&f (uma tábua de qualquer madeira e uma barra de ferro)."
+      - "&fEle bloqueia 100% das flechas de esqueletos e reduz muito o dano de explosões de Creepers. É essencial para sobreviver às primeiras noites!"
+    choices:
+      1:
+        text: "&aObrigado! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_construcao_1:
+    npc-text:
+      - "&e[Chefe Magno]: &fPara suas construções não parecerem 'chatas' ou planas, adicione profundidade! Em vez de usar apenas blocos inteiros, use escadas, lajes e muros."
+      - "&fPor exemplo, coloque escadas de cabeça para baixo sob o beiral de um telhado. Pequenos detalhes fazem uma grande diferença!"
+    choices:
+      1:
+        text: "&aBoa dica! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  # --- Dicas por Bioma ---
+  dica_bioma_desert:
+    npc-text:
+      - "&e[Chefe Magno]: &fEstamos em um deserto! Cuidado com os Husks à noite, eles não queimam no sol. Procure por pirâmides e vilas, elas escondem grandes tesouros!"
+    choices:
+      1:
+        text: "&aEntendi! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_bioma_plains:
+    npc-text:
+      - "&e[Chefe Magno]: &fPlanícies são ótimas para começar! Há muitos animais para comida e couro, e o terreno aberto é perfeito para construir sua primeira base."
+    choices:
+      1:
+        text: "&aBom saber! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_bioma_default:
+    npc-text:
+      - "&e[Chefe Magno]: &fCada lugar tem seus segredos. Observe a vegetação e os animais ao redor, eles sempre dão pistas sobre os recursos que você pode encontrar aqui."
+    choices:
+      1:
+        text: "&aCerto! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  # --- Dicas por Hora do Dia ---
+  dica_momento_day:
+    npc-text:
+      - "&e[Chefe Magno]: &fO sol está forte! É um ótimo momento para explorar o mundo, coletar recursos e construir sem se preocupar tanto com monstros."
+    choices:
+      1:
+        text: "&aCerto! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_momento_night:
+    npc-text:
+      - "&e[Chefe Magno]: &fA noite chegou e os perigos aumentam. Se não estiver preparado para lutar, o melhor é se abrigar e aproveitar para organizar seus baús ou minerar em segurança no subsolo."
+    choices:
+      1:
+        text: "&aEntendido! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  # --- Dicas Gerais Aleatórias ---
+  dica_geral_1:
+    npc-text:
+      - "&e[Chefe Magno]: &fDica do dia: Sempre carregue um balde d'água com você! Ele pode te salvar de quedas, apagar fogo e até criar uma fonte de obsidiana."
+    choices:
+      1:
+        text: "&aEntendi, voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_geral_2:
+    npc-text:
+      - "&e[Chefe Magno]: &fDica do dia: Tochas não impedem apenas que monstros nasçam. Elas também podem quebrar blocos de areia e cascalho se você quebrar o bloco de suporte e colocar a tocha rapidamente no lugar!"
+    choices:
+      1:
+        text: "&aInteressante! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  dica_geral_3:
+    npc-text:
+      - "&e[Chefe Magno]: &fDica do dia: Está perdido? Lembre-se que as nuvens no Minecraft sempre se movem para o oeste. Use-as como uma bússola natural!"
+    choices:
+      1:
+        text: "&aNão sabia disso! Voltar."
+        action: "dialogue:chefe_magno_dicas_mc"
+
+  # --- História do Escotismo ---
+  chefe_magno_historia_inicio:
+    npc-text:
+      - "&e[Chefe Magno]: &fA história do nosso movimento é fascinante! Tudo começou com um homem chamado Robert Baden-Powell."
+      - "&fEle nasceu em Londres, em 1857, e se tornou um herói de guerra. Mas sua maior aventura foi criar o Escotismo."
+    choices:
+      1:
+        text: "&aConte-me mais sobre o início."
+        action: "dialogue:chefe_magno_historia_acampamento"
+      2:
+        text: "&9Voltar"
+        action: "dialogue:chefe_magno_principal"
+
+  chefe_magno_historia_acampamento:
+    npc-text:
+      - "&e[Chefe Magno]: &fEm 1907, B-P (como gostamos de chamá-lo) realizou um acampamento experimental na Ilha de Brownsea, na Inglaterra, com 20 jovens."
+      - "&fEle os dividiu em patrulhas e ensinou técnicas de exploração, primeiros socorros e observação. O sucesso foi tão grande que, no ano seguinte, ele lançou o livro 'Escotismo para Rapazes', e o movimento se espalhou pelo mundo!"
+    choices:
+      1:
+        text: "&aQue incrível! Voltar."
+        action: "dialogue:chefe_magno_historia_inicio"

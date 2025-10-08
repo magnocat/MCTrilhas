@@ -1,0 +1,23 @@
+# ----------------------------------------------------------------------------------- #
+#                                                                                     #
+#                      Localizações de Biomas Notáveis - MCTrilhas                      #
+#                                                                                     #
+# ----------------------------------------------------------------------------------- #
+#
+# Este arquivo armazena as coordenadas de biomas interessantes que o NPC "Chefe Magno"
+# pode indicar aos jogadores.
+#
+# Estrutura:
+#
+# locations:
+#   id_do_bioma: # Use o nome do bioma em inglês, minúsculo (ex: desert, jungle)
+#     display-name: "Deserto" # Nome em português para exibição no diálogo
+#     coordinates: "mundo,x,y,z" # As coordenadas para onde o jogador será informado
+
+locations:
+  desert:
+    display-name: "Deserto"
+    coordinates: "world, 1520, 68, -2450"
+  jungle:
+    display-name: "Selva"
+    coordinates: "world, -3100, 75, 480"

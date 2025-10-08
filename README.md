@@ -38,6 +38,7 @@ Para uma visão detalhada da arquitetura e dos sistemas do plugin, consulte noss
   - **Duelos 1v1**: Sistema completo com desafios, arenas, kits, ranking ELO e modo espectador.
   - **Capture a Bandeira (CTF)**: Jogo em equipe com arenas, placar e estatísticas.
 - **Quests e Recompensas Diárias**: Sistema de Caça ao Tesouro e recompensas diárias para manter os jogadores engajados.
+- **Guia Interativo (NPC)**: Um NPC inteligente, o "Chefe Magno", que oferece dicas, missões e ajuda contextual baseada no seu progresso, hora do dia e localização.
 - **Alta Performance**: O sistema de dados dos jogadores é otimizado com cache e operações assíncronas para evitar sobrecarga no servidor.
 - **Integração com PlaceholderAPI**: Expõe dados como ranque e progresso para outros plugins (TAB, scoreboards, etc.).
 

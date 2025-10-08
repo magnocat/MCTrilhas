@@ -1,6 +1,8 @@
 package com.magnocat.mctrilhas.npc;
 
 import com.magnocat.mctrilhas.MCTrilhasPlugin;
+import com.magnocat.mctrilhas.data.PlayerData;
+import com.magnocat.mctrilhas.ranks.Rank;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -46,15 +48,25 @@ public class DialogueMenu {
             npcTextMeta.setDisplayName(ChatColor.YELLOW + "Mensagem");
             List<String> lore = new ArrayList<>();
 
-            // --- LÓGICA DE NOMES ESPECIAIS ---
+            // --- LÓGICA DE NOME PERSONALIZADO ---
             String playerName;
-            UUID playerUUID = player.getUniqueId();
-            if (playerUUID.equals(UUID.fromString("7227ed6f-4552-4f18-b8d4-4a9f2f30898a"))) { // Miguel
-                playerName = "Miguel Baconzito";
-            } else if (playerUUID.equals(UUID.fromString("dcf43f99-35bb-4722-afa0-45ae55d87460"))) { // Magno
-                playerName = "Mestre dos Magnos";
+            PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
+
+            if (playerData != null && playerData.getCustomName() != null && !playerData.getCustomName().isEmpty()) {
+                // Se tem nome customizado, usa "Ranque + Nome"
+                Rank rank = playerData.getRank();
+                String rankName = (rank != null && rank.getDisplayName() != null) ? rank.getDisplayName() : "";
+                playerName = rankName + " " + playerData.getCustomName();
             } else {
-                playerName = player.getName();
+                // Lógica de fallback para nomes especiais ou nome padrão
+                UUID playerUUID = player.getUniqueId();
+                if (playerUUID.equals(UUID.fromString("7227ed6f-4552-4f18-b8d4-4a9f2f30898a"))) { // Miguel
+                    playerName = "Miguel Baconzito";
+                } else if (playerUUID.equals(UUID.fromString("dcf43f99-35bb-4722-afa0-45ae55d87460"))) { // Magno
+                    playerName = "Mestre dos Magnos";
+                } else {
+                    playerName = player.getName();
+                }
             }
 
             // Adiciona as linhas de texto, substituindo o placeholder pelo nome correto.

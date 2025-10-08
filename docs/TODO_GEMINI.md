@@ -211,6 +211,20 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
         *   **Insígnia de Boas-Vindas:** Concedida a novos jogadores ao serem apadrinhados. Jogadores antigos também podem recebê-la ao serem apadrinhados pela primeira vez.
         *   **Insígnia do Servidor:** A insígnia `MCTRILHAS` agora pode ser reivindicada por todos os membros através do comando `/scout getmap mctrilhas`.
         *   **Apadrinhamento Flexível:** O comando `/apadrinhar` foi atualizado para permitir que jogadores já existentes (com ranques superiores a Visitante) também possam ser apadrinhados.
+*   ### ✅ CONCLUÍDO: Sistema de NPCs Inteligentes ("Chefe Magno")
+    *   **Descrição:** Criação de um sistema de NPCs "in-house" com diálogos complexos e ações contextuais, personificado pelo guia "Chefe Magno".
+    *   **Funcionalidades Implementadas:**
+        *   **Diálogos Contextuais:** O NPC oferece dicas diferentes com base no ranque do jogador, na hora do dia e no bioma em que ele se encontra.
+        *   **Funcionalidades de Ajuda:** O NPC pode explicar os comandos do servidor, conceder a insígnia "MC Trilhas" e repor mapas-troféu perdidos.
+        *   **Comportamento Dinâmico:** O NPC olha para os jogadores, anda, pula, agacha, acena e troca de itens aleatoriamente para parecer mais "vivo".
+        *   **Saudação Proativa:** O NPC cumprimenta jogadores próximos uma vez por dia.
+        *   **Comando `/emote`:** Adicionado para permitir animações em jogadores e NPCs.
+    *   **Descrição:** Implementação de insígnias especiais e um sistema de recompensa para incentivar a comunidade, com base no feedback dos jogadores.
+    *   **Funcionalidades Implementadas:**
+        *   **Recompensa para Padrinhos:** Padrinhos agora recebem 10 Totens como recompensa sempre que seus afilhados sobem de ranque ou conquistam uma nova insígnia.
+        *   **Insígnia de Boas-Vindas:** Concedida a novos jogadores ao serem apadrinhados. Jogadores antigos também podem recebê-la ao serem apadrinhados pela primeira vez.
+        *   **Insígnia do Servidor:** A insígnia `MCTRILHAS` agora pode ser reivindicada por todos os membros através do comando `/scout getmap mctrilhas`.
+        *   **Apadrinhamento Flexível:** O comando `/apadrinhar` foi atualizado para permitir que jogadores já existentes (com ranques superiores a Visitante) também possam ser apadrinhados.
 *   ### ✅ CONCLUÍDO: Maratona de Refatoração e Robustez (Setembro/2025)
     *   **Descrição:** Realizamos uma revisão completa de todos os pacotes do projeto para aumentar a estabilidade e a consistência.
     *   **Funcionalidades Implementadas:**
@@ -234,21 +248,10 @@ Este é o plano de longo prazo para as próximas grandes funcionalidades, confor
 
 ---
 
-*   ### 🎯 EM FOCO: Sistema de Quests e NPCs
-    *   **Descrição:** Implementar um sistema de missões "in-house", totalmente integrado com os sistemas existentes (insígnias, ranques, economia).
-    *   **Filosofia:** A lógica de missões é baseada na estrutura de plugins consolidados como o `Quests`, mas a nossa implementação foca em uma integração profunda e customizada com nosso sistema de **NPCs e Diálogos**, criando uma experiência única e "in-house" sem depender de plugins de gerenciamento de NPCs como o `Citizens`.
-    *   **Funcionalidades Planejadas:**
-        *   **`QuestManager` e `NPCManager`:** Classes para carregar, gerenciar e rastrear o progresso das missões e dos NPCs que as oferecem.
-        *   **NPCs Interativos:** NPCs com aparências customizadas (skins de jogador) ou `Villagers` com profissões, dependendo do contexto. Servirão como pontos de início e fim para as quests.
-        *   **`QuestListener`:** Ouvinte de eventos para monitorar as ações dos jogadores e atualizar o progresso das missões.
-    *   **Princípios de Interação:**
-        *   **Diálogos Privados:** Todas as interações com NPCs, sejam via GUI ou mensagens de chat, devem ser enviadas como mensagens privadas apenas para o jogador que interagiu, para não poluir o chat global.
-    *   **Fluxo de Trabalho Atual (Manual):**
-        1.  **Criar o NPC no Jogo:** Use o comando `/scout admin npc create <id_do_npc> <nome_do_npc>` para criar o NPC na sua localização atual.
-        2.  **Associar o Diálogo:** Abra o arquivo `plugins/MCTrilhas/npcs.yml`, encontre o NPC recém-criado e adicione o ID do diálogo desejado (do arquivo `dialogues.yml`) ao campo `start-dialogue-id`.
-        3.  **Recarregar:** Use `/scout admin reload` ou reinicie o servidor para aplicar a alteração.
-    *   **Melhoria Futura:**
-        *   Criar um comando `/scout admin npc setdialogue <id_do_npc> <id_do_dialogo>` para associar diálogos diretamente pelo jogo, eliminando a necessidade de editar arquivos manualmente.
+*   ### 🎯 EM FOCO: Sistema de Quests
+    *   **Descrição:** Com o sistema de NPCs concluído, o próximo passo é implementar um sistema de missões "in-house" que se integre com os diálogos e ações dos NPCs.
+    *   **Componentes Futuros:** `QuestManager`, `QuestListener`, `quests.yml`.
+    *   **Objetivo:** Criar missões que possam ser iniciadas e concluídas através de conversas com NPCs, com objetivos variados (coletar itens, visitar locais, derrotar monstros) e recompensas integradas ao sistema de economia e insígnias.
 
 *   ### Painel de Administração (Web)
     *   **Descrição:** Uma plataforma web robusta para gerenciamento do servidor, baseada no template AdminLTE. O portal do jogador (`pdash.html`) e o login do admin já foram implementados.

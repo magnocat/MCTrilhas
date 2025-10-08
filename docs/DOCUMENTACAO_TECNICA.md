@@ -325,6 +325,38 @@ MCTrilhas/
 *   **Importância:** Usar o UUID em vez do nome de usuário é crucial porque o nome pode ser alterado, enquanto o UUID (seja online ou offline) permanece constante para aquele jogador no contexto do servidor. É por isso que todos os arquivos de dados em `playerdata/` são nomeados com o UUID do jogador.
 
 ---
+### 3.16. Sistema de NPCs e Diálogos
+*   **Descrição:** Um sistema "in-house" para criar NPCs interativos com diálogos complexos e ações contextuais, sem depender de plugins externos como o `Citizens`. O principal exemplo é o "Chefe Magno", que atua como um guia inteligente para os jogadores.
+*   **Estrutura:** `npc/NPCManager.java`, `npc/DialogueManager.java`, `npc/NPCListener.java`, `npc/DialogueMenu.java`.
+*   **Dados:**
+    *   **`npcs.yml`**: Armazena a definição de cada NPC (ID, nome, localização, skin).
+    *   **`dialogues.yml`**: Armazena a árvore de diálogos, com textos e ações.
+    *   **`biome_locations.yml`**: Armazena coordenadas de biomas para a funcionalidade de localização.
+*   **Lógica de Diálogo:**
+    1.  **Interação:** O `NPCListener` captura o clique do jogador em uma entidade NPC.
+    2.  **Início:** O `DialogueManager` é chamado para iniciar o diálogo inicial associado ao NPC.
+    3.  **GUI:** O `DialogueMenu` constrói e exibe uma interface gráfica com o texto do NPC e as opções do jogador.
+    4.  **Ações:** O `MenuListener` processa o clique do jogador em uma opção, executando a ação definida no `dialogues.yml`.
+*   **Tipos de Ação Implementados:**
+    *   `dialogue:<id>`: Navega para outro diálogo.
+    *   `command:player:<comando>`: Executa um comando pelo jogador.
+    *   `close`: Fecha o menu.
+    *   `input:set_custom_name`: Pede ao jogador para digitar seu nome no chat.
+    *   `grant_badge:<id>`: Concede uma insígnia ao jogador.
+    *   `replace_badge_map_menu`: Abre um menu dinâmico para repor mapas-troféu.
+    *   `locate_biome:<id>`: Informa ao jogador as coordenadas de um bioma.
+*   **Funcionalidades de "IA":**
+    *   **Diálogos Contextuais:** O `MenuListener` processa ações especiais para fornecer respostas baseadas no estado do jogador ou do mundo.
+        *   `ranked_dialogue:<prefixo>`: Escolhe um diálogo com base no ranque do jogador.
+        *   `timed_dialogue:<prefixo>`: Escolhe um diálogo com base na hora do dia (dia/noite).
+        *   `biome_dialogue:<prefixo>`: Escolhe um diálogo com base no bioma atual do jogador.
+    *   **Diálogos Aleatórios:** A ação `dialogue:random:<prefixo>` permite que o `DialogueManager` escolha uma resposta aleatória de um grupo de diálogos.
+*   **Comportamento e Vida:**
+    *   O `NPCManager` possui tarefas que fazem os NPCs parecerem mais vivos.
+    *   **`BehaviorTask`**: Faz o NPC olhar para o jogador mais próximo e, aleatoriamente, andar, pular, agachar, acenar (`/emote`) ou trocar o item que segura na mão.
+    *   **`GreetingTask`**: Faz o "Chefe Magno" enviar uma saudação proativa (uma vez por dia) para jogadores próximos.
+
+---
 
 ## 4. Sistemas Futuros e em Desenvolvimento
 
@@ -360,6 +392,7 @@ MCTrilhas/
 | `/tesouro <subcomando>` | `TreasureHuntCommand` | Gerencia a participação na Caça ao Tesouro. |
 | `/duelo <subcomando>` | `DuelCommand` | (Em desenvolvimento) Gerencia os desafios e a participação em duelos. |
 
+| `/emote <tipo>` | `EmoteCommand` | Executa uma animação (emote), como acenar. |
 
 ### 5.2. Comandos Planejados
 | Comando | Descrição |

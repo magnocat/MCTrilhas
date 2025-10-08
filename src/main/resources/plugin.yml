@@ -52,6 +52,10 @@ commands:
     description: Gerencia seu terreno protegido.
     usage: /terreno <subcomando>
     aliases: [land]
+  emote:
+    description: Executa uma animação (emote).
+    usage: /emote <tipo>
+    aliases: [e]
 
 permissions:
   mctrilhas.*:
@@ -110,6 +114,8 @@ permissions:
       mctrilhas.land.acceptsale: true
       mctrilhas.land.setflag: true
       mctrilhas.land.info: true
+      mctrilhas.emote.use: true
+      mctrilhas.admin.emote.other: true
   mctrilhas.scout.use:
     description: Permite ao jogador ver suas próprias insígnias e progresso.
     default: true
@@ -272,3 +278,9 @@ permissions:
   mctrilhas.land.abandon:
     description: Permite abandonar um terreno protegido.
     default: true
+  mctrilhas.emote.use:
+    description: Permite que um jogador use emotes.
+    default: true
+  mctrilhas.admin.emote.other:
+    description: Permite fazer outros jogadores ou NPCs usarem emotes.
+    default: op

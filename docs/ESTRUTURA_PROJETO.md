@@ -15,6 +15,7 @@ MCTrilhas/
 │   ├── DOCUMENTACAO_TECNICA.md   # Documentação central da arquitetura e sistemas do plugin.
 │   ├── ESTRUTURA_PROJETO.md      # Este arquivo, com a visão geral da estrutura do projeto.
 │   ├── GUIA_CRIACAO_ARENAS.md    # Tutorial para administradores criarem arenas de CTF e Duelo.
+│   └── GUIA_CRIACAO_NPC.md       # Guia passo a passo para criar e configurar novos NPCs.
 │   └── TODO_GEMINI.md            # Resumo do projeto, regras de interação e backlog de tarefas.
 │
 ├── src/main/java/com/magnocat/mctrilhas/
@@ -46,6 +47,7 @@ MCTrilhas/
 │   └── commands/
 │       ├── AdminSubCommand.java        # Roteador para todos os subcomandos de administração (`/scout admin`).
 │       ├── DailyCommand.java           # Implementa o comando `/daily` para recompensas diárias.
+│       ├── EmoteCommand.java           # Implementa o comando `/emote` para executar animações.
 │       ├── FamilyCommand.java          # Implementa o comando `/familia token` para gerar o link do painel do jogador.
 │       ├── GetMapSubCommand.java       # Implementa o subcomando `/scout getmap` para recuperar mapas-troféu de insígnias.
 │       ├── ReloadSubCommand.java       # Implementa o subcomando `/scout admin reload` para recarregar as configurações.
@@ -209,6 +211,7 @@ MCTrilhas/
 │
 └── src/main/resources/
     ├── config.yml            # Arquivo de configuração central. Define insígnias, ranques, recompensas e todas as mensagens.
+    ├── biome_locations.yml   # Coordenadas de biomas para o NPC "Chefe Magno".
     ├── plugin.yml            # Arquivo de definição do plugin para o servidor (nome, versão, comandos, permissões).
     ├── duel_arenas.yml       # Configuração das arenas de Duelo.
     ├── duel_kits.yml         # Configuração dos kits de Duelo.

@@ -88,7 +88,7 @@ public class PlayerDataManager {
         File playerFile = new File(playerDataFolder, uuid.toString() + ".yml");
         if (!playerFile.exists()) {
             // Cria um novo objeto PlayerData para jogadores que entram pela primeira vez.
-            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.VISITANTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null, null, new PlayerDuelStats(), true, new HashMap<>(), false, null));
+            playerDataCache.put(uuid, new PlayerData(uuid, new HashMap<>(), new EnumMap<>(BadgeType.class), new HashSet<>(), false, 0, Rank.VISITANTE, 0, new ArrayList<>(), -1, 0, false, new HashSet<>(), null, null, new PlayerDuelStats(), true, new HashMap<>(), false, null, null, 0));
             return;
         }
 
@@ -203,6 +203,12 @@ public class PlayerDataManager {
         // Carrega o último tipo de pet ativo.
         String lastActivePetType = config.getString("last-active-pet-type", null);
 
+        // Carrega o nome customizado do jogador.
+        String customName = config.getString("custom-name", null);
+
+        // Carrega o timestamp da última saudação do NPC.
+        long lastNpcGreetingTime = config.getLong("last-npc-greeting-time", 0);
+
         // Carrega os IDs dos mapas-troféu.
         Map<String, Integer> badgeMapIds = new HashMap<>();
         if (config.isConfigurationSection("badge-map-ids")) {
@@ -235,7 +241,7 @@ public class PlayerDataManager {
             }
         }
 
-        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedTreasureGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken, duelStats, hudEnabled, badgeMapIds, isBedrockPlayer, lastActivePetType);
+        PlayerData playerData = new PlayerData(uuid, earnedBadges, progressMap, new HashSet<>(visitedBiomesList), progressMessagesDisabled, lastDailyReward, rank, activePlaytimeTicks, treasureHuntLocations, currentTreasureHuntStage, treasureHuntsCompleted, hasReceivedTreasureGrandPrize, new HashSet<>(claimedCtfMilestones), petData, webAccessToken, duelStats, hudEnabled, badgeMapIds, isBedrockPlayer, lastActivePetType, customName, lastNpcGreetingTime);
 
         // Carrega o UUID do padrinho, se existir.
         String godfatherUuidString = config.getString("godfather-uuid");
@@ -279,6 +285,8 @@ public class PlayerDataManager {
         config.set("settings.hud-enabled", playerData.isHudEnabled());
         config.set("last-active-pet-type", playerData.getLastActivePetType());
         config.set("is-bedrock-player", playerData.isBedrockPlayer());
+        config.set("custom-name", playerData.getCustomName());
+        config.set("last-npc-greeting-time", playerData.getLastNpcGreetingTime());
         config.set("last-daily-reward", playerData.getLastDailyRewardTime());
         // Salva a lista de biomas visitados
         config.set("visited-biomes", new ArrayList<>(playerData.getVisitedBiomes()));

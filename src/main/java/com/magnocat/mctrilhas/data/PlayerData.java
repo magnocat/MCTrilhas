@@ -42,8 +42,10 @@ public class PlayerData {
     private final Map<String, Integer> badgeMapIds;
     private boolean isBedrockPlayer;
     private String lastActivePetType; // Armazena o tipo do pet que estava ativo ao sair.
+    private String customName; // Nome customizado escolhido pelo jogador.
+    private long lastNpcGreetingTime; // Timestamp da última saudação proativa do NPC.
 
-    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones, PetData petData, String webAccessToken, PlayerDuelStats duelStats, boolean hudEnabled, Map<String, Integer> badgeMapIds, boolean isBedrockPlayer, String lastActivePetType) {
+    public PlayerData(UUID playerUUID, Map<String, Long> earnedBadgesMap, Map<BadgeType, Double> progressMap, Set<String> visitedBiomes, boolean progressMessagesDisabled, long lastDailyRewardTime, Rank rank, long activePlaytimeTicks, List<String> treasureHuntLocations, int currentTreasureHuntStage, int treasureHuntsCompleted, boolean hasReceivedTreasureGrandPrize, Set<String> claimedCtfMilestones, PetData petData, String webAccessToken, PlayerDuelStats duelStats, boolean hudEnabled, Map<String, Integer> badgeMapIds, boolean isBedrockPlayer, String lastActivePetType, String customName, long lastNpcGreetingTime) {
         this.playerUUID = playerUUID;
         this.earnedBadgesMap = earnedBadgesMap;
         this.progressMap = progressMap;
@@ -66,6 +68,8 @@ public class PlayerData {
         this.badgeMapIds = badgeMapIds != null ? badgeMapIds : new HashMap<>();
         this.isBedrockPlayer = isBedrockPlayer;
         this.lastActivePetType = lastActivePetType;
+        this.customName = customName;
+        this.lastNpcGreetingTime = lastNpcGreetingTime;
     }
 
     public UUID getPlayerUUID() {
@@ -239,5 +243,21 @@ public class PlayerData {
 
     public void setLastActivePetType(String lastActivePetType) {
         this.lastActivePetType = lastActivePetType;
+    }
+
+    public String getCustomName() {
+        return customName;
+    }
+
+    public void setCustomName(String customName) {
+        this.customName = customName;
+    }
+
+    public long getLastNpcGreetingTime() {
+        return lastNpcGreetingTime;
+    }
+
+    public void setLastNpcGreetingTime(long lastNpcGreetingTime) {
+        this.lastNpcGreetingTime = lastNpcGreetingTime;
     }
 }
