@@ -107,11 +107,10 @@ public class NPCManager {
         }
 
         // A API do Paper permite criar NPCs de forma nativa e estável.
-        Player npcEntity = location.getWorld().spawn(location, Player.class, npc -> {
-            npc.setInvulnerable(true);
-            npc.setAI(false);
-            npc.setSilent(true);
-        });
+        Player npcEntity = (Player) location.getWorld().spawnEntity(location, org.bukkit.entity.EntityType.PLAYER);
+        npcEntity.setInvulnerable(true);
+        npcEntity.setAI(false);
+        npcEntity.setSilent(true);
 
         // Aplica a skin customizada usando a API de profile do Paper.
         if (texture != null && signature != null && !texture.isEmpty() && !signature.isEmpty()) {
